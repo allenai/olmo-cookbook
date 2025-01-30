@@ -1,0 +1,129 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "olmo-cookbook"
+dynamic = ["version"]
+readme = "README.md"
+description = ""
+authors = [
+    { name = "Allen Institute for Artificial Intelligence", email = "oe-data-engineering@allenai.org" }
+]
+requires-python = ">=3.9,<3.11"
+license = { file = "LICENSE" }
+dependencies = [
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@main",
+    "boto3",
+    "click",
+    "pydantic",
+    "s3fs",
+    "yaspin"
+]
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy>=1.0,<1.4",
+    "black>=23.1,<24.0",
+    "isort>=5.12,<5.13",
+    "pytest",
+]
+beaker = [
+    "beaker-py",
+    "GitPython>=3.0,<4.0",
+]
+wandb = [
+    "wandb",
+]
+all = [
+    "cookbook[dev,beaker,wandb]",
+]
+
+[project.scripts]
+olmo-cookbook = "cookbook.cli:cli"
+
+[tool.black]
+line-length = 100
+include = '\.pyi?$'
+exclude = '''
+(
+      __pycache__
+    | \.git
+    | \.mypy_cache
+    | \.pytest_cache
+    | \.vscode
+    | \.venv
+    | \bdist\b
+    | \bdoc\b
+    | scratch/
+    | build/
+)
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.ruff]
+line-length = 115
+
+[tool.ruff.lint]
+ignore = ["F403", "F405", "E501"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".venv",
+    "venv",
+    ".mypy_cache",
+    "__pycache__",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "doc",
+    "pretrain_data",
+    "inference",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+
+[tool.pyright]
+reportPrivateImportUsage = false
+
+[tool.mypy]
+ignore_missing_imports = true
+no_site_packages = true
+check_untyped_defs = true
+disable_error_code = "has-type"
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+strict_optional = false
+
+[tool.pytest.ini_options]
+testpaths = "tests/"
+python_classes = [
+  "Test*",
+  "*Test",
+]
+log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+log_level = "DEBUG"
+log_cli = false
+log_cli_level = "DEBUG"
+filterwarnings = [
+    'ignore::FutureWarning:huggingface_hub\.file_download',
+    'ignore::DeprecationWarning:pkg_resources',
+    'ignore::DeprecationWarning:google\.rpc',
+    'ignore::FutureWarning:torch\.distributed\.checkpoint\.default_planner',
+]

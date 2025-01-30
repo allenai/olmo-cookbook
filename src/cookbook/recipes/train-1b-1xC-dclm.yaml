@@ -1,0 +1,24 @@
+name: "olmo-cookbook-1b-1xC-dclm"
+description: "Example olmo-cookbook recipe"
+budget: "ai2/oe-data"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 8
+preemptible: true
+max_tokens: 100_000_000
+sequence_length: 2048
+seed: 1337
+model: "olmo_1b"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/saturn-cirrascale
+weka: true
+dataset:
+  sources:
+    - name: dclm-rw-stem
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/refinedweb_datadelve_topics_50B_rand/allenai/dolma2-tokenizer/science_math_and_technology/0000/*.npy
+
+    - name: dclm-rw-health
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/refinedweb_datadelve_topics_50B_rand/allenai/dolma2-tokenizer/health/0000/*.npy
