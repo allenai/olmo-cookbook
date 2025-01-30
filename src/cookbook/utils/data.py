@@ -4,6 +4,12 @@ import os
 import pathlib
 from collections import defaultdict
 from typing import Tuple
+from typing import Any, List
+from urllib.parse import urlparse
+
+import s3fs
+from olmo_core.data.types import NumpyDatasetDType
+from olmo_core.io import is_url
 
 import s3fs
 from olmo_core.aliases import PathOrStr
@@ -58,39 +64,24 @@ def get_token_counts_and_ratios(
     fs = s3fs.S3FileSystem(anon=False)
     token_counts = defaultdict(int)
 
-    # Count tokens in each source directory
-    with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
-        future_to_source = {
-            executor.submit(
-                lambda sc: {
-                    sc.name: sum(
-                        executor.submit(
-                            lambda path: sum(
-                                _count_tokens_for_file(f"s3://{match}", dtype)
-                                for match in fs.glob(path)
-                            ),
-                            path,
-                        ).result()
-                        for path in sc.paths
-                    )
-                },
-                source_config,
-            ): source_config
-            for source_config in source_configs
+    with concurrent.futures.ThreadPoolExecutor(max_workers=128) as executor:
+        for source in source_configs:
+            source.paths = expand_globs(fs, source.paths)
+
+        futures = {
+            executor.submit(_count_tokens_for_file, path, dtype): source
+            for source in source_configs
+            for path in source.paths
         }
 
-        for future in tqdm(
-            concurrent.futures.as_completed(future_to_source),
-            total=len(future_to_source),
-            desc="Counting source tokens",
-        ):
-            source_config = future_to_source[future]
+        for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+            source_future = futures[future]
             try:
                 result = future.result()
-                token_counts.update(result)
+                token_counts[source_future.name] += result
             except Exception as e:
-                logger.info(f"Error processing {source_config.name}: {str(e)}")
-                token_counts[source_config.name] = 0
+                logger.info(f"Error processing {source_future.name}: {str(e)}")
+                token_counts[source_future.name] = 0
 
     # Calculate relative sizes
     total_tokens = sum(token_counts.values())
@@ -106,3 +97,27 @@ def get_token_counts_and_ratios(
             json.dump({"relative_sizes": relative_sizes, "total_tokens": total_tokens}, f)
 
     return (relative_sizes, total_tokens)
+
+
+def expand_globs(s3: s3fs.S3FileSystem, paths: List[str]) -> Any:
+    results = []
+
+    for path in paths:
+        if is_url(path):
+            parsed = urlparse(str(path))
+            if parsed.scheme in ("s3", "r2", "weka"):
+                results.extend([f"s3://{obj}" for obj in s3.glob(path)])
+            elif parsed.scheme == "gs":
+                raise NotImplementedError("'gs' types are not currently supported")
+            elif parsed.scheme in ("http", "https"):
+                raise NotImplementedError("'http' types are not currently supported")
+            elif parsed.scheme == "file":
+                raise NotImplementedError("'file' types are not currently supported")
+            else:
+                raise NotImplementedError(
+                    f"Glob expansion is not currently supported for '{parsed.scheme}' files"
+                )
+        else:
+            raise NotImplementedError("Glob expansion is only supported for URLs")
+
+    return results
