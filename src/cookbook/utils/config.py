@@ -131,6 +131,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
+            # Add a new cookbook specific image, this will work for now
             beaker_image="ai2-tylerm/olmo-core-regmixer",
             priority=group.config.priority,
             env_secrets=[
@@ -144,7 +145,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             setup_steps=[
                 'git clone "$REPO_URL"',
                 "conda shell.bash activate base",
-                "cd regmixer",
+                "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install -e '.[all]'",

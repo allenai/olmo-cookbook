@@ -36,7 +36,7 @@ wandb = [
     "wandb",
 ]
 all = [
-    "cookbook[dev,beaker,wandb]",
+    "olmo-cookbook[dev,beaker,wandb]",
 ]
 
 [project.scripts]
