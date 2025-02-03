@@ -15,10 +15,70 @@ cluster: ai2/saturn-cirrascale
 weka: true
 dataset:
   sources:
-    - name: dclm-rw-stem
-      paths:
-        - s3://ai2-llm/preprocessed/dclm/refinedweb_datadelve_topics_50B_rand/allenai/dolma2-tokenizer/science_math_and_technology/0000/*.npy
-
-    - name: dclm-rw-health
-      paths:
-        - s3://ai2-llm/preprocessed/dclm/refinedweb_datadelve_topics_50B_rand/allenai/dolma2-tokenizer/health/0000/*.npy
+  - name: dclm-baseline-ft7pct-fw2
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0000/part-17-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0000/part-26-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0001/part-27-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0002/part-09-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0002/part-19-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0002/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0002/part-22-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0002/part-51-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0002/part-61-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0003/part-28-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0003/part-48-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0004/part-09-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0004/part-39-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0004/part-54-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0004/part-60-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0005/part-13-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0006/part-11-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0006/part-27-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0006/part-34-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0007/part-07-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0007/part-18-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0007/part-48-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0008/part-09-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0008/part-10-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0008/part-27-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0008/part-51-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0009/part-17-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0009/part-53-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0009/part-55-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0010/part-04-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0010/part-41-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0013/part-15-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0013/part-32-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0013/part-40-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0013/part-46-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0013/part-48-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0013/part-55-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0014/part-16-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0014/part-44-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0014/part-59-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0015/part-19-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0015/part-63-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0016/part-51-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0017/part-07-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0017/part-61-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0018/part-05-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0018/part-36-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0018/part-56-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0020/part-10-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0022/part-06-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0024/part-14-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0024/part-22-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0026/part-32-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0026/part-57-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0027/part-08-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0027/part-24-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0027/part-44-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0028/part-04-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0028/part-14-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0028/part-28-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0028/part-35-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0028/part-42-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0029/part-45-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0030/part-19-00000.npy
+    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0030/part-30-00000.npy
