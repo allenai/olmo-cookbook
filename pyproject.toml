@@ -29,6 +29,11 @@ dev = [
     "isort>=5.12,<5.13",
     "pytest",
 ]
+eval = [
+    "statsmodels",
+    "matplotlib",
+    "scipy",
+]
 beaker = [
     "beaker-py",
     "GitPython>=3.0,<4.0",

@@ -173,3 +173,8 @@ cython_debug/
 
 # MacOS files
 .DS_Store
+
+# Custom exclusions
+/.eval_data/
+img/
+*.parquet
