@@ -7,13 +7,14 @@ For now, here is the install. I (@davidheineman) will eventually fix the depende
 ```sh
 # Install cookbook
 pip install -e ".[all]"
+pip install -e ".[eval]"
 
 # Install model ladder dependency
 git clone https://github.com/allenai/OLMo-ladder
 cd OLMo-ladder
 git checkout datados
-pip install -e ".[all]"
+pip install -e ".[all]" # "ladder @ git+https://github.com/allenai/OLMo-ladder.git@datados"
 
 # Demo analysis notebook
-python src/cookbook/eval/scripts/analysis/demo.py # "ladder @ git+https://github.com/allenai/OLMo-ladder.git@datados"
+python src/cookbook/eval/scripts/analysis/demo.py # will save outputs in img/
 ```
