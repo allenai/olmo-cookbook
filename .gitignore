@@ -169,3 +169,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Custom exclusions
+/.eval_data/
+img/
+*.parquet
