@@ -13,7 +13,7 @@ OLMost every training recipe you need to perform data interventions with the OLM
 #### For models trained with old trainer
 
 ```shell
-python scripts/eval_checkpoint/convert_checkpoint.py \
+olmo-cookbook convert \
   -i /oe-training-default/kevinf/checkpoints/OLMo-medium/peteish7-medlr/step477000 \
   -t olmo2 \
   --use-beaker \
@@ -23,7 +23,7 @@ python scripts/eval_checkpoint/convert_checkpoint.py \
 #### For models trained with OLMo core
 
 ```shell
-python scripts/eval_checkpoint/convert_checkpoint.py \
+olmo-cookbook convert \
   -i /oe-training-default/ai2-llm/checkpoints/peteish32-anneal/OLMo2-32Bparams-5Ttokens-100Banneal/step11921 \
   -t olmo-core \
   --use-beaker \
