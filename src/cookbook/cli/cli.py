@@ -1,5 +1,4 @@
 import concurrent.futures
-import json
 import logging
 from pathlib import Path
 from typing import Optional
@@ -19,6 +18,9 @@ from cookbook.utils.config import (
     mk_launch_configs,
 )
 from cookbook.utils.data import get_token_counts_and_ratios
+from cookbook.cli.options import conversion_options, evaluation_options
+from cookbook.eval.checkpoints import evaluate_checkpoint
+from cookbook.utils.checkpoints import convert_checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +207,102 @@ def cancel(config: Path, group_id: str):
     """Cancel all running jobs for an experiment group."""
 
     _stop_for_group(config, group_id)
+
+
+@cli.command()
+@conversion_options
+def convert(
+    input_dir: str,
+    olmo_type: str,
+    huggingface_tokenizer: str | None,
+    unsharded_output_dir: str | None,
+    huggingface_output_dir: str | None,
+    unsharded_output_suffix: str,
+    huggingface_output_suffix: str,
+    olmoe_commit_hash: str,
+    olmo2_commit_hash: str,
+    huggingface_token: str | None,
+    use_beaker: bool,
+    beaker_workspace: str,
+    beaker_priority: str,
+    beaker_cluster: str,
+    beaker_allow_dirty: bool,
+    beaker_budget: str,
+    beaker_gpus: int,
+    beaker_dry_run: bool,
+):
+    convert_checkpoint(
+        input_dir=input_dir,
+        olmo_type=olmo_type,
+        huggingface_tokenizer=huggingface_tokenizer,
+        unsharded_output_dir=unsharded_output_dir,
+        huggingface_output_dir=huggingface_output_dir,
+        unsharded_output_suffix=unsharded_output_suffix,
+        huggingface_output_suffix=huggingface_output_suffix,
+        olmoe_commit_hash=olmoe_commit_hash,
+        olmo2_commit_hash=olmo2_commit_hash,
+        huggingface_token=huggingface_token,
+        use_beaker=use_beaker,
+        beaker_workspace=beaker_workspace,
+        beaker_priority=beaker_priority,
+        beaker_cluster=beaker_cluster,
+        beaker_allow_dirty=beaker_allow_dirty,
+        beaker_budget=beaker_budget,
+        beaker_gpus=beaker_gpus,
+        beaker_dry_run=beaker_dry_run,
+    )
+
+
+@cli.command()
+@evaluation_options
+def evaluate(
+    oe_eval_commit: str,
+    checkpoint_path: str,
+    aws_access_key_id: str,
+    aws_secret_access_key: str,
+    workspace: str,
+    cluster: str,
+    huggingface_secret: str,
+    add_bos_token: bool,
+    budget: str,
+    priority: str,
+    num_gpus: int,
+    dashboard: str,
+    model_backend: str,
+    tasks: list[str],
+    partition_size: int,
+    remote_output_prefix: str,
+    extra_args: str,
+    batch_size: int,
+    dry_run: bool,
+    beaker_image: str,
+    use_gantry: bool,
+    gantry_args: str,
+):
+    evaluate_checkpoint(
+        oe_eval_commit=oe_eval_commit,
+        checkpoint_path=checkpoint_path,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        workspace=workspace,
+        cluster=cluster,
+        huggingface_secret=huggingface_secret,
+        add_bos_token=add_bos_token,
+        budget=budget,
+        priority=priority,
+        num_gpus=num_gpus,
+        dashboard=dashboard,
+        model_backend=model_backend,
+        tasks=tasks,
+        partition_size=partition_size,
+        remote_output_prefix=remote_output_prefix,
+        extra_args=extra_args,
+        batch_size=batch_size,
+        dry_run=dry_run,
+        beaker_image=beaker_image,
+        use_gantry=use_gantry,
+        gantry_args=gantry_args,
+    )
 
 
 if __name__ == "__main__":
