@@ -4,7 +4,17 @@ OLMost every recipe you need to perform data interventions with the OLMo family 
 
 ## How To Train an OLMo Model
 
-### TBD
+### Build your training configuration
+
+See src/cookbook/recipes/train-1b-1xC-dclm.yaml for an example to clone
+
+### Launch your training job
+
+1) `olmo-cookbook launch -c src/cookbook/recipes/train-1b-1xC-dclm.yaml`
+
+2) Follow the interactive prompts. A link to the Beaker job will be provided upon successful submission.
+
+3) Monitor your training job in wandb or Beaker
 
 ## How To Evaluate an OLMo Model
 
