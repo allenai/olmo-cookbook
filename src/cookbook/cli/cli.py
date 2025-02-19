@@ -19,8 +19,7 @@ from cookbook.utils.config import (
 )
 from cookbook.utils.data import get_token_counts_and_ratios
 from cookbook.cli.options import conversion_options, evaluation_options
-from cookbook.eval.checkpoints import evaluate_checkpoint
-from cookbook.utils.checkpoints import convert_checkpoint
+from cookbook.eval.checkpoints import convert_checkpoint, evaluate_checkpoint
 
 logger = logging.getLogger(__name__)
 
