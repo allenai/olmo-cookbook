@@ -19,6 +19,8 @@ def get_huggingface_token() -> Optional[str]:
 
         with open(HF_TOKEN_PATH, "r") as f:
             return f.read().strip()
+    except FileNotFoundError:
+        return None
     except ImportError:
         return None
 
