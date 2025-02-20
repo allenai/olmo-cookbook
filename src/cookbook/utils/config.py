@@ -6,7 +6,11 @@ from typing import List, Optional, Tuple
 
 import yaml
 from beaker import Beaker
-from olmo_core.launch.beaker import BeakerEnvSecret, BeakerLaunchConfig, BeakerWekaBucket
+from olmo_core.launch.beaker import (
+    BeakerEnvSecret,
+    BeakerLaunchConfig,
+    BeakerWekaBucket,
+)
 from olmo_core.utils import generate_uuid
 
 from cookbook.aliases import (

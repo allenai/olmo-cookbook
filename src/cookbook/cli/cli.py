@@ -12,14 +12,15 @@ from tqdm import tqdm
 from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
+from cookbook.cli.options import conversion_options, evaluation_options
+from cookbook.cli.utils import PythonEnv
+from cookbook.eval.checkpoints import convert_checkpoint, evaluate_checkpoint
 from cookbook.utils.config import (
     config_from_path,
     mk_experiment_group,
     mk_launch_configs,
 )
 from cookbook.utils.data import get_token_counts_and_ratios
-from cookbook.cli.options import conversion_options, evaluation_options
-from cookbook.eval.checkpoints import convert_checkpoint, evaluate_checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -211,24 +212,26 @@ def cancel(config: Path, group_id: str):
 @cli.command()
 @conversion_options
 def convert(
-    input_dir: str,
-    olmo_type: str,
-    huggingface_tokenizer: str | None,
-    unsharded_output_dir: str | None,
-    huggingface_output_dir: str | None,
-    unsharded_output_suffix: str,
-    huggingface_output_suffix: str,
-    olmoe_commit_hash: str,
-    olmo2_commit_hash: str,
-    huggingface_token: str | None,
-    use_beaker: bool,
-    beaker_workspace: str,
-    beaker_priority: str,
-    beaker_cluster: str,
     beaker_allow_dirty: bool,
     beaker_budget: str,
-    beaker_gpus: int,
+    beaker_cluster: str,
     beaker_dry_run: bool,
+    beaker_gpus: int,
+    beaker_priority: str,
+    beaker_workspace: str,
+    force_venv: bool,
+    huggingface_output_dir: str | None,
+    huggingface_output_suffix: str,
+    huggingface_token: str | None,
+    huggingface_tokenizer: str | None,
+    input_dir: str,
+    olmo2_commit_hash: str,
+    olmo_type: str,
+    olmoe_commit_hash: str,
+    unsharded_output_dir: str | None,
+    unsharded_output_suffix: str,
+    use_beaker: bool,
+    env_name: str,
 ):
     convert_checkpoint(
         input_dir=input_dir,
@@ -249,6 +252,7 @@ def convert(
         beaker_budget=beaker_budget,
         beaker_gpus=beaker_gpus,
         beaker_dry_run=beaker_dry_run,
+        env=PythonEnv.create(name=env_name, force=force_venv),
     )
 
 
@@ -277,7 +281,14 @@ def evaluate(
     beaker_image: str,
     use_gantry: bool,
     gantry_args: str,
+    force_venv: bool,
+    env_name: str,
 ):
+    """Evaluate a checkpoint using the oe-eval toolkit.
+    This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
+    The evaluation results will be saved to the specified remote output prefix.
+    """
+
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
@@ -301,6 +312,7 @@ def evaluate(
         beaker_image=beaker_image,
         use_gantry=use_gantry,
         gantry_args=gantry_args,
+        env=PythonEnv.create(name=env_name, force=force_venv),
     )
 
 

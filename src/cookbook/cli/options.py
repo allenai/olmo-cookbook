@@ -1,10 +1,15 @@
 import click
 
-from cookbook.constants import OLMO_TYPES, OLMOE_COMMIT_HASH, OLMO2_COMMIT_HASH, ALL_NAMED_GROUPS
 from cookbook.cli.utils import (
-    get_huggingface_token,
     get_aws_access_key_id,
     get_aws_secret_access_key,
+    get_huggingface_token,
+)
+from cookbook.constants import (
+    ALL_NAMED_GROUPS,
+    OLMO2_COMMIT_HASH,
+    OLMO_TYPES,
+    OLMOE_COMMIT_HASH,
 )
 
 
@@ -43,6 +48,18 @@ def conversion_options(func):
     @click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
     @click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
     @click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
+    @click.option(
+        "--force-venv",
+        is_flag=True,
+        help="Force creation of new virtual environment",
+        default=False,
+    )
+    @click.option(
+        "--env-name",
+        type=str,
+        default="oe-conversion-venv",
+        help="Name of the environment to use for conversion",
+    )
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
 
@@ -149,6 +166,18 @@ def evaluation_options(func):
         type=str,
         default=None,
         help="Commit hash of the oe-eval toolkit to use; if not provided, use the latest commit",
+    )
+    @click.option(
+        "--force-venv",
+        is_flag=True,
+        help="Force creation of new virtual environment",
+        default=False,
+    )
+    @click.option(
+        "--env-name",
+        type=str,
+        default="oe-eval-venv",
+        help="Name of the environment to use for evaluation",
     )
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
