@@ -4,7 +4,7 @@ budget: "ai2/oe-training"
 workspace: "ai2/dolma2"
 nodes: 8
 gpus: 8
-preemptible: true
+preemptible: false
 max_tokens: 113_184_153_600 # 5xC multiplier
 sequence_length: 2048
 seed: 1337
