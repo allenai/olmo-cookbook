@@ -12,6 +12,9 @@ from cookbook.cli.utils import (
     make_destination_dir,
 )
 from cookbook.constants import (
+    DEFAULT_OLMO2_TOKENIZER,
+    DEFAULT_OLMO_CORE_TOKENIZER,
+    DEFAULT_OLMOE_TOKENIZER,
     OLMO2_COMMIT_HASH,
     OLMO2_CONVERSION_SCRIPT,
     OLMO2_UNSHARD_SCRIPT,
@@ -20,9 +23,6 @@ from cookbook.constants import (
     OLMOE_CONVERSION_SCRIPT,
     OLMOE_UNSHARD_SCRIPT,
     TRANSFORMERS_COMMIT_HASH,
-    DEFAULT_OLMO2_TOKENIZER,
-    DEFAULT_OLMOE_TOKENIZER,
-    DEFAULT_OLMO_CORE_TOKENIZER,
 )
 
 
