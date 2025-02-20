@@ -31,7 +31,7 @@ def convert_olmo_checkpoint(type: str, *args, **kwargs):
         convert_olmoe(*args, **kwargs)
     elif type == "olmo2":
         convert_olmo2(*args, **kwargs)
-    elif type == "olmo_core":
+    elif type == "olmo-core":
         convert_olmo_core(*args, **kwargs)
     else:
         raise ValueError(f"Unknown conversion type: {type}")
