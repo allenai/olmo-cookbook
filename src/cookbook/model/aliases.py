@@ -70,6 +70,7 @@ class ModelConfig:
     def olmo_1b(cls) -> "ModelConfig":
         """
         OLMo-1b (1_336_035_328 parameters)
+                (1_131_841_536 nonembed params)
         """
         return ModelConfig(
             compile=True,
