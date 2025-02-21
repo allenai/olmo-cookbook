@@ -3,18 +3,13 @@ import logging
 import os
 import pathlib
 from collections import defaultdict
-from typing import Tuple
-from typing import Any, List
+from typing import Any, List, Tuple
 from urllib.parse import urlparse
-
-import s3fs
-from olmo_core.data.types import NumpyDatasetDType
-from olmo_core.io import is_url
 
 import s3fs
 from olmo_core.aliases import PathOrStr
 from olmo_core.data.types import NumpyDatasetDType
-from olmo_core.io import get_file_size
+from olmo_core.io import get_file_size, is_url
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)

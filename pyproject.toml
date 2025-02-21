@@ -40,7 +40,8 @@ all = [
 ]
 
 [project.scripts]
-olmo-cookbook = "cookbook.cli:cli"
+olmo-cookbook = "cookbook.cli:cli.cli"
+
 
 [tool.black]
 line-length = 100
