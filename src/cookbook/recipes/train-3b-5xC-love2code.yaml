@@ -126,8 +126,8 @@ dataset:
     - s3://ai2-llm/pretraining-data/sources/learn2code/minhash_metadata/love2code-baseline-filtered-20250218_004_minhashed/scratch/trunc_tokens/part-122-00000.npy
     - s3://ai2-llm/pretraining-data/sources/learn2code/minhash_metadata/love2code-baseline-filtered-20250218_004_minhashed/scratch/trunc_tokens/part-122-00001.npy
     - s3://ai2-llm/pretraining-data/sources/learn2code/minhash_metadata/love2code-baseline-filtered-20250218_004_minhashed/scratch/trunc_tokens/part-123-00000.npy
-  - name: dclm-codeprose-v0 
-    target_ratio: 0.15 
+  - name: dclm-codeprose-v0
+    target_ratio: 0.15
     paths:
     - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-00-00000.npy
     - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-01-00000.npy
@@ -220,6 +220,6 @@ dataset:
     - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-88-00000.npy
     - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-89-00000.npy
     - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-90-00000.npy
-    - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-91-00000.npy    
+    - s3://ai2-llm/preprocessed/dclm/raw_love2code_codeprose/dolma2-tokenizer/part-91-00000.npy
 
 
