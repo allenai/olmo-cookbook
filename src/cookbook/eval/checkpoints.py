@@ -50,7 +50,13 @@ def evaluate_checkpoint(
     print(f"Using Python virtual environment at {env.name}")
 
     # Install oe-eval toolkit
-    oe_eval_dir = install_oe_eval(env=env, commit_hash=oe_eval_commit, editable=("--use-gantry" in extra_args))
+    use_gantry_when_launching_eval = "--use-gantry" in extra_args
+    oe_eval_dir = install_oe_eval(
+        env=env,
+        commit_hash=oe_eval_commit,
+        is_editable=use_gantry_when_launching_eval,
+        # no_dependencies=(not use_gantry_when_launching_eval),
+    )
 
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
@@ -66,6 +72,7 @@ def evaluate_checkpoint(
             aws_secret_access_key=aws_secret_access_key,
             workspace=workspace,
             flags=flags,
+            env=env,
         )
 
         if not is_aws_cred_added:
@@ -134,7 +141,13 @@ def evaluate_checkpoint(
         partition_tasks = all_tasks[i : i + partition_size] if partition_size else all_tasks
         flags.append(f"--task {' '.join(partition_tasks)}")
 
-        if add_aws_flags(aws_access_key_id, aws_secret_access_key, workspace, flags):
+        if add_aws_flags(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            workspace=workspace,
+            flags=flags,
+            env=env,
+        ):
             friendly_task_name = "-".join(partition_tasks)
 
             # remove any special characters from the task name that is not alphanumeric or hyphen
@@ -175,11 +188,9 @@ def evaluate_checkpoint(
             flags.append(f"--gantry-args '{gantry_args}'")
 
         # run oe-eval
-        subprocess.run(
-            shlex.split(f"{OE_EVAL_LAUNCH_COMMAND} {' '.join(flags)} {'--dry-run' if dry_run else ''}"),
-            check=True,
-            cwd=oe_eval_dir,
-        )
+        cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(flags)}"
+        print(f"Command:\n{cmd}\nFrom:\n{oe_eval_dir}")
+        subprocess.run(shlex.split(cmd), check=True, cwd=oe_eval_dir, env=env.path())
         cnt += 1
 
     print(f"Launched {cnt:,} eval jobs on {beaker_clusters} for {run_name}.")

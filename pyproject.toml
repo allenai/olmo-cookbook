@@ -41,6 +41,7 @@ all = [
 
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
+olmo-cookbook-eval = "cookbook.cli:eval.cli"
 
 
 [tool.black]

@@ -169,5 +169,5 @@ ALL_NAMED_GROUPS = {
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
-OE_EVAL_LAUNCH_COMMAND = "python oe_eval/launch.py"
+OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]

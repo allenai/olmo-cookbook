@@ -1,3 +1,4 @@
+import ast
 import os
 import re
 import shlex
@@ -5,7 +6,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from tempfile import gettempdir, mkdtemp
+from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -131,7 +132,12 @@ def get_aws_secret_access_key() -> Optional[str]:
         return None
 
 
-def install_oe_eval(commit_hash: str | None, env: PythonEnv | None = None, editable: bool = False) -> str:
+def install_oe_eval(
+    commit_hash: str | None,
+    env: PythonEnv | None = None,
+    no_dependencies: bool = True,
+    is_editable: bool = False
+) -> str:
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
@@ -139,12 +145,12 @@ def install_oe_eval(commit_hash: str | None, env: PythonEnv | None = None, edita
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
-    print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if editable else "") + "...")
+    print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
     cmd = [
         env.pip,
         "install",
-        "--no-deps",
-        "--editable" if editable else "",
+        ("--no-deps" if no_dependencies else ""),
+        "--editable" if is_editable else "",
         ".",
     ]
     subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=oe_eval_dir, env=env.path())
@@ -152,7 +158,56 @@ def install_oe_eval(commit_hash: str | None, env: PythonEnv | None = None, edita
     return oe_eval_dir
 
 
-def add_secret_to_beaker_workspace(secret_name: str, secret_value: str, workspace: str) -> str:
+def run_func_in_venv(fn):
+    """Wrap any function so that it can run inside a virtual environment"""
+    def wrapper(*args, env: PythonEnv | None = None, **kwargs):
+        if env is None:
+            return fn(*args, **kwargs)
+
+        import inspect
+        import importlib.util
+
+        package_name = __name__.split(".")[0]
+        package_spec = importlib.util.find_spec(package_name)
+        assert package_spec is not None and package_spec.origin is not None
+        package_path = Path(package_spec.origin).parent
+        return_type = inspect.signature(fn).return_annotation
+
+        with NamedTemporaryFile("w", encoding="utf-8", suffix=".py", delete=False) as f:
+            if (fn_module := inspect.getmodule(fn)) is not None:
+                f.write(f"from {fn_module.__name__} import {fn.__name__}\n")
+            else:
+                f.write(inspect.getsource(fn) + "\n")
+
+            f.write(f"out = {fn.__name__}(*{args}, **{kwargs})\n")
+            f.write("print(repr(out), end='')\n")
+            f.flush()
+
+            result = subprocess.run(
+                shlex.split(f"{env.python} {f.name}"),
+                capture_output=True,
+                # check=True,
+                env={**(e := env.path()), "PYTHONPATH": f"{package_path.parent}:{e.get('PYTHONPATH', '')}"},
+            )
+
+            if result.returncode != 0:
+                print(result.stderr.decode())
+                raise RuntimeError("Error running function in virtual environment")
+
+            out = ast.literal_eval(result.stdout.decode())
+            assert isinstance(out, return_type), f"Expected {return_type}, got {type(out)}"
+            return out
+
+    return wrapper
+
+
+@run_func_in_venv
+def add_secret_to_beaker_workspace(
+    secret_name: str,
+    secret_value: str,
+    workspace: str,
+) -> str:
+
     try:
         import beaker  # pyright: ignore
     except ImportError:
@@ -173,6 +228,7 @@ def add_aws_flags(
     aws_secret_access_key: Optional[str],
     workspace: str,
     flags: List[str],
+    env: PythonEnv | None = None,
 ) -> bool:
     if any(flag.startswith("--gantry-secret-aws-access-key-id") for flag in flags) and any(
         flag.startswith("--gantry-secret-aws-secret-access") for flag in flags
@@ -182,9 +238,17 @@ def add_aws_flags(
     if not aws_access_key_id or not aws_secret_access_key:
         return False
 
-    aws_access_key_id_secret = add_secret_to_beaker_workspace("AWS_ACCESS_KEY_ID", aws_access_key_id, workspace)
+    aws_access_key_id_secret = add_secret_to_beaker_workspace(
+        secret_name="AWS_ACCESS_KEY_ID",
+        secret_value=aws_access_key_id,
+        workspace=workspace,
+        env=env     # pyright: ignore
+    )
     aws_secret_access_key_secret = add_secret_to_beaker_workspace(
-        "AWS_SECRET_ACCESS_KEY", aws_secret_access_key, workspace
+        secret_name="AWS_SECRET_ACCESS_KEY",
+        secret_value=aws_secret_access_key,
+        workspace=workspace,
+        env=env     # pyright: ignore
     )
 
     flags.append(f"--gantry-secret-aws-access-key-id '{aws_access_key_id_secret}'")

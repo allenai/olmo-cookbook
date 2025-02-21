@@ -309,7 +309,12 @@ def convert_checkpoint(
             gantry_flags.append(f"--weka {weka_path}:/{weka_path}")
 
         if huggingface_token is not None:
-            secret_name = add_secret_to_beaker_workspace("HF_TOKEN", huggingface_token, beaker_workspace)
+            secret_name = add_secret_to_beaker_workspace(
+                secret_name="HF_TOKEN",
+                secret_value=huggingface_token,
+                workspace=beaker_workspace,
+                env=env,    # type: ignore
+            )
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
