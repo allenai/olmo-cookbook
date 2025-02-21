@@ -177,7 +177,9 @@ class TransformerConfigBuilder:
     def build_callbacks(self, model: TransformerConfig) -> Dict[str, Callback]:
         return {
             "lr_scheduler": SchedulerCallback(
-                scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps(model.num_params))
+                scheduler=CosWithWarmup(
+                    warmup_steps=self.get_warmup_steps(model.num_params), t_max=self.max_tokens
+                ),
             ),
             "gpu_monitor": GPUMemoryMonitorCallback(),
             "grad_clipper": GradClipperCallback(max_grad_norm=self.model_config.max_grad_norm),
@@ -253,17 +255,21 @@ class TransformerConfigBuilder:
             ],
         )
 
-        mixture_config = MixtureBuilder(
-            sources=self.sources,
-            max_tokens=self.max_tokens,
-            sequence_length=self.sequence_length,
-            seed=self.seed,
-            processes=min(os.cpu_count() or 1, 16),
-            dtype=self.dataset_dtype,
-        ).build()
+        # mixture_config = MixtureBuilder(
+        #     sources=self.sources,
+        #     max_tokens=self.max_tokens,
+        #     sequence_length=self.sequence_length,
+        #     seed=self.seed,
+        #     processes=min(os.cpu_count() or 1, 16),
+        #     dtype=self.dataset_dtype,
+        # ).build()
+
+        paths = []
+        for source in self.sources:
+            paths.extend(source.paths)
 
         dataset_config = NumpyDatasetConfig(
-            source_mixture_config=mixture_config,
+            paths=paths,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             tokenizer=tokenizer,
