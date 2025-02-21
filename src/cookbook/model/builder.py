@@ -177,9 +177,7 @@ class TransformerConfigBuilder:
     def build_callbacks(self, model: TransformerConfig) -> Dict[str, Callback]:
         return {
             "lr_scheduler": SchedulerCallback(
-                scheduler=CosWithWarmup(
-                    warmup_steps=self.get_warmup_steps(model.num_params), t_max=self.max_tokens
-                ),
+                scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps(model.num_params)),
             ),
             "gpu_monitor": GPUMemoryMonitorCallback(),
             "grad_clipper": GradClipperCallback(max_grad_norm=self.model_config.max_grad_norm),
