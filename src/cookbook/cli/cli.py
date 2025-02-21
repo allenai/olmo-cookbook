@@ -1,19 +1,17 @@
 import concurrent.futures
 import logging
+import re
 from pathlib import Path
 from typing import Optional
 
 import click
 import yaml
-from beaker import Beaker
-from beaker.services.job import JobClient
 from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
 from cookbook.cli.utils import (
-    PythonEnv,
     get_aws_access_key_id,
     get_aws_secret_access_key,
     get_huggingface_token,
@@ -21,16 +19,27 @@ from cookbook.cli.utils import (
 from cookbook.constants import (
     ALL_NAMED_GROUPS,
     OLMO2_COMMIT_HASH,
+    OLMO_CORE_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
+    TRANSFORMERS_COMMIT_HASH,
 )
-from cookbook.eval.checkpoints import convert_checkpoint, evaluate_checkpoint
+from cookbook.eval.checkpoints import evaluate_checkpoint
+from cookbook.eval.conversion import convert_checkpoint
 from cookbook.utils.config import (
     config_from_path,
     mk_experiment_group,
     mk_launch_configs,
 )
 from cookbook.utils.data import get_token_counts_and_ratios
+
+try:
+    from beaker import Beaker  # pyright: ignore
+    from beaker.services.job import JobClient  # pyright: ignore
+
+    BEAKER_CLIENT_AVAILABLE = True
+except ImportError:
+    BEAKER_CLIENT_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +91,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     else:
         group_uuid = generate_uuid()[:8]
 
-    beaker_user = (Beaker.from_env().account.whoami().name).upper()
+    beaker_user = (Beaker.from_env().account.whoami().name).upper()  # pyright: ignore
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
 
     logger.info(experiment_config)
@@ -114,9 +123,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
             results = []
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                futures = [
-                    executor.submit(experiment.launch) for experiment in launch_group.instances
-                ]
+                futures = [executor.submit(experiment.launch) for experiment in launch_group.instances]
 
                 for future in tqdm(
                     concurrent.futures.as_completed(futures),
@@ -139,8 +146,11 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
 
 
 def _status_for_group(path: Path, group_id: str):
-    beaker = Beaker.from_env()
-    client = JobClient(beaker=beaker)
+    if not BEAKER_CLIENT_AVAILABLE:
+        raise ImportError("Beaker client not available. Please install the beaker package.")
+
+    beaker = Beaker.from_env()  # pyright: ignore
+    client = JobClient(beaker=beaker)  # pyright: ignore
     config = config_from_path(path)
     cluster = beaker.cluster.get(config.cluster)
     jobs = client.list(cluster=cluster)
@@ -155,8 +165,11 @@ def _status_for_group(path: Path, group_id: str):
 
 
 def _stop_for_group(path: Path, group_id: str):
-    beaker = Beaker.from_env()
-    client = JobClient(beaker=beaker)
+    if not BEAKER_CLIENT_AVAILABLE:
+        raise ImportError("Beaker client not available. Please install the beaker package.")
+
+    beaker = Beaker.from_env()  # pyright: ignore
+    client = JobClient(beaker=beaker)  # pyright: ignore
     config = config_from_path(path)
     cluster = beaker.cluster.get(config.cluster)
     jobs = [
@@ -221,25 +234,17 @@ def cancel(config: Path, group_id: str):
 
 @cli.command()
 @click.option("-i", "--input-dir", type=str, required=True, help="Input directory")
-@click.option(
-    "-t", "--olmo-type", type=click.Choice(OLMO_TYPES), required=True, help="Type of OLMo model"
-)
+@click.option("-t", "--olmo-type", type=click.Choice(OLMO_TYPES), required=True, help="Type of OLMo model")
 @click.option("--huggingface-tokenizer", type=str, default=None, help="Huggingface tokenizer")
 @click.option("--unsharded-output-dir", type=str, default=None, help="Unsharded output directory")
-@click.option(
-    "--huggingface-output-dir", type=str, default=None, help="Huggingface output directory"
-)
-@click.option(
-    "--unsharded-output-suffix", type=str, default="unsharded", help="Unsharded output suffix"
-)
-@click.option(
-    "--huggingface-output-suffix", type=str, default="hf", help="Huggingface output suffix"
-)
+@click.option("--huggingface-output-dir", type=str, default=None, help="Huggingface output directory")
+@click.option("--unsharded-output-suffix", type=str, default="unsharded", help="Unsharded output suffix")
+@click.option("--huggingface-output-suffix", type=str, default="hf", help="Huggingface output suffix")
 @click.option("--olmoe-commit-hash", type=str, default=OLMOE_COMMIT_HASH, help="OLMoE commit hash")
 @click.option("--olmo2-commit-hash", type=str, default=OLMO2_COMMIT_HASH, help="OLMo2 commit hash")
-@click.option(
-    "--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token"
-)
+@click.option("--olmo-core-commit-hash", type=str, default=OLMO_CORE_COMMIT_HASH, help="OLMo core commit hash")
+@click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
+@click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
 @click.option("--beaker-workspace", type=str, default="ai2/oe-data", help="Beaker workspace")
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
@@ -248,6 +253,7 @@ def cancel(config: Path, group_id: str):
 @click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
 @click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
 @click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
+@click.option("--use-system-python", is_flag=True, help="Whether to use system Python or a virtual environment")
 @click.option(
     "--force-venv",
     is_flag=True,
@@ -277,8 +283,11 @@ def convert(
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
+    olmo_core_commit_hash: str,
+    huggingface_transformers_commit_hash: str,
     unsharded_output_dir: str | None,
     unsharded_output_suffix: str,
+    use_system_python: bool,
     use_beaker: bool,
     env_name: str,
 ):
@@ -292,6 +301,7 @@ def convert(
         huggingface_output_suffix=huggingface_output_suffix,
         olmoe_commit_hash=olmoe_commit_hash,
         olmo2_commit_hash=olmo2_commit_hash,
+        olmo_core_commit_hash=olmo_core_commit_hash,
         huggingface_token=huggingface_token,
         use_beaker=use_beaker,
         beaker_workspace=beaker_workspace,
@@ -301,7 +311,10 @@ def convert(
         beaker_budget=beaker_budget,
         beaker_gpus=beaker_gpus,
         beaker_dry_run=beaker_dry_run,
-        env=PythonEnv.create(name=env_name, force=force_venv),
+        python_venv_name=env_name,
+        python_venv_force=force_venv,
+        huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
+        use_system_python=use_system_python,
     )
 
 
@@ -373,9 +386,7 @@ def convert(
     help="AWS secret access key to use for S3 access",
 )
 @click.option("-l", "--gantry-args", type=str, default="", help="Extra arguments to pass to Gantry")
-@click.option(
-    "-i", "--beaker-image", type=str, default=None, help="Beaker image to use for evaluation"
-)
+@click.option("-i", "--beaker-image", type=str, default=None, help="Beaker image to use for evaluation")
 @click.option(
     "-z",
     "--batch-size",
@@ -447,6 +458,9 @@ def evaluate(
     The evaluation results will be saved to the specified remote output prefix.
     """
 
+    # Remove any escaped hyphens in extra_args
+    extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
@@ -470,7 +484,8 @@ def evaluate(
         beaker_image=beaker_image,
         use_gantry=use_gantry,
         gantry_args=gantry_args,
-        env=PythonEnv.create(name=env_name, force=force_venv),
+        python_venv_force=force_venv,
+        python_venv_name=env_name,
     )
 
 

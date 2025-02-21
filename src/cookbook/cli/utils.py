@@ -6,7 +6,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import gettempdir, mkdtemp
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from urllib.parse import urlparse
 
 from cookbook.constants import (
@@ -58,9 +58,7 @@ class PythonEnv:
         return hasher.hexdigest()[:6]
 
     @classmethod
-    def create(
-        cls, name: Optional[str], force: bool = False, root: Path | None = None
-    ) -> "PythonEnv":
+    def create(cls, name: Optional[str], force: bool = False, root: Path | None = None) -> "PythonEnv":
         name = name or f"oe-py-env-{cls._generate_hash()}"
         path = (root or cls._find_root_dir()) / ".venv" / name
         if path.exists() and force:
@@ -133,20 +131,32 @@ def get_aws_secret_access_key() -> Optional[str]:
         return None
 
 
-def install_oe_eval(env: PythonEnv = PythonEnv.null(), commit_hash: Optional[str] = None) -> str:
+def install_oe_eval(commit_hash: str | None, env: PythonEnv | None = None, editable: bool = False) -> str:
+    env = env or PythonEnv.null()
+
     print("Installing beaker and gantry clients...")
-    subprocess.run(shlex.split("pip install beaker-py beaker-gantry"), check=True, env=env.path())
+    subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
-    print(f"Installing oe-eval toolkit from {oe_eval_dir}...")
-    subprocess.run(shlex.split("pip install  --no-deps ."), check=True, cwd=oe_eval_dir)
+    print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if editable else "") + "...")
+    cmd = [
+        env.pip,
+        "install",
+        "--no-deps",
+        "--editable" if editable else "",
+        ".",
+    ]
+    subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=oe_eval_dir, env=env.path())
 
     return oe_eval_dir
 
 
 def add_secret_to_beaker_workspace(secret_name: str, secret_value: str, workspace: str) -> str:
-    import beaker
+    try:
+        import beaker  # pyright: ignore
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
     full_secret_name = f"{client.account.name}_{secret_name}"
@@ -172,9 +182,7 @@ def add_aws_flags(
     if not aws_access_key_id or not aws_secret_access_key:
         return False
 
-    aws_access_key_id_secret = add_secret_to_beaker_workspace(
-        "AWS_ACCESS_KEY_ID", aws_access_key_id, workspace
-    )
+    aws_access_key_id_secret = add_secret_to_beaker_workspace("AWS_ACCESS_KEY_ID", aws_access_key_id, workspace)
     aws_secret_access_key_secret = add_secret_to_beaker_workspace(
         "AWS_SECRET_ACCESS_KEY", aws_secret_access_key, workspace
     )
@@ -229,9 +237,7 @@ def clone_repository(git_url: str, commit_hash: str | None = None) -> str:
         return tmp_dir
 
     except Exception as e:
-        print(
-            f"Error cloning repository at '{git_url}' {f' (commit {commit_hash})' if commit_hash else ''}: {e}"
-        )
+        print(f"Error cloning repository at '{git_url}' {f' (commit {commit_hash})' if commit_hash else ''}: {e}")
         if tmp_dir:
             print(f"Cleaning up {tmp_dir}...")
             shutil.rmtree(tmp_dir, ignore_errors=True)
@@ -248,9 +254,7 @@ def install_olmo(commit_hash: str | None, env: PythonEnv | None = None) -> str:
 
     # Install the package
     print(f"Installing OLMo dependencies from {olmo_dir}...")
-    subprocess.run(
-        shlex.split(f"{env.pip} install '.[train]'"), check=True, cwd=olmo_dir, env=env.path()
-    )
+    subprocess.run(shlex.split(f"{env.pip} install '.[train]'"), check=True, cwd=olmo_dir, env=env.path())
 
     return olmo_dir
 
@@ -300,22 +304,14 @@ def install_transformers(commit_hash: str | None, env: PythonEnv | None = None) 
     transformers_dir = clone_repository(TRANSFORMERS_GIT_URL, commit_hash)
 
     # Install the package
-    print(
-        f"Installing the correct version of Transformers ({commit_hash}) from {transformers_dir}..."
-    )
-    subprocess.run(
-        shlex.split(f"{env.pip} install ."), cwd=transformers_dir, check=True, env=env.path()
-    )
+    print(f"Installing the correct version of Transformers ({commit_hash}) from {transformers_dir}...")
+    subprocess.run(shlex.split(f"{env.pip} install ."), cwd=transformers_dir, check=True, env=env.path())
 
     print("Installing Huggingface CLI with support for hf_transfer to download tokenizer...")
-    subprocess.run(
-        shlex.split(f"{env.pip} install 'huggingface-hub[hf_transfer]'"), check=True, env=env.path()
-    )
+    subprocess.run(shlex.split(f"{env.pip} install 'huggingface-hub[hf_transfer]'"), check=True, env=env.path())
 
     print("Installing accelerate to fully support Huggingface model conversion...")
-    subprocess.run(
-        shlex.split(f"{env.pip} install 'accelerate>=0.26.0'"), check=True, env=env.path()
-    )
+    subprocess.run(shlex.split(f"{env.pip} install 'accelerate>=0.26.0'"), check=True, env=env.path())
 
     return transformers_dir
 
@@ -330,17 +326,13 @@ def remove_conflicting_packages():
 
 
 def check_beaker_dependencies():
-    is_beaker_py_installed = (
-        subprocess.run(shlex.split("pip show beaker-py"), capture_output=True).returncode == 0
-    )
+    is_beaker_py_installed = subprocess.run(shlex.split("pip show beaker-py"), capture_output=True).returncode == 0
     is_beaker_gantry_installed = (
         subprocess.run(shlex.split("pip show beaker-gantry"), capture_output=True).returncode == 0
     )
 
     if not is_beaker_py_installed or not is_beaker_gantry_installed:
-        raise RuntimeError(
-            "When using --beaker, both beaker-py and beaker-gantry must be installed"
-        )
+        raise RuntimeError("When using --beaker, both beaker-py and beaker-gantry must be installed")
 
 
 def find_repository_root(current: str | Path = __file__) -> Path:

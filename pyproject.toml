@@ -10,7 +10,7 @@ description = ""
 authors = [
     { name = "Allen Institute for Artificial Intelligence", email = "oe-data-engineering@allenai.org" }
 ]
-requires-python = ">=3.9,<3.12"
+requires-python = ">=3.9,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
@@ -44,7 +44,8 @@ olmo-cookbook = "cookbook.cli:cli.cli"
 
 
 [tool.black]
-line-length = 100
+line-length = 115
+target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''
 (
