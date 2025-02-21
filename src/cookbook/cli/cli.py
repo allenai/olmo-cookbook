@@ -383,6 +383,7 @@ def convert(
     default=0,
     help="Set batch size for inference; if 0, use default batch size",
 )
+@click.option("--compute-gold-bpb", is_flag=True, help="Compute perplexity over the gold continuation for generative benchmarks (e.g., GSM, Minerva, HumanEval)", default=False)
 @click.option(
     "-o",
     "--remote-output-prefix",
@@ -411,6 +412,12 @@ def convert(
     default=False,
 )
 @click.option(
+    "--gpu-memory-utilization",
+    type=float,
+    default=None,
+    help="Reduce memory utilization for vLLM, defaults to 0.8",
+)
+@click.option(
     "--env-name",
     type=str,
     default="oe-eval-venv",
@@ -425,6 +432,7 @@ def evaluate(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    compute_gold_bpb: bool,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -440,6 +448,7 @@ def evaluate(
     use_gantry: bool,
     gantry_args: str,
     force_venv: bool,
+    gpu_memory_utilization: float,
     env_name: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
@@ -456,6 +465,7 @@ def evaluate(
         cluster=cluster,
         huggingface_secret=huggingface_secret,
         add_bos_token=add_bos_token,
+        compute_gold_bpb=compute_gold_bpb,
         budget=budget,
         priority=priority,
         num_gpus=num_gpus,
@@ -470,6 +480,7 @@ def evaluate(
         beaker_image=beaker_image,
         use_gantry=use_gantry,
         gantry_args=gantry_args,
+        gpu_memory_utilization=gpu_memory_utilization,
         env=PythonEnv.create(name=env_name, force=force_venv),
     )
 

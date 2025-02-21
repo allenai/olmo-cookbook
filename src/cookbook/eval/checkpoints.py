@@ -38,6 +38,7 @@ def evaluate_checkpoint(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    compute_gold_bpb: bool,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -52,6 +53,7 @@ def evaluate_checkpoint(
     beaker_image: str,
     use_gantry: bool,
     gantry_args: str,
+    gpu_memory_utilization: float,
     env: PythonEnv,
 ):
     # Install oe-eval toolkit
@@ -131,8 +133,9 @@ def evaluate_checkpoint(
     flags.append("--push-datalake")
 
     # set model info
+    gpu_memory_utilization = f',gpu_memory_utilization={gpu_memory_utilization}' if gpu_memory_utilization else ''
     flags.append(f"--model {run_name}")
-    flags.append(f"--model-args 'model_path={checkpoint_path},add_bos_token={add_bos_token}'")
+    flags.append(f"--model-args 'model_path={checkpoint_path},add_bos_token={add_bos_token}{gpu_memory_utilization}'")
     flags.append(f"--model-type {model_backend}")
 
     all_tasks = sorted(
@@ -168,6 +171,10 @@ def evaluate_checkpoint(
 
         # set extra arguments
         flags.append(extra_args)
+
+        # set compute gold bpb
+        if compute_gold_bpb:
+            flags.append(f"--task-args compute_gold_bpb=true")
 
         # set batch size
         if batch_size:
