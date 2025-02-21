@@ -192,6 +192,7 @@ ALL_NAMED_GROUPS = {
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "code": ALL_CODEX_TASKS,
+    "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
