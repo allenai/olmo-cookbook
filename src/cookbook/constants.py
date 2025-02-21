@@ -156,7 +156,33 @@ ALL_GEN_TASKS = [
     "gsm8k::olmo1",
 ]
 
-ALL_CODEX_TASKS = []
+
+ALL_MATH_TASKS = [
+    # Held-out
+    # "minerva_math_algebra::olmes",
+    # "minerva_math_counting_and_probability::olmes",
+    # "minerva_math_geometry::olmes",
+    # "minerva_math_intermediate_algebra::olmes",
+    # "minerva_math_number_theory::olmes",
+    # "minerva_math_prealgebra::olmes",
+    # "minerva_math_precalculus::olmes",
+    # 'deepmind_math_large::none',
+    # 'gsm_plus::none',
+    # 'gsm_symbolic::none',
+    # 'gsm_symbolic_p1::none',
+    # 'gsm_symbolic_p2::none',
+    # 'minerva_math_500::none', 
+]
+
+
+ALL_CODEX_TASKS = [
+    "codex_humaneval:temp0.8",
+    "codex_humanevalplus:temp0.8", 
+    "mbpp::none",
+    "mbppplus::none",
+    "bigcodebench::none",
+    "bigcodebench_hard::none"
+]
 
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
@@ -165,6 +191,8 @@ ALL_NAMED_GROUPS = {
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+    "code": ALL_CODEX_TASKS,
+    "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
