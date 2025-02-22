@@ -15,7 +15,7 @@ from cookbook.constants import (
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
-from cookbook.eval.checkpoints import evaluate_checkpoint
+from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.conversion import convert_checkpoint
 
 
@@ -121,7 +121,7 @@ def convert(
 @click.option("-w", "--workspace", type=str, default="ai2/oe-data", help="Set workspace")
 @click.option(
     "-t",
-    "--task",
+    "--tasks",
     type=str,
     multiple=True,
     help=(
@@ -193,7 +193,7 @@ def convert(
     "-v",
     "--model-backend",
     type=click.Choice(["hf", "vllm"]),
-    default="hf",
+    default="vllm",
     help="Model backend (hf for Hugging Face, vllm for vLLM)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
@@ -215,6 +215,24 @@ def convert(
     default="oe-eval-venv",
     help="Name of the environment to use for evaluation",
 )
+@click.option(
+    "--vllm-memory-utilization",
+    default=0.8,
+    type=click.FloatRange(0.0, 1.0),
+    help="Memory utilization for vLLM models, as a fraction of total GPU memory (between 0 and 1)",
+)
+@click.option(
+    "--vllm-for-mc/--no-vllm-for-mc",
+    default=True,
+    type=bool,
+    help="Whether to use hack for vLLM models for multiple choice tasks",
+)
+@click.option(
+    "--compute-gold-bpb/--no-compute-gold-bpb",
+    default=True,
+    type=bool,
+    help="Whether to compute gold BPB when evaluating generative tasks.",
+)
 def evaluate(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -229,7 +247,7 @@ def evaluate(
     num_gpus: int,
     dashboard: str,
     model_backend: str,
-    task: list[str],
+    tasks: list[str],
     partition_size: int,
     remote_output_prefix: str,
     extra_args: str,
@@ -240,6 +258,9 @@ def evaluate(
     gantry_args: str,
     force_venv: bool,
     env_name: str,
+    vllm_memory_utilization: float,
+    vllm_for_mc: bool,
+    compute_gold_bpb: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -263,7 +284,7 @@ def evaluate(
         num_gpus=num_gpus,
         dashboard=dashboard,
         model_backend=model_backend,
-        tasks=task,
+        tasks=tasks,
         partition_size=partition_size,
         remote_output_prefix=remote_output_prefix,
         extra_args=extra_args,
@@ -274,6 +295,9 @@ def evaluate(
         gantry_args=gantry_args,
         python_venv_force=force_venv,
         python_venv_name=env_name,
+        vllm_memory_utilization=vllm_memory_utilization,
+        vllm_for_mc=vllm_for_mc,
+        compute_gold_bpb=compute_gold_bpb,
     )
 
 

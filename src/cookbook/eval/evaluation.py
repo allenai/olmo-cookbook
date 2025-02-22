@@ -45,18 +45,19 @@ def evaluate_checkpoint(
     gantry_args: str,
     python_venv_name: str,
     python_venv_force: bool,
+    vllm_memory_utilization: float,
+    vllm_for_mc: bool,
+    compute_gold_bpb: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
     print(f"Using Python virtual environment at {env.name}")
 
     # Install oe-eval toolkit
-    use_gantry_when_launching_eval = "--use-gantry" in extra_args
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
-        is_editable=use_gantry_when_launching_eval,
-        # no_dependencies=(not use_gantry_when_launching_eval),
+        is_editable=use_gantry,
     )
 
     # this is where we store all fixed flags to pass to oe-eval
@@ -104,6 +105,7 @@ def evaluate_checkpoint(
             secret_name="HUGGING_FACE_HUB_TOKEN",
             secret_value=huggingface_secret,
             workspace=workspace,
+            env=env,    # pyright: ignore
         )
         flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
         flags.append("--gantry-args '{\"hf_token\":true}'")
@@ -127,76 +129,104 @@ def evaluate_checkpoint(
     flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
     flags.append("--push-datalake")
 
+    # figure out model args based on cli
+    model_args = {"model_path": checkpoint_path, "add_bos_token": "true" if add_bos_token else "false"}
+    if model_backend == "vllm":
+        # if we are using vllm, we need to set the memory utilization
+        model_args["gpu_memory_utilization"] = str(vllm_memory_utilization)
+    model_args_str = ",".join(f"{k}={v}" for k, v in model_args.items())
+
     # set model info
     flags.append(f"--model {run_name}")
-    flags.append(f"--model-args 'model_path={checkpoint_path},add_bos_token={add_bos_token}'")
+    flags.append(f"--model-args '{model_args_str}'")
     flags.append(f"--model-type {model_backend}")
 
+    # these are all the tasks we want to run
     all_tasks = sorted(
         set(task for task_group in tasks for task in ALL_NAMED_GROUPS.get(task_group, [task_group]))
     )
 
-    cnt = 0
-    for i in range(0, len(all_tasks), partition_size or len(all_tasks)):
-        local_flags = deepcopy(flags)
+    # we need to partition tasks based on whether they are mc, gen, or rc
+    partitioned_tasks = {}
+    for task in all_tasks:
+        if ":rc::" in task:
+            partitioned_tasks.setdefault("rc", []).append(task)
+        elif ":mc::" in task:
+            partitioned_tasks.setdefault("mc", []).append(task)
+        else:
+            partitioned_tasks.setdefault("gen", []).append(task)
 
-        # add all tasks in the partition as flag
-        partition_tasks = all_tasks[i: i + partition_size] if partition_size else all_tasks
-        local_flags.append(f"--task {' '.join(partition_tasks)}")
+    # we launch jobs by partition. We are careful to partition RC/MC/GEN tasks separately
+    submitted_jobs_cnt = 0
+    for task_group, tasks_names in partitioned_tasks.items():
+        for i in range(0, len(tasks_names), partition_size or len(tasks_names)):
+            local_flags = deepcopy(flags)
 
-        if add_aws_flags(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            workspace=workspace,
-            flags=local_flags,
-            env=env,
-        ):
-            friendly_task_name = "-".join(partition_tasks)
+            # add all tasks in the partition as flag
+            partition_tasks = tasks_names[i: i + partition_size] if partition_size else tasks_names
+            local_flags.append(f"--task {' '.join(partition_tasks)}")
 
-            # remove any special characters from the task name that is not alphanumeric or hyphen
-            friendly_task_name = re.sub(r"[^a-zA-Z0-9\-]+", "_", friendly_task_name)
+            if add_aws_flags(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                workspace=workspace,
+                flags=local_flags,
+                env=env,
+            ):
+                friendly_task_name = "-".join(partition_tasks)
 
-            # replace multiple underscores or hyphens with a single hyphen
-            friendly_task_name = re.sub(r"(\-_+|_+\-)", "-", friendly_task_name)
+                # remove any special characters from the task name that is not alphanumeric or hyphen
+                friendly_task_name = re.sub(r"[^a-zA-Z0-9\-]+", "_", friendly_task_name)
 
-            # remove any leading/trailing '-' or '_'
-            friendly_task_name = friendly_task_name.strip("_-")
+                # replace multiple underscores or hyphens with a single hyphen
+                friendly_task_name = re.sub(r"(\-_+|_+\-)", "-", friendly_task_name)
 
-            # truncate the task name if it is too long
-            if len(friendly_task_name) > 50:
-                h = md5(friendly_task_name.encode()).hexdigest()
-                friendly_task_name = f"{friendly_task_name[:43]}-{h[:6]}"
+                # remove any leading/trailing '-' or '_'
+                friendly_task_name = friendly_task_name.strip("_-")
 
-            # set remote output directory
-            remote_dir = f"{remote_output_prefix}/{dashboard}/{run_name}/{friendly_task_name}"
-            local_flags.append(f"--remote-output-dir '{remote_dir}'")
+                # truncate the task name if it is too long
+                if len(friendly_task_name) > 50:
+                    h = md5(friendly_task_name.encode()).hexdigest()
+                    friendly_task_name = f"{friendly_task_name[:43]}-{h[:6]}"
 
-        # set extra arguments
-        local_flags.append(extra_args)
+                # set remote output directory
+                remote_dir = f"{remote_output_prefix}/{dashboard}/{run_name}/{friendly_task_name}"
+                local_flags.append(f"--remote-output-dir '{remote_dir}'")
 
-        # set batch size
-        if batch_size:
-            local_flags.append(f"--batch-size {batch_size}")
+            # set extra arguments
+            local_flags.append(extra_args)
 
-        # set dry run
-        if dry_run:
-            local_flags.append("--dry-run")
+            # set batch size
+            if batch_size:
+                local_flags.append(f"--batch-size {batch_size}")
 
-        # set beaker image
-        if beaker_image:
-            local_flags.append(f"--beaker-image {beaker_image}")
+            # set dry run
+            if dry_run:
+                local_flags.append("--dry-run")
 
-        # set gantry args
-        if use_gantry:
-            local_flags.append(f"--gantry-args '{gantry_args}'")
+            # set beaker image
+            if beaker_image:
+                local_flags.append(f"--beaker-image {beaker_image}")
 
-        # run oe-eval
-        cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
-        print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
-        output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
-        print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
-        if output.returncode != 0:
-            raise RuntimeError(f"Error running command: {cmd}")
-        cnt += 1
+            # set gantry args
+            if use_gantry:
+                local_flags.append("--use-gantry")
+                if gantry_args:
+                    local_flags.append(f"--gantry-args '{gantry_args}'")
 
-    print(f"Launched {cnt:,} eval jobs on {beaker_clusters} for {run_name}.")
+            if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
+                local_flags.append("--vllm-for-mc")
+
+            if model_backend == "vllm" and task_group == "gen" and compute_gold_bpb:
+                local_flags.append("--task-args compute_gold_bpb=true")
+
+            # run oe-eval
+            cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
+            print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
+            output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
+            print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
+            if output.returncode != 0:
+                raise RuntimeError(f"Error running command: {cmd}")
+            submitted_jobs_cnt += 1
+
+    print(f"Launched {submitted_jobs_cnt:,} eval jobs on {beaker_clusters} for {run_name}.")

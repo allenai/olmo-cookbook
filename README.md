@@ -23,7 +23,7 @@ See src/cookbook/recipes/train-1b-1xC-dclm.yaml for an example to clone
 #### For models trained with old trainer
 
 ```shell
-olmo-cookbook convert \
+olmo-cookbook-eval convert \
   -i /oe-training-default/kevinf/checkpoints/OLMo-medium/peteish7-medlr/step477000 \
   -t olmo2 \
   --use-beaker \
@@ -33,7 +33,7 @@ olmo-cookbook convert \
 #### For models trained with OLMo core
 
 ```shell
-olmo-cookbook convert \
+olmo-cookbook-eval convert \
   -i /oe-training-default/ai2-llm/checkpoints/peteish32-anneal/OLMo2-32Bparams-5Ttokens-100Banneal/step11921 \
   -t olmo-core \
   --use-beaker \
@@ -43,7 +43,7 @@ olmo-cookbook convert \
 ### Run Evaluation
 
 ```shell
-olmo-cookbook evaluate -h \
+olmo-cookbook-eval evaluate -h \
   "/oe-training-default/ai2-llm/checkpoints/OLMoE/a0125/olmoe-8x1b-newhp-newds-dolmino-seed-42/step23842-hf" \
   --task core:mc --task mmlu:mc --task mmlu:rc --task gen \
   --priority high \

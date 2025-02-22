@@ -351,8 +351,14 @@ def download_tokenizer(huggingface_tokenizer: str, env: PythonEnv | None = None)
     tokenizer_dir = mkdtemp()
     try:
         print(f"Downloading tokenizer from Huggingface Hub to {tokenizer_dir}...")
-        cmd = f"huggingface-cli download {huggingface_tokenizer} --local-dir {tokenizer_dir}"
-        subprocess.run(shlex.split(cmd), check=True, env=env.path())
+        cmd = [
+            "huggingface-cli",
+            "download",
+            huggingface_tokenizer,
+            f"--local-dir {tokenizer_dir}",
+            "--exclude '*.safetensors'",
+        ]
+        subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
     except Exception as e:
         print(f"Error downloading tokenizer: {e}")
         shutil.rmtree(tokenizer_dir, ignore_errors=True)

@@ -313,7 +313,7 @@ def convert_checkpoint(
                 secret_name="HF_TOKEN",
                 secret_value=huggingface_token,
                 workspace=beaker_workspace,
-                env=env,    # type: ignore
+                env=env,  # type: ignore
             )
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
