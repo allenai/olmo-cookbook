@@ -2,15 +2,12 @@ import os
 import shlex
 import shutil
 import subprocess
-from pathlib import Path
 
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
-    check_beaker_dependencies,
     discover_weka_mount,
     download_tokenizer,
-    find_repository_root,
     install_olmo,
     install_olmo_core,
     install_transformers,
@@ -322,21 +319,21 @@ def convert_checkpoint(
         for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
             gantry_flags.append(f"--cluster {cluster}")
 
-        repo_root = find_repository_root()
-        this_script_relative_to_repo = Path(__file__).relative_to(repo_root)
-
-        remote_command = (
-            f"python {this_script_relative_to_repo} "
-            + f" --input-dir {input_dir} "
-            + f" --olmo-type {olmo_type} "
-            + (f" --huggingface-tokenizer {huggingface_tokenizer} " if huggingface_tokenizer else "")
-            + (f" --unsharded-output-dir {unsharded_output_dir} " if unsharded_output_dir else "")
-            + (f" --huggingface-output-dir {huggingface_output_dir} " if huggingface_output_dir else "")
-            + f" --unsharded-output-suffix {unsharded_output_suffix} "
-            + f" --huggingface-output-suffix {huggingface_output_suffix} "
-            + f" --olmoe-commit-hash {olmoe_commit_hash} "
-            + f" --olmo2-commit-hash {olmo2_commit_hash} "
-        )
+        remote_command = [
+            "olmo-cookbook-eval convert",
+            f"{input_dir}",
+            f"--olmo-type {olmo_type}",
+            (f"--huggingface-tokenizer {huggingface_tokenizer}" if huggingface_tokenizer else ""),
+            (f"--unsharded-output-dir {unsharded_output_dir}" if unsharded_output_dir else ""),
+            (f"--huggingface-output-dir {huggingface_output_dir}" if huggingface_output_dir else ""),
+            f"--unsharded-output-suffix {unsharded_output_suffix}",
+            f"--huggingface-output-suffix {huggingface_output_suffix}",
+            f"--olmoe-commit-hash {olmoe_commit_hash}",
+            f"--olmo2-commit-hash {olmo2_commit_hash}",
+            f"--olmo-core-commit-hash {olmo_core_commit_hash}",
+            f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
+            "--use-system-python",
+        ]
 
         gantry_command = (
             "gantry run "
