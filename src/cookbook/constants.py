@@ -157,27 +157,9 @@ ALL_GEN_TASKS = [
 ]
 
 
-ALL_MATH_TASKS = [
-    # Held-out
-    # "minerva_math_algebra::olmes",
-    # "minerva_math_counting_and_probability::olmes",
-    # "minerva_math_geometry::olmes",
-    # "minerva_math_intermediate_algebra::olmes",
-    # "minerva_math_number_theory::olmes",
-    # "minerva_math_prealgebra::olmes",
-    # "minerva_math_precalculus::olmes",
-    # 'deepmind_math_large::none',
-    # 'gsm_plus::none',
-    # 'gsm_symbolic::none',
-    # 'gsm_symbolic_p1::none',
-    # 'gsm_symbolic_p2::none',
-    # 'minerva_math_500::none', 
-]
-
-
 ALL_CODEX_TASKS = [
     "codex_humaneval:temp0.8",
-    "codex_humanevalplus:temp0.8", 
+    "codex_humanevalplus:temp0.8",
     "mbpp::none",
     "mbppplus::none",
     "bigcodebench::none",
