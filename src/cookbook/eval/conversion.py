@@ -361,7 +361,7 @@ def convert_checkpoint(
     remove_conflicting_packages(env=env)
 
     if olmo_type == "olmoe":
-        convert_olmoe(
+        return convert_olmoe(
             input_dir=input_dir,
             unsharded_output_dir=unsharded_output_dir,
             huggingface_output_dir=huggingface_output_dir,
@@ -373,7 +373,7 @@ def convert_checkpoint(
             env=env,
         )
     elif olmo_type == "olmo2":
-        convert_olmo2(
+        return convert_olmo2(
             input_dir=input_dir,
             unsharded_output_dir=unsharded_output_dir,
             huggingface_output_dir=huggingface_output_dir,
@@ -385,7 +385,7 @@ def convert_checkpoint(
             env=env,
         )
     elif olmo_type == "olmo-core":
-        convert_olmo_core(
+        return convert_olmo_core(
             input_dir=input_dir,
             unsharded_output_dir=unsharded_output_dir,
             huggingface_output_dir=huggingface_output_dir,
