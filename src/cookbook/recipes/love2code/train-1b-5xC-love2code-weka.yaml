@@ -1,0 +1,224 @@
+name: "olmo-cookbook-1b-5xC-love2code"
+description: "Love2Code model, first stab at a config"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: false
+max_tokens: 113_184_153_600 # 5xC multiplier
+sequence_length: 2048
+seed: 1337
+model: "olmo_1b"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: the-stack-v2-ai2v0
+    target_ratio: 0.85
+    paths: # TODO: ADD ACTUAL PATHS
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-001-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-004-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-006-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-007-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-009-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-010-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-011-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-012-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-014-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-015-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-016-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-017-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-018-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-020-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-020-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-022-00003.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-024-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-024-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-025-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-027-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00003.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-029-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-030-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-031-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-032-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-034-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-035-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-037-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-038-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-040-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-043-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-045-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-046-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-047-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-048-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-048-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00003.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00003.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-052-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-053-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-055-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-055-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-058-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-058-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-060-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-060-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-060-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-067-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-068-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-070-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-071-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-073-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-074-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-077-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-077-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-078-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-081-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-082-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-083-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-086-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-088-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-090-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-092-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-092-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-093-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-093-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-095-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-096-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-097-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-099-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-099-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-099-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-100-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-101-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-101-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-103-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-105-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-106-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-108-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-109-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-110-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-110-00002.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-111-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-111-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-112-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-115-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-116-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-117-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-118-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-119-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-121-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-122-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-122-00001.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-123-00000.npy
+  - name: dclm-codeprose-v0
+    target_ratio: 0.15
+    paths:
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-00-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-01-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-02-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-03-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-04-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-05-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-06-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-07-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-08-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-09-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-10-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-11-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-12-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-13-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-14-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-15-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-16-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-17-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-18-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-19-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-20-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-21-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-22-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-23-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-24-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-25-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-26-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-27-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-28-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-29-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-30-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-31-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-32-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-33-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-34-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-35-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-36-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-37-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-38-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-39-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-40-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-41-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-42-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-43-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-44-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-45-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-46-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-47-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-48-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-49-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-50-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-51-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-52-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-53-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-54-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-55-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-56-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-57-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-58-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-59-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-60-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-61-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-62-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-63-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-64-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-65-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-66-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-67-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-68-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-69-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-70-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-71-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-72-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-73-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-74-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-75-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-76-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-77-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-78-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-79-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-80-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-81-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-82-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-83-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-84-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-85-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-86-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-87-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-88-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-89-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-90-00000.npy
+    - /weka/oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-91-00000.npy
+

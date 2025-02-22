@@ -101,7 +101,6 @@ def get_token_counts_and_ratios(
 
 def expand_globs(s3: s3fs.S3FileSystem, paths: List[str]) -> Any:
     results = []
-
     for path in paths:
         if is_url(path):
             parsed = urlparse(str(path))
@@ -118,6 +117,7 @@ def expand_globs(s3: s3fs.S3FileSystem, paths: List[str]) -> Any:
                     f"Glob expansion is not currently supported for '{parsed.scheme}' files"
                 )
         else:
-            raise NotImplementedError("Glob expansion is only supported for URLs")
+            results.append(path)
+            # raise NotImplementedError("Glob expansion is only supported for URLs")
 
     return results
