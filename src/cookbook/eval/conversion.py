@@ -285,7 +285,8 @@ def convert_checkpoint(
     )
 
     if use_beaker:
-        check_beaker_dependencies()
+        print("Installing beaker and gantry clients...")
+        subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
 
         assert input_dir.startswith("/"), "Input directory must be fully specified"
         if unsharded_output_dir:
@@ -354,9 +355,9 @@ def convert_checkpoint(
         )
 
         print(f"Submitting to beaker with command: {gantry_command}")
-        return subprocess.run(shlex.split(gantry_command), check=True)
+        return subprocess.run(shlex.split(gantry_command), check=True, env=env.path())
 
-    remove_conflicting_packages()
+    remove_conflicting_packages(env=env)
 
     if olmo_type == "olmoe":
         convert_olmoe(

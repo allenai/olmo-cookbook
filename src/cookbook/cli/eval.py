@@ -22,7 +22,7 @@ from cookbook.eval.conversion import convert_checkpoint
 logger = logging.getLogger(__name__)
 
 
-@click.option("-i", "--input-dir", type=str, required=True, help="Input directory")
+@click.argument("input_dir", type=str)
 @click.option("-t", "--olmo-type", type=click.Choice(OLMO_TYPES), required=True, help="Type of OLMo model")
 @click.option("--huggingface-tokenizer", type=str, default=None, help="Huggingface tokenizer")
 @click.option("--unsharded-output-dir", type=str, default=None, help="Unsharded output directory")

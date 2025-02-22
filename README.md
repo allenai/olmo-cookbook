@@ -34,7 +34,7 @@ olmo-cookbook-eval convert \
 
 ```shell
 olmo-cookbook-eval convert \
-  -i /oe-training-default/ai2-llm/checkpoints/peteish32-anneal/OLMo2-32Bparams-5Ttokens-100Banneal/step11921 \
+  "/oe-training-default/ai2-llm/checkpoints/peteish32-anneal/OLMo2-32Bparams-5Ttokens-100Banneal/step11921" \
   -t olmo-core \
   --use-beaker \
   --huggingface-tokenizer allenai/OLMo-2-1124-7B
@@ -43,7 +43,7 @@ olmo-cookbook-eval convert \
 ### Run Evaluation
 
 ```shell
-olmo-cookbook-eval evaluate -h \
+olmo-cookbook-eval evaluate \
   "/oe-training-default/ai2-llm/checkpoints/OLMoE/a0125/olmoe-8x1b-newhp-newds-dolmino-seed-42/step23842-hf" \
   --task core:mc --task mmlu:mc --task mmlu:rc --task gen \
   --priority high \

@@ -386,19 +386,36 @@ def install_transformers(commit_hash: str | None, env: PythonEnv | None = None) 
     return transformers_dir
 
 
-def remove_conflicting_packages():
+def remove_conflicting_packages(env: PythonEnv | None = None):
+    env = env or PythonEnv.null()
     is_flash_attention_installed = (
-        subprocess.run(shlex.split("pip show flash-attention"), capture_output=True).returncode == 0
+        subprocess.run(
+            shlex.split(f"{env.pip} show flash-attention"),
+            capture_output=True,
+            env=env.path()
+        ).returncode == 0
     )
     if is_flash_attention_installed:
         print("Uninstalling flash attention to avoid conflicts...")
-        subprocess.run(shlex.split("pip uninstall -y flash-attention"))
+        subprocess.run(
+            shlex.split(f"{env.pip} uninstall -y flash-attention"),
+            env=env.path()
+        )
 
 
-def check_beaker_dependencies():
-    is_beaker_py_installed = subprocess.run(shlex.split("pip show beaker-py"), capture_output=True).returncode == 0
+def check_beaker_dependencies(env: PythonEnv | None = None):
+    env = env or PythonEnv.null()
+    is_beaker_py_installed = subprocess.run(
+        shlex.split(f"{env.pip} show beaker-py"),
+        capture_output=True,
+        env=env.path()
+    ).returncode == 0
     is_beaker_gantry_installed = (
-        subprocess.run(shlex.split("pip show beaker-gantry"), capture_output=True).returncode == 0
+        subprocess.run(
+            shlex.split(f"{env.pip} show beaker-gantry"),
+            capture_output=True,
+            env=env.path()
+        ).returncode == 0
     )
 
     if not is_beaker_py_installed or not is_beaker_gantry_installed:
