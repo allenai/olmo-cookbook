@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
 @click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker")
 @click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
 @click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
 @click.option("--use-system-python", is_flag=True, help="Whether to use system Python or a virtual environment")
@@ -79,30 +80,32 @@ def convert(
     use_system_python: bool,
     use_beaker: bool,
     env_name: str,
+    beaker_preemptible: bool,
 ):
     convert_checkpoint(
-        input_dir=input_dir,
-        olmo_type=olmo_type,
-        huggingface_tokenizer=huggingface_tokenizer,
-        unsharded_output_dir=unsharded_output_dir,
-        huggingface_output_dir=huggingface_output_dir,
-        unsharded_output_suffix=unsharded_output_suffix,
-        huggingface_output_suffix=huggingface_output_suffix,
-        olmoe_commit_hash=olmoe_commit_hash,
-        olmo2_commit_hash=olmo2_commit_hash,
-        olmo_core_commit_hash=olmo_core_commit_hash,
-        huggingface_token=huggingface_token,
-        use_beaker=use_beaker,
-        beaker_workspace=beaker_workspace,
-        beaker_priority=beaker_priority,
-        beaker_cluster=beaker_cluster,
         beaker_allow_dirty=beaker_allow_dirty,
         beaker_budget=beaker_budget,
-        beaker_gpus=beaker_gpus,
+        beaker_cluster=beaker_cluster,
         beaker_dry_run=beaker_dry_run,
-        python_venv_name=env_name,
-        python_venv_force=force_venv,
+        beaker_gpus=beaker_gpus,
+        beaker_preemptible=beaker_preemptible,
+        beaker_priority=beaker_priority,
+        beaker_workspace=beaker_workspace,
+        huggingface_output_dir=huggingface_output_dir,
+        huggingface_output_suffix=huggingface_output_suffix,
+        huggingface_token=huggingface_token,
+        huggingface_tokenizer=huggingface_tokenizer,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
+        input_dir=input_dir,
+        olmo_core_commit_hash=olmo_core_commit_hash,
+        olmo_type=olmo_type,
+        olmo2_commit_hash=olmo2_commit_hash,
+        olmoe_commit_hash=olmoe_commit_hash,
+        python_venv_force=force_venv,
+        python_venv_name=env_name,
+        unsharded_output_dir=unsharded_output_dir,
+        unsharded_output_suffix=unsharded_output_suffix,
+        use_beaker=use_beaker,
         use_system_python=use_system_python,
     )
 

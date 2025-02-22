@@ -257,6 +257,7 @@ def convert_checkpoint(
     beaker_gpus: int,
     beaker_priority: str,
     beaker_workspace: str,
+    beaker_preemptible: bool,
     huggingface_output_dir: str | None,
     huggingface_output_suffix: str,
     huggingface_token: str | None,
@@ -320,6 +321,7 @@ def convert_checkpoint(
             gantry_flags.append(f"--cluster {cluster}")
 
         remote_command = [
+            "pip install . &&",
             "olmo-cookbook-eval convert",
             f"{input_dir}",
             f"--olmo-type {olmo_type}",
@@ -334,25 +336,28 @@ def convert_checkpoint(
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
             "--use-system-python",
         ]
+        remote_command_str = " ".join(remote_command)
 
-        gantry_command = (
-            "gantry run "
-            + f"--description 'Converting OLMo checkpoint at {input_dir}' "
-            + ("--allow-dirty " if beaker_allow_dirty else "")
-            + "--no-python "
-            + f"--workspace {beaker_workspace} "
-            + f"--priority {beaker_priority} "
-            + f"--gpus {beaker_gpus} "
-            + "--preemptible "
-            + f"--budget {beaker_budget} "
-            + "--yes "
-            + ("--dry-run " if beaker_dry_run else "")
-            + f"{' '.join(gantry_flags)} "
-            + f"-- /bin/bash -c '{remote_command}'"
-        )
+        gantry_command = [
+            "gantry run",
+            f"--description 'Converting OLMo checkpoint at {input_dir}'",
+            ("--allow-dirty" if beaker_allow_dirty else ""),
+            "--no-python",
+            f"--workspace {beaker_workspace}",
+            f"--priority {beaker_priority}",
+            f"--gpus {beaker_gpus}",
+            ("--preemptible" if beaker_preemptible else ""),
+            f"--budget {beaker_budget}",
+            "--yes",
+            ("--dry-run" if beaker_dry_run else ""),
+            " ".join(gantry_flags),
+            f"-- /bin/bash -c '{remote_command_str}'",
+        ]
+        gantry_command_str = " ".join(gantry_command)
 
-        print(f"Submitting to beaker with command: {gantry_command}")
-        return subprocess.run(shlex.split(gantry_command), check=True, env=env.path())
+        print(f"Submitting to beaker with command: {gantry_command_str}")
+        return
+        return subprocess.run(shlex.split(gantry_command_str), check=True, env=env.path())
 
     remove_conflicting_packages(env=env)
 
