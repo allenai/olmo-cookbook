@@ -70,6 +70,7 @@ class ModelConfig:
     def olmo_1b(cls) -> "ModelConfig":
         """
         OLMo-1b (1_336_035_328 parameters)
+                (1_131_841_536 nonembed params)
         """
         return ModelConfig(
             compile=True,
@@ -80,6 +81,23 @@ class ModelConfig:
             flash_attention=True,
             max_sequence_length=4096,
         )
+
+    @classmethod
+    def love2code_3b(cls) -> "ModelConfig":
+        """
+        num params should be : 3607267840
+        num non_embed parmams should be: 3481438720        
+        """
+        return ModelConfig(
+            compile=True,
+            d_model=2560,
+            n_heads=32,
+            n_layers=32,
+            rope_theta=500_000,
+            flash_attention=True,
+            max_sequence_length=2048
+        )
+
 
 
 class SupportedModels(Enum):
