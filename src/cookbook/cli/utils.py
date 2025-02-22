@@ -402,6 +402,20 @@ def remove_conflicting_packages(env: PythonEnv | None = None):
             env=env.path()
         )
 
+    is_olmo_core_installed = (
+        subprocess.run(
+            shlex.split(f"{env.pip} show ai2-olmo-core"),
+            capture_output=True,
+            env=env.path()
+        ).returncode == 0
+    )
+    if is_olmo_core_installed:
+        print("Uninstalling ai2-olmo-core to avoid conflicts...")
+        subprocess.run(
+            shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"),
+            env=env.path()
+        )
+
 
 def check_beaker_dependencies(env: PythonEnv | None = None):
     env = env or PythonEnv.null()
