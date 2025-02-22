@@ -356,7 +356,6 @@ def convert_checkpoint(
         gantry_command_str = " ".join(gantry_command)
 
         print(f"Submitting to beaker with command: {gantry_command_str}")
-        return
         return subprocess.run(shlex.split(gantry_command_str), check=True, env=env.path())
 
     remove_conflicting_packages(env=env)
