@@ -1,3 +1,4 @@
+from copy import deepcopy
 import re
 import shlex
 import subprocess
@@ -17,6 +18,39 @@ from cookbook.constants import (
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
+
+
+# /Users/lucas/Code/olmo-cookbook/.venv/oe-eval-venv/bin/python oe_eval/launch.py
+#   --beaker-workspace 'ai2/lm-eval'
+#   --beaker-budget 'ai2/oe-data'
+#   --beaker-priority high
+#   --cluster 'ai2/jupiter-cirrascale-2,ai2/ceres-cirrascale,ai2/saturn-cirrascale'
+#   --gpus 2
+#   --datalake-tags 'dashboard=peteish32,checkpoint=peteish32-from716000-peteish32-from716000-100Banneal_step11921-hf'
+#   --push-datalake
+#   --model peteish32-from716000-peteish32-from716000-100Banneal_step11921-hf
+#   --model-args 'model_path=weka://oe-training-default/ai2-llm/checkpoints/peteish32-anneal/peteish32-from716000-peteish32-from716000-100Banneal/step11921-hf,add_bos_token=False'
+#   --model-type vllm
+#   --task coqa::olmes drop::olmes
+#   --gantry-secret-aws-access-key-id 'lucas_AWS_ACCESS_KEY_ID'
+#   --gantry-secret-aws-secret-access 'lucas_AWS_SECRET_ACCESS_KEY'
+#   --remote-output-dir s3://ai2-llm/evaluation/peteish32/peteish32-from716000-peteish32-from716000-100Banneal_step11921-hf/coqa_olmes-drop_olmes
+#   --task-args compute_gold_bpb=true
+#   --model-args gpu_memory_utilization=0.6
+#   --use-gantry
+#   --beaker-image lucas/vllm-0.7.2patch-olmo2-32b
+#   --task gsm8k::olmo1 naturalqs::olmes
+#   --remote-output-dir s3://ai2-llm/evaluation/peteish32/peteish32-from716000-peteish32-from716000-100Banneal_step11921-hf/gsm8k_olmo1-naturalqs_olmes
+#   --task-args compute_gold_bpb=true
+#   --model-args gpu_memory_utilization=0.6
+#   --use-gantry
+#   --beaker-image lucas/vllm-0.7.2patch-olmo2-32b
+#   --task squad::olmes
+#   --remote-output-dir s3://ai2-llm/evaluation/peteish32/peteish32-from716000-peteish32-from716000-100Banneal_step11921-hf/squad_olmes
+#   --task-args compute_gold_bpb=true
+#   --model-args gpu_memory_utilization=0.6
+#   --use-gantry
+#   --beaker-image lucas/vllm-0.7.2patch-olmo2-32b
 
 
 def evaluate_checkpoint(
@@ -137,8 +171,10 @@ def evaluate_checkpoint(
 
     cnt = 0
     for i in range(0, len(all_tasks), partition_size or len(all_tasks)):
+        local_flags = deepcopy(flags)
+
         # add all tasks in the partition as flag
-        partition_tasks = all_tasks[i : i + partition_size] if partition_size else all_tasks
+        partition_tasks = all_tasks[i: i + partition_size] if partition_size else all_tasks
         flags.append(f"--task {' '.join(partition_tasks)}")
 
         if add_aws_flags(
@@ -166,30 +202,30 @@ def evaluate_checkpoint(
 
             # set remote output directory
             remote_dir = f"{remote_output_prefix}/{dashboard}/{run_name}/{friendly_task_name}"
-            flags.append(f"--remote-output-dir {remote_dir}")
+            local_flags.append(f"--remote-output-dir '{remote_dir}'")
 
         # set extra arguments
-        flags.append(extra_args)
+        local_flags.append(extra_args)
 
         # set batch size
         if batch_size:
-            flags.append(f"--batch-size {batch_size}")
+            local_flags.append(f"--batch-size {batch_size}")
 
         # set dry run
         if dry_run:
-            flags.append("--dry-run")
+            local_flags.append("--dry-run")
 
         # set beaker image
         if beaker_image:
-            flags.append(f"--beaker-image {beaker_image}")
+            local_flags.append(f"--beaker-image {beaker_image}")
 
         # set gantry args
         if use_gantry:
-            flags.append(f"--gantry-args '{gantry_args}'")
+            local_flags.append(f"--gantry-args '{gantry_args}'")
 
         # run oe-eval
-        cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(flags)}"
-        print(f"Command:\n{cmd}\nFrom:\n{oe_eval_dir}")
+        cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
+        print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
         subprocess.run(shlex.split(cmd), check=True, cwd=oe_eval_dir, env=env.path())
         cnt += 1
 
