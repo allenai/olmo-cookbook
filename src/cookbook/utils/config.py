@@ -11,7 +11,6 @@ from olmo_core.launch.beaker import (
     BeakerLaunchConfig,
     BeakerWekaBucket,
 )
-from olmo_core.utils import generate_uuid
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -32,12 +31,14 @@ def config_from_path(config: Path) -> ExperimentConfig:
 
 
 def mk_source_instances(
-    sources: list[SourceConfig], priors: Tuple[dict[str, float], int]
+    sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
-    is_fractional = any(source.target_ratio is not None for source in sources)
-
     # If no user provided ratios, use the priors from the sources
-    ratios_by_source, total_tokens = priors
+    if priors:
+        ratios_by_source, total_tokens = priors
+    else:
+        # TODO(undfined): Clean this up and fail faster
+        ratios_by_source = {}
 
     instances = []
     for source in sources:
@@ -83,33 +84,13 @@ def mk_instance_cmd(
 ) -> List[str]:
     """Build a command for launching an experiment instance."""
 
-    sources = []
-
-    for source in instance.sources:
-        paths = [f'"{path}"' for path in source.paths]
-        source_str = (
-            f'-s ("{source.name}",[{",".join(paths)}],{source.ratio},{source.repetition_factor})'
-        )
-        sources.append(source_str)
-
-    if not sources:
-        raise ValueError("No sources found for experiment, exiting!")
-
     return [
         "src/cookbook/train.py",
         "train",
         f"-n {instance.name}",
         f"-g {group_id}",
-        f"-l {config.sequence_length}",
-        f"-t {config.max_tokens}",
-        f"-S {config.seed}",
-        f"-c {config.cluster}",
         f"-u {beaker_user}",
-        f"-d {config.dataset.dtype.value}",
-        f"-T {config.tokenizer}",
-        f"-m {config.model}",
-        f"-w {config.weka}",
-        *sources,
+        f"-C {config.path}",
     ]
 
 
@@ -152,7 +133,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install -e '.[all]'",
+                "pip install -e '.[train]'",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",

@@ -1,5 +1,6 @@
 import ast
 import logging
+from pathlib import Path
 from typing import List, Tuple, cast
 
 import click
@@ -8,8 +9,8 @@ from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import get_default_device, seed_all
 from torch.distributed.elastic.multiprocessing.errors import record
 
-from cookbook.aliases import SourceInstance
 from cookbook.model.builder import TransformerConfigBuilder
+from cookbook.utils.config import config_from_path, mk_source_instances
 
 logger = logging.getLogger(__name__)
 
@@ -34,32 +35,11 @@ def cli():
 
 @cli.command()
 @click.option(
-    "--max-tokens",
-    "-t",
-    type=int,
-    help="Max tokens for the mixture dataset",
-    required=True,
-)
-@click.option(
-    "--source",
-    "-s",
-    multiple=True,
-    type=str,
-    help="Source datasets in the form of `Tuple[str, List[str], float]`",
-    cls=PythonLiteralOption,
-)
-@click.option(
     "--run-name",
     "-n",
     type=str,
     help="Name of the run",
     required=True,
-)
-@click.option(
-    "--sequence-length",
-    "-l",
-    type=int,
-    help="Sequence length for the transformer",
 )
 @click.option(
     "--seed",
@@ -86,72 +66,40 @@ def cli():
     help="Cluster running the experiment",
 )
 @click.option(
-    "--dtype",
-    "-d",
-    type=str,
-    help="Data type for the dataset",
-)
-@click.option(
-    "--tokenizer",
-    "-T",
-    type=str,
-    help="Tokenizer for the dataset",
-)
-@click.option(
-    "--model-identifier",
-    "-m",
-    type=str,
-    help="Model identifier",
-)
-@click.option(
-    "-w",
-    "--weka",
-    type=bool,
-    default=False,
-    help="Use Weka as root dir",
+    "--config-path",
+    "-C",
+    type=click.Path(exists=True),
+    required=True,
+    help="Relative path to the experiment configuration file.",
 )
 @record
 def train(
     run_name: str,
-    max_tokens: int,
-    source: List[Tuple[str, List[str], str, str]],
-    sequence_length: int,
-    seed: int,
     group_id: str,
     beaker_user: str,
-    cluster: str,
-    dtype: str,
-    tokenizer: str,
-    model_identifier: str,
-    weka: bool,
+    config_path: Path,
 ):
     """
     Launch a training run with the given parameters.
     """
 
-    # Rebuild the source instances from the parsed tuples
-    sources: List[SourceInstance] = []
-    for item in source:
-        name, paths, ratio, repetition = item
-        sources.append(
-            SourceInstance(
-                name=name, paths=paths, ratio=float(ratio), repetition_factor=float(repetition)
-            )
-        )
+    base_config = config_from_path(config_path)
+    source_instances = mk_source_instances(base_config.dataset.sources, None)
 
     config = TransformerConfigBuilder(
         beaker_user=beaker_user,
-        cluster=cluster,
+        cluster=base_config.cluster,
         group_id=group_id.strip(),
         run_name=run_name.strip(),
-        max_tokens=max_tokens,
-        sources=sources,
-        sequence_length=sequence_length,
-        seed=seed,
-        dtype=dtype.strip(),
-        tokenizer=tokenizer.strip(),
-        model_identifier=model_identifier.strip(),
-        weka=weka,
+        max_tokens=base_config.max_tokens,
+        sources=source_instances,
+        sequence_length=base_config.sequence_length,
+        seed=base_config.seed,
+        dtype=base_config.dataset.dtype,
+        tokenizer=base_config.tokenizer,
+        model_identifier=base_config.model,
+        weka=base_config.weka,
+        wandb_config=base_config.wandb,
     ).build()
     dataset = config.dataset.build()
 

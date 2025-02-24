@@ -36,6 +36,10 @@ class DatasetConfig(BaseModel):
     seed: int = 42
 
 
+class WandbConfig(BaseModel):
+    project: str
+
+
 class ExperimentConfig(BaseModel):
     name: str
     description: str
@@ -48,13 +52,15 @@ class ExperimentConfig(BaseModel):
     seed: int
     cluster: str
     tokenizer: str
-    priority: Priority
+    priority: Priority  # pyright: ignore
     dataset: DatasetConfig
     tokenizer: str
     model: str
+    wandb: Optional[WandbConfig] = None
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
+    path: Path
 
 
 class ExperimentInstance(BaseModel):
@@ -78,4 +84,6 @@ def validate_sources(sources: list[SourceConfig]):
 
     for source in sources:
         if target_ratio_present and source.target_ratio is None:
-            raise ValueError("If any source has target_ratio set, all sources must have target_ratio set.")
+            raise ValueError(
+                "If any source has target_ratio set, all sources must have target_ratio set."
+            )

@@ -55,7 +55,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    experiment_config = ExperimentConfig(**data)
+    experiment_config = ExperimentConfig(**data, path=config)
     validate_sources(experiment_config.dataset.sources)
 
     token_universe = get_token_counts_and_ratios(
@@ -102,7 +102,9 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
             results = []
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                futures = [executor.submit(experiment.launch) for experiment in launch_group.instances]
+                futures = [
+                    executor.submit(experiment.launch) for experiment in launch_group.instances
+                ]
 
                 for future in tqdm(
                     concurrent.futures.as_completed(futures),

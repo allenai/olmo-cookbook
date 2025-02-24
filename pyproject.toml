@@ -13,7 +13,6 @@ authors = [
 requires-python = ">=3.9,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
     "boto3",
     "click",
     "pydantic",
@@ -21,6 +20,9 @@ dependencies = [
     "yaspin"
 ]
 [project.optional-dependencies]
+core-train = [
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
+]
 dev = [
     "ruff",
     "mypy>=1.0,<1.4",
@@ -34,6 +36,9 @@ beaker = [
 ]
 wandb = [
     "wandb",
+]
+train = [
+    "olmo-cookbook[dev,core-train,beaker,wandb]",
 ]
 all = [
     "olmo-cookbook[dev,beaker,wandb]",
