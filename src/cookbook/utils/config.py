@@ -91,10 +91,10 @@ def mk_instance_cmd(
         instance.name,
         "-g",
         group_id,
-        "-u"
+        "-u",
         beaker_user,
         "-C",
-        config.path,
+        str(config.path),
     ]
 
 
