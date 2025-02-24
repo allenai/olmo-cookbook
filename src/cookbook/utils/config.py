@@ -90,7 +90,7 @@ def mk_instance_cmd(
         f"-n {instance.name}",
         f"-g {group_id}",
         f"-u {beaker_user}",
-        f"-C {config.path}",
+        f"-C /olmo-core-runtime/olmo-cookbook/{config.path}",
     ]
 
 
