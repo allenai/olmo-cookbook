@@ -1,4 +1,4 @@
-name: "olmo-cookbook-1b-1xC-dclm"
+name: "olmo-cookbook-1b-1xC-dclm-001"
 description: "Example olmo-cookbook recipe"
 budget: "ai2/oe-data"
 workspace: "ai2/dolma2"
