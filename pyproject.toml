@@ -38,10 +38,7 @@ wandb = [
     "wandb",
 ]
 train = [
-    "olmo-cookbook[dev,core-train,beaker,wandb]",
-]
-all = [
-    "olmo-cookbook[dev,beaker,wandb]",
+    "olmo-cookbook[core-train,beaker,wandb]",
 ]
 
 [project.scripts]
