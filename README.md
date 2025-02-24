@@ -45,7 +45,7 @@ olmo-cookbook-eval convert \
 ```shell
 olmo-cookbook-eval evaluate \
   "/oe-training-default/ai2-llm/checkpoints/OLMoE/a0125/olmoe-8x1b-newhp-newds-dolmino-seed-42/step23842-hf" \
-  --task core:mc --task mmlu:mc --task mmlu:rc --task gen \
+  --tasks core:mc --tasks mmlu:mc --tasks mmlu:rc --tasks gen \
   --priority high \
   --cluster aus80g \
   --num-gpus 1 \
