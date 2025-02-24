@@ -1,7 +1,6 @@
-import ast
 import logging
+from typing import cast
 from pathlib import Path
-from typing import List, Tuple, cast
 
 import click
 from olmo_core.train import prepare_training_environment, teardown_training_environment
@@ -13,19 +12,6 @@ from cookbook.model.builder import TransformerConfigBuilder
 from cookbook.utils.config import config_from_path, mk_source_instances
 
 logger = logging.getLogger(__name__)
-
-
-class PythonLiteralOption(click.Option):
-    """
-    Custom click option to parse python literals.
-    """
-
-    def type_cast_value(self, ctx, value):
-        try:
-            parsed = [item.replace(" ", "").replace("'", "") for item in value]
-            return [ast.literal_eval(item) for item in parsed]
-        except:
-            raise click.BadParameter(value)
 
 
 @click.group()
@@ -42,12 +28,6 @@ def cli():
     required=True,
 )
 @click.option(
-    "--seed",
-    "-S",
-    type=int,
-    help="Seed for the experiment",
-)
-@click.option(
     "--group-id",
     "-g",
     type=str,
@@ -58,12 +38,6 @@ def cli():
     "-u",
     type=str,
     help="Beaker user",
-)
-@click.option(
-    "--cluster",
-    "-c",
-    type=str,
-    help="Cluster running the experiment",
 )
 @click.option(
     "--config-path",
