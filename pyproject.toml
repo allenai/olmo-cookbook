@@ -20,9 +20,6 @@ dependencies = [
     "yaspin"
 ]
 [project.optional-dependencies]
-core-train = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
-]
 dev = [
     "ruff",
     "mypy>=1.0,<1.4",
@@ -38,7 +35,10 @@ wandb = [
     "wandb",
 ]
 train = [
-    "olmo-cookbook[core-train,beaker,wandb]",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
+    "beaker-py",
+    "GitPython>=3.0,<4.0",
+    "wandb",
 ]
 
 [project.scripts]
