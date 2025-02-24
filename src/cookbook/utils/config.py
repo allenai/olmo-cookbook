@@ -133,7 +133,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install -e '.[train]'",
+                "pip install -e '.[all]'",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
