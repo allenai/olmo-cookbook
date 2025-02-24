@@ -52,3 +52,16 @@ olmo-cookbook-eval evaluate \
   --model-backend vllm \
   --dashboard olmoe-0125
 ```
+
+Another example is running evaluation for a Hugging Face model
+
+```shell
+olmo-cookbook-eval evaluate \
+  mistralai/Mistral-Small-24B-Base-2501
+  --tasks gen-no-jp
+  --priority high
+  --cluster aus80g
+  --num-gpus 1
+  --model-backend vllm
+  --dashboard peteish32
+```
