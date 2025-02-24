@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import yaml
 from beaker import Beaker
@@ -87,10 +87,14 @@ def mk_instance_cmd(
     return [
         "src/cookbook/train.py",
         "train",
-        f"-n {instance.name}",
-        f"-g {group_id}",
-        f"-u {beaker_user}",
-        f"-C /olmo-core-runtime/olmo-cookbook/{config.path}",
+        "-n",
+        instance.name,
+        "-g",
+        group_id,
+        "-u"
+        beaker_user,
+        "-C",
+        config.path,
     ]
 
 
