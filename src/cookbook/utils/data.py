@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import s3fs
 from olmo_core.aliases import PathOrStr
 from olmo_core.data.types import NumpyDatasetDType
-from olmo_core.io import get_file_size, is_url, normalize_path, init_client
+from olmo_core.io import get_file_size, is_url, normalize_path
 from olmo_core.utils import OLMoEnvironmentError
 from tqdm import tqdm
 

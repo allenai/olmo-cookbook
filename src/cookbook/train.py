@@ -1,6 +1,6 @@
 import logging
-from typing import cast
 from pathlib import Path
+from typing import cast
 
 import click
 from olmo_core.train import prepare_training_environment, teardown_training_environment
@@ -8,9 +8,9 @@ from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import get_default_device, seed_all
 from torch.distributed.elastic.multiprocessing.errors import record
 
-from cookbook.utils.data import normalize_source_paths
 from cookbook.model.builder import TransformerConfigBuilder
 from cookbook.utils.config import config_from_path, mk_source_instances
+from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
 

@@ -102,9 +102,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
             results = []
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                futures = [
-                    executor.submit(experiment.launch) for experiment in launch_group.instances
-                ]
+                futures = [executor.submit(experiment.launch) for experiment in launch_group.instances]
 
                 for future in tqdm(
                     concurrent.futures.as_completed(futures),
