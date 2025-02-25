@@ -18,5 +18,5 @@ dataset:
   - name: starcoder1
     target_ratio: 1.0
     paths: # TODO: ADD ACTUAL PATHS
-    - /weka/oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/*
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/*.npy
 
