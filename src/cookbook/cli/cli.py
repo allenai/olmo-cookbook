@@ -58,9 +58,9 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     experiment_config = ExperimentConfig(**data, path=config)
     validate_sources(experiment_config.dataset.sources)
 
-    # token_universe = get_token_counts_and_ratios(
-    #     experiment_config.dataset.sources, experiment_config.dataset.dtype, not no_cache
-    # )
+    token_universe = get_token_counts_and_ratios(
+        experiment_config.dataset.sources, experiment_config.dataset.dtype, not no_cache
+    )
 
     token_universe = ({}, 0)
 
