@@ -136,17 +136,13 @@ class TransformerConfigBuilder:
         self.root_dir = f"/tmp/{self.run_name}"
         self.wandb_config = wandb_config
 
-        self.checkpoint_dir = (
-            f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
-        )
+        self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
 
         if any(substring in cluster for substring in ["jupiter", "saturn"]) and weka:
             logger.info("Using Weka bucket as root dir")
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
 
-        self.dataset_cache = (
-            f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
-        )
+        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
@@ -156,9 +152,7 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self, parameters: int) -> int:
-        return round(
-            parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length)
-        )
+        return round(parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length))
 
     def get_batch_size(self, parameters: int) -> int:
         if self.sequence_length != 2048:

@@ -57,6 +57,7 @@ def train(
     Launch a training run with the given parameters.
     """
 
+    # TODO(undfined): pass the cached token universe or skip fractional dataset creation
     base_config = config_from_path(config_path)
     source_instances = mk_source_instances(base_config.dataset.sources, None)
 

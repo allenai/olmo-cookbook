@@ -16,6 +16,7 @@ weka: true
 dataset:
   sources:
   - name: dclm-baseline-ft7pct-fw2
+    target_ratio: 1.0
     paths:
     - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0000/part-17-00000.npy
     - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/0000/part-26-00000.npy
