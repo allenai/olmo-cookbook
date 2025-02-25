@@ -49,9 +49,7 @@ def flatten_dict(dictionary, parent_key="", separator=".", include_lists=False):
         if isinstance(value, list) and include_lists:
             value = {f"{i}": v for i, v in enumerate(value)}
         if isinstance(value, MutableMapping):
-            d.update(
-                **flatten_dict(value, new_key, separator=separator, include_lists=include_lists)
-            )
+            d.update(**flatten_dict(value, new_key, separator=separator, include_lists=include_lists))
         else:
             d[new_key] = value
     return d
