@@ -8,6 +8,7 @@ from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import get_default_device, seed_all
 from torch.distributed.elastic.multiprocessing.errors import record
 
+from cookbook.utils.data import normalize_source_paths
 from cookbook.model.builder import TransformerConfigBuilder
 from cookbook.utils.config import config_from_path, mk_source_instances
 
@@ -59,7 +60,9 @@ def train(
 
     # TODO(undfined): pass the cached token universe or skip fractional dataset creation
     base_config = config_from_path(config_path)
-    source_instances = mk_source_instances(base_config.dataset.sources, None)
+
+    # Because this is happening on-box in Beaker we want paths normalized for usage there.
+    source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
 
     config = TransformerConfigBuilder(
         beaker_user=beaker_user,

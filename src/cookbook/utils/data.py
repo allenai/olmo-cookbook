@@ -9,7 +9,8 @@ from urllib.parse import urlparse
 import s3fs
 from olmo_core.aliases import PathOrStr
 from olmo_core.data.types import NumpyDatasetDType
-from olmo_core.io import get_file_size, is_url
+from olmo_core.io import get_file_size, is_url, normalize_path, init_client
+from olmo_core.utils import OLMoEnvironmentError
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
@@ -56,12 +57,24 @@ def get_token_counts_and_ratios(
         except FileNotFoundError:
             logger.info("No cache file found, calculating from source files...")
 
-    fs = s3fs.S3FileSystem(anon=False)
     token_counts = defaultdict(int)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=128) as executor:
+    client_kwargs = {}
+    for source in source_configs:
+        for path in source.paths:
+            parsed = urlparse(path)
+            if parsed.scheme == "s3":
+                continue
+            if parsed.scheme == "weka":
+                client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
+
+    fs = s3fs.S3FileSystem(client_kwargs={**client_kwargs})
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
         for source in source_configs:
-            source.paths = expand_globs(fs, source.paths)
+            globs = [path for path in source.paths if "*" in path]
+            paths = [path for path in source.paths if path not in globs]
+            source.paths = paths + expand_globs(fs, globs)
 
         futures = {
             executor.submit(_count_tokens_for_file, path, dtype): source
@@ -94,25 +107,90 @@ def get_token_counts_and_ratios(
     return (relative_sizes, total_tokens)
 
 
-def expand_globs(s3: s3fs.S3FileSystem, paths: List[str]) -> Any:
+def expand_globs(s3: s3fs.S3FileSystem, sources: List[str]) -> Any:
     results = []
 
-    for path in paths:
-        if is_url(path):
-            parsed = urlparse(str(path))
-            if parsed.scheme in ("s3", "r2", "weka"):
-                results.extend([f"s3://{obj}" for obj in s3.glob(path)])
-            elif parsed.scheme == "gs":
-                raise NotImplementedError("'gs' types are not currently supported")
-            elif parsed.scheme in ("http", "https"):
-                raise NotImplementedError("'http' types are not currently supported")
-            elif parsed.scheme == "file":
-                raise NotImplementedError("'file' types are not currently supported")
-            else:
-                raise NotImplementedError(
-                    f"Glob expansion is not currently supported for '{parsed.scheme}' files"
-                )
+    for source in sources:
+        if is_url(source):
+            logger.info(f"Expanding remote glob '{source}'...")
+            results.extend(_expand_remote(source, s3))
         else:
-            raise NotImplementedError("Glob expansion is only supported for URLs")
+            logger.info(f"Expanding local glob '{source}'...")
+            results.extend(_expand_local(source))
 
     return results
+
+
+def _expand_local(pattern: str) -> List[str]:
+    """
+    Expand a local glob pattern.
+    """
+    from glob import glob
+
+    logger.info(f"Expanding '{pattern}'...")
+    matches = sorted(glob(pattern))
+    if not matches:
+        raise FileNotFoundError(pattern)
+
+    return [normalize_path(match) for match in matches]
+
+
+def _expand_remote(pattern: str, fs: s3fs.S3FileSystem) -> List[str]:
+    """
+    Expand a remote glob pattern.
+    """
+    parsed = urlparse(pattern)
+
+    if parsed.scheme == "s3":
+        return [f"s3://{obj}" for obj in fs.glob(pattern)]
+    elif parsed.scheme == "r2":
+        raise NotImplementedError("'r2' types are not currently supported")
+    elif parsed.scheme == "weka":
+        return [f"weka://{obj}" for obj in fs.glob(pattern)]
+    elif parsed.scheme == "gs":
+        raise NotImplementedError("'gs' types are not currently supported")
+    elif parsed.scheme in ("http", "https"):
+        raise NotImplementedError("'http' types are not currently supported")
+    elif parsed.scheme == "file":
+        raise NotImplementedError("'file' types are not currently supported")
+    else:
+        raise NotImplementedError(f"Glob expansion is not currently supported for '{parsed.scheme}' files")
+
+
+def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
+    """
+    Normalize the paths in a SourceConfig object.
+    """
+    normalized = []
+
+    for source in sources:
+        for path in source.paths:
+            source_paths = []
+            if is_url(path):
+                parsed = urlparse(path)
+                if parsed.scheme == "s3":
+                    source_paths.append(path)
+                elif parsed.scheme == "weka":
+                    source_paths.append(normalize_path(path.replace("weka://", "/weka/")))
+                elif parsed.scheme == "gs":
+                    source_paths.append(path)
+                elif parsed.scheme == "r2":
+                    raise NotImplementedError("'r2' types are not currently supported")
+                elif parsed.scheme in ("http", "https"):
+                    raise NotImplementedError("'http' types are not currently supported")
+                else:
+                    raise OLMoEnvironmentError(f"Unsupported URL scheme: {parsed.scheme}")
+            else:
+                source_paths.append(normalize_path(path))
+
+            normalized.append(
+                SourceConfig(
+                    name=source.name,
+                    paths=source_paths,
+                    target_ratio=source.target_ratio,
+                    repetition_factor=source.repetition_factor,
+                    max_source_ratio=source.max_source_ratio,
+                )
+            )
+
+    return normalized

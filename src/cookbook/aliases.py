@@ -84,6 +84,4 @@ def validate_sources(sources: list[SourceConfig]):
 
     for source in sources:
         if target_ratio_present and source.target_ratio is None:
-            raise ValueError(
-                "If any source has target_ratio set, all sources must have target_ratio set."
-            )
+            raise ValueError("If any source has target_ratio set, all sources must have target_ratio set.")
