@@ -27,7 +27,7 @@ def config_from_path(config: Path) -> ExperimentConfig:
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    return ExperimentConfig(**data)
+    return ExperimentConfig(**data, path=config)
 
 
 def mk_source_instances(

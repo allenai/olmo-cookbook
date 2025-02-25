@@ -19,6 +19,7 @@ dependencies = [
     "s3fs",
     "yaspin"
 ]
+
 [project.optional-dependencies]
 dev = [
     "ruff",
