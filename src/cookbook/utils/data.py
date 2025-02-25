@@ -164,8 +164,8 @@ def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
     normalized = []
 
     for source in sources:
+        source_paths = []
         for path in source.paths:
-            source_paths = []
             if is_url(path):
                 parsed = urlparse(path)
                 if parsed.scheme == "s3":
@@ -183,14 +183,14 @@ def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
             else:
                 source_paths.append(normalize_path(path))
 
-            normalized.append(
-                SourceConfig(
-                    name=source.name,
-                    paths=source_paths,
-                    target_ratio=source.target_ratio,
-                    repetition_factor=source.repetition_factor,
-                    max_source_ratio=source.max_source_ratio,
-                )
+        normalized.append(
+            SourceConfig(
+                name=source.name,
+                paths=source_paths,
+                target_ratio=source.target_ratio,
+                repetition_factor=source.repetition_factor,
+                max_source_ratio=source.max_source_ratio,
             )
+        )
 
     return normalized
