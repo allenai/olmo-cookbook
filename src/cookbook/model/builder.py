@@ -1,7 +1,7 @@
 import logging
 import os
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from olmo_core.config import DType
 from olmo_core.data import (
@@ -28,7 +28,7 @@ from olmo_core.train.callbacks import (
     WandBCallback,
 )
 
-from cookbook.aliases import SourceInstance
+from cookbook.aliases import SourceInstance, WandbConfig
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.aliases import (
     ModelConfig,
@@ -99,6 +99,7 @@ class TransformerConfigBuilder:
     tokenizer: TokenizerConfig
     dtype: str
     weka: bool
+    wandb_config: Optional[WandbConfig]
     profile: bool = False
 
     def __init__(
@@ -114,6 +115,7 @@ class TransformerConfigBuilder:
         dtype: str,
         model_identifier: str,
         weka: bool,
+        wandb_config: Optional[WandbConfig] = None,
         seed: int = 42,
         s3: bool = True,
         profile: bool = False,
@@ -132,18 +134,15 @@ class TransformerConfigBuilder:
         self.data_dir: str = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
+        self.wandb_config = wandb_config
 
-        self.checkpoint_dir = (
-            f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
-        )
+        self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
 
         if any(substring in cluster for substring in ["jupiter", "saturn"]) and weka:
             logger.info("Using Weka bucket as root dir")
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
 
-        self.dataset_cache = (
-            f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
-        )
+        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
@@ -153,9 +152,7 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self, parameters: int) -> int:
-        return round(
-            parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length)
-        )
+        return round(parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length))
 
     def get_batch_size(self, parameters: int) -> int:
         if self.sequence_length != 2048:
@@ -190,7 +187,7 @@ class TransformerConfigBuilder:
             ),
             "wandb": WandBCallback(
                 name=self.run_name.strip(),
-                project="olmo-cookbook",
+                project=self.wandb_config.project.strip() if self.wandb_config else "olmo-cookbook",
                 group=self.group_id.strip(),
                 cancel_check_interval=10,
                 enabled=True,

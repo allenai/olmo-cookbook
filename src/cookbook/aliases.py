@@ -2,12 +2,16 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
 
-from beaker import Priority
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from pydantic import BaseModel
 
 PathType = Union[Path, PathLike[Any], str]
+
+try:
+    from beaker import Priority  # pyright: ignore
+except ImportError:
+    Priority = str
 
 
 class SourceConfig(BaseModel):
@@ -32,6 +36,10 @@ class DatasetConfig(BaseModel):
     seed: int = 42
 
 
+class WandbConfig(BaseModel):
+    project: str
+
+
 class ExperimentConfig(BaseModel):
     name: str
     description: str
@@ -44,13 +52,15 @@ class ExperimentConfig(BaseModel):
     seed: int
     cluster: str
     tokenizer: str
-    priority: Priority
+    priority: Priority  # pyright: ignore
     dataset: DatasetConfig
     tokenizer: str
     model: str
+    wandb: Optional[WandbConfig] = None
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
+    path: Path
 
 
 class ExperimentInstance(BaseModel):
@@ -74,6 +84,4 @@ def validate_sources(sources: list[SourceConfig]):
 
     for source in sources:
         if target_ratio_present and source.target_ratio is None:
-            raise ValueError(
-                "If any source has target_ratio set, all sources must have target_ratio set."
-            )
+            raise ValueError("If any source has target_ratio set, all sources must have target_ratio set.")

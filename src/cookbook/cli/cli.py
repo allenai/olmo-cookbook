@@ -1,5 +1,4 @@
 import concurrent.futures
-import json
 import logging
 from pathlib import Path
 from typing import Optional
@@ -13,6 +12,7 @@ from tqdm import tqdm
 from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
+from cookbook.cli.eval import convert, evaluate
 from cookbook.utils.config import (
     config_from_path,
     mk_experiment_group,
@@ -55,7 +55,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    experiment_config = ExperimentConfig(**data)
+    experiment_config = ExperimentConfig(**data, path=config)
     validate_sources(experiment_config.dataset.sources)
 
     # token_universe = get_token_counts_and_ratios(
@@ -72,7 +72,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     else:
         group_uuid = generate_uuid()[:8]
 
-    beaker_user = (Beaker.from_env().account.whoami().name).upper()
+    beaker_user = (Beaker.from_env().account.whoami().name).upper()  # pyright: ignore
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
 
     logger.info(experiment_config)
@@ -104,9 +104,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
             results = []
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                futures = [
-                    executor.submit(experiment.launch) for experiment in launch_group.instances
-                ]
+                futures = [executor.submit(experiment.launch) for experiment in launch_group.instances]
 
                 for future in tqdm(
                     concurrent.futures.as_completed(futures),
@@ -129,8 +127,8 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
 
 
 def _status_for_group(path: Path, group_id: str):
-    beaker = Beaker.from_env()
-    client = JobClient(beaker=beaker)
+    beaker = Beaker.from_env()  # pyright: ignore
+    client = JobClient(beaker=beaker)  # pyright: ignore
     config = config_from_path(path)
     cluster = beaker.cluster.get(config.cluster)
     jobs = client.list(cluster=cluster)
@@ -145,8 +143,8 @@ def _status_for_group(path: Path, group_id: str):
 
 
 def _stop_for_group(path: Path, group_id: str):
-    beaker = Beaker.from_env()
-    client = JobClient(beaker=beaker)
+    beaker = Beaker.from_env()  # pyright: ignore
+    client = JobClient(beaker=beaker)  # pyright: ignore
     config = config_from_path(path)
     cluster = beaker.cluster.get(config.cluster)
     jobs = [
@@ -209,5 +207,9 @@ def cancel(config: Path, group_id: str):
     _stop_for_group(config, group_id)
 
 
+cli.command()(evaluate)
+cli.command()(convert)
+
+
 if __name__ == "__main__":
-    cli()
+    cli({})

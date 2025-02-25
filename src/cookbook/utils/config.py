@@ -1,13 +1,13 @@
-import json
 import logging
-import os
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import yaml
-from beaker import Beaker
-from olmo_core.launch.beaker import BeakerEnvSecret, BeakerLaunchConfig, BeakerWekaBucket
-from olmo_core.utils import generate_uuid
+from olmo_core.launch.beaker import (
+    BeakerEnvSecret,
+    BeakerLaunchConfig,
+    BeakerWekaBucket,
+)
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -24,16 +24,18 @@ def config_from_path(config: Path) -> ExperimentConfig:
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    return ExperimentConfig(**data)
+    return ExperimentConfig(**data, path=config)
 
 
 def mk_source_instances(
-    sources: list[SourceConfig], priors: Tuple[dict[str, float], int]
+    sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
-    is_fractional = any(source.target_ratio is not None for source in sources)
-
     # If no user provided ratios, use the priors from the sources
-    ratios_by_source, total_tokens = priors
+    if priors:
+        ratios_by_source, total_tokens = priors
+    else:
+        # TODO(undfined): Clean this up and fail faster
+        ratios_by_source = {}
 
     instances = []
     for source in sources:
@@ -79,33 +81,17 @@ def mk_instance_cmd(
 ) -> List[str]:
     """Build a command for launching an experiment instance."""
 
-    sources = []
-
-    for source in instance.sources:
-        paths = [f'"{path}"' for path in source.paths]
-        source_str = (
-            f'-s ("{source.name}",[{",".join(paths)}],{source.ratio},{source.repetition_factor})'
-        )
-        sources.append(source_str)
-
-    if not sources:
-        raise ValueError("No sources found for experiment, exiting!")
-
     return [
         "src/cookbook/train.py",
         "train",
-        f"-n {instance.name}",
-        f"-g {group_id}",
-        f"-l {config.sequence_length}",
-        f"-t {config.max_tokens}",
-        f"-S {config.seed}",
-        f"-c {config.cluster}",
-        f"-u {beaker_user}",
-        f"-d {config.dataset.dtype.value}",
-        f"-T {config.tokenizer}",
-        f"-m {config.model}",
-        f"-w {config.weka}",
-        *sources,
+        "-n",
+        instance.name,
+        "-g",
+        group_id,
+        "-u",
+        beaker_user,
+        "-C",
+        str(config.path),
     ]
 
 

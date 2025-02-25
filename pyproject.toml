@@ -10,16 +10,16 @@ description = ""
 authors = [
     { name = "Allen Institute for Artificial Intelligence", email = "oe-data-engineering@allenai.org" }
 ]
-requires-python = ">=3.9,<3.12"
+requires-python = ">=3.9,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
     "boto3",
     "click",
     "pydantic",
     "s3fs",
     "yaspin"
 ]
+
 [project.optional-dependencies]
 dev = [
     "ruff",
@@ -36,14 +36,20 @@ wandb = [
     "wandb",
 ]
 all = [
-    "olmo-cookbook[dev,beaker,wandb]",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
+    "beaker-py",
+    "GitPython>=3.0,<4.0",
+    "wandb",
 ]
 
 [project.scripts]
-olmo-cookbook = "cookbook.cli:cli"
+olmo-cookbook = "cookbook.cli:cli.cli"
+olmo-cookbook-eval = "cookbook.cli:eval.cli"
+
 
 [tool.black]
-line-length = 100
+line-length = 115
+target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''
 (
