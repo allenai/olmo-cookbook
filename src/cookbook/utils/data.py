@@ -140,12 +140,10 @@ def _expand_remote(pattern: str, fs: s3fs.S3FileSystem) -> List[str]:
     """
     parsed = urlparse(pattern)
 
-    if parsed.scheme == "s3":
+    if parsed.scheme in ["s3", "weka"]:
         return [f"s3://{obj}" for obj in fs.glob(pattern)]
     elif parsed.scheme == "r2":
         raise NotImplementedError("'r2' types are not currently supported")
-    elif parsed.scheme == "weka":
-        return [f"weka://{obj}" for obj in fs.glob(pattern)]
     elif parsed.scheme == "gs":
         raise NotImplementedError("'gs' types are not currently supported")
     elif parsed.scheme in ("http", "https"):

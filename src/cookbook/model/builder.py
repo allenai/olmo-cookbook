@@ -14,7 +14,7 @@ from olmo_core.data import (
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.nn.transformer import TransformerConfig, TransformerDataParallelConfig
 from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride
-from olmo_core.train import TrainerConfig
+from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
     CheckpointerCallback,
@@ -250,17 +250,21 @@ class TransformerConfigBuilder:
             ],
         )
 
-        mixture_config = MixtureBuilder(
-            sources=self.sources,
-            max_tokens=self.max_tokens,
-            sequence_length=self.sequence_length,
-            seed=self.seed,
-            processes=min(os.cpu_count() or 1, 16),
-            dtype=self.dataset_dtype,
-        ).build()
+        # mixture_config = MixtureBuilder(
+        #     sources=self.sources,
+        #     max_tokens=self.max_tokens,
+        #     sequence_length=self.sequence_length,
+        #     seed=self.seed,
+        #     processes=min(os.cpu_count() or 1, 16),
+        #     dtype=self.dataset_dtype,
+        # ).build()
+
+        source_paths = []
+        for source in self.sources:
+            source_paths.extend(source.paths)
 
         dataset_config = NumpyDatasetConfig(
-            source_mixture_config=mixture_config,
+            paths=source_paths,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             tokenizer=tokenizer,
@@ -276,6 +280,7 @@ class TransformerConfigBuilder:
 
         trainer_config = TrainerConfig(
             save_folder=self.checkpoint_dir,
+            max_duration=Duration.tokens(self.max_tokens),
             work_dir=self.dataset_cache,
             rank_microbatch_size=self.model_config.device_batch_size * self.sequence_length,
             save_overwrite=True,
