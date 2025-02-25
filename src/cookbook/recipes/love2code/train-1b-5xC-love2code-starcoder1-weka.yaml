@@ -1,0 +1,22 @@
+name: "olmo-cookbook-1b-5xC-love2code-starcoder"
+description: "Love2Code model, but with starcoder1 data"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: false
+max_tokens: 113_184_153_600 # 5xC multiplier
+sequence_length: 2048
+seed: 1337
+model: "olmo_1b"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: starcoder1
+    target_ratio: 1.0
+    paths: # TODO: ADD ACTUAL PATHS
+    - /weka/oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/*
+
