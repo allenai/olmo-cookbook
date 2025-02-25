@@ -250,21 +250,21 @@ class TransformerConfigBuilder:
             ],
         )
 
-        # mixture_config = MixtureBuilder(
-        #     sources=self.sources,
-        #     max_tokens=self.max_tokens,
-        #     sequence_length=self.sequence_length,
-        #     seed=self.seed,
-        #     processes=min(os.cpu_count() or 1, 16),
-        #     dtype=self.dataset_dtype,
-        # ).build()
+        mixture_config = MixtureBuilder(
+            sources=self.sources,
+            max_tokens=self.max_tokens,
+            sequence_length=self.sequence_length,
+            seed=self.seed,
+            processes=16,
+            dtype=self.dataset_dtype,
+        ).build()
 
-        source_paths = []
-        for source in self.sources:
-            source_paths.extend(source.paths)
+        # source_paths = []
+        # for source in self.sources:
+        #     source_paths.extend(source.paths)
 
         dataset_config = NumpyDatasetConfig(
-            paths=source_paths,
+            source_mixture_config=mixture_config,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             tokenizer=tokenizer,
