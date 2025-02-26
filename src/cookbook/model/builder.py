@@ -14,7 +14,7 @@ from olmo_core.data import (
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.nn.transformer import TransformerConfig, TransformerDataParallelConfig
 from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride
-from olmo_core.train import TrainerConfig
+from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
     CheckpointerCallback,
@@ -249,17 +249,17 @@ class TransformerConfigBuilder:
             weight_decay=self.model_config.weight_decay,
         )
 
-        mixture_config = MixtureBuilder(
-            sources=self.sources,
-            max_tokens=self.max_tokens,
-            sequence_length=self.sequence_length,
-            seed=self.seed,
-            processes=16,
-            dtype=self.dataset_dtype,
-        ).build()
+        # mixture_config = MixtureBuilder(
+        #     sources=self.sources,
+        #     max_tokens=self.max_tokens,
+        #     sequence_length=self.sequence_length,
+        #     seed=self.seed,
+        #     processes=16,
+        #     dtype=self.dataset_dtype,
+        # ).build()
 
-        dataset_config = NumpyDatasetConfig(
-            source_mixture_config=mixture_config,
+        dataset_config = NumpyDatasetConfig.from_data_mix(
+            mix=DataMix.OLMoE_mix_0824,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             max_target_sequence_length=8192,
@@ -281,6 +281,7 @@ class TransformerConfigBuilder:
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
+            max_duration=Duration.tokens(self.max_tokens),
         )
 
         for callback_name, callback in self.build_callbacks(model).items():
