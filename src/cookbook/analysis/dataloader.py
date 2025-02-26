@@ -73,12 +73,6 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
     if is_multiindex:
         # For native_ids which count up from 0, there are the same IDs across tasks. Append the task name.
         slices['native_id'] = slices['native_id'] + '_' + slices['task'].astype(str)
-
-        # duplicates = slices[slices.duplicated(subset=['native_id'] + col, keep=False)]
-        # print(set(duplicates['model']))
-        # print(set(duplicates['mix']))
-        # print(duplicates)
-        # raise RuntimeError()
         
         duplicates_count = slices.duplicated(subset=['native_id'] + col).sum()
         if duplicates_count > 0:
@@ -105,16 +99,6 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
     if is_multiindex:
         # If there are multiple cols, reshape the output nd array
         if len(col) > 1:
-            # pivoted = pivoted.sort_index(axis=1)
-            # expanded_columns = pivoted.columns.to_frame(index=False)
-            # pivoted.columns = pd.MultiIndex.from_tuples(
-            #     [tuple(col) for col in expanded_columns.to_numpy()],
-            #     names=expanded_columns.columns.tolist()
-            # )
-            # scores = pivoted.to_numpy()
-            # scores = scores.reshape(
-            #     (pivoted.shape[0], len(expanded_columns['mix'].unique()), len(expanded_columns['step'].unique()))
-            # )
             pivoted = pivoted.sort_index(axis=1)
             expanded_columns = pivoted.columns.to_frame(index=False)
             pivoted.columns = pd.MultiIndex.from_tuples(

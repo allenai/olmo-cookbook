@@ -4,6 +4,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 import boto3
 
+from cookbook.analysis.process.preprocess import fsize, recursive_pull, load_df_parallel, cleanup_metrics_df
+from cookbook.analysis.utils import DATA_DIR
+
+
 # Add parent directory to the path
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
@@ -60,7 +64,9 @@ def mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=100, exclu
     s3_client = boto3.client('s3')
     keys = []
 
-    if not isinstance(s3_prefix, list):
+    if isinstance(s3_prefix, tuple):
+        s3_prefixes = list(s3_prefix)
+    elif not isinstance(s3_prefix, list):
         s3_prefixes = [s3_prefix]
     else:
         s3_prefixes = s3_prefix
@@ -95,3 +101,42 @@ def mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=100, exclu
         # Sequential implmentation
         for key in tqdm(keys, desc="Syncing download folder from S3", unit="file"):
             download_file(s3_client, bucket_name, key, local_dir, excluded_file_names)
+
+
+def process_local_folder(local_results_path, file_type='predictions'):
+    data_dir = Path(DATA_DIR).resolve()
+    data_dir.mkdir(exist_ok=True)
+
+    aws_dir         = data_dir / local_results_path
+    prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
+    metrics_path    = data_dir / f"{local_results_path}_metrics.parquet"
+
+    predictions_df = recursive_pull(aws_dir, file_type)
+
+    # Save predictions to parquet
+    import time
+    start_time = time.time()
+    
+    df = load_df_parallel(predictions_df, file_type) # for 6700 preds: 300s (5 min)
+
+    print(f"Converted to pandas in: {time.time() - start_time:.4f} seconds")
+
+    if file_type == 'metrics':
+        df = cleanup_metrics_df(df)
+
+        print(df.columns)
+
+        df.to_parquet(metrics_path)
+        print('Done!')
+        return
+
+    # Reset the df index (for faster indexing)
+    df.set_index(['task', 'model', 'step', 'mix'], inplace=True)
+
+    # Save to parquet
+    df.to_parquet(prediction_path, index=True)
+    print(f"Predictions saved to {prediction_path} ({fsize(prediction_path):.2f} GB)")
+
+    print('Done!')
+
+    return prediction_path

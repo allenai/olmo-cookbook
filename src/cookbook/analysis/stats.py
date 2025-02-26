@@ -108,7 +108,7 @@ def compute_significance(df, models, metric, step='max', last_n=1, tasks=None, a
             mixes, scores = get_nd_array(df, 'mix', metric, model=models, task=task, step=step, sorted=True)
 
         if len(scores) == 0:
-            print(f'Found no scores for {task}! Skipping...')
+            print(f'Found no scores for {get_title_from_task(task)}! Skipping...')
             continue
 
         if isinstance(task, list):
