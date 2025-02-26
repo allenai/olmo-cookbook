@@ -51,8 +51,6 @@ def get_sig_cluster_bound(p_vals, idx, alpha):
 
 def get_sig_clusters(p_vals, alpha=0.01):
     """
-    The pièce de résistance.
-
     Start with highest scoring mix, assign rank 1 to all mixes until we have 
     encountered a mix statistically significantly different from any mix so far.
     """
@@ -94,7 +92,7 @@ def compute_significance(df, models, metric, step='max', last_n=1, tasks=None, a
         if last_n > 1:
             assert step == 'max'
             
-            mixes, scores = get_nd_array(df, ['mix', 'step'], 'acc_per_char', model=models, task=task)
+            mixes, scores = get_nd_array(df, ['mix', 'step'], metric, model=models, task=task)
             scores = scores[:, -last_n:, :] # get last n steps
             scores = scores.mean(axis=1) # average over last n ckpts
 

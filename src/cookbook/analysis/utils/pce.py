@@ -223,7 +223,7 @@ def compute_weighted_pairwise_p_values(seg_scores, weights=None, return_scores=F
         for jj in range(ii + 1, num_systems):
             null_delta = partial[:, ii] - partial[:, jj]  # shape: (num_permutations, )
             test_delta = sys_scores[ii] - sys_scores[jj]  # float
-            p_vals[ii, jj] = np.sum(null_delta >= test_delta) / num_permutations
+            p_vals[jj, ii] = p_vals[ii, jj] = np.sum(null_delta >= test_delta) / num_permutations
 
     if return_scores:
         return p_vals, sys_scores, partial

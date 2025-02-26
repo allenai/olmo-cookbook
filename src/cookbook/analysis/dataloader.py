@@ -73,6 +73,12 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
     if is_multiindex:
         # For native_ids which count up from 0, there are the same IDs across tasks. Append the task name.
         slices['native_id'] = slices['native_id'] + '_' + slices['task'].astype(str)
+
+        # duplicates = slices[slices.duplicated(subset=['native_id'] + col, keep=False)]
+        # print(set(duplicates['model']))
+        # print(set(duplicates['mix']))
+        # print(duplicates)
+        # raise RuntimeError()
         
         duplicates_count = slices.duplicated(subset=['native_id'] + col).sum()
         if duplicates_count > 0:
@@ -80,7 +86,7 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
                 'drop' not in task: # this is a known problem for 433 HellaSwag instances, 1 Drop instance
                 warnings.simplefilter("once", UserWarning)
                 warnings.warn(f"Warning: {duplicates_count}/{len(slices)} duplicate native_id-key pairs found for task='{task}' model='{model}'. Removing duplicates...", category=UserWarning, stacklevel=2)
-            slices = slices.drop_duplicates(subset=['native_id'] + col, keep='first')
+            slices = slices.sort_values(by=col, na_position='last').drop_duplicates(subset=['native_id'] + col, keep='first')
 
         # Pivot the data to get mixes as columns and question_ids as rows
         pivoted = slices.pivot(index='native_id', columns=col, values=metric)

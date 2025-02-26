@@ -10,6 +10,8 @@ import numpy as np
 import psutil
 from tqdm import tqdm
 
+from cookbook.analysis.utils.constants_tasks import PRIMARY_METRICS_OLMES
+
 # Add parent directory to the path
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
@@ -34,13 +36,15 @@ METRICS_TO_KEEP = [
     "pass_at_10",
 
     # Perplexity metrics (e.g., Paloma)
-    "bits_per_byte"
+    "bits_per_byte",
+    "bits_per_byte_corr"
 ]
 
 MODEL_OUTPUT_TO_KEEP = [
     "sum_logits",
     "logits_per_char",
     "logits_per_byte",
+    "bits_per_byte"
 ]
 
 SIZE_PREFIXES = [
@@ -142,6 +146,20 @@ def process_predictions(file_path):
         if isinstance(entry['exact_match'], bool):
             entry['exact_match'] = float(entry['exact_match'])
 
+        # If primary_score does not exist, add it
+        def clean_task_name(task_name):
+            """ task_name str replace everything after : as "" unless its :rc, :mc, :cot """
+            task_name = re.sub(r':(?!rc$|mc$|cot$).*', '', task_name)
+            task_name = re.sub(r'^task-\d+-', '', task_name) # remove the task-? prefix if it exists
+            return task_name
+        task_name = file_path.split('/')[-1].replace('-predictions.jsonl', '')
+        task_name = clean_task_name(task_name)
+        primary_metric_key = PRIMARY_METRICS_OLMES.get(task_name, None)
+        if primary_metric_key is None: 
+            primary_metric_key = 'acc_per_char'
+        if ('primary_score' not in entry and primary_metric_key in metrics) or ('primary_score' in entry and primary_metric_key['primary_score'] is None):
+            entry['primary_score'] = metrics[primary_metric_key]
+
         # Compute BPB using request files
         if request_ids_to_bytes is not None:
             all_num_bytes = request_ids_to_bytes[str(entry["native_id"])]
@@ -164,6 +182,13 @@ def process_predictions(file_path):
             else:
                 print(f'Incorrect correct_choice indexer: {entry["correct_choice"]}, {file_path}')
                 entry["logits_per_byte_corr"] = 0
+
+        # Use both names
+        if 'bits_per_byte_corr' in entry and entry['bits_per_byte_corr'] is not None:
+            entry['logits_per_byte_corr'] = entry['bits_per_byte_corr']
+
+        if 'logits_per_byte_corr' in entry and entry['logits_per_byte_corr'] is not None:
+            entry['bits_per_byte_corr'] = entry['logits_per_byte_corr']
  
         processed += [entry]
     return processed

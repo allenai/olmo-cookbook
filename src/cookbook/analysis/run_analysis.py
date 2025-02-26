@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from cookbook.analysis.stats import compute_significance
 from cookbook.analysis.utils.constants_tasks import get_title_from_task
 
-REVERSED_METRICS = ['margin_per_byte', 'norm_correct_prob_per_byte', 'correct_prob_per_byte', 'correct_logit_per_byte', 'logits_per_char_corr', 'logits_per_byte_corr']
-
 def run_paired_comparison(df, task, model_names, metric='primary_score', axes=None):
     task_name = get_title_from_task(task)
+
+    model_names = sorted(list(set(model_names)))
 
     ax: plt.Axes = axes if axes is not None else None
     _, p_values, _ = compute_significance(
