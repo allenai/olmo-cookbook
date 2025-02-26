@@ -290,6 +290,7 @@ class TransformerConfigBuilder:
             metrics_collect_interval=10,
             cancel_check_interval=5,
             # z_loss_multiplier=1e-5,
+            compile_loss=True,
             max_duration=Duration.tokens(self.max_tokens),
         )
 
