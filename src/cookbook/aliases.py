@@ -36,6 +36,10 @@ class DatasetConfig(BaseModel):
     seed: int = 42
 
 
+class WandbConfig(BaseModel):
+    project: str
+
+
 class ExperimentConfig(BaseModel):
     name: str
     description: str
@@ -48,13 +52,15 @@ class ExperimentConfig(BaseModel):
     seed: int
     cluster: str
     tokenizer: str
-    priority: Priority
+    priority: Priority  # pyright: ignore
     dataset: DatasetConfig
     tokenizer: str
     model: str
+    wandb: Optional[WandbConfig] = None
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
+    path: Path
 
 
 class ExperimentInstance(BaseModel):

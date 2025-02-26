@@ -133,10 +133,7 @@ def get_aws_secret_access_key() -> Optional[str]:
 
 
 def install_oe_eval(
-    commit_hash: str | None,
-    env: PythonEnv | None = None,
-    no_dependencies: bool = True,
-    is_editable: bool = False
+    commit_hash: str | None, env: PythonEnv | None = None, no_dependencies: bool = True, is_editable: bool = False
 ) -> str:
     env = env or PythonEnv.null()
 
@@ -160,12 +157,13 @@ def install_oe_eval(
 
 def run_func_in_venv(fn):
     """Wrap any function so that it can run inside a virtual environment"""
+
     def wrapper(*args, env: PythonEnv | None = None, **kwargs):
         if env is None:
             return fn(*args, **kwargs)
 
-        import inspect
         import importlib.util
+        import inspect
 
         package_name = __name__.split(".")[0]
         package_spec = importlib.util.find_spec(package_name)
@@ -207,7 +205,6 @@ def add_secret_to_beaker_workspace(
     secret_value: str,
     workspace: str,
 ) -> str:
-
     try:
         import beaker  # pyright: ignore
     except ImportError:
@@ -265,13 +262,13 @@ def add_aws_flags(
         secret_name="AWS_ACCESS_KEY_ID",
         secret_value=aws_access_key_id,
         workspace=workspace,
-        env=env     # pyright: ignore
+        env=env,  # pyright: ignore
     )
     aws_secret_access_key_secret = add_secret_to_beaker_workspace(
         secret_name="AWS_SECRET_ACCESS_KEY",
         secret_value=aws_secret_access_key,
         workspace=workspace,
-        env=env     # pyright: ignore
+        env=env,  # pyright: ignore
     )
 
     flags.append(f"--gantry-secret-aws-access-key-id '{aws_access_key_id_secret}'")
@@ -413,46 +410,36 @@ def remove_conflicting_packages(env: PythonEnv | None = None):
     env = env or PythonEnv.null()
     is_flash_attention_installed = (
         subprocess.run(
-            shlex.split(f"{env.pip} show flash-attention"),
-            capture_output=True,
-            env=env.path()
-        ).returncode == 0
+            shlex.split(f"{env.pip} show flash-attention"), capture_output=True, env=env.path()
+        ).returncode
+        == 0
     )
     if is_flash_attention_installed:
         print("Uninstalling flash attention to avoid conflicts...")
-        subprocess.run(
-            shlex.split(f"{env.pip} uninstall -y flash-attention"),
-            env=env.path()
-        )
+        subprocess.run(shlex.split(f"{env.pip} uninstall -y flash-attention"), env=env.path())
 
     is_olmo_core_installed = (
         subprocess.run(
-            shlex.split(f"{env.pip} show ai2-olmo-core"),
-            capture_output=True,
-            env=env.path()
-        ).returncode == 0
+            shlex.split(f"{env.pip} show ai2-olmo-core"), capture_output=True, env=env.path()
+        ).returncode
+        == 0
     )
     if is_olmo_core_installed:
         print("Uninstalling ai2-olmo-core to avoid conflicts...")
-        subprocess.run(
-            shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"),
-            env=env.path()
-        )
+        subprocess.run(shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"), env=env.path())
 
 
 def check_beaker_dependencies(env: PythonEnv | None = None):
     env = env or PythonEnv.null()
-    is_beaker_py_installed = subprocess.run(
-        shlex.split(f"{env.pip} show beaker-py"),
-        capture_output=True,
-        env=env.path()
-    ).returncode == 0
+    is_beaker_py_installed = (
+        subprocess.run(shlex.split(f"{env.pip} show beaker-py"), capture_output=True, env=env.path()).returncode
+        == 0
+    )
     is_beaker_gantry_installed = (
         subprocess.run(
-            shlex.split(f"{env.pip} show beaker-gantry"),
-            capture_output=True,
-            env=env.path()
-        ).returncode == 0
+            shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path()
+        ).returncode
+        == 0
     )
 
     if not is_beaker_py_installed or not is_beaker_gantry_installed:

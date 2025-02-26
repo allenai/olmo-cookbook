@@ -2,6 +2,7 @@ import logging
 import re
 
 import click
+
 from cookbook.cli.utils import (
     get_aws_access_key_id,
     get_aws_secret_access_key,
@@ -15,9 +16,8 @@ from cookbook.constants import (
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
-from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.conversion import convert_checkpoint
-
+from cookbook.eval.evaluation import evaluate_checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,9 @@ logger = logging.getLogger(__name__)
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
 @click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
-@click.option("--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker")
+@click.option(
+    "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
+)
 @click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
 @click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
 @click.option("--use-system-python", is_flag=True, help="Whether to use system Python or a virtual environment")

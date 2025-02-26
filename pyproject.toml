@@ -13,13 +13,13 @@ authors = [
 requires-python = ">=3.9,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
     "boto3",
     "click",
     "pydantic",
     "s3fs",
     "yaspin"
 ]
+
 [project.optional-dependencies]
 dev = [
     "ruff",
@@ -36,7 +36,10 @@ wandb = [
     "wandb",
 ]
 all = [
-    "olmo-cookbook[dev,beaker,wandb]",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4934c7c416e7f170a2f4ea169675b2fd97996df0",
+    "beaker-py",
+    "GitPython>=3.0,<4.0",
+    "wandb",
 ]
 
 [project.scripts]

@@ -163,7 +163,7 @@ ALL_CODEX_TASKS = [
     "mbpp::none",
     "mbppplus::none",
     "bigcodebench::none",
-    "bigcodebench_hard::none"
+    "bigcodebench_hard::none",
 ]
 
 ALL_NAMED_GROUPS = {

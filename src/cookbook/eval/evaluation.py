@@ -1,7 +1,7 @@
-from copy import deepcopy
 import re
 import shlex
 import subprocess
+from copy import deepcopy
 from hashlib import md5
 from urllib.parse import urlparse
 
@@ -165,7 +165,7 @@ def evaluate_checkpoint(
             local_flags = deepcopy(flags)
 
             # add all tasks in the partition as flag
-            partition_tasks = tasks_names[i: i + partition_size] if partition_size else tasks_names
+            partition_tasks = tasks_names[i : i + partition_size] if partition_size else tasks_names
             local_flags.append(f"--task {' '.join(partition_tasks)}")
 
             if add_aws_flags(

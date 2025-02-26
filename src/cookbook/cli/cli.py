@@ -55,7 +55,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    experiment_config = ExperimentConfig(**data)
+    experiment_config = ExperimentConfig(**data, path=config)
     validate_sources(experiment_config.dataset.sources)
 
     token_universe = get_token_counts_and_ratios(
