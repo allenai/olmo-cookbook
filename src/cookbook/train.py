@@ -93,8 +93,8 @@ def train(
         mesh=world_mesh,
     )
     optim = config.optim.build(model)
-    data_loader = config.data_loader.build(dataset)
-    trainer = config.trainer.build(model, optim, data_loader)
+    data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
+    trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
     config_dict = config.as_config_dict()
     cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
     cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
