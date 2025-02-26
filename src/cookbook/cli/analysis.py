@@ -1,5 +1,6 @@
 import click
 import logging
+from pathlib import Path
 
 from cookbook.analysis.process.aws import mirror_s3_to_local, process_local_folder
 from cookbook.analysis.run_analysis import run_analysis
@@ -48,11 +49,21 @@ def download(bucket_name: str, s3_prefix: list[str], local_results_path: str, ma
     metrics_path     = process_local_folder(local_results_path, file_type='metrics')
     predictions_path = process_local_folder(local_results_path, file_type='predictions')
 
+
 @cli.command()
-@click.argument("predictions_path", type=str)
-def run(predictions_path: str):
+@click.option(
+    "--local-results-path",
+    type=str,
+    required=True,
+    help="Local path to results file",
+)
+def run(local_results_path: str):
     """Run analysis on processed prediction files."""
-    results_df = run_analysis(predictions_path)
+    data_dir = Path(DATA_DIR).resolve()
+    prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
+    metrics_path    = data_dir / f"{local_results_path}_metrics.parquet"
+    
+    results_df = run_analysis(prediction_path)
 
 if __name__ == "__main__":
     cli()
