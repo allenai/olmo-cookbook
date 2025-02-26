@@ -19,6 +19,7 @@ dependencies = [
     "s3fs",
     "yaspin",
     "PyYAML>=6.0,<7.0",
+    "torchao"
 ]
 
 [project.optional-dependencies]
