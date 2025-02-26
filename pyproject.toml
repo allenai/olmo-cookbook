@@ -17,7 +17,8 @@ dependencies = [
     "click",
     "pydantic",
     "s3fs",
-    "yaspin"
+    "yaspin",
+    "PyYAML>=6.0,<7.0",
 ]
 
 [project.optional-dependencies]
