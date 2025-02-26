@@ -91,6 +91,7 @@ def train(
         init_device="meta",
         device=device,
         mesh=world_mesh,
+        max_seq_len=config.dataset.sequence_length,
     )
     optim = config.optim.build(model)
     data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
