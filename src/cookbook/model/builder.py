@@ -264,6 +264,7 @@ class TransformerConfigBuilder:
             sequence_length=self.sequence_length,
             max_target_sequence_length=8192,
             tokenizer=tokenizer,
+            mix_base_dir=self.dataset_cache,
             work_dir=self.dataset_cache,
         )
 
