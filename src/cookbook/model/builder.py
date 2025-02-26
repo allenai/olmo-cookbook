@@ -194,7 +194,7 @@ class TransformerConfigBuilder:
                 eval_dataset=NumpyDatasetConfig.from_data_mix(
                     DataMix.v3_small_ppl_validation,
                     name=NumpyDatasetType.padded_fsl,
-                    mix_base_dir=self.data_dir,
+                    mix_base_dir=self.root_dir,
                     sequence_length=self.sequence_length,
                     tokenizer=self.tokenizer,
                     work_dir=self.dataset_cache,
@@ -278,7 +278,8 @@ class TransformerConfigBuilder:
         trainer_config = TrainerConfig(
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
-            rank_microbatch_size=self.model_config.device_batch_size * self.sequence_length,
+            # rank_microbatch_size=self.model_config.device_batch_size * self.sequence_length,
+            rank_microbatch_size=8 * self.sequence_length,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,

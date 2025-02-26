@@ -1,5 +1,5 @@
 name: "olmo-cookbook-1b-5xC-olmo2"
-description: "Cookbookb olmo2-1b mix baseline"
+description: "Cookbook olmo2-1b mix baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
