@@ -167,8 +167,9 @@ class TransformerConfigBuilder:
         global_batch_size = round(global_batch_size)
         global_batch_size *= self.max_dp_world_size
 
+        global_batch_size = self.sequence_length * global_batch_size
         print(f"Global batch size is: {global_batch_size}")
-        return self.sequence_length * global_batch_size
+        return global_batch_size
 
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
