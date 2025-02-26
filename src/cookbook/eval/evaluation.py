@@ -100,15 +100,17 @@ def evaluate_checkpoint(
 
     else:
         print("Path is a huggingface model; I will add huggingface token to workspace")
-        assert huggingface_secret, "Hugging Face token must be provided"
-        hf_token_secret = add_secret_to_beaker_workspace(
-            secret_name="HUGGING_FACE_HUB_TOKEN",
-            secret_value=huggingface_secret,
-            workspace=workspace,
-            env=env,  # pyright: ignore
-        )
-        flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
-        flags.append("--gantry-args '{\"hf_token\":true}'")
+        if huggingface_secret:
+            hf_token_secret = add_secret_to_beaker_workspace(
+                secret_name="HUGGING_FACE_HUB_TOKEN",
+                secret_value=huggingface_secret,
+                workspace=workspace,
+                env=env,    # pyright: ignore
+            )
+            flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
+            flags.append("--gantry-args '{\"hf_token\":true}'")
+        else:
+            print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
     # we use this run name when storing store all the output files
     run_name = make_eval_run_name(checkpoint_path=checkpoint_path, add_bos_token=add_bos_token)

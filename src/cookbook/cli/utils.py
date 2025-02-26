@@ -220,6 +220,25 @@ def add_secret_to_beaker_workspace(
     return full_secret_name
 
 
+@run_func_in_venv
+def check_if_secret_exists_in_beaker_workspace(
+    secret_name: str,
+    workspace: str,
+) -> bool:
+    try:
+        import beaker  # pyright: ignore
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
+
+    client = beaker.Beaker.from_env(default_workspace=workspace)
+    full_secret_name = f"{client.account.name}_{secret_name}"
+    try:
+        client.secret.get(full_secret_name)
+        return True
+    except beaker.exceptions.SecretNotFound:
+        return False
+
+
 def add_aws_flags(
     aws_access_key_id: Optional[str],
     aws_secret_access_key: Optional[str],
@@ -233,7 +252,11 @@ def add_aws_flags(
         return True
 
     if not aws_access_key_id or not aws_secret_access_key:
-        return False
+        # if keys are not set, we are still okay to proceed if they are already set in the workspace
+        return (
+            check_if_secret_exists_in_beaker_workspace("AWS_ACCESS_KEY_ID", workspace)
+            and check_if_secret_exists_in_beaker_workspace("AWS_SECRET_ACCESS_KEY", workspace)
+        )
 
     aws_access_key_id_secret = add_secret_to_beaker_workspace(
         secret_name="AWS_ACCESS_KEY_ID",
