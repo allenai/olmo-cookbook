@@ -211,7 +211,7 @@ class TransformerConfigBuilder:
 
     def build(self) -> ModelTrainConfig:
         tokenizer = self.tokenizer
-        model = getattr(TransformerConfig, "olmo2_1b")(
+        model = getattr(TransformerConfig, "olmo2_1B")(
             init_seed=self.seed,
             compile=self.model_config.compile,
             # d_model=self.model_config.d_model,
