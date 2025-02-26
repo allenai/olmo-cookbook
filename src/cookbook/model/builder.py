@@ -155,9 +155,6 @@ class TransformerConfigBuilder:
         return round(parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length))
 
     def get_batch_size(self, parameters: int) -> int:
-        if self.sequence_length != 2048:
-            raise NotImplementedError("Only sequence length 2048 is supported right now")
-
         global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
         global_batch_size /= self.model_config.batch_divisor
         global_batch_size = round(global_batch_size)
@@ -214,16 +211,17 @@ class TransformerConfigBuilder:
 
     def build(self) -> ModelTrainConfig:
         tokenizer = self.tokenizer
-        model = TransformerConfig.llama_like(
+        model = getattr(TransformerConfig, "olmo2_1b")(
+            init_seed=self.seed,
             compile=self.model_config.compile,
-            d_model=self.model_config.d_model,
-            n_layers=self.model_config.n_layers,
-            n_heads=self.model_config.n_heads,
+            # d_model=self.model_config.d_model,
+            # n_layers=self.model_config.n_layers,
+            # n_heads=self.model_config.n_heads,
             vocab_size=tokenizer.padded_vocab_size(),
-            rope_theta=self.model_config.rope_theta,
-            layer_norm_eps=self.model_config.layer_norm_eps,
-            qk_norm=self.model_config.qk_norm,
-            block_name=self.model_config.block_type,
+            # rope_theta=self.model_config.rope_theta,
+            # layer_norm_eps=self.model_config.layer_norm_eps,
+            # qk_norm=self.model_config.qk_norm,
+            # block_name=self.model_config.block_type,
             dp_config=TransformerDataParallelConfig(
                 name=self.model_config.dp_type,
                 param_dtype=DType.bfloat16,
@@ -236,7 +234,6 @@ class TransformerConfigBuilder:
 
         if self.sequence_length == 4096:
             learning_rate /= 4
-            raise NotImplementedError("Only sequence length 2048 is supported right now")
 
         optim_config = AdamWConfig(
             lr=learning_rate,
@@ -245,9 +242,11 @@ class TransformerConfigBuilder:
             group_overrides=[
                 OptimGroupOverride(
                     params=["embeddings.weight"],
-                    opts=dict(weight_decay=self.model_config.weight_decay),
+                    opts=dict(weight_decay=0.0),
                 )
             ],
+            fused=True,
+            weight_decay=self.model_config.weight_decay,
         )
 
         mixture_config = MixtureBuilder(
@@ -263,6 +262,7 @@ class TransformerConfigBuilder:
             source_mixture_config=mixture_config,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
+            max_target_sequence_length=8192,
             tokenizer=tokenizer,
             work_dir=self.dataset_cache,
         )
