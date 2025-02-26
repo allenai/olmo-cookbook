@@ -1,48 +1,10 @@
-from cookbook.analysis.process.preprocess import fsize, recursive_pull, load_df_parallel, cleanup_metrics_df, sanity_check
+from cookbook.analysis.process.preprocess import sanity_check
+from cookbook.analysis.process.aws import process_local_folder
+
 from cookbook.analysis.process.hf import push_parquet_to_hf
 from cookbook.analysis.process.aws import mirror_s3_to_local
 from cookbook.analysis.utils import DATA_DIR
 from pathlib import Path
-
-
-def process_local_folder(local_results_path, file_type='predictions'):
-    data_dir = Path(DATA_DIR).resolve()
-    data_dir.mkdir(exist_ok=True)
-
-    aws_dir         = data_dir / local_results_path
-    prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
-    metrics_path    = data_dir / f"{local_results_path}_metrics.parquet"
-
-    predictions_df = recursive_pull(aws_dir, file_type)
-
-    # Save predictions to parquet
-    import time
-    start_time = time.time()
-    
-    df = load_df_parallel(predictions_df, file_type) # for 6700 preds: 300s (5 min)
-
-    print(f"Converted to pandas in: {time.time() - start_time:.4f} seconds")
-
-    if file_type == 'metrics':
-        df = cleanup_metrics_df(df)
-
-        print(df.columns)
-
-        df.to_parquet(metrics_path)
-        print('Done!')
-        return
-
-    # Reset the df index (for faster indexing)
-    df.set_index(['task', 'model', 'step', 'mix'], inplace=True)
-
-    # Save to parquet
-    df.to_parquet(prediction_path, index=True)
-    print(f"Predictions saved to {prediction_path} ({fsize(prediction_path):.2f} GB)")
-
-    print('Done!')
-
-    return prediction_path
-
 
 def main():
     """

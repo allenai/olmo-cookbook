@@ -13,6 +13,7 @@ from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
 from cookbook.cli.eval import convert, evaluate
+from cookbook.cli.analysis import download, run
 from cookbook.utils.config import (
     config_from_path,
     mk_experiment_group,
