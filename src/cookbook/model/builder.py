@@ -100,6 +100,7 @@ class TransformerConfigBuilder:
     dtype: str
     weka: bool
     wandb_config: Optional[WandbConfig]
+    max_dp_world_size: int
     profile: bool = False
 
     def __init__(
@@ -119,6 +120,7 @@ class TransformerConfigBuilder:
         seed: int = 42,
         s3: bool = True,
         profile: bool = False,
+        max_dp_world_size: int = 64,
     ):
         self.run_name = run_name
         self.sources = sources
@@ -135,6 +137,7 @@ class TransformerConfigBuilder:
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
         self.wandb_config = wandb_config
+        self.max_dp_world_size = max_dp_world_size
 
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
 
@@ -155,15 +158,17 @@ class TransformerConfigBuilder:
         return round(parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length))
 
     def get_batch_size(self, parameters: int) -> int:
+        assert self.sequence_length in {2048, 4096, 8192}
+        seq_len_divisor = self.sequence_length // 2048
+
         global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
-        global_batch_size /= self.model_config.batch_divisor
+        global_batch_size /= seq_len_divisor
+        global_batch_size /= self.max_dp_world_size
         global_batch_size = round(global_batch_size)
-        global_batch_size *= self.model_config.batch_divisor
+        global_batch_size *= self.max_dp_world_size
 
-        global_batch_size = self.next_power_of_2(global_batch_size)
         print(f"Global batch size is: {global_batch_size}")
-
-        return global_batch_size
+        return self.next_power_of_2(self.sequence_length * global_batch_size)
 
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()

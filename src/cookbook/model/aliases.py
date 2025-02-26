@@ -32,7 +32,6 @@ class ModelConfig:
     save_interval: int = 1000
     eval_interval: int = 200
     device_batch_size: int = 8
-    batch_divisor: int = 32
     eps: float = 1e-8
     betas: tuple = (0.9, 0.95)
     weight_decay: float = 0.1
