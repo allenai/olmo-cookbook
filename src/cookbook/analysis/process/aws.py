@@ -1,5 +1,4 @@
-import sys
-import os
+import sys, os, re
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
@@ -8,8 +7,6 @@ import boto3
 # Add parent directory to the path
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
-
-from utils import DATA_DIR
 
 EXCLUDED_FILE_NAMES = [
     'requests.jsonl',
@@ -30,6 +27,12 @@ def download_file(s3_client, bucket_name, key, local_dir, excluded_file_names):
         local_file_size = os.path.getsize(local_path)
         if s3_file_size == local_file_size:
             return  # Skip download if the file already exists and has the same size
+        
+    # 1) Remove any subfolders after checkpoint: [MODEL_NAME]/step2693-hf/gsm8k__olmes/result.json => step2693-hf/result.json
+    local_path = re.sub(r'([^/]+)/[^/]+/([^/]+)$', r'\1/\2', local_path)
+    
+    # 2) Remove any subfolders after checkpoint: [MODEL_NAME]/stepXXXX???/.../... => stepXXXX???/file
+    local_path = re.sub(r'(step\d+[^/]*)/.*?/([^/]+)$', r'\1/\2', local_path)
 
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     s3_client.download_file(bucket_name, key, local_path)
@@ -49,28 +52,34 @@ def fetch_keys_for_prefix(bucket_name, prefix):
     return keys
 
 
-def mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=100, excluded_file_names=EXCLUDED_FILE_NAMES, s3_prefix_list=None):
+def mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=100, excluded_file_names=EXCLUDED_FILE_NAMES):
     """ Recursively download an S3 folder to mirror remote """
     s3_client = boto3.client('s3')
-    paginator = s3_client.get_paginator('list_objects_v2')
     keys = []
 
-    if s3_prefix_list is not None:
-        with open(s3_prefix_list, 'r') as file:
-            s3_prefixes = [line.strip() for line in file.readlines() if line.strip()]
-    else:
+    if not isinstance(s3_prefix, list):
         s3_prefixes = [s3_prefix]
+    else:
+        s3_prefixes = s3_prefix
 
+    print(f'Searching through S3 prefixes: {s3_prefixes}')
+
+    # with ProcessPoolExecutor() as executor:
     with ThreadPoolExecutor(max_workers=100) as executor:
-        pages = paginator.paginate(Bucket=bucket_name, Prefix=s3_prefix)
-        keys = []
-        for result in tqdm(executor.map(fetch_page, pages), desc="Listing S3 entries"):
-            keys.extend(result)
+        future_to_prefix = {}
+        with tqdm(total=len(s3_prefixes), desc="Submitting S3 prefix tasks", unit="prefix") as submit_pbar:
+            for prefix in s3_prefixes:
+                future = executor.submit(fetch_keys_for_prefix, bucket_name, prefix)
+                future_to_prefix[future] = prefix
+                submit_pbar.update(1)
 
-        for s3_prefix in tqdm(s3_prefixes, desc="Processing S3 prefixes", unit="prefix"):
-            pages = paginator.paginate(Bucket=bucket_name, Prefix=s3_prefix)
-            for result in executor.map(fetch_page, pages):
-                keys.extend(result)
+        with tqdm(total=len(future_to_prefix), desc="Fetching keys from S3 prefixes", unit="prefix") as pbar:
+            for future in as_completed(future_to_prefix):
+                try:
+                    keys.extend(future.result())
+                except Exception as e:
+                    print(f"Error processing prefix {future_to_prefix[future]}: {e}")
+                pbar.update(1)
 
     if max_threads > 1:
         # ProcessPoolExecutor seems not to work with AWS, so we use ThreadPoolExecutor
@@ -83,4 +92,3 @@ def mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=100, exclu
         # Sequential implmentation
         for key in tqdm(keys, desc="Syncing download folder from S3", unit="file"):
             download_file(s3_client, bucket_name, key, local_dir, excluded_file_names)
-

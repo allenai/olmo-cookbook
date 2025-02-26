@@ -1,17 +1,17 @@
-from cookbook.eval.process.preprocess import fsize, recursive_pull, load_df_parallel, cleanup_metrics_df, sanity_check
-from cookbook.eval.process.hf import push_parquet_to_hf
-from cookbook.eval.process.aws import mirror_s3_to_local
-from utils import DATA_DIR
+from cookbook.analysis.process.preprocess import fsize, recursive_pull, load_df_parallel, cleanup_metrics_df, sanity_check
+from cookbook.analysis.process.hf import push_parquet_to_hf
+from cookbook.analysis.process.aws import mirror_s3_to_local
+from cookbook.analysis.utils import DATA_DIR
 from pathlib import Path
 
 
-def process_local_folder(folder_name, file_type='predictions'):
+def process_local_folder(local_results_path, file_type='predictions'):
     data_dir = Path(DATA_DIR).resolve()
     data_dir.mkdir(exist_ok=True)
 
-    aws_dir         = data_dir / folder_name
-    prediction_path = data_dir / f"{folder_name}_predictions.parquet"
-    metrics_path    = data_dir / f"{folder_name}_metrics.parquet"
+    aws_dir         = data_dir / local_results_path
+    prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
+    metrics_path    = data_dir / f"{local_results_path}_metrics.parquet"
 
     predictions_df = recursive_pull(aws_dir, file_type)
 
@@ -41,38 +41,42 @@ def process_local_folder(folder_name, file_type='predictions'):
 
     print('Done!')
 
+    return prediction_path
+
 
 def main():
     """
     Mirror AWS bucket to a local folder
     https://us-east-1.console.aws.amazon.com/s3/buckets/ai2-llm?prefix=eval-results/downstream/metaeval/OLMo-ladder/&region=us-east-1&bucketType=general
     """
-    bucket_name = 'ai2-llm'
-    s3_prefix = 'eval-results/downstream/metaeval/'
-    folder_name = 'aws'
+    bucket_name = "ai2-llm"
+    s3_prefix = ["evaluation/anneal-peteish-7b"]
+    local_results_path = 'olmo2_anneals_with_pdf'
 
-    local_dir = f'{DATA_DIR}/{folder_name}'
+    local_dir = f'{DATA_DIR}/{local_results_path}'
 
     mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=100)
 
-    sanity_check(folder_name)
+    sanity_check(local_results_path) # check if any evals are missing
 
     # Launch preprocessing job!
-    process_local_folder(folder_name, file_type='metrics')
-    process_local_folder(folder_name, file_type='predictions')
+    metrics_local_path     = process_local_folder(local_results_path, file_type='metrics')
+    predictions_local_path = process_local_folder(local_results_path, file_type='predictions')
 
     # Push to HF!
     push_parquet_to_hf(
-        parquet_file_path='analysis/data/aws_metrics.parquet',
-        hf_dataset_name='allenai/ladder-evals',
+        parquet_file_path=metrics_local_path,
+        hf_dataset_name='allenai/debug-evals',
         split_name='benchmarks',
-        overwrite=True
+        overwrite=True,
+        private=True
     )
     push_parquet_to_hf(
-        parquet_file_path='analysis/data/aws_predictions.parquet',
-        hf_dataset_name='allenai/ladder-evals',
+        parquet_file_path=predictions_local_path,
+        hf_dataset_name='allenai/debug-evals',
         split_name='instances',
-        overwrite=True
+        overwrite=True,
+        private=True
     )
 
 

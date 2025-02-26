@@ -228,25 +228,3 @@ def compute_weighted_pairwise_p_values(seg_scores, weights=None, return_scores=F
     if return_scores:
         return p_vals, sys_scores, partial
     return p_vals
-
-
-def compute_pairwise_p_values_paired_t_test(seg_scores, return_scores=False):
-    """ Computes pairwise p-values using a paired t-test """
-    num_systems, num_segments = seg_scores.shape
-    seg_scores = seg_scores.astype(np.float32)
-    sys_scores = np.sum(seg_scores, axis=1)
-
-    p_vals = np.empty((num_systems, num_systems)) * np.nan
-    
-    for i in range(num_systems):
-        for j in range(i + 1, num_systems):
-            diff = seg_scores[i, :] - seg_scores[j, :]
-            mean_diff = np.mean(diff)
-            std_diff = np.std(diff, ddof=1)
-            n = num_segments
-            t_stat = mean_diff / (std_diff / np.sqrt(n))
-            p_vals[i, j] = 1 - t.cdf(t_stat, df=n - 1)
-    
-    if return_scores:
-        return p_vals, sys_scores / seg_scores.shape[1], None
-    return p_vals
