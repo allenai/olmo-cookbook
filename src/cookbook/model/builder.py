@@ -20,6 +20,7 @@ from olmo_core.train.callbacks import (
     CheckpointerCallback,
     ConfigSaverCallback,
     DownstreamEvaluatorCallbackConfig,
+    GarbageCollectorCallback,
     GPUMemoryMonitorCallback,
     GradClipperCallback,
     LMEvaluatorCallbackConfig,
@@ -181,6 +182,7 @@ class TransformerConfigBuilder:
             ),
             "gpu_monitor": GPUMemoryMonitorCallback(),
             "grad_clipper": GradClipperCallback(max_grad_norm=self.model_config.max_grad_norm),
+            "garbage_collector": GarbageCollectorCallback(),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
             "checkpointer": CheckpointerCallback(
@@ -284,12 +286,10 @@ class TransformerConfigBuilder:
         trainer_config = TrainerConfig(
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
-            # rank_microbatch_size=self.model_config.device_batch_size * self.sequence_length,
-            rank_microbatch_size=8 * self.sequence_length,
+            rank_microbatch_size=self.model_config.device_batch_size * self.sequence_length,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
-            # z_loss_multiplier=1e-5,
             compile_loss=True,
             max_duration=Duration.tokens(self.max_tokens),
         )
