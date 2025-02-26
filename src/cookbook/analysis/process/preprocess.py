@@ -290,7 +290,7 @@ def get_metadata_from_file_name(root, file):
     # Use last two folders as "path"/"step":
     # E.g., ../peteish-moreeval-1B-0.5xC/step8145-unsharded-hf
     if len(path_parts) >= 2:
-        if 'step' in path_parts[-1]: # and ('-unsharded' in path_parts[-1] or '-hf' in path_parts[-1])
+        if path_parts[-1].startswith('step'): # and ('-unsharded' in path_parts[-1] or '-hf' in path_parts[-1])
             # Local OLMo runs (anything that ends in "stepXXX-unsharded")
             model_name = path_parts[-2]
             step_str = path_parts[-1]
@@ -477,38 +477,7 @@ def sanity_check(folder_name):
     model_tasks = defaultdict(set)
     for (root, file) in all_files:
         model_name, mix_name, step, step_str, size, token_ratio, task = get_metadata_from_file_name(root, file)
-        # synthetic evals (excluded from Ian's model for now)
-        if ':cot' in task:
-            continue
-        if ':pertub_cot' in task:
-            continue
-        if ':para' in task:
-            continue
-        if ':perturb_cot' in task:
-            continue
-        if ':distractors' in task:
-            continue
-        if ':enlarge' in task:
-            continue
-        if ':perturb_rc' in task:
-            continue
-        if 'bbh_' in task:
-            continue
-
-        # only math/code
-        if not ('gsm8k' in task or 'mbpp' in task or 'codex' in task or 'minerva' in task):
-            continue
-
-        # perplexity evals
-        if '-verbose' in task:
-            continue
-        if task in ["paloma_twitterAAE_HELM_fixed", "paloma_c4_100_domains", "paloma_dolma_100_subreddits"]:
-            # these tasks are half-evaluated and shouldn't be in there anyways
-            continue
-        # if 'paloma' in task or 'llm_compression' in task or 'custom_loss' in task:
-        #     continue
         model_tasks[f'{model_name}-{step}'].add(task)
-        # model_tasks[f'{model_name}'].add(task)
 
     all_tasks = set(task for tasks in model_tasks.values() for task in tasks)
     incomplete_models = {model for model, tasks in model_tasks.items() if tasks != all_tasks}

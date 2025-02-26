@@ -35,6 +35,8 @@ eval = [
     "statsmodels",
     "matplotlib",
     "scipy",
+    "pandas",
+    "tqdm"
 ]
 beaker = [
     "beaker-py",
