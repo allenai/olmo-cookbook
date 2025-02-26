@@ -168,7 +168,7 @@ class TransformerConfigBuilder:
         global_batch_size *= self.max_dp_world_size
 
         print(f"Global batch size is: {global_batch_size}")
-        return self.next_power_of_2(self.sequence_length * global_batch_size)
+        return self.sequence_length * global_batch_size
 
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
@@ -288,7 +288,7 @@ class TransformerConfigBuilder:
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
-            z_loss_multiplier=1e-5,
+            # z_loss_multiplier=1e-5,
             max_duration=Duration.tokens(self.max_tokens),
         )
 
