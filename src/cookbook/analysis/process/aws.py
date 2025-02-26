@@ -34,6 +34,9 @@ def download_file(s3_client, bucket_name, key, local_dir, excluded_file_names):
     # 2) Remove any subfolders after checkpoint: [MODEL_NAME]/stepXXXX???/.../... => stepXXXX???/file
     local_path = re.sub(r'(step\d+[^/]*)/.*?/([^/]+)$', r'\1/\2', local_path)
 
+    # 3) Remove the task-XXX- prefix
+    local_path = re.sub(r'task-\d+-', '', local_path)
+
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     s3_client.download_file(bucket_name, key, local_path)
 
