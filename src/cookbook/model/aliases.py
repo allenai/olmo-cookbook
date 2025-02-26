@@ -39,7 +39,7 @@ class ModelConfig:
     max_grad_norm: float = 1.0
     decay_embeddings: bool = False
     qk_norm: bool = True
-    dp_type: DataParallelType = DataParallelType.hsdp
+    dp_type: DataParallelType = DataParallelType.fsdp
     block_type: TransformerBlockType = TransformerBlockType.reordered_norm
 
     @classmethod
