@@ -117,7 +117,6 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            # Add a new cookbook specific image, this will work for now
             beaker_image="petew/olmo-core-nightly",
             priority=group.config.priority,
             env_secrets=[
