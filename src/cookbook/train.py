@@ -64,7 +64,9 @@ def train(
     # Because this is happening on-box in Beaker we want paths normalized for usage there.
     source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
 
+    dp_world_size = base_config.nodes * base_config.gpus
     config = TransformerConfigBuilder(
+        max_dp_world_size=dp_world_size,
         beaker_user=beaker_user,
         cluster=base_config.cluster,
         group_id=group_id.strip(),
