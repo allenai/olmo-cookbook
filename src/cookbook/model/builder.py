@@ -159,30 +159,18 @@ class TransformerConfigBuilder:
         return round(parameters / (self.get_batch_size(parameters) * self.model_config.max_sequence_length))
 
     def get_batch_size(self, parameters: int) -> int:
+        assert self.sequence_length in {2048, 4096, 8192}
+        seq_len_divisor = self.sequence_length // 2048
 
-        # global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
-        # global_batch_size /= self.model_config.batch_divisor
-        # global_batch_size = round(global_batch_size)
-        # global_batch_size *= self.model_config.batch_divisor
+        global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
+        global_batch_size /= seq_len_divisor
+        global_batch_size /= self.max_dp_world_size
+        global_batch_size = round(global_batch_size)
+        global_batch_size *= self.max_dp_world_size
 
-        # global_batch_size = self.next_power_of_2(global_batch_size)
-        # print(f"Global batch size is: {global_batch_size}")
-
-        return 1024 * 4096
-
-    # def get_batch_size(self, parameters: int) -> int:
-    #     assert self.sequence_length in {2048, 4096, 8192}
-    #     seq_len_divisor = self.sequence_length // 2048
-
-    #     global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
-    #     global_batch_size /= seq_len_divisor
-    #     global_batch_size /= self.max_dp_world_size
-    #     global_batch_size = round(global_batch_size)
-    #     global_batch_size *= self.max_dp_world_size
-
-    #     global_batch_size = self.sequence_length * global_batch_size
-    #     print(f"Global batch size is: {global_batch_size}")
-    #     return global_batch_size
+        global_batch_size = self.sequence_length * global_batch_size
+        print(f"Global batch size is: {global_batch_size}")
+        return global_batch_size
 
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
@@ -209,18 +197,18 @@ class TransformerConfigBuilder:
                 cancel_check_interval=10,
                 enabled=True,
             ),
-            # TODO: Add Comet ML callback
-            "lm_evaluator": LMEvaluatorCallbackConfig(
-                eval_dataset=NumpyDatasetConfig.from_data_mix(
-                    DataMix.v3_small_ppl_validation,
-                    name=NumpyDatasetType.padded_fsl,
-                    mix_base_dir=self.root_dir,
-                    sequence_length=self.sequence_length,
-                    tokenizer=self.tokenizer,
-                    work_dir=self.dataset_cache,
-                ),
-                eval_interval=self.model_config.eval_interval,
-            ),
+            # # TODO: Add Comet ML callback
+            # "lm_evaluator": LMEvaluatorCallbackConfig(
+            #     eval_dataset=NumpyDatasetConfig.from_data_mix(
+            #         DataMix.v3_small_ppl_validation,
+            #         name=NumpyDatasetType.padded_fsl,
+            #         mix_base_dir=self.root_dir,
+            #         sequence_length=self.sequence_length,
+            #         tokenizer=self.tokenizer,
+            #         work_dir=self.dataset_cache,
+            #     ),
+            #     eval_interval=self.model_config.eval_interval,
+            # ),
             # # TODO: Make this configurable?
             # "downstream_evaluator": DownstreamEvaluatorCallbackConfig(
             #     tasks=[task.value for task in DownstreamEvaluators],
@@ -292,7 +280,7 @@ class TransformerConfigBuilder:
             global_batch_size=global_batch_size,
             work_dir=self.dataset_cache,
             seed=self.seed,
-            num_workers=16,
+            num_workers=12,
         )
 
         trainer_config = TrainerConfig(
@@ -302,7 +290,8 @@ class TransformerConfigBuilder:
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
-            # compile_loss=True,
+            compile_loss=True,
+            z_loss_multiplier=1e-5,
             max_duration=Duration.tokens(self.max_tokens),
         )
 
