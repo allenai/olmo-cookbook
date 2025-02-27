@@ -168,7 +168,7 @@ class TransformerConfigBuilder:
         global_batch_size = round(global_batch_size)
         global_batch_size *= self.max_dp_world_size
 
-        global_batch_size = self.sequence_length * global_batch_size
+        global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
         print(f"Global batch size is: {global_batch_size}")
         return global_batch_size
 
