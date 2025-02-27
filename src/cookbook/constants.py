@@ -156,6 +156,16 @@ ALL_GEN_TASKS = [
     "gsm8k::olmo1",
 ]
 
+ALL_MATH_TASKS = [
+    "minerva_math_algebra::olmes",
+    "minerva_math_counting_and_probability::olmes",
+    "minerva_math_geometry::olmes",
+    "minerva_math_intermediate_algebra::olmes",
+    "minerva_math_number_theory::olmes",
+    "minerva_math_prealgebra::olmes",
+    "minerva_math_precalculus::olmes",
+]
+
 
 ALL_CODEX_TASKS = [
     "codex_humaneval:temp0.8",
@@ -173,6 +183,7 @@ ALL_NAMED_GROUPS = {
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+    "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
 }
