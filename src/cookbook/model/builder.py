@@ -223,6 +223,9 @@ class TransformerConfigBuilder:
         source_paths = None
 
         if is_fractional:
+            logger.info(
+                "Using fractional source_mixture dataset builder... This can take awhile for large token populations!"
+            )
             mixture_config = MixtureBuilder(
                 sources=self.sources,
                 max_tokens=self.max_tokens,
