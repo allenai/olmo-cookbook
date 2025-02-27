@@ -265,7 +265,8 @@ class TransformerConfigBuilder:
 
         # TODO(undfined): Figure out how we want to do this long term
         global_batch_size = 1024 * self.sequence_length
-        learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
+        learning_rate = 4e-4
+        # learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
 
         if self.sequence_length == 4096:
             learning_rate /= 4
