@@ -289,7 +289,7 @@ class TransformerConfigBuilder:
         )
 
         data_loader_config = NumpyDataLoaderConfig(
-            global_batch_size=global_batch_size * self.sequence_length,
+            global_batch_size=global_batch_size,
             work_dir=self.dataset_cache,
             seed=self.seed,
             num_workers=16,
