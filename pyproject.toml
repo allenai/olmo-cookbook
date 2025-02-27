@@ -30,6 +30,7 @@ dev = [
     "pytest",
 ]
 eval = [
+    "adjustText",
     "statsmodels",
     "matplotlib",
     "scipy",

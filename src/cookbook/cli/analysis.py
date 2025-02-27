@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 from cookbook.analysis.process.aws import mirror_s3_to_local, process_local_folder
-from cookbook.analysis.run_analysis import run_analysis
+from cookbook.analysis.run_analysis import run_instance_analysis, run_benchmark_analysis
 from cookbook.analysis.utils import DATA_DIR
 
 logger = logging.getLogger(__name__)
@@ -57,13 +57,29 @@ def download(bucket_name: str, s3_prefix: list[str], local_results_path: str, ma
     required=True,
     help="Local path to results file",
 )
-def run(local_results_path: str):
+@click.option(
+    "--type",
+    type=click.Choice(['instances', 'benchmarks']),
+    required=True,
+    help="Type of analysis to run",
+)
+@click.option(
+    "--external-evals-path",
+    type=str,
+    default="allenai/ladder-evals",
+    help="Path to hf dataset of external model evals to plot against",
+)
+def run(local_results_path: str, type: str, external_evals_path: str):
     """Run analysis on processed prediction files."""
     data_dir = Path(DATA_DIR).resolve()
     prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
     metrics_path    = data_dir / f"{local_results_path}_metrics.parquet"
     
-    results_df = run_analysis(prediction_path)
+    if type == 'instances':
+        results_df = run_instance_analysis(prediction_path)
+    else:
+        results_df = run_benchmark_analysis(metrics_path, external_evals_path=external_evals_path)
+    
 
 if __name__ == "__main__":
     cli()
