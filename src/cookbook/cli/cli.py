@@ -62,6 +62,8 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
         experiment_config.dataset.sources, experiment_config.dataset.dtype, not no_cache
     )
 
+    token_universe = ({}, 0)
+
     logger.info("Token distribution by source:")
     logger.info(token_universe)
 
