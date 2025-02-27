@@ -222,14 +222,7 @@ class TransformerConfigBuilder:
         model = getattr(TransformerConfig, "olmo2_1B")(
             init_seed=self.seed,
             compile=self.model_config.compile,
-            # d_model=self.model_config.d_model,
-            # n_layers=self.model_config.n_layers,
-            # n_heads=self.model_config.n_heads,
             vocab_size=tokenizer.padded_vocab_size(),
-            # rope_theta=self.model_config.rope_theta,
-            # layer_norm_eps=self.model_config.layer_norm_eps,
-            # qk_norm=self.model_config.qk_norm,
-            # block_name=self.model_config.block_type,
             dp_config=TransformerDataParallelConfig(
                 name=self.model_config.dp_type,
                 param_dtype=DType.bfloat16,
@@ -237,7 +230,6 @@ class TransformerConfigBuilder:
             ),
         )
 
-        # global_batch_size = self.get_batch_size(model.num_params)
         global_batch_size = 1024 * self.sequence_length
         learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
 
@@ -258,21 +250,21 @@ class TransformerConfigBuilder:
             weight_decay=self.model_config.weight_decay,
         )
 
-        # mixture_config = MixtureBuilder(
-        #     sources=self.sources,
-        #     max_tokens=self.max_tokens,
-        #     sequence_length=self.sequence_length,
-        #     seed=self.seed,
-        #     processes=16,
-        #     dtype=self.dataset_dtype,
-        # ).build()
+        mixture_config = MixtureBuilder(
+            sources=self.sources,
+            max_tokens=self.max_tokens,
+            sequence_length=self.sequence_length,
+            seed=self.seed,
+            processes=12,
+            dtype=self.dataset_dtype,
+        ).build()
 
-        source_files = []
-        for source in self.sources:
-            source_files.extend(source.paths)
+        # source_files = []
+        # for source in self.sources:
+        #     source_files.extend(source.paths)
 
         dataset_config = NumpyDatasetConfig(
-            paths=source_files,
+            source_mixture_config=mixture_config,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             max_target_sequence_length=8192,
