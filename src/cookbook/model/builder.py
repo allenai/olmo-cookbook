@@ -266,8 +266,12 @@ class TransformerConfigBuilder:
         #     dtype=self.dataset_dtype,
         # ).build()
 
-        dataset_config = NumpyDatasetConfig.from_data_mix(
-            mix=DataMix.OLMoE_mix_0824,
+        source_files = []
+        for source in self.sources:
+            source_files.extend(source.paths)
+
+        dataset_config = NumpyDatasetConfig(
+            paths=source_files,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             max_target_sequence_length=8192,
