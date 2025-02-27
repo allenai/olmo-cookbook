@@ -62,9 +62,6 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
         experiment_config.dataset.sources, experiment_config.dataset.dtype, not no_cache
     )
 
-    logger.info("Token distribution by source:")
-    logger.info(token_universe)
-
     if group_id:
         group_uuid = group_id
     else:
@@ -74,6 +71,8 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
 
     logger.info(experiment_config)
+    logger.info("Token distribution by source:")
+    logger.info(token_universe)
     if not click.confirm("Proceed with this configuration?", default=False):
         logger.info("Launch cancelled!")
         return
