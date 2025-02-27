@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 
 from olmo_core.config import DType
 from olmo_core.data import (
-    DataMix,
     NumpyDataLoaderConfig,
     NumpyDatasetConfig,
     NumpyDatasetType,
@@ -217,8 +216,42 @@ class TransformerConfigBuilder:
             # ),
         }
 
+    def build_dataset_config(self) -> NumpyDatasetConfig:
+        is_fractional = any(source.ratio is not None and source.ratio != 1 for source in self.sources)
+
+        mixture_config = None
+        source_paths = None
+
+        if is_fractional:
+            mixture_config = MixtureBuilder(
+                sources=self.sources,
+                max_tokens=self.max_tokens,
+                sequence_length=self.sequence_length,
+                seed=self.seed,
+                processes=12,
+                dtype=self.dataset_dtype,
+            ).build()
+        else:
+            source_paths = []
+            for source in self.sources:
+                source_paths.extend(source.paths)
+
+        dataset_config = NumpyDatasetConfig(
+            paths=source_paths,
+            source_mixture_config=mixture_config,
+            name=NumpyDatasetType.fsl,
+            sequence_length=self.sequence_length,
+            # TODO(undfined): Parameterize this
+            max_target_sequence_length=8192,
+            tokenizer=self.tokenizer,
+            mix_base_dir=self.root_dir,
+            work_dir=self.dataset_cache,
+        )
+        return dataset_config
+
     def build(self) -> ModelTrainConfig:
         tokenizer = self.tokenizer
+        # TODO(undfined): Parameterize this model selection
         model = getattr(TransformerConfig, "olmo2_1B")(
             init_seed=self.seed,
             compile=self.model_config.compile,
@@ -230,6 +263,7 @@ class TransformerConfigBuilder:
             ),
         )
 
+        # TODO(undfined): Figure out how we want to do this long term
         global_batch_size = 1024 * self.sequence_length
         learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
 
@@ -250,28 +284,7 @@ class TransformerConfigBuilder:
             weight_decay=self.model_config.weight_decay,
         )
 
-        mixture_config = MixtureBuilder(
-            sources=self.sources,
-            max_tokens=self.max_tokens,
-            sequence_length=self.sequence_length,
-            seed=self.seed,
-            processes=12,
-            dtype=self.dataset_dtype,
-        ).build()
-
-        # source_files = []
-        # for source in self.sources:
-        #     source_files.extend(source.paths)
-
-        dataset_config = NumpyDatasetConfig(
-            source_mixture_config=mixture_config,
-            name=NumpyDatasetType.fsl,
-            sequence_length=self.sequence_length,
-            max_target_sequence_length=8192,
-            tokenizer=tokenizer,
-            mix_base_dir=self.root_dir,
-            work_dir=self.dataset_cache,
-        )
+        dataset_config = self.build_dataset_config()
 
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
