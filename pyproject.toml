@@ -32,6 +32,7 @@ dev = [
     "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 eval = [
+    "adjustText",
     "statsmodels",
     "matplotlib",
     "scipy",
