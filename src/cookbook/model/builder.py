@@ -209,12 +209,12 @@ class TransformerConfigBuilder:
                 ),
                 eval_interval=self.model_config.eval_interval,
             ),
-            # TODO: Make this configurable?
-            "downstream_evaluator": DownstreamEvaluatorCallbackConfig(
-                tasks=[task.value for task in DownstreamEvaluators],
-                tokenizer=self.tokenizer,
-                eval_interval=self.model_config.eval_interval,
-            ),
+            # # TODO: Make this configurable?
+            # "downstream_evaluator": DownstreamEvaluatorCallbackConfig(
+            #     tasks=[task.value for task in DownstreamEvaluators],
+            #     tokenizer=self.tokenizer,
+            #     eval_interval=self.model_config.eval_interval,
+            # ),
         }
 
     def build(self) -> ModelTrainConfig:
