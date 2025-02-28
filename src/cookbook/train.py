@@ -58,31 +58,35 @@ def train(
     Launch a training run with the given parameters.
     """
 
-    # TODO(undfined): pass the cached token universe or skip fractional dataset creation
     base_config = config_from_path(config_path)
 
     # Because this is happening on-box in Beaker we want paths normalized for usage there.
     source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
-
     dp_world_size = base_config.nodes * base_config.gpus
+
     config = TransformerConfigBuilder(
-        max_dp_world_size=dp_world_size,
         beaker_user=beaker_user,
         cluster=base_config.cluster,
-        group_id=group_id.strip(),
-        run_name=run_name.strip(),
-        max_tokens=base_config.max_tokens,
-        sources=source_instances,
-        sequence_length=base_config.sequence_length,
-        seed=base_config.seed,
+        downstream_evaluator=base_config.downstream_evaluator,
         dtype=base_config.dataset.dtype,
-        tokenizer=base_config.tokenizer,
+        eval_interval=base_config.eval_interval,
+        group_id=group_id.strip(),
+        lm_evaluator=base_config.lm_evaluator,
+        max_dp_world_size=dp_world_size,
+        max_target_sequence_length=base_config.max_target_sequence_length,
+        max_tokens=base_config.max_tokens,
         model_identifier=base_config.model,
-        weka=base_config.weka,
+        run_name=run_name.strip(),
+        save_interval=base_config.save_interval,
+        seed=base_config.seed,
+        sequence_length=base_config.sequence_length,
+        sources=source_instances,
+        tokenizer=base_config.tokenizer,
         wandb_config=base_config.wandb,
+        weka=base_config.weka,
     ).build()
-    dataset = config.dataset.build()
 
+    dataset = config.dataset.build()
     device = get_default_device()
     world_mesh = config.model.build_mesh(device=device)
 
