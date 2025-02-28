@@ -104,6 +104,9 @@ def train(
     cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
     cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
+    logger.info("Configuration:")
+    logger.info(config_dict)
+
     trainer.fit()
 
 
