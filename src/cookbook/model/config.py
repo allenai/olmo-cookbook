@@ -42,11 +42,6 @@ class DefaultTransformerProperties:
     rope_theta: int = 500_000
 
 
-class OptimizerConfig(AdamWConfig):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
 class WrappedTransformerConfig(TransformerConfig):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
