@@ -111,7 +111,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             clusters=[group.config.cluster],
             num_nodes=group.config.nodes,
             num_gpus=group.config.gpus,
-            shared_filesystem=group.config.shared_filesystem,
+            shared_filesystem=group.config.weka,
             allow_dirty=True,
             weka_buckets=weka_buckets,
             budget=group.config.budget or "ai2/oe-data",
