@@ -74,6 +74,7 @@ class WrappedTransformerConfig(TransformerConfig):
     def olmo2_core_190M(cls, dp_type: Optional[DataParallelType] = None) -> "WrappedTransformerConfig":
         return WrappedTransformerConfig(
             **getattr(TransformerConfig, "olmo2_190M")(
+                vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
                 compile=True,
                 dp_config=TransformerDataParallelConfig(
                     name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
@@ -90,6 +91,7 @@ class WrappedTransformerConfig(TransformerConfig):
         """
         return WrappedTransformerConfig(
             **getattr(TransformerConfig, "olmo2_1B")(
+                vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
                 compile=True,
                 dp_config=TransformerDataParallelConfig(
                     name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
