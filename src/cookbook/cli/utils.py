@@ -253,10 +253,9 @@ def add_aws_flags(
 
     if not aws_access_key_id or not aws_secret_access_key:
         # if keys are not set, we are still okay to proceed if they are already set in the workspace
-        return (
-            check_if_secret_exists_in_beaker_workspace("AWS_ACCESS_KEY_ID", workspace)
-            and check_if_secret_exists_in_beaker_workspace("AWS_SECRET_ACCESS_KEY", workspace)
-        )
+        return check_if_secret_exists_in_beaker_workspace(
+            "AWS_ACCESS_KEY_ID", workspace
+        ) and check_if_secret_exists_in_beaker_workspace("AWS_SECRET_ACCESS_KEY", workspace)
 
     aws_access_key_id_secret = add_secret_to_beaker_workspace(
         secret_name="AWS_ACCESS_KEY_ID",
@@ -302,7 +301,7 @@ def clone_repository(git_url: str, commit_hash: str | None = None) -> str:
         tmp_dir = mkdtemp()
 
         # Base clone command with minimal history
-        cmd = shlex.split(f"git clone --depth 1 {git_url}")
+        cmd = shlex.split(f"git clone --depth {git_url}")
 
         if commit_hash:
             cmd.append("--no-checkout")
