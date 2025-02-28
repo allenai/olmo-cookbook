@@ -105,7 +105,7 @@ def evaluate_checkpoint(
                 secret_name="HUGGING_FACE_HUB_TOKEN",
                 secret_value=huggingface_secret,
                 workspace=workspace,
-                env=env,    # pyright: ignore
+                env=env,  # pyright: ignore
             )
             flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
             flags.append("--gantry-args '{\"hf_token\":true}'")
