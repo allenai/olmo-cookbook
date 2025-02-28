@@ -105,7 +105,7 @@ class TransformerConfigBuilder:
     sequence_length: int
     max_target_sequence_length: int
     max_tokens: int
-    transformer_config: WrappedTransformerConfig
+    transformer_config: TransformerConfig
     group_id: str
     cluster: str
     beaker_user: str
