@@ -301,10 +301,10 @@ def clone_repository(git_url: str, commit_hash: str | None = None) -> str:
         tmp_dir = mkdtemp()
 
         # Base clone command with minimal history
-        cmd = shlex.split(f"git clone --depth {git_url}")
+        cmd = shlex.split(f"git clone {git_url}")
 
-        if commit_hash:
-            cmd.append("--no-checkout")
+        #  if commit_hash:
+        #      cmd.append("--no-checkout")
 
         cmd.append(tmp_dir)
 
