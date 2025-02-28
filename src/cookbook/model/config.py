@@ -42,67 +42,58 @@ class DefaultTransformerProperties:
     rope_theta: int = 500_000
 
 
-class WrappedTransformerConfig(TransformerConfig):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
+class WrappedTransformerConfig:
     @classmethod
-    def olmo_30m(cls, tokenizer: TokenizerConfig) -> "WrappedTransformerConfig":
+    def olmo_30m(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         OLMo 30m
         """
-        return WrappedTransformerConfig(
-            **getattr(TransformerConfig, "llama_like")(
-                d_model=256,
-                n_heads=8,
-                n_layers=4,
-                vocab_size=tokenizer.padded_vocab_size(),
-                compile=DefaultTransformerProperties.compile,
-                rope_theta=DefaultTransformerProperties.rope_theta,
-                layer_norm_eps=DefaultTransformerProperties.layer_norm_eps,
-                qk_norm=DefaultTransformerProperties.qk_norm,
-                block_name=DefaultTransformerProperties.block_type,
-                dp_config=TransformerDataParallelConfig(
-                    name=DefaultTransformerProperties.dp_type,
-                    param_dtype=DType.bfloat16,
-                    reduce_dtype=DType.float32,
-                ),
-            )
-        )
-
-    @classmethod
-    def olmo2_core_190M(cls, dp_type: Optional[DataParallelType] = None) -> "WrappedTransformerConfig":
-        return WrappedTransformerConfig(
-            **getattr(TransformerConfig, "olmo2_190M")(
-                vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
-                compile=True,
-                dp_config=TransformerDataParallelConfig(
-                    name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
-                    param_dtype=DType.bfloat16,
-                    reduce_dtype=DType.float32,
-                ),
+        return getattr(TransformerConfig, "llama_like")(
+            d_model=256,
+            n_heads=8,
+            n_layers=4,
+            vocab_size=tokenizer.padded_vocab_size(),
+            compile=DefaultTransformerProperties.compile,
+            rope_theta=DefaultTransformerProperties.rope_theta,
+            layer_norm_eps=DefaultTransformerProperties.layer_norm_eps,
+            qk_norm=DefaultTransformerProperties.qk_norm,
+            block_name=DefaultTransformerProperties.block_type,
+            dp_config=TransformerDataParallelConfig(
+                name=DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
             ),
         )
 
     @classmethod
-    def olmo2_core_1B(cls, dp_type: Optional[DataParallelType] = None) -> "WrappedTransformerConfig":
+    def olmo2_core_190M(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
+        return getattr(TransformerConfig, "olmo2_190M")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            compile=True,
+            dp_config=TransformerDataParallelConfig(
+                name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+            ),
+        )
+
+    @classmethod
+    def olmo2_core_1B(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
         """
         OLMo2 1b (1_336_035_328 parameters)
         """
-        return WrappedTransformerConfig(
-            **getattr(TransformerConfig, "olmo2_1B")(
-                vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
-                compile=True,
-                dp_config=TransformerDataParallelConfig(
-                    name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
-                    param_dtype=DType.bfloat16,
-                    reduce_dtype=DType.float32,
-                ),
+        return getattr(TransformerConfig, "olmo2_1B")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            compile=True,
+            dp_config=TransformerDataParallelConfig(
+                name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
             ),
         )
 
     @classmethod
-    def from_model_identifier(cls, model_identifier: str) -> "WrappedTransformerConfig":
+    def from_model_identifier(cls, model_identifier: str) -> TransformerConfig:
         if model_identifier == "olmo_30m":
             return cls.olmo_30m(TokenizerConfig.gpt_neox_olmo_dolma_v1_5())
         elif model_identifier == "olmo2_190M":
