@@ -309,7 +309,6 @@ class TransformerConfigBuilder:
         # learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
         learning_rate = 4e-4
 
-        transformer_config = self.transformer_config
         dataset_config = self.build_dataset_config()
 
         if self.sequence_length == 4096:
@@ -336,12 +335,12 @@ class TransformerConfigBuilder:
             max_duration=Duration.tokens(self.max_tokens),
         )
 
-        for callback_name, callback in self.build_callbacks(transformer_config).items():
+        for callback_name, callback in self.build_callbacks(self.transformer_config).items():
             trainer_config.callbacks[callback_name] = callback
 
         return ModelTrainConfig(
             init_seed=self.seed,
-            model=transformer_config,
+            model=self.transformer_config,
             optim=optim_config,
             dataset=dataset_config,
             data_loader=data_loader_config,
