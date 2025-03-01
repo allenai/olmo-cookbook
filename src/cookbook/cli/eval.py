@@ -18,6 +18,7 @@ from cookbook.constants import (
 )
 from cookbook.eval.conversion import convert_checkpoint
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.results import get_results
 
 logger = logging.getLogger(__name__)
 
@@ -306,6 +307,53 @@ def evaluate(
     )
 
 
+@click.option("-c", "--checkpoint-path", multiple=True, type=str, default=[])
+@click.option("-a", "--add-bos-token", is_flag=True, help="Add BOS token")
+@click.option("-d", "--dashboard", type=str, default=None, help="Set dashboard name")
+@click.option(
+    "-t",
+    "--tasks",
+    type=str,
+    multiple=True,
+    default=[],
+    help=(
+        "Set specific tasks or tasks groups. Can be specified multiple times. "
+        f"Tasks groups are: {', '.join(ALL_NAMED_GROUPS)}"
+    ),
+)
+@click.option("-r", "--dry-run", is_flag=True, help="Dry run (do not launch jobs)")
+@click.option(
+    "--force-venv",
+    is_flag=True,
+    help="Force creation of new virtual environment",
+    default=False,
+)
+@click.option(
+    "--env-name",
+    type=str,
+    default="oe-eval-venv",
+    help="Name of the environment to use for evaluation",
+)
+def results(
+    checkpoint_path: list[str],
+    add_bos_token: bool,
+    dashboard: str,
+    tasks: list[str],
+    dry_run: bool,
+    force_venv: bool,
+    env_name: str,
+):
+    get_results(
+        checkpoint_path=checkpoint_path,
+        add_bos_token=add_bos_token,
+        dashboard=dashboard,
+        tasks=tasks,
+        dry_run=dry_run,
+        python_venv_force=force_venv,
+        python_venv_name=env_name,
+    )
+
+
 @click.group()
 def cli():
     pass
@@ -313,6 +361,7 @@ def cli():
 
 cli.command()(convert)
 cli.command()(evaluate)
+cli.command()(results)
 
 if __name__ == "__main__":
     cli({})
