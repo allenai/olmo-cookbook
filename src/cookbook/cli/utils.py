@@ -98,16 +98,18 @@ def get_aws_access_key_id() -> Optional[str]:
             )
             return output.stdout.decode().strip()
         except Exception:
-            return None
-    elif "AWS_ACCESS_KEY_ID" in os.environ:
+            pass
+
+    if "AWS_ACCESS_KEY_ID" in os.environ:
         return os.environ["AWS_ACCESS_KEY_ID"]
-    elif os.path.exists("~/.aws/credentials"):
+
+    if os.path.exists("~/.aws/credentials"):
         with open("~/.aws/credentials", "r") as f:
             for line in f:
                 if line.startswith("aws_access_key_id"):
                     return line.split("=")[1].strip()
-    else:
-        return None
+
+    return None
 
 
 def get_aws_secret_access_key() -> Optional[str]:
@@ -120,16 +122,18 @@ def get_aws_secret_access_key() -> Optional[str]:
             )
             return output.stdout.decode().strip()
         except Exception:
-            return None
-    elif "AWS_SECRET_ACCESS_KEY" in os.environ:
+            pass
+
+    if "AWS_SECRET_ACCESS_KEY" in os.environ:
         return os.environ["AWS_SECRET_ACCESS_KEY"]
-    elif os.path.exists("~/.aws/credentials"):
+
+    if os.path.exists("~/.aws/credentials"):
         with open("~/.aws/credentials", "r") as f:
             for line in f:
                 if line.startswith("aws_secret_access_key"):
                     return line.split("=")[1].strip()
-    else:
-        return None
+
+    return None
 
 
 def install_oe_eval(
