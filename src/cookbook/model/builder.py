@@ -185,21 +185,23 @@ class TransformerConfigBuilder:
             logger.info(f"Invalid tokenizer identifier: {tokenizer}")
             raise e
 
-    def get_warmup_steps(self, parameters: int) -> int:
-        return round(parameters / (self.get_batch_size(parameters) * self.sequence_length))
+    def get_warmup_steps(self) -> int:
+        return 2000
 
     def get_batch_size(self, parameters: int) -> int:
-        assert self.sequence_length in {2048, 4096, 8192}
-        seq_len_divisor = self.sequence_length // 2048
+        # assert self.sequence_length in {2048, 4096, 8192}
+        # seq_len_divisor = self.sequence_length // 2048
 
-        global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
-        global_batch_size /= seq_len_divisor
-        global_batch_size /= self.max_dp_world_size
-        global_batch_size = round(global_batch_size)
-        global_batch_size *= self.max_dp_world_size
+        # global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
+        # global_batch_size /= seq_len_divisor
+        # global_batch_size /= self.max_dp_world_size
+        # global_batch_size = round(global_batch_size)
+        # global_batch_size *= self.max_dp_world_size
 
-        global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
+        global_batch_size = 1024 * self.sequence_length
+        # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
         print(f"Global batch size is: {global_batch_size}")
+
         return global_batch_size
 
     def next_power_of_2(self, x: int) -> int:
@@ -207,9 +209,7 @@ class TransformerConfigBuilder:
 
     def build_callbacks(self, model: TransformerConfig) -> Dict[str, Callback]:
         callbacks = {
-            "lr_scheduler": SchedulerCallback(
-                scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps(model.num_params))
-            ),
+            "lr_scheduler": SchedulerCallback(scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps())),
             "gpu_monitor": GPUMemoryMonitorCallback(),
             "grad_clipper": GradClipperCallback(max_grad_norm=self.max_grad_norm),
             "garbage_collector": GarbageCollectorCallback(),
@@ -304,7 +304,7 @@ class TransformerConfigBuilder:
         )
 
     def build(self) -> ModelTrainConfig:
-        global_batch_size = 1024 * self.sequence_length
+        global_batch_size = self.get_batch_size(self.transformer_config.num_params)
         # TODO(undfined): Figure out how we want to do this long term
         # learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
         learning_rate = 4e-4
