@@ -11,7 +11,7 @@ from olmo_core.data import (
 )
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.nn.transformer import TransformerConfig
-from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride
+from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride, Scheduler
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -35,6 +35,7 @@ from cookbook.model.config import (
     SupportedTokenizers,
     WrappedTransformerConfig,
 )
+from cookbook.model.schedulers import WSD
 from cookbook.model.evaluators import DownstreamEvaluators
 
 logger = logging.getLogger(__name__)
@@ -65,14 +66,14 @@ class TransformerConfigBuilder:
         eval_interval (int): The evaluation interval. Default is 200.
         save_interval (int): The save interval. Default is 1000.
         lm_evaluator (bool): Whether to enable language model evaluation. Default is False.
-        downstream_evaluator (bool): Whether to enable downstream evaluation. Default is False.
+        downstream_evaluators (list[DownstreamEvaluators]): The downstream evaluators. Default is an empty list.
         profile (bool): Whether to enable profiling. Default is False.
 
     Methods:
         __init__(run_name, sources, sequence_length, max_tokens, group_id, cluster, beaker_user,
                  tokenizer, dtype, model_identifier, weka, wandb_config=None, max_target_sequence_length=8192,
                  seed=42, s3=True, profile=False, max_dp_world_size=64, save_interval=1000, eval_interval=200,
-                 lm_evaluator=False, downstream_evaluator=False):
+                 lm_evaluator=False, downstream_evaluators=[]):
             Initializes the TransformerConfigBuilder.
 
         get_tokenizer_config(tokenizer: str) -> TokenizerConfig:
@@ -119,7 +120,7 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    downstream_evaluator: bool
+    downstream_evaluators: List[DownstreamEvaluators]
     profile: bool = False
 
     def __init__(
@@ -139,7 +140,7 @@ class TransformerConfigBuilder:
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
-        downstream_evaluator: bool,
+        downstream_evaluators: List[DownstreamEvaluators],
         wandb_config: Optional[WandbConfig] = None,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
@@ -167,7 +168,7 @@ class TransformerConfigBuilder:
         self.save_interval = save_interval
         self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
-        self.downstream_evaluator = downstream_evaluator
+        self.downstream_evaluators = downstream_evaluators
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
 
@@ -243,10 +244,9 @@ class TransformerConfigBuilder:
                 eval_interval=self.eval_interval,
             )
 
-        # TODO(undfined): This can be made fully configurable in the future
-        if self.downstream_evaluator:
+        if self.downstream_evaluators:
             callbacks["downstream_evaluator"] = DownstreamEvaluatorCallbackConfig(
-                tasks=[task.value for task in DownstreamEvaluators],
+                tasks=[evaluator.value for evaluator in self.downstream_evaluators],
                 tokenizer=self.tokenizer,
                 eval_interval=self.eval_interval,
             )
@@ -288,6 +288,16 @@ class TransformerConfigBuilder:
         )
         return dataset_config
 
+    def get_scheduler_config(self, scheduler_type: str = "cosine") -> Scheduler:
+        if scheduler_type == "cosine":
+            return CosWithWarmup(warmup_steps=self.get_warmup_steps())
+        elif scheduler_type == "wsd":
+            return WSD(
+                warmup_steps=self.get_warmup_steps(),
+            )
+        else:
+            raise ValueError(f"Unsupported scheduler type: {scheduler_type}")
+
     def get_optimizer_config(self, learning_rate: float) -> AdamWConfig:
         return AdamWConfig(
             lr=learning_rate,
@@ -327,7 +337,7 @@ class TransformerConfigBuilder:
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
             # TODO(undfined): How should we be pick rmbz?
-            rank_microbatch_size=8 * self.sequence_length,
+            rank_microbatch_size=16 * self.sequence_length,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
