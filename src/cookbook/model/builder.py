@@ -327,7 +327,7 @@ class TransformerConfigBuilder:
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
             # TODO(undfined): How should we be pick rmbz?
-            rank_microbatch_size=4 * self.sequence_length,
+            rank_microbatch_size=8 * self.sequence_length,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
