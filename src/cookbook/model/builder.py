@@ -307,7 +307,7 @@ class TransformerConfigBuilder:
         global_batch_size = self.get_batch_size(self.transformer_config.num_params)
         # TODO(undfined): Figure out how we want to do this long term
         # learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
-        learning_rate = 4e-4
+        learning_rate = 1.8e-3
 
         dataset_config = self.build_dataset_config()
 
