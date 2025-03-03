@@ -16,6 +16,7 @@ weka: true
 dataset:
   sources:
   - name: starcoder1
+    target_ratio: 1.0
     paths:
     - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-00-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-01-00000.npy
