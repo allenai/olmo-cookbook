@@ -97,15 +97,15 @@ class DownstreamEvaluators(Enum):
     MMLU_HUMANITIES_BPB = "mmlu_humanities_bpb"
     MMLU_SOCIAL_SCIENCES_BPB = "mmlu_social_sciences_bpb"
     MMLU_OTHER_BPB = "mmlu_other_bpb"
-    CODEX_MBPP_BPB = "codex_mbpp_bpb"
-    CODEX_HUMANEVAL_BPB = "codex_humaneval_bpb"
+    # CODEX_MBPP_BPB = "codex_mbpp_bpb"
+    # CODEX_HUMANEVAL_BPB = "codex_humaneval_bpb"
 
 
-class EvaluationGroups(Enum):
-    """Enum class enumerating
-    available in-loop evaluators groups."""
+# class EvaluationGroups(Enum):
+#     """Enum class enumerating
+#     available in-loop evaluators groups."""
 
-    code_bpb = [
-        DownstreamEvaluators.CODEX_MBPP_BPB,
-        DownstreamEvaluators.CODEX_HUMANEVAL_BPB,
-    ]
+#     code_bpb = [
+#         DownstreamEvaluators.CODEX_MBPP_BPB,
+#         DownstreamEvaluators.CODEX_HUMANEVAL_BPB,
+#     ]
