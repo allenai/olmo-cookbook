@@ -331,7 +331,6 @@ class TransformerConfigBuilder:
             cancel_check_interval=5,
             compile_loss=True,
             z_loss_multiplier=1e-5,
-            max_duration=Duration.tokens(self.max_tokens),
         )
 
         for callback_name, callback in self.build_callbacks(self.transformer_config).items():
