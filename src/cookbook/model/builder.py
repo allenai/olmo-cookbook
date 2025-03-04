@@ -339,17 +339,13 @@ class TransformerConfigBuilder:
 
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_batch_size(self.transformer_config.num_params)
-        # TODO(undfined): Figure out how we want to do this long term
-        # learning_rate = 4.7e-3 * (model.num_params / tokenizer.padded_vocab_size()) ** (-1 / 3)
-        learning_rate = 1.8e-3
-
-        dataset_config = self.build_dataset_config()
+        learning_rate = self.get_learning_rate()
 
         if self.sequence_length == 4096:
             learning_rate /= 4
 
+        dataset_config = self.build_dataset_config()
         optim_config = self.get_optimizer_config()
-
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
             work_dir=self.dataset_cache,
