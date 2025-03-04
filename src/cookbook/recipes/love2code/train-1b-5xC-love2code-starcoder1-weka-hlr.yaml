@@ -7,9 +7,7 @@ gpus: 8
 preemptible: false
 max_tokens: 113_184_153_600 # 5xC multiplier
 sequence_length: 2048
-# evaluators:
-#   - CODEX_MBPP_BPB
-#   - CODEX_HUMANEVAL_BPB
+learning_rate: 1.8e-3
 seed: 1337
 model: "olmo2_1B"
 tokenizer: "dolma2"

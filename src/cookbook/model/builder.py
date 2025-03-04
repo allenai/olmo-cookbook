@@ -34,6 +34,7 @@ from cookbook.model.config import (
     ModelTrainConfig,
     SupportedTokenizers,
     WrappedTransformerConfig,
+    MODEL_TO_LR_MAP,
 )
 from cookbook.model.schedulers import WSD
 from cookbook.model.evaluators import DownstreamEvaluators
@@ -106,6 +107,7 @@ class TransformerConfigBuilder:
     sequence_length: int
     max_target_sequence_length: int
     max_tokens: int
+    model_identifier: str
     transformer_config: TransformerConfig
     group_id: str
     cluster: str
@@ -121,6 +123,7 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     downstream_evaluators: List[DownstreamEvaluators]
+    learning_rate: Optional[float]
     profile: bool = False
 
     def __init__(
@@ -141,6 +144,7 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluators],
+        learning_rate: Optional[float] = None,
         wandb_config: Optional[WandbConfig] = None,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
@@ -153,6 +157,7 @@ class TransformerConfigBuilder:
         self.max_tokens = max_tokens
         self.group_id = group_id
         self.seed = seed
+        self.model_identifier = model_identifier
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
@@ -168,6 +173,7 @@ class TransformerConfigBuilder:
         self.save_interval = save_interval
         self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
+        self.learning_rate = learning_rate
         self.downstream_evaluators = downstream_evaluators
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
@@ -204,6 +210,24 @@ class TransformerConfigBuilder:
         print(f"Global batch size is: {global_batch_size}")
 
         return global_batch_size
+
+    # def default_learning_rate(self) -> float:
+    #     learning_rate = 4.7e-3 * (self.transformer_config.num_params / self.tokenizer.padded_vocab_size()) ** (
+    #         -1 / 3
+    #     )
+    #     learning_rate = learning_rate / self.sequence_length
+    #     return learning_rate
+
+    def get_learning_rate(self) -> float:
+        if self.learning_rate:
+            return self.learning_rate
+
+        maybe_lr = MODEL_TO_LR_MAP.get(self.model_identifier)
+
+        if maybe_lr:
+            return maybe_lr
+        else:
+            return 5e-4
 
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
@@ -298,9 +322,9 @@ class TransformerConfigBuilder:
         else:
             raise ValueError(f"Unsupported scheduler type: {scheduler_type}")
 
-    def get_optimizer_config(self, learning_rate: float) -> AdamWConfig:
+    def get_optimizer_config(self) -> AdamWConfig:
         return AdamWConfig(
-            lr=learning_rate,
+            lr=self.get_learning_rate(),
             eps=DefaultOptimizerProperties.eps,
             betas=DefaultOptimizerProperties.betas,
             group_overrides=[
@@ -324,7 +348,7 @@ class TransformerConfigBuilder:
         if self.sequence_length == 4096:
             learning_rate /= 4
 
-        optim_config = self.get_optimizer_config(learning_rate=learning_rate)
+        optim_config = self.get_optimizer_config()
 
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
