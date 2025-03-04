@@ -1,11 +1,12 @@
-name: "olmo-cookbook-1b-5xC-love2code"
+name: "olmo-cookbook-1b-5xC-love2code-no-prose-hlr"
 description: "Love2Code model, first stab at a config"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: false
-max_tokens: 113_184_153_600 # 5xC multiplier
+max_tokens: 113_184_153_600 # 5xC multipve/lier
+
 sequence_length: 2048
 seed: 1337
 learning_rate: 1.8e-3
@@ -19,51 +20,111 @@ dataset:
   - name: the-stack-v2-ai2v0
     target_ratio: 1.0
     paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-001-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-025-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-122-00001.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-004-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-060-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-024-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-092-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-082-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-052-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-018-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-118-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-055-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-058-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-060-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-109-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-119-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-043-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-097-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-067-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-029-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-086-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-101-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-090-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-099-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-037-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-123-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-106-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-110-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-088-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-035-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-015-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-048-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-108-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-011-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-055-00002.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-006-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-007-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00002.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-009-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-010-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-011-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-012-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-014-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-015-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-016-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-017-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-018-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-020-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-020-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-022-00003.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-024-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-024-00002.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-025-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-027-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00002.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00003.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-029-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-001-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-030-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-031-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-032-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-034-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-035-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-037-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-038-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-040-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00001.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00002.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-043-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-020-00001.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-045-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-046-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-053-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-101-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-100-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-071-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-117-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-047-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-048-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-048-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-034-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-112-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-020-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-096-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-093-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-121-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-116-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-068-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-122-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-099-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-042-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-115-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-074-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-081-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-073-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-046-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-093-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-038-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-031-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-103-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-099-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-070-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-008-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-111-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-092-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-048-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-083-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-078-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-060-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-077-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-027-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-016-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-105-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-040-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-111-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-077-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-014-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-095-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-051-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-010-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-022-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-028-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-058-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-024-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-009-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-017-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-110-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-012-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00002.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/love2code/stack2_v0_trunc/part-050-00003.npy
