@@ -1,0 +1,94 @@
+name: "olmo-cookbook-1b-5xC-love2code-starcoder-no-prose"
+description: "Love2Code model, but with starcoder1 data and no prose"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: false
+max_tokens: 113_184_153_600 # 5xC multiplier
+sequence_length: 2048
+seed: 1337
+model: "olmo2_1B"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: starcoder1
+    target_ratio: 1.0
+    paths:
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-00-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-01-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-01-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-02-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-02-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-03-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-03-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-04-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-05-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-05-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-06-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-06-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-07-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-08-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-08-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-09-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-09-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-10-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-11-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-11-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-12-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-12-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-13-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-14-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-15-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-15-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-16-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-17-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-18-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-19-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-19-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-20-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-20-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-21-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-22-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-22-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-23-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-23-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-24-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-25-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-25-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-26-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-27-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-28-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-28-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-29-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-29-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-30-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-31-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-31-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-32-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-32-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-33-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-33-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-34-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-34-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-35-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-35-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-36-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-37-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-37-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-38-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-39-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-40-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-40-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-41-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-41-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-42-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-43-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-44-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-45-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-46-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-47-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/starcoder/v0_decontaminated_doc_only/allenai/dolma2-tokenizer/part-48-00000.npy

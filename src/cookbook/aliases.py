@@ -6,6 +6,8 @@ from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from pydantic import BaseModel
 
+from cookbook.model.evaluators import DownstreamEvaluators
+
 PathType = Union[Path, PathLike[Any], str]
 
 try:
@@ -57,7 +59,7 @@ class ExperimentConfig(BaseModel):
     tokenizer: str
     model: str
     lm_evaluator: bool = False
-    downstream_evaluator: bool = False
+    downstream_evaluators: list[DownstreamEvaluators] = []
     max_target_sequence_length: int = 8192
     wandb: Optional[WandbConfig] = None
     preemptible: bool = True

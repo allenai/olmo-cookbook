@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import cast, List, Tuple
+from typing import List, Tuple, cast
 
 import yaml
 from olmo_core.launch.beaker import (
@@ -113,7 +113,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     config = TransformerConfigBuilder(
         beaker_user=beaker_user,
         cluster=base_config.cluster,
-        downstream_evaluator=base_config.downstream_evaluator,
+        downstream_evaluators=base_config.downstream_evaluators,
         dtype=base_config.dataset.dtype,
         eval_interval=base_config.eval_interval,
         group_id=group_id.strip(),
