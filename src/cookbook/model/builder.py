@@ -240,7 +240,7 @@ class TransformerConfigBuilder:
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
 
-    def build_callbacks(self, model: TransformerConfig) -> Dict[str, Callback]:
+    def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
             "lr_scheduler": SchedulerCallback(scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps())),
             "gpu_monitor": GPUMemoryMonitorCallback(),
@@ -374,7 +374,7 @@ class TransformerConfigBuilder:
             max_duration=Duration.tokens(self.max_tokens),
         )
 
-        for callback_name, callback in self.build_callbacks(self.transformer_config).items():
+        for callback_name, callback in self.build_callbacks().items():
             trainer_config.callbacks[callback_name] = callback
 
         return ModelTrainConfig(
