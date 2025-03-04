@@ -30,14 +30,14 @@ from olmo_core.train.callbacks import (
 from cookbook.aliases import SourceInstance, WandbConfig
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
+    MODEL_TO_LR_MAP,
     DefaultOptimizerProperties,
     ModelTrainConfig,
     SupportedTokenizers,
     WrappedTransformerConfig,
-    MODEL_TO_LR_MAP,
 )
-from cookbook.model.schedulers import WSD
 from cookbook.model.evaluators import DownstreamEvaluators
+from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 

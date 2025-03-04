@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import cast, List, Tuple
+from typing import List, Tuple, cast
 
 import yaml
 from olmo_core.launch.beaker import (

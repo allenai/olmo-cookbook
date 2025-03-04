@@ -1,8 +1,8 @@
-from typing import Optional, Union
 from dataclasses import dataclass
-from olmo_core.exceptions import OLMoConfigurationError
-import torch
+from typing import Optional, Union
 
+import torch
+from olmo_core.exceptions import OLMoConfigurationError
 from olmo_core.optim import Scheduler
 
 
