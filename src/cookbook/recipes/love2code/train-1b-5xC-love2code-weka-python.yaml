@@ -13,7 +13,6 @@ tokenizer: "dolma2"
 priority: high
 cluster: ai2/jupiter-cirrascale-2
 weka: true
-learning_rate: 1.8e-3
 dataset:
   sources:
   - name: the-stack-v2-ai2v0
