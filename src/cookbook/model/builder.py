@@ -53,41 +53,46 @@ class TransformerConfigBuilder:
         sequence_length (int): The sequence length for the model.
         max_target_sequence_length (int): The maximum target sequence length for the model.
         max_tokens (int): The maximum number of tokens to train on.
-        transformer_config (WrappedTransformerConfig): The transformer configuration.
+        model_identifier (str): The identifier for the model.
+        transformer_config (TransformerConfig): The transformer configuration.
         group_id (str): The group ID for the run.
         cluster (str): The cluster name.
         beaker_user (str): The Beaker user name.
         s3 (bool): Whether to use S3 for storage.
-        seed (int): The random seed for reproducibility. Default is 42.
+        seed (int): The random seed for reproducibility.
         tokenizer (TokenizerConfig): The tokenizer configuration.
         dtype (str): The data type for the dataset.
-        weka (bool): Whether to use Weka buckets. Default is False.
-        wandb_config (Optional[WandbConfig]): The Weights and Biases configuration. Default is None.
-        max_dp_world_size (int): The maximum data parallel world size. Default is 64.
-        eval_interval (int): The evaluation interval. Default is 200.
-        save_interval (int): The save interval. Default is 1000.
-        lm_evaluator (bool): Whether to enable language model evaluation. Default is False.
-        downstream_evaluators (list[DownstreamEvaluators]): The downstream evaluators. Default is an empty list.
-        profile (bool): Whether to enable profiling. Default is False.
+        weka (bool): Whether to use Weka buckets.
+        wandb_config (Optional[WandbConfig]): The Weights and Biases configuration.
+        max_dp_world_size (int): The maximum data parallel world size.
+        eval_interval (int): The evaluation interval.
+        save_interval (int): The save interval.
+        lm_evaluator (bool): Whether to enable language model evaluation.
+        downstream_evaluators (List[DownstreamEvaluators]): The downstream evaluators.
+        learning_rate (Optional[float]): The learning rate for the optimizer.
+        profile (bool): Whether to enable profiling.
 
     Methods:
         __init__(run_name, sources, sequence_length, max_tokens, group_id, cluster, beaker_user,
-                 tokenizer, dtype, model_identifier, weka, wandb_config=None, max_target_sequence_length=8192,
-                 seed=42, s3=True, profile=False, max_dp_world_size=64, save_interval=1000, eval_interval=200,
-                 lm_evaluator=False, downstream_evaluators=[]):
+                 tokenizer, dtype, model_identifier, weka, max_dp_world_size, save_interval, eval_interval,
+                 lm_evaluator, downstream_evaluators, learning_rate=None, wandb_config=None,
+                 max_target_sequence_length=8192, seed=42, s3=True, profile=False):
             Initializes the TransformerConfigBuilder.
 
         get_tokenizer_config(tokenizer: str) -> TokenizerConfig:
             Returns the tokenizer configuration based on the tokenizer identifier.
 
-        get_warmup_steps(parameters: int) -> int:
-            Returns the number of warmup steps based on the model parameters.
+        get_warmup_steps() -> int:
+            Returns the number of warmup steps.
 
-        get_batch_size(parameters: int) -> int:
-            Returns the global batch size based on the sequence length and model parameters.
+        get_batch_size() -> int:
+            Returns the global batch size based on the sequence length.
 
         next_power_of_2(x: int) -> int:
             Returns the next power of 2 greater than or equal to x.
+
+        get_learning_rate() -> float:
+            Returns the learning rate for the optimizer.
 
         build_callbacks(model: TransformerConfig) -> Dict[str, Callback]:
             Builds and returns a dictionary of callbacks for the trainer.
@@ -95,7 +100,10 @@ class TransformerConfigBuilder:
         build_dataset_config() -> NumpyDatasetConfig:
             Builds and returns the dataset configuration.
 
-        get_optimizer_config(learning_rate: float) -> AdamWConfig:
+        get_scheduler_config(scheduler_type: str = "cosine") -> Scheduler:
+            Returns the scheduler configuration based on the scheduler type.
+
+        get_optimizer_config() -> AdamWConfig:
             Returns the optimizer configuration.
 
         build() -> ModelTrainConfig:
