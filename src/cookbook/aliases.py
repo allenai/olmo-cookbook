@@ -56,10 +56,15 @@ class ExperimentConfig(BaseModel):
     dataset: DatasetConfig
     tokenizer: str
     model: str
+    lm_evaluator: bool = False
+    downstream_evaluator: bool = False
+    max_target_sequence_length: int = 8192
     wandb: Optional[WandbConfig] = None
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
+    eval_interval: int = 200
+    save_interval: int = 1000
     path: Path
 
 
