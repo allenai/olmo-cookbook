@@ -195,7 +195,7 @@ class TransformerConfigBuilder:
     def get_warmup_steps(self) -> int:
         return 2000
 
-    def get_batch_size(self, parameters: int) -> int:
+    def get_batch_size(self) -> int:
         # assert self.sequence_length in {2048, 4096, 8192}
         # seq_len_divisor = self.sequence_length // 2048
 
@@ -205,8 +205,8 @@ class TransformerConfigBuilder:
         # global_batch_size = round(global_batch_size)
         # global_batch_size *= self.max_dp_world_size
 
-        global_batch_size = 1024 * self.sequence_length
         # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
+        global_batch_size = 1024 * self.sequence_length
         print(f"Global batch size is: {global_batch_size}")
 
         return global_batch_size
@@ -338,7 +338,7 @@ class TransformerConfigBuilder:
         )
 
     def build(self) -> ModelTrainConfig:
-        global_batch_size = self.get_batch_size(self.transformer_config.num_params)
+        global_batch_size = self.get_batch_size()
         learning_rate = self.get_learning_rate()
 
         if self.sequence_length == 4096:
