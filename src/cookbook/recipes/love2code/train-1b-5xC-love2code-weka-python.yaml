@@ -8,7 +8,7 @@ preemptible: false
 max_tokens: 113_184_153_600 # 5xC multiplier
 sequence_length: 2048
 seed: 1337
-model: "olmo_1b"
+model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/jupiter-cirrascale-2
@@ -17,7 +17,8 @@ dataset:
   sources:
   - name: the-stack-v2-ai2v0
     target_ratio: 0.85
-    paths: # TODO: ADD ACTUAL PATHS
+
+    paths:
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00001.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00002.npy
@@ -1159,7 +1160,11 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00006.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00007.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00008.npy
+<<<<<<< HEAD
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00009.npy    
+=======
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00009.npy
+>>>>>>> main
   - name: dclm-codeprose-v0
     target_ratio: 0.15
     paths:
@@ -1255,4 +1260,7 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-89-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-90-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/dclm_codeprose/dolma2-tokenizer/part-91-00000.npy
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
