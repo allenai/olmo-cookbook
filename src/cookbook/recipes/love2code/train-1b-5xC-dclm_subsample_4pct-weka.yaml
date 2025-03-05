@@ -2,7 +2,7 @@ name: "olmo-cookbook-1b-5xC-dclm_subsample_4pct"
 description: "4pct subsample of dclm-baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
-nodes: 16
+nodes: 8
 gpus: 8
 preemptible: false
 max_tokens: 113_184_153_600 # 5xC multiplier
