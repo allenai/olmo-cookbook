@@ -3,6 +3,7 @@ import shlex
 import subprocess
 from copy import deepcopy
 from hashlib import md5
+import sys
 from urllib.parse import urlparse
 
 from cookbook.cli.utils import (
@@ -11,12 +12,14 @@ from cookbook.cli.utils import (
     add_secret_to_beaker_workspace,
     install_oe_eval,
     make_eval_run_name,
+    escape_datalake_tags
 )
 from cookbook.constants import (
     ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
+    BCOLORS
 )
 
 
@@ -63,6 +66,9 @@ def evaluate_checkpoint(
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
 
+    # these are tags I'm gonna write to datalake
+    tags: dict[str, float | int | str] = {}
+
     # clusters_to_exclude
     clusters_to_exclude: set[str] = set()
 
@@ -90,10 +96,23 @@ def evaluate_checkpoint(
                 "but cluster is not set to 'goog'. Overriding cluster."
             )
             cluster = "goog"
+    elif scheme == "weka":
+        print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
+        for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
+            clusters_to_exclude.add(cl)
     elif scheme:
         raise ValueError(f"Unsupported scheme '{scheme}' in checkpoint path")
     elif checkpoint_path.startswith("/") and any(re.match(rf"/{w}/", checkpoint_path) for w in WEKA_MOUNTS):
-        print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
+        print(
+            BCOLORS.WARNING,
+            "Checkpoint is likely a weka mount because it starts with ",
+            "/".join(checkpoint_path.rsplit("/", 2)[:2]),
+            " WARNING: in the future, we will require the weka:// prefix.",
+            BCOLORS.ENDC,
+            sep="",
+            file=sys.stderr,
+            flush=True
+        )
         for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
             clusters_to_exclude.add(cl)
         checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
@@ -128,7 +147,13 @@ def evaluate_checkpoint(
     flags.append(f"--gpus {num_gpus}")
 
     # datalake parameters (mostly have to push there + tags)
-    flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
+    tags['dashboard'] = dashboard
+    tags['run_name'] = run_name
+    tags['checkpoint_path'] = checkpoint_path
+
+    # we need to excape the tags before pushing them to datalake
+    flags.append(f"--datalake-tags")
+    flags.append(",".join([f"{k}={v}" for k, v in escape_datalake_tags(tags).items()]))
     flags.append("--push-datalake")
 
     # figure out model args based on cli

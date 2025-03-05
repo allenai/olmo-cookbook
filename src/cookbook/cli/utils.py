@@ -1,13 +1,14 @@
-import ast
+import json
 import os
 import re
 import shlex
 import shutil
 import subprocess
+from ast import literal_eval
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
-from typing import List, Optional
+from typing import Any, List, Optional, TypeVar, cast
 from urllib.parse import urlparse
 
 from cookbook.constants import (
@@ -192,7 +193,7 @@ def run_func_in_venv(fn):
                 print(result.stderr.decode())
                 raise RuntimeError("Error running function in virtual environment")
 
-            out = ast.literal_eval(result.stdout.decode())
+            out = literal_eval(result.stdout.decode())
             assert isinstance(out, return_type), f"Expected {return_type}, got {type(out)}"
             return out
 
@@ -468,3 +469,21 @@ def discover_weka_mount(path: str | Path | None = None) -> str | None:
 
     if root in WEKA_MOUNTS:
         return root
+
+
+T = TypeVar("T", bound=dict[str, Any])
+
+
+def escape_datalake_tags(tags: T) -> T:
+    "Replace '=' and ',' with '_' in tag values. pass through json serialzation to sanitize values"
+    try:
+        sanitized_tags = json.loads(json.dumps(tags))
+    except (json.JSONDecodeError, TypeError) as e:
+        raise ValueError(f"Error sanitizing tags {repr(tags)}") from e
+
+    escaped_tags = {
+        k: (v.replace("=", "_").replace(",", "_") if isinstance(v, str) else v)
+        for k, v in sanitized_tags.items()
+    }
+
+    return cast(T, escaped_tags)    # manual casting cuz mypy is dumb
