@@ -177,10 +177,15 @@ ALL_CODEX_TASKS = [
 ]
 
 STARCODER_CODEX_TASKS = [
-    "codex_humaneval:starcoder_pass@1",
-    "codex_humaneval:starcoder_pass@10",
+    "codex_humaneval::starcoder_pass@1",
+    "codex_humaneval::starcoder_pass@10",
     "mbpp::starcoder_pass@1",
     "mbpp::starcoder_pass@10",
+]
+
+STARCODER_PASS_AT_1_TASKS = [
+    "codex_humaneval::starcoder_pass@1",
+    "mbpp::starcoder_pass@1",
 ]
 
 ALL_NAMED_GROUPS = {
@@ -193,6 +198,7 @@ ALL_NAMED_GROUPS = {
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
     "starcoder": STARCODER_CODEX_TASKS,
+    "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
 }
 
