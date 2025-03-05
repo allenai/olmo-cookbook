@@ -45,6 +45,11 @@ def cli():
     default=False,
     help="Ignore cached source details for this experiment launch.",
 )
+@click.option(
+    "--group-id",
+    default=None,
+    help="Overrides the generated run group_id, allows for restarts with config changes or similar",
+)
 def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
     """Launch an experiment."""
 
@@ -81,7 +86,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
                 group=mk_experiment_group(
                     config=experiment_config,
                     priors=token_universe,
-                    group_uuid=group_uuid,
+                    group_id=group_uuid,
                 ),
                 beaker_user=beaker_user,
             )
