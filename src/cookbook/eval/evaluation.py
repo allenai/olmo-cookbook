@@ -1,25 +1,25 @@
 import re
 import shlex
 import subprocess
+import sys
 from copy import deepcopy
 from hashlib import md5
-import sys
 from urllib.parse import urlparse
 
 from cookbook.cli.utils import (
     PythonEnv,
     add_aws_flags,
     add_secret_to_beaker_workspace,
+    escape_datalake_tags,
     install_oe_eval,
     make_eval_run_name,
-    escape_datalake_tags
 )
 from cookbook.constants import (
     ALL_NAMED_GROUPS,
+    BCOLORS,
     BEAKER_KNOWN_CLUSTERS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
-    BCOLORS
 )
 
 
@@ -111,7 +111,7 @@ def evaluate_checkpoint(
             BCOLORS.ENDC,
             sep="",
             file=sys.stderr,
-            flush=True
+            flush=True,
         )
         for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
             clusters_to_exclude.add(cl)
@@ -147,9 +147,9 @@ def evaluate_checkpoint(
     flags.append(f"--gpus {num_gpus}")
 
     # datalake parameters (mostly have to push there + tags)
-    tags['dashboard'] = dashboard
-    tags['checkpoint'] = run_name
-    tags['checkpoint_path'] = checkpoint_path
+    tags["dashboard"] = dashboard
+    tags["checkpoint"] = run_name
+    tags["checkpoint_path"] = checkpoint_path
 
     # we need to excape the tags before pushing them to datalake
     flags.append(f"--datalake-tags")
