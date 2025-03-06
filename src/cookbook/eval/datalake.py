@@ -46,6 +46,11 @@ class ResultType(Enum):
 OE_EVAL_DATALAKE_BASE_API_URL = "https://oe-eval-datalake.allen.ai"
 CACHE_APPLICATION_NAME = "oe-eval-datalake"
 CACHE_USER_NAME = "olmo-cookbook"
+MAX_WORKERS = 20
+
+
+def get_max_workers(work_units: int, debug: bool = False) -> int:
+    return 1 if debug else min(work_units, MAX_WORKERS)
 
 
 def get_logger():
@@ -169,7 +174,7 @@ def _download_results(
         return results
 
     start = time.time()
-    max_workers = 1 if debug else count_files
+    max_workers = get_max_workers(count_files, debug=debug)
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         results = [
             task_result
@@ -385,7 +390,7 @@ def _process_fine_grained_predictions(
         )
         return predictions, metrics
 
-    max_workers = 1 if debug else len(experiments)
+    max_workers = get_max_workers(len(experiments), debug=debug)
     logger.info("Downloading results for %d experiments with %d workers", len(experiments), max_workers)
 
     start = time.time()
@@ -463,7 +468,7 @@ def get_simple_dashboard_metrics(
 
     logger.info(f"Found {len(experiments)} experiments for dashboard name {dashboard_name}")
 
-    max_workers = 1 if debug else len(experiments)
+    max_workers = get_max_workers(len(experiments), debug=debug)
     logger.info("Downloading results for %d experiments with %d workers", len(experiments), max_workers)
 
     start = time.time()

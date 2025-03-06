@@ -65,3 +65,11 @@ olmo-cookbook-eval evaluate \
   --model-backend vllm
   --dashboard peteish32
 ```
+
+### Get Evaluation Results
+
+```shell
+olmo-cookbook-eval results \
+  olmoe-0125 \
+  --tasks gen
+```

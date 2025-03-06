@@ -1,10 +1,10 @@
 import pprint
 from cookbook.constants import ALL_NAMED_GROUPS
 
-from .datalake import get_simple_dashboard_metrics
+from .datalake import get_dashboard_fine_grained_predictions
 
 
-def simple_dashboard(
+def get_results(
     dashboard: str,
     tasks: list[str],
     models: list[str],
@@ -14,7 +14,7 @@ def simple_dashboard(
 ):
     valid_tasks = set(task for task_group in tasks for task in ALL_NAMED_GROUPS.get(task_group, [task_group]))
     valid_models = set(models)
-    metrics = get_simple_dashboard_metrics(
+    _, metrics = get_dashboard_fine_grained_predictions(
         dashboard_name=dashboard,
         cache_dir=cache_dir,
         invalidate_cache=invalidate_cache,

@@ -500,6 +500,6 @@ def unpack_datalake_tags(tags_str: str) -> dict[str, Any]:
         v = v.replace("\\,", ",").replace("\\=", "=")
         try:
             tags[k] = literal_eval(v)
-        except ValueError:
+        except Exception:
             tags[k] = v
     return tags

@@ -18,7 +18,7 @@ from cookbook.constants import (
 )
 from cookbook.eval.conversion import convert_checkpoint
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.results import simple_dashboard
+from cookbook.eval.results import get_results
 
 logger = logging.getLogger(__name__)
 
@@ -313,7 +313,7 @@ def evaluate(
 @click.option("--cache-dir", type=str, default=None, help="Cache directory")
 @click.option("--invalidate-cache", is_flag=True, help="Invalidate cache")
 @click.option("--debug", is_flag=True, help="Debug mode")
-def dashboard(
+def results(
     dashboard: str,
     tasks: list[str],
     models: list[str],
@@ -321,7 +321,7 @@ def dashboard(
     invalidate_cache: bool,
     debug: bool,
 ):
-    simple_dashboard(
+    get_results(
         dashboard=dashboard,
         tasks=tasks,
         models=models,
@@ -338,7 +338,7 @@ def cli():
 
 cli.command()(convert)
 cli.command()(evaluate)
-cli.command()(dashboard)
+cli.command()(results)
 
 if __name__ == "__main__":
     cli({})
