@@ -18,7 +18,7 @@ from cookbook.constants import (
 )
 from cookbook.eval.conversion import convert_checkpoint
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.results import get_results
+from cookbook.eval.results import simple_dashboard
 
 logger = logging.getLogger(__name__)
 
@@ -307,50 +307,27 @@ def evaluate(
     )
 
 
-@click.option("-c", "--checkpoint-path", multiple=True, type=str, default=[])
-@click.option("-a", "--add-bos-token", is_flag=True, help="Add BOS token")
-@click.option("-d", "--dashboard", type=str, default=None, help="Set dashboard name")
-@click.option(
-    "-t",
-    "--tasks",
-    type=str,
-    multiple=True,
-    default=[],
-    help=(
-        "Set specific tasks or tasks groups. Can be specified multiple times. "
-        f"Tasks groups are: {', '.join(ALL_NAMED_GROUPS)}"
-    ),
-)
-@click.option("-r", "--dry-run", is_flag=True, help="Dry run (do not launch jobs)")
-@click.option(
-    "--force-venv",
-    is_flag=True,
-    help="Force creation of new virtual environment",
-    default=False,
-)
-@click.option(
-    "--env-name",
-    type=str,
-    default="oe-eval-venv",
-    help="Name of the environment to use for evaluation",
-)
-def results(
-    checkpoint_path: list[str],
-    add_bos_token: bool,
+@click.argument("dashboard", type=str)
+@click.option("-t", "--tasks", type=str, multiple=True, help="Set specific tasks or tasks groups")
+@click.option("-m", "--models", type=str, multiple=True, help="Set specific models")
+@click.option("--cache-dir", type=str, default=None, help="Cache directory")
+@click.option("--invalidate-cache", is_flag=True, help="Invalidate cache")
+@click.option("--debug", is_flag=True, help="Debug mode")
+def dashboard(
     dashboard: str,
     tasks: list[str],
-    dry_run: bool,
-    force_venv: bool,
-    env_name: str,
+    models: list[str],
+    cache_dir: str,
+    invalidate_cache: bool,
+    debug: bool,
 ):
-    get_results(
-        checkpoint_path=checkpoint_path,
-        add_bos_token=add_bos_token,
+    simple_dashboard(
         dashboard=dashboard,
         tasks=tasks,
-        dry_run=dry_run,
-        python_venv_force=force_venv,
-        python_venv_name=env_name,
+        models=models,
+        cache_dir=cache_dir,
+        invalidate_cache=invalidate_cache,
+        debug=debug,
     )
 
 
@@ -361,7 +338,7 @@ def cli():
 
 cli.command()(convert)
 cli.command()(evaluate)
-cli.command()(results)
+cli.command()(dashboard)
 
 if __name__ == "__main__":
     cli({})

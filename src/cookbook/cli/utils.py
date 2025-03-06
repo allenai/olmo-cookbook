@@ -487,3 +487,19 @@ def escape_datalake_tags(tags: T) -> T:
     }
 
     return cast(T, escaped_tags)    # manual casting cuz mypy is dumb
+
+
+def format_datalake_tags(tags: dict[str, Any]) -> str:
+    return ",".join([f"{k}={v}" for k, v in escape_datalake_tags(tags).items()])
+
+
+def unpack_datalake_tags(tags_str: str) -> dict[str, Any]:
+    tags = {}
+    for tag_str in re.split(r'(?<!\\),', tags_str):
+        k, v = re.split(r'(?<!\\)=', tag_str, maxsplit=1)
+        v = v.replace("\\,", ",").replace("\\=", "=")
+        try:
+            tags[k] = literal_eval(v)
+        except ValueError:
+            tags[k] = v
+    return tags

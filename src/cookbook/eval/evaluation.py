@@ -148,7 +148,7 @@ def evaluate_checkpoint(
 
     # datalake parameters (mostly have to push there + tags)
     tags['dashboard'] = dashboard
-    tags['run_name'] = run_name
+    tags['checkpoint'] = run_name
     tags['checkpoint_path'] = checkpoint_path
 
     # we need to excape the tags before pushing them to datalake

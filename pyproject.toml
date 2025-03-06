@@ -13,11 +13,11 @@ authors = [
 requires-python = ">=3.9,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
-    "boto3",
     "click",
     "pydantic",
     "s3fs",
     "yaspin",
+    "platformdirs",
     "PyYAML>=6.0,<7.0",
 ]
 
