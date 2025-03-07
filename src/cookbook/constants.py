@@ -176,6 +176,12 @@ ALL_CODEX_TASKS = [
     "bigcodebench_hard::none",
 ]
 
+ALL_1B_TASKS = [
+    "hellaswag",
+    "piqa",
+] + MMLU_CATEGORIES
+
+
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
@@ -186,7 +192,9 @@ ALL_NAMED_GROUPS = {
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+    "1b-evals": ALL_1B_TASKS,
 }
+
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
