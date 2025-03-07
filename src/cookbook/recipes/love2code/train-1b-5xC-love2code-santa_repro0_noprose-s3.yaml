@@ -1,0 +1,22 @@
+name: "olmo-cookbook-1b-5xC-love2code-santacoder_repro0_noprose-s3"
+description: "Love2Code model arch, but with santacoder flow"
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 4
+gpus: 8
+preemptible: false
+max_tokens: 113_184_153_600 # 5xC multiplier
+sequence_length: 2048
+seed: 1337
+model: "olmo2_1B"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: santacoder_repro
+    target_ratio: 1.0
+    paths:
+    - s3://ai2-llm/preprocessed/learn2code/love2code_santacoder_repro/allenai/dolma2-tokenizer/*.npy
+
