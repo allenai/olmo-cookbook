@@ -57,26 +57,26 @@ def mk_source_instances(
 
 
 def mk_experiments(
-    config: ExperimentConfig, group_uuid: str, priors: Tuple[dict[str, float], int]
+    config: ExperimentConfig, group_id: str, priors: Tuple[dict[str, float], int]
 ) -> list[ExperimentInstance]:
     """Generate source instances from a config."""
     return [
         ExperimentInstance(
-            name=f"{config.name}-{group_uuid}",
+            name=f"{config.name}-{group_id}",
             sources=mk_source_instances(config.dataset.sources, priors),
         )
     ]
 
 
 def mk_experiment_group(
-    config: ExperimentConfig, priors: Tuple[dict[str, float], int], group_uuid: str
+    config: ExperimentConfig, priors: Tuple[dict[str, float], int], group_id: str
 ) -> ExperimentGroup:
     """Build an experiment group from an experiment config."""
 
     return ExperimentGroup(
         config=config,
-        group_id=group_uuid,
-        instances=mk_experiments(config, group_uuid, priors),
+        group_id=group_id,
+        instances=mk_experiments(config, group_id, priors),
     )
 
 
