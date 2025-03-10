@@ -192,6 +192,7 @@ ALL_NAMED_GROUPS = {
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+    "all_1b_tasks": ALL_1B_TASKS,
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
