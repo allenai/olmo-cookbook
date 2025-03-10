@@ -361,8 +361,8 @@ def install_olmo_core(commit_hash: str | None, env: PythonEnv | None = None) -> 
 
 def make_destination_dir(input_dir: str, suffix: str, output_dir: str | None = None) -> str:
     if output_dir is None:
-        input_base, input_fn = os.path.split(input_dir)
-        output_dir = os.path.join(input_base, f"{input_fn.rstrip('/')}-{suffix}")
+        input_base, input_fn = os.path.split(input_dir.rstrip("/"))
+        output_dir = os.path.join(input_base, f"{input_fn}-{suffix}")
 
     os.makedirs(output_dir, exist_ok=True)
 

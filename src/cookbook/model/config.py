@@ -5,11 +5,7 @@ from typing import Optional
 from olmo_core.config import Config, DType
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
 from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.nn.transformer import (
-    TransformerBlockType,
-    TransformerConfig,
-    TransformerDataParallelConfig,
-)
+from olmo_core.nn.transformer import TransformerBlockType, TransformerConfig, TransformerDataParallelConfig
 from olmo_core.optim import AdamWConfig
 from olmo_core.train import TrainerConfig
 
@@ -93,6 +89,18 @@ class WrappedTransformerConfig:
         )
 
     @classmethod
+    def starcoder2_3B(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
+        return getattr(TransformerConfig, "starcoder2_3b")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            compile=True,
+            dp_config=TransformerDataParallelConfig(
+                name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+            ),
+        )
+
+    @classmethod
     def from_model_identifier(cls, model_identifier: str) -> TransformerConfig:
         if model_identifier == "olmo_30m":
             return cls.olmo_30m(TokenizerConfig.gpt_neox_olmo_dolma_v1_5())
@@ -100,6 +108,8 @@ class WrappedTransformerConfig:
             return cls.olmo2_core_190M()
         elif model_identifier == "olmo2_1B":
             return cls.olmo2_core_1B()
+        elif model_identifier == "starcoder2_3b":
+            return cls.starcoder2_3B()
         else:
             raise ValueError(f"Model identifier {model_identifier} is not supported.")
 

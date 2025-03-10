@@ -176,6 +176,12 @@ ALL_CODEX_TASKS = [
     "bigcodebench_hard::none",
 ]
 
+ALL_1B_TASKS = [
+    "hellaswag",
+    "piqa",
+] + MMLU_CATEGORIES
+
+
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
