@@ -52,7 +52,6 @@ def cli():
 )
 def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
     """Launch an experiment."""
-
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 

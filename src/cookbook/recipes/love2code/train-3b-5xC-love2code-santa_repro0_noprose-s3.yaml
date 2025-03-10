@@ -3,7 +3,7 @@ description: "Starcoder2 3B model with a dummy data to make sure things are conf
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
 nodes: 1
-gpus: 8
+gpus: 1
 preemptible: false
 max_tokens: 300_000_000 # ~5xC multiplier
 sequence_length: 2048
