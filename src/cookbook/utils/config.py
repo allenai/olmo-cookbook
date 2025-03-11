@@ -130,6 +130,8 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         tokenizer=base_config.tokenizer,
         wandb_config=base_config.wandb,
         weka=base_config.weka,
+        rank_microbatch_size=base_config.rank_microbatch_size,
+        load_path=base_config.load_path,
     ).build()
 
     device = get_default_device()

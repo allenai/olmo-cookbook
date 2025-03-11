@@ -58,6 +58,9 @@ class ExperimentConfig(BaseModel):
     dataset: DatasetConfig
     tokenizer: str
     model: str
+    load_path: Optional[str] = None
+    rank_microbatch_size: Optional[int] = None
+    global_batch_size: Optional[int] = None
     lm_evaluator: bool = False
     downstream_evaluators: list[DownstreamEvaluators] = []
     max_target_sequence_length: int = 8192

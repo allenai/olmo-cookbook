@@ -26,6 +26,7 @@ from olmo_core.train.callbacks import (
     SchedulerCallback,
     WandBCallback,
 )
+from olmo_core.train.common import LoadStrategy
 
 from cookbook.aliases import SourceInstance, WandbConfig
 from cookbook.data.dataset import MixtureBuilder
@@ -131,7 +132,10 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     downstream_evaluators: List[DownstreamEvaluators]
+    load_path: Optional[str]
     learning_rate: Optional[float]
+    global_batch_size: Optional[int]
+    rank_microbatch_size: Optional[int]
     profile: bool = False
 
     def __init__(
@@ -152,6 +156,9 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluators],
+        load_path: Optional[str] = None,
+        global_batch_size: Optional[int] = None,
+        rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
         wandb_config: Optional[WandbConfig] = None,
         max_target_sequence_length: int = 8192,
@@ -182,7 +189,10 @@ class TransformerConfigBuilder:
         self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
         self.learning_rate = learning_rate
+        self.global_batch_size = global_batch_size
+        self.rank_microbatch_size = rank_microbatch_size
         self.downstream_evaluators = downstream_evaluators
+        self.load_path = load_path
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
 
@@ -203,7 +213,7 @@ class TransformerConfigBuilder:
     def get_warmup_steps(self) -> int:
         return 2000
 
-    def get_batch_size(self) -> int:
+    def get_batch_sizes(self) -> tuple[int, int]:
         # assert self.sequence_length in {2048, 4096, 8192}
         # seq_len_divisor = self.sequence_length // 2048
 
@@ -214,10 +224,19 @@ class TransformerConfigBuilder:
         # global_batch_size *= self.max_dp_world_size
 
         # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
-        global_batch_size = 1024 * self.sequence_length
+        if self.global_batch_size:
+            global_batch_size = self.global_batch_size
+        else:
+            global_batch_size = 1024 * self.sequence_length
+
+        if self.rank_microbatch_size:
+            rank_microbatch_size = self.rank_microbatch_size
+        else:
+            rank_microbatch_size = 16 * self.sequence_length
+
         print(f"Global batch size is: {global_batch_size}")
 
-        return global_batch_size
+        return global_batch_size, rank_microbatch_size
 
     # def default_learning_rate(self) -> float:
     #     learning_rate = 4.7e-3 * (self.transformer_config.num_params / self.tokenizer.padded_vocab_size()) ** (
@@ -346,7 +365,7 @@ class TransformerConfigBuilder:
         )
 
     def build(self) -> ModelTrainConfig:
-        global_batch_size = self.get_batch_size()
+        global_batch_size, rank_microbatch_size = self.get_batch_sizes()
         learning_rate = self.get_learning_rate()
 
         if self.sequence_length == 4096:
@@ -361,11 +380,15 @@ class TransformerConfigBuilder:
             num_workers=12,
         )
 
+        load_path = self.load_path
+        load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
+
         trainer_config = TrainerConfig(
+            load_path=load_path,
+            load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
-            # TODO(undfined): How should we be pick rmbz?
-            rank_microbatch_size=16 * self.sequence_length,
+            rank_microbatch_size=rank_microbatch_size,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
