@@ -9,12 +9,12 @@ import pandas as pd
 from tqdm import tqdm
 
 from cookbook.analysis.stats import compute_significance
-from cookbook.analysis.utils.constants import (
+from cookbook.analysis.constants import (
+    PLOT_DIR,
     get_task_sets,
     get_title_from_task,
 )
 
-PLOT_DIR = "/tmp/cookbook/plots"
 
 REVERSED_METRICS = [
     "margin_per_byte",
