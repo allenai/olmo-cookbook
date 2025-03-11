@@ -90,7 +90,6 @@ class WrappedTransformerConfig:
 
     @classmethod
     def starcoder2_3B(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
-        print("CTRLF HERE:", dir(TransformerConfig))
         return getattr(TransformerConfig, "starcoder2_3b")(
             vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
             compile=True,

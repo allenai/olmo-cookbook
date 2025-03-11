@@ -8,7 +8,7 @@ preemptible: true
 max_tokens: 318_651_801_600 # 5xC multiplier
 sequence_length: 4096
 seed: 1337
-model: "Starcoder2-3B"
+model: "starcoder2_3b"
 tokenizer: "dolma2"
 priority: high
 learning_rate: 7.0e-4

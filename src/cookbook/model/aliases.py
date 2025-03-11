@@ -86,7 +86,7 @@ class ModelConfig:
     def love2code_3b(cls) -> "ModelConfig":
         """
         num params should be : 3607267840
-        num non_embed parmams should be: 3481438720        
+        num non_embed parmams should be: 3481438720
         """
         return ModelConfig(
             compile=True,
@@ -95,15 +95,15 @@ class ModelConfig:
             n_layers=32,
             rope_theta=500_000,
             flash_attention=True,
-            max_sequence_length=2048
+            max_sequence_length=2048,
         )
-
 
 
 class SupportedModels(Enum):
     olmo_190m = ModelConfig.olmo_190m()
     olmo_30m = ModelConfig.olmo_30m()
     olmo_1b = ModelConfig.olmo_1b()
+    starcoder2_3b = ModelConfig.starcoder_3b()
 
 
 class SupportedTokenizers(Enum):
