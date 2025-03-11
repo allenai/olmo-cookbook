@@ -804,7 +804,7 @@ def get_task_sets(all_tasks) -> list[list[str]]:
 
     selected_tasks: list[list[str]] = [
         mmlu,
-        olmes + olmes_mc + olmes_gen + olmes,
+        olmes + olmes_mc + olmes_gen,
         olmes_mc,
         mmlu_mc,
         olmes_gen,
