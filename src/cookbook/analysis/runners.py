@@ -1,6 +1,7 @@
 import os
 import sys
 import warnings
+from typing import Optional
 
 sys.path.append(os.path.dirname(os.getcwd()))
 
@@ -8,13 +9,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from tqdm import tqdm
 
-from cookbook.analysis.stats import compute_significance
 from cookbook.analysis.constants import (
     PLOT_DIR,
     get_task_sets,
-    get_title_from_task,
+    get_title_from_task_set,
 )
-
+from cookbook.analysis.stats import compute_significance
 
 REVERSED_METRICS = [
     "margin_per_byte",
@@ -27,31 +27,29 @@ REVERSED_METRICS = [
 ]
 
 
-def run_paired_comparison(df, task, model_names, metric="primary_score", axes=None):
-    task_name = get_title_from_task(task)
-
+def run_paired_comparison(
+    df: pd.DataFrame,
+    task_set: list[str] | list[list[str]],
+    model_names: list[str],
+    axes: plt.Axes,
+    metric: str = "primary_score",
+) -> dict:
+    task_name = get_title_from_task_set(task_set)
     model_names = sorted(list(set(model_names)))
+    ax: Optional[plt.Axes] = axes
 
-    from typing import Optional
-
-    ax: Optional[plt.Axes] = axes if axes is not None else None
-    sig_values, p_values = compute_significance(
+    _, p_values = compute_significance(
         df,
         models=model_names,
         metric=metric,
         step=None,  # the models have different checkpoint steps
         last_n=1,  # the "last n" checkpoints to average results
         alpha=0.05,  # significance level
-        tasks=[task],
+        tasks=task_set,
         plot_axes=ax,
         plot_sig_clusters=False,
         quiet=True,
     )
-
-    if ax:
-        # (plotting logic goes here)
-        # ax.set_ylabel(primary_score_name)
-        pass
 
     # Return nothing if test failed to run
     if task_name not in p_values:
@@ -60,8 +58,14 @@ def run_paired_comparison(df, task, model_names, metric="primary_score", axes=No
     mixes, scores, p_values, sig_clusters = p_values[task_name]
 
     return {
-        # Add return values here, if needed!
-        # "test": 0
+        "mixes": mixes,
+        "scores": scores,
+        "p_values": p_values,
+        "sig_clusters": sig_clusters,
+        "task_name": task_name,
+        "task_set": task_set,
+        "metric": metric,
+        "model_names": model_names,
     }
 
 
@@ -115,7 +119,8 @@ def is_excluded_external_model(m):
     return False
 
 
-def run_instance_analysis(local_path_instances):
+def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
+    """Run instance analysis on the given local path to instances."""
     print(f"Loading {local_path_instances}")
 
     df = pd.read_parquet(local_path_instances)
@@ -128,58 +133,84 @@ def run_instance_analysis(local_path_instances):
 
     print(f"Loaded {len(df):,} model evaluations")
 
-    MODELS = sorted(df.index.get_level_values("model").unique().to_list())
-    TASKS = sorted(df.index.get_level_values("task").unique().to_list())
+    ALL_MODELS = sorted(df.index.get_level_values("model").unique().to_list())
+    ALL_TASKS = sorted(df.index.get_level_values("task").unique().to_list())
 
-    selected_tasks = get_task_sets(TASKS)
-    # selected_tasks = TASKS
-
-    task_names = [get_title_from_task(task) for task in selected_tasks]
+    task_sets = get_task_sets(ALL_TASKS)
+    named_tasks = [get_title_from_task_set(task_set) for task_set in task_sets]
 
     # Negate metrics where lower is better, so the ordering is the same
     for col in REVERSED_METRICS:
         if col in df.columns:
             df[col] = df[col].apply(lambda x: -x if pd.notna(x) else x)
 
-    # Render figures
-    results = []
-    with tqdm(total=len(selected_tasks)) as pbar:
-        for task in selected_tasks:
-            pbar.set_description(
-                f"Computing paired permutation test on {len(MODELS)} models for {get_title_from_task(task)}"
-            )
+    primary = []
+    bpb = []
+    with tqdm(total=len(named_tasks)) as pbar:
+        for task in task_sets:
+            task_name = get_title_from_task_set(task)
+            pbar.set_description(f"Computing paired permutation test on {len(ALL_MODELS)} models for {task_name}")
 
-            # Paried permutation test
             N_COLS = 2
             N_ROWS = 1
+
             fig, axes = plt.subplots(
-                N_ROWS, N_COLS, figsize=(0.85 * len(MODELS) * N_COLS, 0.25 * len(MODELS) * N_ROWS), squeeze=False
+                N_ROWS,
+                N_COLS,
+                figsize=(0.85 * len(ALL_MODELS) * N_COLS, 0.25 * len(ALL_MODELS) * N_ROWS),
+                squeeze=False,
             )  # 0.35
 
-            result = run_paired_comparison(
-                df, task=task, model_names=MODELS, metric="primary_score", axes=axes[0, 0]
+            primary.append(
+                run_paired_comparison(
+                    df, task_set=[task], model_names=ALL_MODELS, metric="primary_score", axes=axes[0, 0]
+                )
             )
-            results += [result]
 
-            result = run_paired_comparison(
-                df, task=task, model_names=MODELS, metric="bits_per_byte_corr", axes=axes[0, 1]
+            bpb.append(
+                run_paired_comparison(
+                    df, task_set=[task], model_names=ALL_MODELS, metric="bits_per_byte_corr", axes=axes[0, 1]
+                )
             )
-            results += [result]
 
             if any(ax.has_data() for row in axes for ax in row):
+                print(f"Saving figure(s) for {task_name}...")
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=UserWarning)
                     fig.tight_layout()
                 os.makedirs(PLOT_DIR, exist_ok=True)
                 plt.savefig(
-                    f"{PLOT_DIR}/paired_comparison_{get_title_from_task(task)}.pdf",
+                    f"{PLOT_DIR}/paired_comparison_{task_name}.pdf",
                     format="pdf",
                     bbox_inches="tight",
                 )
-            plt.close()
 
+            plt.close()
             pbar.update(1)
 
-    results_df = pd.DataFrame(results, index=task_names)
+    # Remove tasks with empty results
+    primary = [item for item in primary if item]
+    bpb = [item for item in bpb if item]
 
-    return results_df
+    # Sort by task name
+    primary.sort(key=lambda x: x["task_name"])
+    bpb.sort(key=lambda x: x["task_name"])
+
+    output_columns = [
+        "scores",
+        "p_values",
+        "metric",
+        "models",
+        "task_name",
+    ]
+
+    return (
+        (
+            "primary_score",
+            pd.DataFrame(primary, columns=output_columns),
+        ),
+        (
+            "bits_per_byte_corr",
+            pd.DataFrame(bpb, columns=output_columns),
+        ),
+    )

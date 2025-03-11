@@ -1,10 +1,12 @@
-import click
+import json
 import logging
 from pathlib import Path
 
+import click
+
+from cookbook.analysis.constants import DATA_DIR
 from cookbook.analysis.data.aws import mirror_s3_to_local, process_local_folder
 from cookbook.analysis.runners import run_instance_analysis
-from cookbook.analysis.constants import DATA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +49,8 @@ def download(bucket_name: str, s3_prefix: list[str], local_results_path: str, ma
     # Download from S3
     mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=max_threads)
 
-    # Process files to parquet
-    metrics_path = process_local_folder(local_results_path, file_type="metrics")
-    predictions_path = process_local_folder(local_results_path, file_type="predictions")
+    # Convert to parquet
+    process_local_folder(local_results_path, file_type="predictions")
 
 
 @cli.command()
@@ -64,7 +65,15 @@ def run(local_results_path: str):
     data_dir = Path(DATA_DIR).resolve()
     prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
 
-    run_instance_analysis(prediction_path)
+    # Run the analysis
+    outcomes = run_instance_analysis(prediction_path)
+
+    # Dump the results to a JSON file
+    for item in outcomes:
+        output_path = data_dir / f"{local_results_path}_{item[0]}.json"
+        js = json.loads(item[1].to_json(orient="records"))
+        with open(output_path, "w") as f:
+            json.dump(js, f, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":

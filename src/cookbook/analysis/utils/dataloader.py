@@ -1,6 +1,7 @@
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
 
 
 def get_slice(df, mix=None, model=None, task=None, step=None):

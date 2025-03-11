@@ -1,12 +1,19 @@
-import sys, os, re
-from pathlib import Path
+import os
+import re
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
+from pathlib import Path
+
 import boto3
+from tqdm import tqdm
 
-from cookbook.analysis.data.preprocess import fsize, recursive_pull, load_df_parallel, cleanup_metrics_df
 from cookbook.analysis.constants import DATA_DIR
-
+from cookbook.analysis.data.preprocess import (
+    cleanup_metrics_df,
+    fsize,
+    load_df_parallel,
+    recursive_pull,
+)
 
 # Add parent directory to the path
 parent_dir = Path(__file__).resolve().parent.parent

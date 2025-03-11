@@ -1,17 +1,18 @@
-import json, os, re, sys
+import json
+import os
+import re
+import sys
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Pool
 from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import psutil
 from tqdm import tqdm
 
 from cookbook.analysis.constants import DATA_DIR, PRIMARY_METRICS_OLMES
-
 
 # Metrics to use when processing instance-level results
 METRICS_TO_KEEP = [

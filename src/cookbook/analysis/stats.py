@@ -6,8 +6,8 @@ import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
 
+from cookbook.analysis.constants import get_title_from_task_set
 from cookbook.analysis.plot.heatmap import plot_heatmap
-from cookbook.analysis.constants import get_title_from_task
 from cookbook.analysis.utils.dataloader import get_nd_array, get_slice
 from cookbook.analysis.utils.pce import (
     compute_pairwise_p_values,
@@ -77,12 +77,12 @@ def compute_significance(
     df: DataFrame,
     models,
     metric: str,
+    plot_axes: plt.Axes,
     step: Optional[str] = "max",
     last_n: int = 1,
-    tasks: Optional[list[str]] = None,
+    tasks: Optional[list[str] | list[list[str]]] = None,
     alpha: float = 0.05,
     num_permutations: int = 1_000,
-    plot_axes: Optional[np.ndarray] = None,
     pretty_mix_names: Optional[dict[str, str]] = None,
     plot_sig_clusters: bool = True,
     plot_clean: bool = False,
@@ -93,11 +93,7 @@ def compute_significance(
 
     sig_results = pd.DataFrame(index=["perc_sig"], columns=tasks)
     all_p_values = {}
-
-    n_tasks = len(tasks)
-    fig, axes = plt.subplots(n_tasks, 1, figsize=(0.5 * len(models), 0.4 * len(models) * n_tasks))
-    if n_tasks == 1:
-        axes = [axes]
+    axes = [plot_axes]
 
     for i, task in tqdm(enumerate(tasks), desc="Computing pairwise comparisons", total=len(tasks), disable=quiet):
         if last_n > 1:
@@ -119,7 +115,7 @@ def compute_significance(
             mixes, scores = get_nd_array(df, "mix", metric, model=models, task=task, step=step, sorted=True)
 
         if len(scores) == 0:
-            print(f"Found no scores for {get_title_from_task(task)}! Skipping...")
+            print(f"Found no scores for {get_title_from_task_set(task)}! Skipping...")
             continue
 
         if isinstance(task, list):
@@ -141,7 +137,7 @@ def compute_significance(
             p_values[np.tril_indices_from(p_values, k=-1)] = np.nan
 
             # Change task name
-            task = get_title_from_task(task)
+            task = get_title_from_task_set(task)
         else:
             p_values, mix_scores, _ = compute_pairwise_p_values(
                 scores, num_permutations=num_permutations, return_scores=True
@@ -155,22 +151,26 @@ def compute_significance(
         sig_results.loc["perc_sig", task] = perc_sig
         all_p_values[task] = (mixes, scores, p_values, sig_clusters)
 
-        if plot_axes:
+        if plot_axes and len(tasks) == 1:
+            print(f"Plotting {task}...")
+
             if pretty_mix_names is not None:
                 mix_names = [pretty_mix_names[mix] for mix in mixes]
             else:
                 mix_names = mixes
-            axes[i] = plot_heatmap(
+
+            plot = plot_heatmap(
                 axes[i], p_values, mix_names, mix_scores, sig_clusters, alpha=alpha, plot_clean=plot_clean
             )
+            axes[i] = plot
             title = (
                 r"$p$"
                 + f'-values for {task} (n={scores.shape[1]}) {("last " + str(last_n) + " steps" if last_n > 1 else "")}({metric}), perc sig={(perc_sig*100):.2f}%'
             )
+
             if len(models) < 15:
                 title = r"$p$" + f"-values for {task}, perc sig={(perc_sig*100):.2f}%"
-            axes[i].set_title(title, fontsize=10)
 
-        fig.tight_layout()
+            axes[i].set_title(title, fontsize=10)
 
     return sig_results, all_p_values

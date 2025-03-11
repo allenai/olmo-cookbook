@@ -75,8 +75,10 @@ def plot_heatmap(
     sm = plt.cm.ScalarMappable(cmap=plt.cm.get_cmap("viridis"), norm=norm)
     cbar = plt.colorbar(sm, ax=ax, fraction=0.05, pad=0.04)
     label = r"$p$" + f"-values " + r"$\alpha$=" + f"{alpha}"
+
     if len(values) < 15 or plot_clean:
         label = r"$p$" + f"-values"
+
     cbar.set_label(label)
 
     # Add value annotations with smaller font
