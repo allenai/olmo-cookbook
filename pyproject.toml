@@ -36,6 +36,13 @@ beaker = [
 wandb = [
     "wandb",
 ]
+analysis = [
+    "statsmodels",
+    "matplotlib",
+    "scipy",
+    "pandas",
+    "tqdm"
+]
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@revert-147-epwalsh/mixture-fix",
     "beaker-py",
@@ -46,7 +53,7 @@ all = [
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
-
+olmo-cookbook-analysis = "cookbook.cli:analysis.cli"
 
 [tool.black]
 line-length = 115
