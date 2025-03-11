@@ -149,8 +149,31 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     return trainer
 
 
+def validate_experiment_group(group: ExperimentGroup) -> bool:
+    """Stack all the checks for validity of the ExperimentGroup here.
+    Return True if everything is A-okay
+    """
+    checks_passing = True
+    msgs = []
+    # Check: if running on augusta => not using weka for anything
+    if "augusta" in group.config.cluster and group.config.weka:
+        checks_passing &= False
+        msgs.append("Cannot be on Augusta and use weka!")
+
+    return checks_passing, msgs
+
+
 def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLaunchConfig]:
     """Build a beaker launch config from an experiment group."""
+
+    try:
+        exp_group_valid, validity_msgs = validate_experiment_group(group)
+        assert exp_group_valid
+    except AssertionError as e:
+        logger.info("Exp group not valid!")
+        for msg in validity_msgs:
+            logger.info("\t" + msg)
+        raise e
 
     weka_buckets: List[BeakerWekaBucket] = []
     if group.config.weka:
