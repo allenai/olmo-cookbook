@@ -1,5 +1,5 @@
-name: "olmo-cookbook-starcoder2-3b-5xC-santaRepro"
-description: "Starcoder2 3B model with a dummy data to make sure things are configured well"
+name: "olmo-cookbook-starcoder2-3b-5xC-santaRepro_trueSC"
+description: "Starcoder2 3B model with a dummy data to make sure things are configured well| TRUE SC"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
 nodes: 1

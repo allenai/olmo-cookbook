@@ -363,7 +363,7 @@ class TransformerConfigBuilder:
             max_duration=Duration.tokens(self.max_tokens),
             work_dir=self.dataset_cache,
             # TODO(undfined): How should we be pick rmbz?
-            rank_microbatch_size=2 * 4096,  # 16 * self.sequence_length,
+            rank_microbatch_size=4 * 4096,  # 16 * self.sequence_length,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
