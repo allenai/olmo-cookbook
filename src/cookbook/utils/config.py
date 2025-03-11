@@ -3,23 +3,13 @@ from pathlib import Path
 from typing import List, Tuple, cast
 
 import yaml
-from olmo_core.launch.beaker import (
-    BeakerEnvSecret,
-    BeakerLaunchConfig,
-    BeakerWekaBucket,
-)
-from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
-from olmo_core.utils import get_default_device, seed_all
 
-from cookbook.aliases import (
-    ExperimentConfig,
-    ExperimentGroup,
-    ExperimentInstance,
-    SourceConfig,
-    SourceInstance,
-)
+from cookbook.aliases import ExperimentConfig, ExperimentGroup, ExperimentInstance, SourceConfig, SourceInstance
 from cookbook.model.builder import TransformerConfigBuilder
 from cookbook.utils.data import normalize_source_paths
+from olmo_core.launch.beaker import BeakerEnvSecret, BeakerLaunchConfig, BeakerWekaBucket
+from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
+from olmo_core.utils import get_default_device, seed_all
 
 logger = logging.getLogger(__name__)
 
@@ -159,8 +149,31 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     return trainer
 
 
+def validate_experiment_group(group: ExperimentGroup) -> bool:
+    """Stack all the checks for validity of the ExperimentGroup here.
+    Return True if everything is A-okay
+    """
+    checks_passing = True
+    msgs = []
+    # Check: if running on augusta => not using weka for anything
+    if "augusta" in group.config.cluster and group.config.weka:
+        checks_passing &= False
+        msgs.append("Cannot be on Augusta and use weka!")
+
+    return checks_passing, msgs
+
+
 def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLaunchConfig]:
     """Build a beaker launch config from an experiment group."""
+
+    try:
+        exp_group_valid, validity_msgs = validate_experiment_group(group)
+        assert exp_group_valid
+    except AssertionError as e:
+        logger.info("Exp group not valid!")
+        for msg in validity_msgs:
+            logger.info("\t" + msg)
+        raise e
 
     weka_buckets: List[BeakerWekaBucket] = []
     if group.config.weka:
@@ -190,6 +203,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="AWS_CREDENTIALS", secret=f"{beaker_user}_AWS_CREDENTIALS"),
                 BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
+                BeakerEnvSecret(name="GS_INTEROP_KEY", secret="GS_INTEROP_KEY"),
+                BeakerEnvSecret(name="GS_INTEROP_SECRET", secret="GS_INTEROP_SECRET"),
             ],
             setup_steps=[
                 'git clone "$REPO_URL"',

@@ -182,8 +182,15 @@ class TransformerConfigBuilder:
         if any(substring in cluster for substring in ["jupiter", "saturn"]) and weka:
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+        elif "augusta" in cluster:
+            try:
+                assert not weka
+            except AssertionError as e:
+                logger.info("Can't be on Augusta and weka!")
+                raise e
+            self.data_dir = self.root_dir = "gs://ai2-llm"
 
+        self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:

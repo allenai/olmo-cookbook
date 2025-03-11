@@ -182,6 +182,18 @@ ALL_1B_TASKS = [
 ] + MMLU_CATEGORIES
 
 
+STARCODER_CODEX_TASKS = [
+    "codex_humaneval::starcoder_pass@1",
+    "codex_humaneval::starcoder_pass@10",
+    "mbpp::starcoder_pass@1",
+    "mbpp::starcoder_pass@10",
+]
+
+STARCODER_PASS_AT_1_TASKS = [
+    "codex_humaneval::starcoder_pass@1",
+    "mbpp::starcoder_pass@1",
+]
+
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
@@ -191,6 +203,8 @@ ALL_NAMED_GROUPS = {
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
+    "starcoder": STARCODER_CODEX_TASKS,
+    "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "1b-evals": ALL_1B_TASKS,
 }
