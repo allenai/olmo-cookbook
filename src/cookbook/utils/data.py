@@ -1,4 +1,6 @@
 import concurrent.futures
+import hashlib
+import json
 import logging
 import os
 import pathlib
@@ -7,20 +9,16 @@ from typing import Any, List, Tuple
 from urllib.parse import urlparse
 
 import s3fs
+from tqdm import tqdm
+
+from cookbook.aliases import SourceConfig
 from olmo_core.aliases import PathOrStr
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.io import get_file_size, is_url, normalize_path
 from olmo_core.utils import OLMoEnvironmentError
-from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 logging.getLogger("botocore").setLevel(logging.WARNING)
-
-
-import hashlib
-import json
-
-from cookbook.aliases import SourceConfig
 
 
 def _bytes_to_tokens(num_bytes: int, dtype: NumpyDatasetDType) -> int:
@@ -65,9 +63,12 @@ def get_token_counts_and_ratios(
             parsed = urlparse(path)
             if parsed.scheme == "s3":
                 continue
-            if parsed.scheme == "weka":
+            elif parsed.scheme == "weka":
                 client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
-
+            elif parsed.scheme == "gs":
+                client_kwargs["endpoint_url"] = "https://storage.googleapis.com"
+                client_kwargs["key"] = os.environ.get("GS_INTEROP_KEY")
+                client_kwargs["secret"] = os.environ.get("GS_INTEROP_SECRET")
     fs = s3fs.S3FileSystem(client_kwargs={**client_kwargs})
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:

@@ -2,13 +2,18 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from olmo_core.data import (
-    DataMix,
-    NumpyDataLoaderConfig,
-    NumpyDatasetConfig,
-    NumpyDatasetType,
-    TokenizerConfig,
+from cookbook.aliases import SourceInstance, WandbConfig
+from cookbook.data.dataset import MixtureBuilder
+from cookbook.model.config import (
+    MODEL_TO_LR_MAP,
+    DefaultOptimizerProperties,
+    ModelTrainConfig,
+    SupportedTokenizers,
+    WrappedTransformerConfig,
 )
+from cookbook.model.evaluators import DownstreamEvaluators
+from cookbook.model.schedulers import WSD
+from olmo_core.data import DataMix, NumpyDataLoaderConfig, NumpyDatasetConfig, NumpyDatasetType, TokenizerConfig
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride, Scheduler
@@ -26,18 +31,6 @@ from olmo_core.train.callbacks import (
     SchedulerCallback,
     WandBCallback,
 )
-
-from cookbook.aliases import SourceInstance, WandbConfig
-from cookbook.data.dataset import MixtureBuilder
-from cookbook.model.config import (
-    MODEL_TO_LR_MAP,
-    DefaultOptimizerProperties,
-    ModelTrainConfig,
-    SupportedTokenizers,
-    WrappedTransformerConfig,
-)
-from cookbook.model.evaluators import DownstreamEvaluators
-from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
@@ -189,8 +182,15 @@ class TransformerConfigBuilder:
         if any(substring in cluster for substring in ["jupiter", "saturn"]) and weka:
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+        elif "augusta" in cluster:
+            try:
+                assert not weka
+            except AssertionError as e:
+                logger.info("Can't be on Augusta and weka!")
+                raise e
+            self.data_dir = self.root_dir = "gs://ai2-llm"
 
+        self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
