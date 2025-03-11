@@ -29,6 +29,14 @@ dev = [
     "isort>=5.12,<5.13",
     "pytest",
 ]
+eval = [
+    "adjustText",
+    "statsmodels",
+    "matplotlib",
+    "scipy",
+    "pandas",
+    "tqdm"
+]
 beaker = [
     "beaker-py",
     "GitPython>=3.0,<4.0",
@@ -46,6 +54,7 @@ all = [
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
+olmo-cookbook-analysis = "cookbook.cli:analysis.cli"
 
 
 [tool.black]
