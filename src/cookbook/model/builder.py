@@ -250,8 +250,8 @@ class TransformerConfigBuilder:
             "profiler": ProfilerCallback(enabled=self.profile),
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
-                ephemeral_save_interval=1,
-                save_async=False,
+                ephemeral_save_interval=20,
+                save_async=True,
             ),
             "wandb": WandBCallback(
                 name=self.run_name.strip(),

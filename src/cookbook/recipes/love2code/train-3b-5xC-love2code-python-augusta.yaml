@@ -2,7 +2,7 @@ name: "olmo-cookbook-3b-5xC-love2code-python-augusta"
 description: "Starcoder2-3B(ish) 5xC | Love2code python only (~3 epochs)"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
-nodes: 16
+nodes: 1
 gpus: 8
 preemptible: true
 max_tokens: 318_651_801_600 # 5xC multiplier
