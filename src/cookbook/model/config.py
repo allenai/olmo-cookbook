@@ -4,8 +4,8 @@ from typing import Optional
 
 from olmo_core.config import Config, DType
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
-from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.nn.transformer import TransformerBlockType, TransformerConfig, TransformerDataParallelConfig
+from olmo_core.distributed.parallel import DataParallelConfig, DataParallelType
+from olmo_core.nn.transformer import TransformerBlockType, TransformerConfig
 from olmo_core.optim import AdamWConfig
 from olmo_core.train import TrainerConfig
 
@@ -54,7 +54,7 @@ class WrappedTransformerConfig:
             layer_norm_eps=DefaultTransformerProperties.layer_norm_eps,
             qk_norm=DefaultTransformerProperties.qk_norm,
             block_name=DefaultTransformerProperties.block_type,
-            dp_config=TransformerDataParallelConfig(
+            dp_config=DataParallelConfig(
                 name=DefaultTransformerProperties.dp_type,
                 param_dtype=DType.bfloat16,
                 reduce_dtype=DType.float32,
@@ -66,7 +66,7 @@ class WrappedTransformerConfig:
         return getattr(TransformerConfig, "olmo2_190M")(
             vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
             compile=True,
-            dp_config=TransformerDataParallelConfig(
+            dp_config=DataParallelConfig(
                 name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
                 param_dtype=DType.bfloat16,
                 reduce_dtype=DType.float32,
@@ -81,7 +81,7 @@ class WrappedTransformerConfig:
         return getattr(TransformerConfig, "olmo2_1B")(
             vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
             compile=True,
-            dp_config=TransformerDataParallelConfig(
+            dp_config=DataParallelConfig(
                 name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
                 param_dtype=DType.bfloat16,
                 reduce_dtype=DType.float32,
@@ -93,7 +93,7 @@ class WrappedTransformerConfig:
         return getattr(TransformerConfig, "starcoder2_3b")(
             vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
             compile=True,
-            dp_config=TransformerDataParallelConfig(
+            dp_config=DataParallelConfig(
                 name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
                 param_dtype=DType.bfloat16,
                 reduce_dtype=DType.float32,
