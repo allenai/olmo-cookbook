@@ -230,7 +230,7 @@ class TransformerConfigBuilder:
             global_batch_size = 1024 * self.sequence_length
 
         if self.rank_microbatch_size:
-            rank_microbatch_size = self.rank_microbatch_size * self.rank_microbatch_size
+            rank_microbatch_size = self.rank_microbatch_size
         else:
             rank_microbatch_size = 16 * self.sequence_length
 
