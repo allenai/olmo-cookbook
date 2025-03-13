@@ -6,7 +6,7 @@ mkdir src/cookbook/recipes/batch-size
 
 STEP=0
 mkdir src/cookbook/recipes/batch-size/step$STEP
-for multiplier in 0.0625 0.125 0.25 0.5 1 2 3 4; do
+for multiplier in 0.125 0.25 0.5 1 2 3 4; do
     python scripts/make_batch_size_config.py \
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
@@ -18,7 +18,7 @@ done
 
 STEP=10000
 mkdir src/cookbook/recipes/batch-size/step$STEP
-for multiplier in 0.0625 0.125 0.25 0.5 1 2 3 4; do
+for multiplier in 0.125 0.25 0.5 1 2 3 4; do
     python scripts/make_batch_size_config.py \
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
