@@ -225,7 +225,7 @@ class TransformerConfigBuilder:
 
         # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
         if self.global_batch_size:
-            global_batch_size = self.global_batch_size * self.global_batch_size
+            global_batch_size = self.global_batch_size
         else:
             global_batch_size = 1024 * self.sequence_length
 
