@@ -24,9 +24,9 @@ def main(args):
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
 
-    global_batch_size = config.get("global_batch_size", 1024)
     learning_rate = config.get("learning_rate", 1e-4)
     sequence_length = config.get("sequence_length", 2048)
+    global_batch_size = config.get("global_batch_size", 1024 * sequence_length)
 
     config["name"] = args.name
     config["description"] = args.description
@@ -34,7 +34,7 @@ def main(args):
     config["budget"] = args.budget
     config["workspace"] = args.workspace
     config["load_path"] = args.load_path
-    config["global_batch_size"] = int(global_batch_size * sequence_length * args.multiplier)
+    config["global_batch_size"] = int(global_batch_size * args.multiplier)
     config["learning_rate"] = learning_rate * sqrt(args.multiplier)
 
     if args.nodes is not None:
