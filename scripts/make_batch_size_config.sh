@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CHECKPOINTS="/weka/oe-training-default/ai2-llm/checkpoints"
+
 mkdir src/cookbook/recipes/batch-size
 
 STEP=0
@@ -9,7 +11,7 @@ for multiplier in 0.0625 0.125 0.25 0.5 1 2 3 4; do
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
         --name "code-step$STEP-${multiplier}x" \
-        --load-path "gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
         --nodes 1
 done
@@ -21,7 +23,7 @@ for multiplier in 0.0625 0.125 0.25 0.5 1 2 3 4; do
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
         --name "code-step$STEP-${multiplier}x" \
-        --load-path "gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
         --nodes 1
 done
@@ -33,7 +35,7 @@ for multiplier in 0.5 1 2 3 4; do
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
         --name "code-step$STEP-${multiplier}x" \
-        --load-path "gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
         --nodes 1
 done
@@ -45,7 +47,7 @@ for multiplier in 1 2 4 8; do
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
         --name "code-step$STEP-${multiplier}x" \
-        --load-path "gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
         --nodes 1
 done
@@ -57,7 +59,7 @@ for multiplier in 1 2 4 8; do
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
         --name "code-step$STEP-${multiplier}x" \
-        --load-path "gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
         --nodes 1
 done
@@ -69,7 +71,7 @@ for multiplier in 1 2 4 8; do
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
         --name "code-step$STEP-${multiplier}x" \
-        --load-path "gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
         --nodes 1
 done
