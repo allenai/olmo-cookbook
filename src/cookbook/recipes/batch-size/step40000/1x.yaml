@@ -1148,7 +1148,7 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00009.npy
     target_ratio: 1.0
 description: Train code model with larger batch size
-global_batch_size: 1024
+global_batch_size: 2097152
 gpus: 8
 learning_rate: 0.0018
 load_path: gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step40000/
