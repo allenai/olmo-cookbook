@@ -1151,7 +1151,7 @@ description: Train code model with larger batch size
 global_batch_size: 6291456
 gpus: 8
 learning_rate: 0.003117691453623979
-load_path: gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step20000/
+load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step20000/
 max_tokens: 2147483648
 model: olmo2_1B
 name: code-step20000-3x
