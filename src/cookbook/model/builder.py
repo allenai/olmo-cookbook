@@ -234,7 +234,7 @@ class TransformerConfigBuilder:
         else:
             rank_microbatch_size = 16 * self.sequence_length
 
-        print(f"Global batch size is: {global_batch_size}")
+        print(f"Global batch size (in tokens) is: {global_batch_size}")
 
         return global_batch_size, rank_microbatch_size
 
