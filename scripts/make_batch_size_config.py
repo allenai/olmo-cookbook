@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument("--load-path", type=str, default="gs://ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step0/")
     parser.add_argument("--multiplier", "-k", type=float, default=1.)
     parser.add_argument("--max-tokens", "-t", type=int, default=512 * 1024 * 4096)
+    parser.add_argument("--start-step", type=int, default=0)
     parser.add_argument("--budget", type=str, default="ai2/oe-training")
     parser.add_argument("--workspace", type=str, default="ai2/13B")
     parser.add_argument("--nodes", type=int, default=None)
@@ -30,7 +31,7 @@ def main(args):
 
     config["name"] = args.name
     config["description"] = args.description
-    config["max_tokens"] = args.max_tokens
+    config["max_tokens"] = args.start_step * global_batch_size + args.max_tokens
     config["budget"] = args.budget
     config["workspace"] = args.workspace
     config["load_path"] = args.load_path

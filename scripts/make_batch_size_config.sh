@@ -13,6 +13,7 @@ for multiplier in 0.125 0.25 0.5 1 2 3 4; do
         --name "code-step$STEP-${multiplier}x" \
         --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
+        --start-step $STEP \
         --nodes 1
 done
 
@@ -25,6 +26,7 @@ for multiplier in 0.125 0.25 0.5 1 2 3 4; do
         --name "code-step$STEP-${multiplier}x" \
         --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
+        --start-step $STEP \
         --nodes 1
 done
 
@@ -37,6 +39,7 @@ for multiplier in 0.5 1 2 3 4; do
         --name "code-step$STEP-${multiplier}x" \
         --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
+        --start-step $STEP \
         --nodes 1
 done
 
@@ -49,6 +52,7 @@ for multiplier in 1 2 4 8; do
         --name "code-step$STEP-${multiplier}x" \
         --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
+        --start-step $STEP \
         --nodes 1
 done
 
@@ -61,6 +65,7 @@ for multiplier in 1 2 4 8; do
         --name "code-step$STEP-${multiplier}x" \
         --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
+        --start-step $STEP \
         --nodes 1
 done
 
@@ -73,5 +78,6 @@ for multiplier in 1 2 4 8; do
         --name "code-step$STEP-${multiplier}x" \
         --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
         --multiplier $multiplier \
+        --start-step $STEP \
         --nodes 1
 done
