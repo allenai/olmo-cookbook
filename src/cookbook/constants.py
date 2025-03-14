@@ -176,6 +176,12 @@ ALL_CODEX_TASKS = [
     "bigcodebench_hard::none",
 ]
 
+ALL_1B_TASKS = [
+    "hellaswag",
+    "piqa",
+] + MMLU_CATEGORIES
+
+
 STARCODER_CODEX_TASKS = [
     "codex_humaneval::starcoder_pass@1",
     "codex_humaneval::starcoder_pass@10",
@@ -200,6 +206,7 @@ ALL_NAMED_GROUPS = {
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+    "1b-evals": ALL_1B_TASKS,
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"

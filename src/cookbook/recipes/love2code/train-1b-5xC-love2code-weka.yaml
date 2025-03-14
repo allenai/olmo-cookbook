@@ -8,7 +8,7 @@ preemptible: false
 max_tokens: 113_184_153_600 # 5xC multiplier
 sequence_length: 2048
 seed: 1337
-model: "olmo2_1B"
+model: "olmo_1b"
 tokenizer: "dolma2"
 priority: urgent
 cluster: ai2/jupiter-cirrascale-2

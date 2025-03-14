@@ -1,0 +1,22 @@
+name: "olmo-cookbook-starcoder2-3b-5xC-santaRepro_trueSC"
+description: "Starcoder2 3B model with a dummy data to make sure things are configured well| TRUE SC"
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 1
+gpus: 8
+preemptible: false
+max_tokens: 300_000_000 # ~5xC multiplier
+sequence_length: 2048
+seed: 1337
+model: "starcoder2_3b"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: santacoder_repro
+    target_ratio: 1.0
+    paths:
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00000.npy
+

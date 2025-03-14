@@ -7,19 +7,14 @@ import click
 import yaml
 from beaker import Beaker
 from beaker.services.job import JobClient
-from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
 from cookbook.cli.eval import convert, evaluate
-from cookbook.utils.config import (
-    build_train_config,
-    config_from_path,
-    mk_experiment_group,
-    mk_launch_configs,
-)
+from cookbook.utils.config import build_train_config, config_from_path, mk_experiment_group, mk_launch_configs
 from cookbook.utils.data import get_token_counts_and_ratios
+from olmo_core.utils import generate_uuid, prepare_cli_environment
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +52,6 @@ def cli():
 )
 def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
     """Launch an experiment."""
-
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
