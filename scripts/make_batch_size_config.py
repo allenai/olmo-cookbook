@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument("--start-step", type=int, default=0)
     parser.add_argument("--budget", type=str, default="ai2/oe-training")
     parser.add_argument("--workspace", type=str, default="ai2/13B")
+    parser.add_argument("--priority", type=str, default="normal")
     parser.add_argument("--nodes", type=int, default=None)
     return parser.parse_args()
 
@@ -31,6 +32,7 @@ def main(args):
 
     config["name"] = args.name
     config["description"] = args.description
+    config["priority"] = args.priority
     config["max_tokens"] = args.start_step * global_batch_size + args.max_tokens
     config["budget"] = args.budget
     config["workspace"] = args.workspace

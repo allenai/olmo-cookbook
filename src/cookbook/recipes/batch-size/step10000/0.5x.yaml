@@ -1157,7 +1157,7 @@ model: olmo2_1B
 name: code-step10000-0.5x
 nodes: 1
 preemptible: false
-priority: high
+priority: normal
 seed: 1337
 sequence_length: 2048
 tokenizer: dolma2
