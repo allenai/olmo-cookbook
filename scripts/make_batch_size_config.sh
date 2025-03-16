@@ -30,9 +30,61 @@ for multiplier in 0.125 0.25 0.5 1 2 3 4 8 16 32; do
         --nodes 1
 done
 
+STEP=7000
+mkdir src/cookbook/recipes/batch-size/step$STEP
+for multiplier in 0.125 0.25 0.5 1 2 4 8 16; do
+    python scripts/make_batch_size_config.py \
+        "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
+        "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
+        --name "code-step$STEP-${multiplier}x" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
+        --multiplier $multiplier \
+        --start-step $STEP \
+        --nodes 1
+done
+
+STEP=9000
+mkdir src/cookbook/recipes/batch-size/step$STEP
+for multiplier in 0.125 0.25 0.5 1 2 4 8 16; do
+    python scripts/make_batch_size_config.py \
+        "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
+        "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
+        --name "code-step$STEP-${multiplier}x" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
+        --multiplier $multiplier \
+        --start-step $STEP \
+        --nodes 1
+done
+
 STEP=10000
 mkdir src/cookbook/recipes/batch-size/step$STEP
 for multiplier in 0.125 0.25 0.5 1 2 3 4 5 6 7 8 10 12 14 16 18 20 24 28 32; do
+    python scripts/make_batch_size_config.py \
+        "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
+        "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
+        --name "code-step$STEP-${multiplier}x" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
+        --multiplier $multiplier \
+        --start-step $STEP \
+        --nodes 1
+done
+
+STEP=11000
+mkdir src/cookbook/recipes/batch-size/step$STEP
+for multiplier in 0.125 0.25 0.5 1 2 4 8 16; do
+    python scripts/make_batch_size_config.py \
+        "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
+        "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
+        --name "code-step$STEP-${multiplier}x" \
+        --load-path $CHECKPOINTS/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step$STEP/ \
+        --multiplier $multiplier \
+        --start-step $STEP \
+        --nodes 1
+done
+
+STEP=13000
+mkdir src/cookbook/recipes/batch-size/step$STEP
+for multiplier in 0.125 0.25 0.5 1 2 4 8 16; do
     python scripts/make_batch_size_config.py \
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
@@ -123,7 +175,7 @@ done
 
 STEP=45000
 mkdir src/cookbook/recipes/batch-size/step$STEP
-for multiplier in 1 2 3 4 8 10 12 14 16 20 24 28 32; do
+for multiplier in 1 2 3 4 5 6 7 8 10 12 14 16 20 24 28 32; do
     python scripts/make_batch_size_config.py \
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
@@ -136,7 +188,7 @@ done
 
 STEP=50000
 mkdir src/cookbook/recipes/batch-size/step$STEP
-for multiplier in 1 2 4 8 12 16 20 24 28 32; do
+for multiplier in 1 2 4 8 12 13 14 15 16 17 18 19 20 24 28 32; do
     python scripts/make_batch_size_config.py \
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
