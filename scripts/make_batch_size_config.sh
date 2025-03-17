@@ -32,7 +32,7 @@ done
 
 STEP=7000
 mkdir src/cookbook/recipes/batch-size/step$STEP
-for multiplier in 0.125 0.25 0.5 1 2 4 8 16; do
+for multiplier in 0.125 0.25 0.5 1 1.5 2 2.5 3 3.5 4 8 16; do
     python scripts/make_batch_size_config.py \
         "src/cookbook/recipes/love2code/train-1b-5xC-love2code-weka-python-no-prose-hlr.yaml" \
         "src/cookbook/recipes/batch-size/step$STEP/${multiplier}x.yaml" \
