@@ -14,10 +14,6 @@ priority: high
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 weka: true
-eval_interval: 100
-downstream_evaluators:
-  - codex_humaneval_gold_bpb_0shot
-  - codex_mbpp_gold_bpb_0shot
 dataset:
   sources:
   - name: the-stack-v2-ai2v0

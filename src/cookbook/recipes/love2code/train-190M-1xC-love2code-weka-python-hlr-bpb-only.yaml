@@ -1,0 +1,183 @@
+name: "olmo-cookbook-1b-5xC-love2code-python-hlr"
+description: "Love2Code model, but with python code only"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 1
+gpus: 8
+preemptible: false
+max_tokens: 3_800_000_000 # ~1xC multiplier
+sequence_length: 2048
+seed: 1337
+model: "olmo2_190M"
+tokenizer: "dolma2"
+priority: high
+learning_rate: 1.8e-3
+cluster: ai2/jupiter-cirrascale-2
+eval_interval: 100
+downstream_evaluators:
+  - codex_humaneval_gold_bpb_0shot
+  - codex_mbpp_gold_bpb_0shot
+weka: true
+dataset:
+  sources:
+  - name: the-stack-v2-ai2v0
+    target_ratio: 1.0
+    paths:
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-000-00009.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-001-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00009.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-002-00010.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-003-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00009.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-004-00010.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-005-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00009.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00010.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00011.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00012.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-006-00013.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-007-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-008-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-009-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-010-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-011-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-012-00009.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-013-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00009.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-014-00010.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00001.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00002.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00003.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00004.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00005.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00006.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00007.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-015-00008.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-016-00000.npy
