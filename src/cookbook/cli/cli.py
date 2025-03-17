@@ -228,7 +228,7 @@ def cancel(config: Path, group_id: str):
     help="The destination workspace to copy secrets to",
     default="ai2/dolma2",
 )
-def prepare_workspace_from(source: str, dest: str):
+def prepare_user_workspace_from(source: str, dest: str):
     beaker = Beaker.from_env()
 
     if source == dest:
@@ -311,7 +311,7 @@ def prepare_workspace_from(source: str, dest: str):
     default=None,
     required=False,
 )
-def prepare_workspace(
+def prepare_user_workspace(
     workspace: str,
     beaker_token: str,
     aws_config: str,
