@@ -12,7 +12,7 @@ model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
 learning_rate: 1.8e-3
-cluster: ai2/jupiter-cirrascale-2
+cluster: ai2/augusta-google-1
 weka: true
 eval_interval: 100
 downstream_evaluators:
