@@ -24,7 +24,7 @@ Optional: (Only if you are using Weka storage for token files)
 
 #### Remote (Beaker)
 
-1) Create a `Beaker` user account, request access to AI2 clusters, and create an API token.
+1) Create a `Beaker` user account, request access to AI2 clusters, and create a Beaker user token.
 2) Set up your workspace
 
 ```shell
