@@ -4,7 +4,7 @@ budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
-preemptible: true
+preemptible: false
 max_tokens: 113_184_153_600 # 5xC multiplier
 sequence_length: 2048
 seed: 1337
@@ -12,7 +12,7 @@ model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
 learning_rate: 1.8e-3
-cluster: ai2/augusta-google-1
+cluster: ai2/jupiter-cirrascale-2
 weka: true
 eval_interval: 100
 downstream_evaluators:
