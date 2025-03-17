@@ -1148,13 +1148,13 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/love2code/python_only/part-119-00009.npy
     target_ratio: 1.0
 description: Train code model with larger batch size
-global_batch_size: 12582912
+global_batch_size: 79691776
 gpus: 8
-learning_rate: 0.00440908153700972
-load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step30000/
-max_tokens: 65062043648
+learning_rate: 0.011095945205344156
+load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-python-no-prose-hlr-c0c0f2d1/step45000/
+max_tokens: 96519323648
 model: olmo2_1B
-name: code-step30000-6x
+name: code-step45000-38x
 nodes: 1
 preemptible: false
 priority: high

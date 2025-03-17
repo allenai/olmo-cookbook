@@ -16,8 +16,8 @@ def parse_args():
     parser.add_argument("--max-tokens", "-t", type=int, default=512 * 1024 * 4096)
     parser.add_argument("--start-step", type=int, default=0)
     parser.add_argument("--budget", type=str, default="ai2/oe-training")
-    parser.add_argument("--workspace", type=str, default="ai2/13B")
-    parser.add_argument("--priority", type=str, default="normal")
+    parser.add_argument("--workspace", type=str, default="ai2/olmo-batchsize")
+    parser.add_argument("--priority", type=str, default="high")
     parser.add_argument("--nodes", type=int, default=None)
     return parser.parse_args()
 
