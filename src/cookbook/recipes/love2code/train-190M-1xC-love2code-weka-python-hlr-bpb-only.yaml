@@ -1,4 +1,4 @@
-name: "olmo-cookbook-1b-5xC-love2code-python-hlr"
+name: "olmo-cookbook-190M-1xC-love2code-python-hlr-bpb-only"
 description: "Love2Code model, but with python code only"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
