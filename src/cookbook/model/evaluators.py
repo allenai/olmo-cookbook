@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DownstreamEvaluators(Enum):
+class DownstreamEvaluator(Enum):
     """Enum class enumerating available in-loop evaluators."""
 
     PIQA = "piqa"
