@@ -2,7 +2,7 @@
 
 OLMost every recipe you need to experiment with the OLMo family of models.
 
-## To Train an OLMo Model
+## How To Train an OLMo Model
 
 ### Prepare your environments
 
@@ -28,7 +28,7 @@ Optional: (Only if you are using Weka storage for token files)
 2) Set up your workspace
 
 ```shell
-olmo-cookbook prepare-workspace \
+olmo-cookbook prepare-user-workspace \
   --workspace <workspace> \
   --beaker-token <beaker-token> \
   --aws-config <aws-config> \
