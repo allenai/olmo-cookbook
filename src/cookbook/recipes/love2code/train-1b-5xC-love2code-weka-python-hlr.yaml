@@ -14,6 +14,10 @@ priority: high
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 weka: true
+eval_interval: 100 # For testing, remove for real training
+downstream_evaluators:
+  - CODEX_MBPP_BPB
+  - CODEX_HUMANEVAL_BPB
 dataset:
   sources:
   - name: the-stack-v2-ai2v0
