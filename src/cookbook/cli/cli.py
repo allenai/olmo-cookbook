@@ -1,5 +1,6 @@
 import concurrent.futures
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -210,6 +211,144 @@ def cancel(config: Path, group_id: str):
     """Cancel all running jobs for an experiment group."""
 
     _stop_for_group(config, group_id)
+
+
+@cli.command()
+@click.option(
+    "--source",
+    "-s",
+    type=str,
+    help="The source workspace to copy secrets from",
+    required=True,
+)
+@click.option(
+    "--dest",
+    "-d",
+    type=str,
+    help="The destination workspace to copy secrets to",
+    default="ai2/dolma2",
+)
+def prepare_user_workspace_from(source: str, dest: str):
+    beaker = Beaker.from_env()
+
+    if source == dest:
+        raise ValueError("Dest workspace cannot be source workspace")
+
+    if not source.startswith("ai2/"):
+        raise ValueError("source workspace must be in the ai2 organization")
+
+    user = beaker.account.whoami().name.upper()
+    source_workspace = beaker.workspace.get(source)
+    target_workspace = beaker.workspace.get(dest)
+
+    required = (
+        f"{user}_BEAKER_TOKEN",
+        f"{user}_WANDB_API_KEY",
+        f"{user}_AWS_CONFIG",
+        f"{user}_AWS_CREDENTIALS",
+        "R2_ENDPOINT_URL",
+        "WEKA_ENDPOINT_URL",
+    )
+
+    for secret_name in required:
+        secret_value = beaker.secret.read(secret_name, workspace=source_workspace)
+        beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
+
+        print(f"copied '{secret_name}' to {target_workspace.full_name}")
+
+
+@cli.command()
+@click.option(
+    "--workspace",
+    "-w",
+    type=str,
+    help="The Beaker workspace to write secrets to",
+    default=None,
+    required=True,
+)
+@click.option(
+    "--beaker-token",
+    "-t",
+    type=str,
+    help="The beaker token to use for authentication",
+    default=None,
+    required=True,
+)
+@click.option(
+    "--aws-config",
+    "-c",
+    type=str,
+    help="The AWS config file to use for authentication",
+    default=None,
+    required=True,
+)
+@click.option(
+    "--aws-credentials",
+    "-a",
+    type=str,
+    help="The AWS credentials file to use for authentication",
+    default=None,
+    required=True,
+)
+@click.option(
+    "--r2-endpoint-url",
+    type=str,
+    help="The R2 endpoint URL to use for authentication",
+    default=None,
+    required=False,
+)
+@click.option(
+    "--weka-endpoint-url",
+    type=str,
+    help="The WEKA endpoint URL to use for authentication",
+    default=None,
+    required=False,
+)
+@click.option(
+    "--wandb-api-key",
+    type=str,
+    help="The wandb API key to use for authentication",
+    default=None,
+    required=False,
+)
+def prepare_user_workspace(
+    workspace: str,
+    beaker_token: str,
+    aws_config: str,
+    aws_credentials: str,
+    r2_endpoint_url: Optional[str] = None,
+    weka_endpoint_url: Optional[str] = None,
+    wandb_api_key: Optional[str] = None,
+):
+    """Prepare the workspace environment for use with OLMo-cookbook."""
+
+    beaker = Beaker.from_env()
+    user = beaker.account.whoami().name.upper()
+    target_workspace = beaker.workspace.get(workspace)
+
+    def read_file(file_path) -> str:
+        """Read a file and return its contents."""
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        with open(file_path, "r") as file:
+            return file.read()
+
+    aws_config = read_file(aws_config)
+    aws_credentials = read_file(aws_credentials)
+
+    secrets: dict[str, Optional[str]] = {
+        f"{user}_BEAKER_TOKEN": beaker_token,
+        f"{user}_WANDB_API_KEY": wandb_api_key,
+        f"{user}_AWS_CONFIG": aws_config,
+        f"{user}_AWS_CREDENTIALS": aws_credentials,
+        "R2_ENDPOINT_URL": r2_endpoint_url,
+        "WEKA_ENDPOINT_URL": weka_endpoint_url,
+    }
+
+    for secret_name, secret_value in secrets.items():
+        if secret_value:
+            beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
+            print(f"Succesfully wrote '{secret_name}' to {target_workspace.full_name}")
 
 
 cli.command()(evaluate)
