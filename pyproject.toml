@@ -19,6 +19,7 @@ dependencies = [
     "s3fs",
     "yaspin",
     "PyYAML>=6.0,<7.0",
+    "transformers @ git+https://github.com/2015aroras/transformers/tree/shanea/learn2code"
 ]
 
 [project.optional-dependencies]
@@ -37,7 +38,7 @@ wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@revert-147-epwalsh/mixture-fix",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@mattj/gelu",
     "beaker-py",
     "GitPython>=3.0,<4.0",
     "wandb",
