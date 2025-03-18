@@ -19,7 +19,7 @@ dependencies = [
     "s3fs",
     "yaspin",
     "PyYAML>=6.0,<7.0",
-    "transformers @ git+https://github.com/2015aroras/transformers/shanea/learn2code"
+    "transformers @ git+https://github.com/2015aroras/transformers.git@shanea/learn2code"
 ]
 
 [project.optional-dependencies]
