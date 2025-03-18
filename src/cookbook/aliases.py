@@ -6,7 +6,7 @@ from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from pydantic import BaseModel
 
-from cookbook.model.evaluators import DownstreamEvaluators
+from cookbook.model.evaluators import DownstreamEvaluator
 
 PathType = Union[Path, PathLike[Any], str]
 
@@ -62,7 +62,7 @@ class ExperimentConfig(BaseModel):
     rank_microbatch_size: Optional[int] = None
     global_batch_size: Optional[int] = None
     lm_evaluator: bool = False
-    downstream_evaluators: list[DownstreamEvaluators] = []
+    downstream_evaluators: list[DownstreamEvaluator] = []
     max_target_sequence_length: int = 8192
     wandb: Optional[WandbConfig] = None
     preemptible: bool = True
