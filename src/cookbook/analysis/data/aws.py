@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -122,8 +123,6 @@ def process_local_folder(local_results_path, file_type="predictions"):
     predictions_df = recursive_pull(aws_dir, file_type)
 
     # Save predictions to parquet
-    import time
-
     start_time = time.time()
 
     df = load_df_parallel(predictions_df, file_type)  # for 6700 preds: 300s (5 min)
