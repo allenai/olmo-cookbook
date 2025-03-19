@@ -77,7 +77,7 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
         slices["native_id"] = slices["native_id"] + "_" + slices["task"].astype(str)
 
         duplicates_count = slices.duplicated(subset=["native_id"] + col).sum()
-        if duplicates_count > 0:
+        if duplicates_count > 0 and task:
             if (
                 "hellaswag" not in task and "drop" not in task
             ):  # this is a known problem for 433 HellaSwag instances, 1 Drop instance
@@ -97,6 +97,7 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
         columns = pivoted.columns
         scores = pivoted.to_numpy()
     else:
+        pivoted = None
         if len(col) == 1:
             columns = slices[col[0]].to_numpy()
             scores = slices[metric].to_numpy()
@@ -105,7 +106,7 @@ def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, so
             columns = pivoted.columns
             scores = pivoted.to_numpy()
 
-    if is_multiindex:
+    if is_multiindex and pivoted:
         # If there are multiple cols, reshape the output nd array
         if len(col) > 1:
             pivoted = pivoted.sort_index(axis=1)
