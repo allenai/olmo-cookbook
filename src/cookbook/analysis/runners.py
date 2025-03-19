@@ -12,7 +12,7 @@ from tqdm import tqdm
 from cookbook.analysis.constants import (
     PLOT_DIR,
     get_task_sets,
-    get_title_from_task_set,
+    get_title_from_task,
 )
 from cookbook.analysis.stats import compute_significance
 
@@ -29,12 +29,12 @@ REVERSED_METRICS = [
 
 def run_paired_comparison(
     df: pd.DataFrame,
-    task_set: list[str] | list[list[str]],
+    task: list[list[str] | str],
     model_names: list[str],
     axes: plt.Axes,
     metric: str = "primary_score",
 ) -> dict:
-    task_name = get_title_from_task_set(task_set)
+    task_name = get_title_from_task(task)
     model_names = sorted(list(set(model_names)))
     ax: Optional[plt.Axes] = axes
 
@@ -45,7 +45,7 @@ def run_paired_comparison(
         step=None,  # the models have different checkpoint steps
         last_n=1,  # the "last n" checkpoints to average results
         alpha=0.05,  # significance level
-        tasks=task_set,
+        tasks=task,
         plot_axes=ax,
         plot_sig_clusters=False,
         quiet=True,
@@ -63,7 +63,7 @@ def run_paired_comparison(
         "p_values": p_values,
         "sig_clusters": sig_clusters,
         "task_name": task_name,
-        "task_set": task_set,
+        "task_set": task,
         "metric": metric,
         "model_names": model_names,
     }
@@ -136,8 +136,10 @@ def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame
     ALL_MODELS = sorted(df.index.get_level_values("model").unique().to_list())
     ALL_TASKS = sorted(df.index.get_level_values("task").unique().to_list())
 
-    task_sets = get_task_sets(ALL_TASKS)
-    named_tasks = [get_title_from_task_set(task_set) for task_set in task_sets]
+    print(ALL_TASKS)
+
+    tasks = get_task_sets(ALL_TASKS)
+    # named_tasks = [get_title_from_task(task_set) for task_set in tasks]
 
     # Negate metrics where lower is better, so the ordering is the same
     for col in REVERSED_METRICS:
@@ -146,9 +148,9 @@ def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame
 
     primary = []
     bpb = []
-    with tqdm(total=len(named_tasks)) as pbar:
-        for task in task_sets:
-            task_name = get_title_from_task_set(task)
+    with tqdm(total=len(tasks)) as pbar:
+        for task in tasks:
+            task_name = get_title_from_task(task)
             pbar.set_description(f"Computing paired permutation test on {len(ALL_MODELS)} models for {task_name}")
 
             N_COLS = 2
@@ -164,13 +166,13 @@ def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame
 
             primary.append(
                 run_paired_comparison(
-                    df, task_set=[task], model_names=ALL_MODELS, metric="primary_score", axes=axes[0, 0]
+                    df, task=[task], model_names=ALL_MODELS, metric="primary_score", axes=axes[0, 0]
                 )
             )
 
             bpb.append(
                 run_paired_comparison(
-                    df, task_set=[task], model_names=ALL_MODELS, metric="bits_per_byte_corr", axes=axes[1, 0]
+                    df, task=[task], model_names=ALL_MODELS, metric="bits_per_byte_corr", axes=axes[1, 0]
                 )
             )
 

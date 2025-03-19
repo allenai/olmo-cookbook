@@ -6,7 +6,7 @@ import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
 
-from cookbook.analysis.constants import get_title_from_task_set
+from cookbook.analysis.constants import get_title_from_task
 from cookbook.analysis.plot.heatmap import plot_heatmap
 from cookbook.analysis.utils.dataloader import get_nd_array, get_slice
 from cookbook.analysis.utils.pce import (
@@ -80,7 +80,7 @@ def compute_significance(
     plot_axes: plt.Axes,
     step: Optional[str] = "max",
     last_n: int = 1,
-    tasks: Optional[list[str] | list[list[str]]] = None,
+    tasks: Optional[list[list[str] | str]] = None,
     alpha: float = 0.05,
     num_permutations: int = 1_000,
     pretty_mix_names: Optional[dict[str, str]] = None,
@@ -115,7 +115,7 @@ def compute_significance(
             mixes, scores = get_nd_array(df, "mix", metric, model=models, task=task, step=step, sorted=True)
 
         if len(scores) == 0:
-            print(f"Found no scores for {get_title_from_task_set(task)}! Skipping...")
+            print(f"Found no scores for {get_title_from_task(task)}! Skipping...")
             continue
 
         if isinstance(task, list):
@@ -137,7 +137,7 @@ def compute_significance(
             p_values[np.tril_indices_from(p_values, k=-1)] = np.nan
 
             # Change task name
-            task = get_title_from_task_set(task)
+            task = get_title_from_task(task)
         else:
             p_values, mix_scores, _ = compute_pairwise_p_values(
                 scores, num_permutations=num_permutations, return_scores=True

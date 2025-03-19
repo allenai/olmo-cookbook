@@ -2,8 +2,8 @@ DATA_DIR = "/tmp/cookbook/analysis/data"
 PLOT_DIR = "/tmp/cookbook/analysis/plots"
 
 
-def get_title_from_task_set(task_set):
-    if isinstance(task_set, list):
+def get_title_from_task(task):
+    if isinstance(task, list):
         title_mapping = {
             "mmlu_pro_": "mmlu_pro",
             "mmlu_abstract_algebra:mc": "mmlu_mc",
@@ -20,16 +20,16 @@ def get_title_from_task_set(task_set):
             "drop": "olmes_gen",
         }
         for key, title in title_mapping.items():
-            if key in task_set[0]:
+            if key in task[0]:
                 return title
 
         return "aggregate"
 
-    return task_set
+    return task
 
 
 def set_title_from_task(ax, task):
-    ax.set_title(get_title_from_task_set(task))
+    ax.set_title(get_title_from_task(task))
 
 
 RC_TASKS_OLMES = [
@@ -780,7 +780,7 @@ PRIMARY_METRICS_OLMES = {
 }
 
 
-def get_task_sets(all_tasks) -> list[list[str]]:
+def get_task_sets(all_tasks) -> list[list[str] | str]:
     mmlu: list[str] = [t for t in all_tasks if "mmlu" in t and ":" not in t and "_pro_" not in t]
     minerva: list[str] = [t for t in all_tasks if "minerva" in t and ":" not in t]
     mmlu_pro: list[str] = [t for t in all_tasks if "_pro_" in t and ":rc" in t]
@@ -802,18 +802,18 @@ def get_task_sets(all_tasks) -> list[list[str]]:
     bbh: list[str] = [t for t in all_tasks if "bbh" in t and ":" not in t]
     paloma: list[str] = [t for t in all_tasks if "paloma" in t]
 
-    selected_tasks: list[list[str]] = [
-        mmlu,
-        olmes + olmes_mc + olmes_gen,
-        olmes_mc,
-        mmlu_mc,
-        olmes_gen,
-        minerva,
-        agi_eval,
-        bbh,
-        paloma,
+    selected_tasks = (
+        olmes + olmes_mc + olmes_gen + [olmes, mmlu, olmes_mc, mmlu_mc, olmes_gen, minerva, agi_eval, bbh, paloma]
+    )
+    selected_tasks += ["gsm_symbolic_main", mmlu_pro, "autobencher", "autobencher:mc"]
+    selected_tasks += [
+        "minerva_math_500",
+        "mbpp",
+        "mbppplus",
+        "codex_humaneval",
+        "codex_humanevalplus",
+        "copycolors:mc",
     ]
-    selected_tasks.append(["gsm_symbolic_main", *mmlu_pro, "autobencher", "autobencher:mc"])
     selected_tasks.append(
         [
             "codex_humaneval",
