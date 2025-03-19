@@ -155,11 +155,12 @@ def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame
             N_ROWS = 1
 
             fig, axes = plt.subplots(
-                N_ROWS,
-                N_COLS,
-                figsize=(0.85 * len(ALL_MODELS) * N_COLS, 0.25 * len(ALL_MODELS) * N_ROWS),
+                N_ROWS * 2,
+                N_COLS // 2,
+                gridspec_kw={"wspace": 0.4, "hspace": 0},
+                figsize=(0.4 * len(ALL_MODELS) * (N_COLS // 2), 0.85 * len(ALL_MODELS) * (N_ROWS * 2)),
                 squeeze=False,
-            )  # 0.35
+            )
 
             primary.append(
                 run_paired_comparison(
@@ -169,7 +170,7 @@ def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame
 
             bpb.append(
                 run_paired_comparison(
-                    df, task_set=[task], model_names=ALL_MODELS, metric="bits_per_byte_corr", axes=axes[0, 1]
+                    df, task_set=[task], model_names=ALL_MODELS, metric="bits_per_byte_corr", axes=axes[1, 0]
                 )
             )
 

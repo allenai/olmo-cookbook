@@ -64,11 +64,14 @@ def plot_heatmap(
     ax.set_yticks(range(len(mix_names)))
 
     if not plot_clean:
-        ax.set_xticklabels(mix_names, rotation=45, ha="right", fontsize=8)
-        ax.set_yticklabels(mix_names, fontsize=8)
+        ax.set_xticklabels(mix_names, rotation=45, ha="right", fontsize=12)
+        ax.set_yticklabels(mix_names, fontsize=12)
     else:
         ax.set_xticklabels([])
         ax.set_yticklabels([])
+
+    # Add gridlines
+    ax.grid(which="both", color="gray", linestyle="-", linewidth=0.5, alpha=0.3)
 
     # Add colorbar only for the viridis range
     norm = plt.Normalize(0, 1)
@@ -86,7 +89,7 @@ def plot_heatmap(
         for i in range(values.shape[0]):
             for j in range(values.shape[1]):
                 if not mask[i, j]:
-                    ax.text(j, i, f"{values[i, j]:.2f}".lstrip("0"), ha="center", va="center", fontsize=7)
+                    ax.text(j, i, f"{values[i, j]:.2f}".lstrip("0"), ha="center", va="center", fontsize=10)
 
     return ax
 
@@ -106,50 +109,3 @@ def lighten_color(color, amount=0.2):
     new_g = min(g + (1 - g) * amount, 1)
     new_b = min(b + (1 - b) * amount, 1)
     return new_r, new_g, new_b
-
-
-def plot_training(
-    ax: plt.Axes,
-    x,
-    y,
-    xlabel: str,
-    ylabel: str,
-    label=None,
-    title=None,
-    color=None,
-    fit=None,
-    ci=None,
-    sma_window=None,
-):
-    if color is None and label is not None:
-        label_for_color = label
-        color = assign_color(label_for_color)
-
-    if xlabel == "step":
-        if sma_window is not None:
-            import numpy as np
-
-            sma = np.convolve(y, np.ones(sma_window) / sma_window, mode="valid")
-            x_sma = x[sma_window - 1 :]
-            x_plt, y_plt = x_sma, sma
-        else:
-            x_plt, y_plt = x, y
-
-        ax.plot(x_plt, y_plt, label=label, color=color, linewidth=0.5, marker=".", markersize=2)
-        # ax.plot(df_slice[xlabel], df_slice[ylabel].rolling(window=5).mean(), label=label, color=color, linewidth=0.5, marker='.', markersize=2)
-    else:
-        ax.scatter(x, y, label=label, color=color, s=3)
-
-    if ci is not None:
-        ax.fill_between(x, y - ci, y + ci, alpha=0.1, color=color)
-
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    if title:
-        ax.set_title(title)
-    if label is not None:
-        ax.legend()
-
-    ax.tick_params(axis="both", which="major", labelsize=8)
-
-    return ax

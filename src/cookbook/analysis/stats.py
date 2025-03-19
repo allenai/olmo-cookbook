@@ -171,6 +171,6 @@ def compute_significance(
             if len(models) < 15:
                 title = r"$p$" + f"-values for {task}, perc sig={(perc_sig*100):.2f}%"
 
-            axes[i].set_title(title, fontsize=10)
+            axes[i].set_title(title, fontsize=14)
 
     return sig_results, all_p_values
