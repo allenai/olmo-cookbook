@@ -133,6 +133,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
+        learning_rate=base_config.learning_rate,
     ).build()
 
     device = get_default_device()

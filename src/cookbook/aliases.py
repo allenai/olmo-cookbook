@@ -60,6 +60,7 @@ class ExperimentConfig(BaseModel):
     model: str
     load_path: Optional[str] = None
     rank_microbatch_size: Optional[int] = None
+    learning_rate: Optional[float] = None
     global_batch_size: Optional[int] = None
     lm_evaluator: bool = False
     downstream_evaluators: list[DownstreamEvaluator] = []
