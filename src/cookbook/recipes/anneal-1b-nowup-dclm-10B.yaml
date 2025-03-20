@@ -1,7 +1,7 @@
 name: "olmo-cookbook-1b-anneal-nowup-dclm-10B"
 description: "Example olmo-cookbook recipe"
 budget: "ai2/oe-data"
-workspace: "ai2/dolma2"
+workspace: "ai2/oe-data"
 nodes: 1
 gpus: 8
 preemptible: true
