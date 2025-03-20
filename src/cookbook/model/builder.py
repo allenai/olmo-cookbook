@@ -1,3 +1,4 @@
+import json
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -9,9 +10,18 @@ from olmo_core.data import (
     NumpyDatasetType,
     TokenizerConfig,
 )
+from olmo_core.optim.config import OptimConfig
+from olmo_core.io import resource_path
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.nn.transformer import TransformerConfig
-from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride, Scheduler
+from olmo_core.optim import (
+    AdamWConfig,
+    CosWithWarmup,
+    LinearWithWarmup,
+    SkipStepAdamWConfig,
+    OptimGroupOverride,
+    Scheduler,
+)
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -27,6 +37,7 @@ from olmo_core.train.callbacks import (
     WandBCallback,
 )
 from olmo_core.train.common import LoadStrategy
+import torch
 
 from cookbook.aliases import SourceInstance, WandbConfig
 from cookbook.data.dataset import MixtureBuilder
@@ -39,6 +50,7 @@ from cookbook.model.config import (
 )
 from cookbook.model.evaluators import DownstreamEvaluator
 from cookbook.model.custom_schedulers import WSD
+
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +118,7 @@ class TransformerConfigBuilder:
         get_scheduler_config() -> Scheduler:
             Returns the scheduler configuration based on the scheduler type.
 
-        get_optimizer_config() -> AdamWConfig:
+        get_optimizer_config() -> OptimConfig:
             Returns the optimizer configuration.
 
         build() -> ModelTrainConfig:
@@ -243,7 +255,7 @@ class TransformerConfigBuilder:
             global_batch_size = 1024 * self.sequence_length
 
         if self.rank_microbatch_size:
-            rank_microbatch_size = self.rank_microbatch_size
+            rank_microbatch_size = self.rank_microbatch_size * self.sequence_length
         else:
             rank_microbatch_size = 16 * self.sequence_length
 
@@ -351,6 +363,8 @@ class TransformerConfigBuilder:
             return CosWithWarmup(warmup_steps=self.get_warmup_steps())
         elif self.scheduler_type == "cosine_nowup":
             return CosWithWarmup(warmup_steps=0)
+        elif self.scheduler_type == "linear_nowup":
+            return LinearWithWarmup(warmup_steps=0, t_max=self.max_tokens)
         elif self.scheduler_type == "wsd":
             return WSD(
                 warmup_steps=self.get_warmup_steps(),
@@ -358,9 +372,9 @@ class TransformerConfigBuilder:
         else:
             raise ValueError(f"Unsupported scheduler type: {self.scheduler_type}")
 
-    def get_optimizer_config(self) -> AdamWConfig:
+    def get_optimizer_config(self, lr: Optional[float] = None) -> OptimConfig:
         return AdamWConfig(
-            lr=self.get_learning_rate(),
+            lr=lr or self.get_learning_rate(),
             eps=DefaultOptimizerProperties.eps,
             betas=DefaultOptimizerProperties.betas,
             group_overrides=[
@@ -391,6 +405,92 @@ class TransformerConfigBuilder:
 
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
+
+        trainer_config = TrainerConfig(
+            load_path=load_path,
+            load_strategy=load_strategy,
+            save_folder=self.checkpoint_dir,
+            work_dir=self.dataset_cache,
+            rank_microbatch_size=rank_microbatch_size,
+            save_overwrite=False,
+            metrics_collect_interval=10,
+            cancel_check_interval=5,
+            compile_loss=True,
+            z_loss_multiplier=1e-5,
+            max_duration=Duration.tokens(self.max_tokens),
+        )
+
+        for callback_name, callback in self.build_callbacks().items():
+            trainer_config.callbacks[callback_name] = callback
+
+        return ModelTrainConfig(
+            init_seed=self.seed,
+            model=self.transformer_config,
+            optim=optim_config,
+            dataset=dataset_config,
+            data_loader=data_loader_config,
+            trainer=trainer_config,
+        )
+
+
+class TransformerAnnealConfigBuilder(TransformerConfigBuilder):
+    """
+    A builder class for configuring and creating a transformer model training configuration with annealing.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.scheduler_type = "linear_nowup"
+
+    def get_optimizer_config(self, lr: Optional[float] = None) -> OptimConfig:
+        return SkipStepAdamWConfig(
+            lr=lr or self.get_learning_rate(),
+            eps=DefaultOptimizerProperties.eps,
+            betas=DefaultOptimizerProperties.betas,
+            group_overrides=[
+                OptimGroupOverride(
+                    params=["embeddings.weight"],
+                    opts=dict(weight_decay=0.0),
+                )
+            ],
+            weight_decay=DefaultOptimizerProperties.weight_decay,
+        )
+
+    def build(self) -> ModelTrainConfig:
+        train_state = torch.load(resource_path(f"{self.load_path}/train", "rank0.pt"), weights_only=False)
+        last_pretrain_step: int = train_state["global_step"]
+        max_pretrain_steps = train_state.get("max_steps", None)
+
+        if max_pretrain_steps is None:
+            raise ValueError(
+                "max_steps not found in the training state, unable to determine annealing parameters."
+            )
+
+        logger.info(f"Will anneal from checkpoint at step {last_pretrain_step:,d} of {max_pretrain_steps:,d}")
+
+        with resource_path(str(self.load_path), "config.json").open() as f:
+            config = json.load(f)
+
+        base_lr = config["optim"]["lr"]
+        scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+
+        assert scheduler_config.pop("_CLASS_") == CosWithWarmup.__name__
+        scheduler = CosWithWarmup(**scheduler_config)
+        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+
+        global_batch_size, rank_microbatch_size = self.get_batch_sizes()
+
+        dataset_config = self.build_dataset_config()
+        optim_config = self.get_optimizer_config(lr=starting_lr)
+        data_loader_config = NumpyDataLoaderConfig(
+            global_batch_size=global_batch_size,
+            work_dir=self.dataset_cache,
+            seed=self.seed,
+            num_workers=12,
+        )
+
+        load_path = self.load_path
+        load_strategy = LoadStrategy.always
 
         trainer_config = TrainerConfig(
             load_path=load_path,

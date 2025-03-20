@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from olmo_core.optim.config import OptimConfig
 from olmo_core.config import Config, DType
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
 from olmo_core.distributed.parallel import DataParallelType
@@ -17,7 +18,7 @@ from olmo_core.train import TrainerConfig
 @dataclass
 class ModelTrainConfig(Config):
     model: TransformerConfig
-    optim: AdamWConfig
+    optim: OptimConfig
     dataset: NumpyDatasetConfig
     data_loader: NumpyDataLoaderConfig
     trainer: TrainerConfig
