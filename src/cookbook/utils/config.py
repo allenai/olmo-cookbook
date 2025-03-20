@@ -158,6 +158,11 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         optim = config.optim.build(model)
         data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
         trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
+
+        # ANNEAL: If we don't have a checkpoint for this run, try to load the pretraining checkpoint
+        if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
+            trainer.load_checkpoint(base_config.load_path, load_trainer_state=False)
+
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
