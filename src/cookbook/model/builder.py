@@ -480,8 +480,7 @@ class TransformerAnnealConfigBuilder(TransformerConfigBuilder):
             base_lr = config["optim"]["lr"]
             scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
 
-            logger.info(f"Scheduler: {scheduler_config.get('_CLASS_')}")
-            logger.info(CosWithWarmup.__name__)
+            logger.info(f"Scheduler class found: {scheduler_config.get('_CLASS_')}")
 
             assert scheduler_config.pop("_CLASS_").split(".")[-1] == CosWithWarmup.__name__
             scheduler = CosWithWarmup(**scheduler_config)
@@ -507,7 +506,7 @@ class TransformerAnnealConfigBuilder(TransformerConfigBuilder):
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
             rank_microbatch_size=rank_microbatch_size,
-            save_overwrite=False,
+            save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
             compile_loss=True,
