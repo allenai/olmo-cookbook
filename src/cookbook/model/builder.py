@@ -497,12 +497,9 @@ class TransformerAnnealConfigBuilder(TransformerConfigBuilder):
             num_workers=12,
         )
 
-        load_path = self.load_path
-        load_strategy = LoadStrategy.always
-
         trainer_config = TrainerConfig(
-            load_path=load_path,
-            load_strategy=load_strategy,
+            load_path=self.load_path,
+            load_strategy=LoadStrategy.always,
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
             rank_microbatch_size=rank_microbatch_size,
