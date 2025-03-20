@@ -59,6 +59,7 @@ class ExperimentConfig(BaseModel):
     tokenizer: str
     model: str
     scheduler_type: str = "cosine_warmup"
+    anneal: bool = False
     warmup_steps: Optional[int] = None
     load_path: Optional[str] = None
     rank_microbatch_size: Optional[int] = None
