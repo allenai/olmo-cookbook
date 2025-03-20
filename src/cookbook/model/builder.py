@@ -38,7 +38,7 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator
-from cookbook.model.schedulers import WSD
+from cookbook.model.custom_schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
@@ -69,15 +69,17 @@ class TransformerConfigBuilder:
         eval_interval (int): The evaluation interval.
         save_interval (int): The save interval.
         lm_evaluator (bool): Whether to enable language model evaluation.
-        downstream_evaluators (List[DownstreamEvaluators]): The downstream evaluators.
+        downstream_evaluators (List[DownstreamEvaluator]): The downstream evaluators.
+        scheduler_type (str): The type of scheduler to use.
+        load_path (Optional[str]): The path to load the model from.
         learning_rate (Optional[float]): The learning rate for the optimizer.
+        global_batch_size (Optional[int]): The global batch size.
+        rank_microbatch_size (Optional[int]): The rank microbatch size.
+        warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         profile (bool): Whether to enable profiling.
 
     Methods:
-        __init__(run_name, sources, sequence_length, max_tokens, group_id, cluster, beaker_user,
-                 tokenizer, dtype, model_identifier, weka, max_dp_world_size, save_interval, eval_interval,
-                 lm_evaluator, downstream_evaluators, learning_rate=None, wandb_config=None,
-                 max_target_sequence_length=8192, seed=42, s3=True, profile=False):
+        __init__(*args, *kwargs):
             Initializes the TransformerConfigBuilder.
 
         get_tokenizer_config(tokenizer: str) -> TokenizerConfig:
@@ -86,8 +88,8 @@ class TransformerConfigBuilder:
         get_warmup_steps() -> int:
             Returns the number of warmup steps.
 
-        get_batch_size() -> int:
-            Returns the global batch size based on the sequence length.
+        get_batch_sizes() -> tuple[int, int]:
+            Returns the global and rank microbatch sizes based on the sequence length.
 
         next_power_of_2(x: int) -> int:
             Returns the next power of 2 greater than or equal to x.
@@ -95,13 +97,13 @@ class TransformerConfigBuilder:
         get_learning_rate() -> float:
             Returns the learning rate for the optimizer.
 
-        build_callbacks(model: TransformerConfig) -> Dict[str, Callback]:
+        build_callbacks() -> Dict[str, Callback]:
             Builds and returns a dictionary of callbacks for the trainer.
 
         build_dataset_config() -> NumpyDatasetConfig:
             Builds and returns the dataset configuration.
 
-        get_scheduler_config(scheduler_type: str = "cosine") -> Scheduler:
+        get_scheduler_config() -> Scheduler:
             Returns the scheduler configuration based on the scheduler type.
 
         get_optimizer_config() -> AdamWConfig:
@@ -132,10 +134,12 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     downstream_evaluators: List[DownstreamEvaluator]
+    scheduler_type: str
     load_path: Optional[str]
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
+    warmup_steps: Optional[int]
     profile: bool = False
 
     def __init__(
@@ -156,12 +160,14 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],
+        scheduler_type: str,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
         rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
         wandb_config: Optional[WandbConfig] = None,
         max_target_sequence_length: int = 8192,
+        warmup_steps: Optional[int] = None,
         seed: int = 42,
         s3: bool = True,
         profile: bool = False,
@@ -191,6 +197,8 @@ class TransformerConfigBuilder:
         self.learning_rate = learning_rate
         self.global_batch_size = global_batch_size
         self.rank_microbatch_size = rank_microbatch_size
+        self.warmup_steps = warmup_steps
+        self.scheduler_type = scheduler_type
         self.downstream_evaluators = downstream_evaluators
         self.load_path = load_path
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
@@ -211,9 +219,13 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self) -> int:
-        return 2000
+        if self.warmup_steps:
+            return self.warmup_steps
+        else:
+            return 2000
 
     def get_batch_sizes(self) -> tuple[int, int]:
+        # TODO(undfined): Revisit this logic in the future
         # assert self.sequence_length in {2048, 4096, 8192}
         # seq_len_divisor = self.sequence_length // 2048
 
@@ -224,8 +236,9 @@ class TransformerConfigBuilder:
         # global_batch_size *= self.max_dp_world_size
 
         # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
+
         if self.global_batch_size:
-            global_batch_size = self.global_batch_size
+            global_batch_size = self.global_batch_size * self.sequence_length
         else:
             global_batch_size = 1024 * self.sequence_length
 
@@ -237,13 +250,6 @@ class TransformerConfigBuilder:
         print(f"Global batch size (in tokens) is: {global_batch_size}")
 
         return global_batch_size, rank_microbatch_size
-
-    # def default_learning_rate(self) -> float:
-    #     learning_rate = 4.7e-3 * (self.transformer_config.num_params / self.tokenizer.padded_vocab_size()) ** (
-    #         -1 / 3
-    #     )
-    #     learning_rate = learning_rate / self.sequence_length
-    #     return learning_rate
 
     def get_learning_rate(self) -> float:
         if self.learning_rate:
@@ -259,9 +265,9 @@ class TransformerConfigBuilder:
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
 
-    def build_callbacks(self, model: TransformerConfig) -> Dict[str, Callback]:
+    def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
-            "lr_scheduler": SchedulerCallback(scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps())),
+            "lr_scheduler": SchedulerCallback(scheduler=self.get_scheduler_config()),
             "gpu_monitor": GPUMemoryMonitorCallback(),
             "grad_clipper": GradClipperCallback(max_grad_norm=self.max_grad_norm),
             "garbage_collector": GarbageCollectorCallback(),
@@ -339,15 +345,18 @@ class TransformerConfigBuilder:
         )
         return dataset_config
 
-    def get_scheduler_config(self, scheduler_type: str = "cosine") -> Scheduler:
-        if scheduler_type == "cosine":
+    def get_scheduler_config(self) -> Scheduler:
+        # TODO(undfined): Move these scheduler_type strings into an enum
+        if self.scheduler_type == "cosine_warmup":
             return CosWithWarmup(warmup_steps=self.get_warmup_steps())
-        elif scheduler_type == "wsd":
+        elif self.scheduler_type == "cosine_nowup":
+            return CosWithWarmup(warmup_steps=0)
+        elif self.scheduler_type == "wsd":
             return WSD(
                 warmup_steps=self.get_warmup_steps(),
             )
         else:
-            raise ValueError(f"Unsupported scheduler type: {scheduler_type}")
+            raise ValueError(f"Unsupported scheduler type: {self.scheduler_type}")
 
     def get_optimizer_config(self) -> AdamWConfig:
         return AdamWConfig(
@@ -397,7 +406,7 @@ class TransformerConfigBuilder:
             max_duration=Duration.tokens(self.max_tokens),
         )
 
-        for callback_name, callback in self.build_callbacks(self.transformer_config).items():
+        for callback_name, callback in self.build_callbacks().items():
             trainer_config.callbacks[callback_name] = callback
 
         return ModelTrainConfig(
