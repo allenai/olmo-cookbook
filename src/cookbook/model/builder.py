@@ -467,21 +467,30 @@ class TransformerAnnealConfigBuilder(TransformerConfigBuilder):
             )
 
         logger.info(f"Will anneal from checkpoint at step {last_pretrain_step:,d} of {max_pretrain_steps:,d}")
+        if self.learning_rate:
+            logger.info(f"Using provided learning rate for annealing scheduler: {self.learning_rate}")
+            lr = self.learning_rate
+        else:
+            logger.info(
+                "No learning rate provided, attempting to use config file to determine annealing scheduler."
+            )
+            with resource_path(str(self.load_path), "config.json").open() as f:
+                config = json.load(f)
 
-        with resource_path(str(self.load_path), "config.json").open() as f:
-            config = json.load(f)
+            base_lr = config["optim"]["lr"]
+            scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
 
-        base_lr = config["optim"]["lr"]
-        scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+            logger.info(f"Scheduler: {scheduler_config.get('_CLASS_')}")
+            logger.info(CosWithWarmup.__name__)
 
-        assert scheduler_config.pop("_CLASS_") == CosWithWarmup.__name__
-        scheduler = CosWithWarmup(**scheduler_config)
-        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+            assert scheduler_config.pop("_CLASS_").split(".")[-1] == CosWithWarmup.__name__
+            scheduler = CosWithWarmup(**scheduler_config)
+            lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
         global_batch_size, rank_microbatch_size = self.get_batch_sizes()
 
         dataset_config = self.build_dataset_config()
-        optim_config = self.get_optimizer_config(lr=starting_lr)
+        optim_config = self.get_optimizer_config(lr=lr)
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
             work_dir=self.dataset_cache,

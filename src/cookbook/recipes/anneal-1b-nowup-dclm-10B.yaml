@@ -14,7 +14,7 @@ priority: high
 cluster: ai2/saturn-cirrascale
 weka: true
 anneal: true
-load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-olmo2-f50cc596/step26986
+load_path: weka://oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-olmo2-f50cc596/step26986
 dataset:
   sources:
   - name: dclm-baseline-ft7pct-fw2
