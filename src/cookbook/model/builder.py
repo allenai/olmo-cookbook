@@ -398,7 +398,7 @@ class TransformerConfigBuilder:
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
             rank_microbatch_size=rank_microbatch_size,
-            save_overwrite=True,
+            save_overwrite=False,
             metrics_collect_interval=10,
             cancel_check_interval=5,
             compile_loss=True,
