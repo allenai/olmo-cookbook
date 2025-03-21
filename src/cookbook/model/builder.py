@@ -37,7 +37,7 @@ from cookbook.model.config import (
     SupportedTokenizers,
     WrappedTransformerConfig,
 )
-from cookbook.model.evaluators import DownstreamEvaluators
+from cookbook.model.evaluators import DownstreamEvaluator
 from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    downstream_evaluators: List[DownstreamEvaluators]
+    downstream_evaluators: List[DownstreamEvaluator]
     load_path: Optional[str]
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
@@ -155,7 +155,7 @@ class TransformerConfigBuilder:
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
-        downstream_evaluators: List[DownstreamEvaluators],
+        downstream_evaluators: List[DownstreamEvaluator],
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
         rank_microbatch_size: Optional[int] = None,
@@ -234,7 +234,7 @@ class TransformerConfigBuilder:
         else:
             rank_microbatch_size = 16 * self.sequence_length
 
-        print(f"Global batch size is: {global_batch_size}")
+        print(f"Global batch size (in tokens) is: {global_batch_size}")
 
         return global_batch_size, rank_microbatch_size
 
