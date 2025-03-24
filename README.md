@@ -104,3 +104,26 @@ olmo-cookbook-eval evaluate \
   --model-backend vllm
   --dashboard peteish32
 ```
+
+## How to Run Pairwise Analysis of Models
+
+### Install dependencies
+```shell
+pip install ".[analysis]"
+```
+
+### Download and preprocess results
+```shell
+olmo-cookbook-analysis download \                                                                                             conda:cookbook-311
+  --bucket-name "ai2-llm" \
+  --s3-prefix "evaluation/peteish32" \
+  --local-results-path "peteish32"
+```
+
+### Run pairwise analysis
+```shell
+olmo-cookbook-analysis run --local-results-path "peteish32"
+```
+
+### View pairwise analysis results
+Plots are written to `/tmp/cookbook/analysis/peteish32/plots` and can be viewed with your preferred PDF viewer.
