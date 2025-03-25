@@ -39,19 +39,29 @@ OLMO_CORE_EXAMPLES_BASE_DIR = "src/scripts/train"
     '-d', '--data-mix',
     type=str,
     required=True,
-    help="Name or path of the data mix to use to train"
+    help=(
+        "Name or path of the data mix to use to train. "
+        "Can be either an absolute path to a file, or name of file in the data/mixes directory."
+    )
 )
 @click.option(
     '-m', '--model',
     type=str,
     required=True,
-    help="Name or path of the model to train"
+    help=(
+        "Name or path of the model to train. "
+        "Can be either an absolute path to a file, or name of file in the OLMo Core's src/scripts/train directory."
+    )
 )
 @click.option(
     '-n', '--duration',
     type=str,
     required=True,
-    help="Duration of the training"
+    help=(
+        "Duration of the training in tokens (t), steps (s), or epochs (e). "
+        "Can be specified as a number followed by a unit (e.g., '10000 steps'), "
+        "or using scientific notation (e.g., '1e9t'). "
+    )
 )
 @click.option(
     "-c", "--cluster",
@@ -62,26 +72,26 @@ OLMO_CORE_EXAMPLES_BASE_DIR = "src/scripts/train"
 @click.option(
     "--force-venv",
     is_flag=True,
-    help="Force creation of new virtual environment",
+    help="Force creation of new virtual environment.",
     default=False,
 )
 @click.option(
     "--env-name",
     type=str,
-    default="oe-eval-venv",
-    help="Name of the environment to use for evaluation",
+    default="olmo-core-env",
+    help="Name of the environment to use for training.",
 )
 @click.option(
     "--olmo-core-commit-hash",
     type=str,
-    help="Commit hash of olmo-core to use",
+    help="Commit hash of olmo-core to use.",
     default=OLMO_CORE_TRAIN_COMMIT_HASH,
 )
 @click.option(
     "--num-nodes",
     type=int,
     default=1,
-    help="Number of nodes to use for training"
+    help="Number of nodes to use for training. Each node has 8 GPUs."
 )
 @click.option(
     "--dry-run",
@@ -93,44 +103,44 @@ OLMO_CORE_EXAMPLES_BASE_DIR = "src/scripts/train"
     "--use-wandb/--no-use-wandb",
     is_flag=True,
     default=True,
-    help="Enable or disable logging to wandb",
+    help="Enable or disable logging to wandb. If logging to wandb, must have WANDB_API_KEY set in environment.",
 )
 @click.option(
     "--use-comet/--no-use-comet",
     is_flag=True,
     default=False,
-    help="Enable or disable logging to comet",
+    help="Enable or disable logging to comet. If logging to comet, must have COMET_API_KEY set in environment.",
 )
 @click.option(
     "-w", "--workspace",
     type=str,
     required=True,
     default="ai2/oe-data",
-    help="Beaker workspace to use for training",
+    help="Beaker workspace to use for training.",
 )
 @click.option(
     "-p", "--priority",
     type=str,
     default="high",
-    help="Priority of the job",
+    help="Priority of the job.",
 )
 @click.option(
     "-b", "--budget",
     type=str,
     default="ai2/oe-data",
-    help="Budget to use for the job",
+    help="Budget to use for the job.",
 )
 @click.option(
     "--run-name",
     type=str,
-    help="Name of the run",
+    help="Name of the run.",
     default=None,
 )
 @click.option(
     "-i", "--beaker-image",
     type=str,
     default=None,
-    help="Beaker image to use for training",
+    help="Beaker image to use for training.",
 )
 def launch(
     data_mix: str,
