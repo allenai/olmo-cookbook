@@ -104,3 +104,15 @@ olmo-cookbook-eval evaluate \
   --model-backend vllm
   --dashboard peteish32
 ```
+
+### Running OLMo-core script
+
+```shell
+olmo-cookbook-core launch \
+  -d stackexchange \
+  -m OLMo2-1B \
+  -n 10e9T \
+  -i petew/olmo-core-tch260cu126-v2.0.1 \
+  -p urgent \
+  -c ai2/jupiter-cirrascale-2
+```
