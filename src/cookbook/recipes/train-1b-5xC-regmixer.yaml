@@ -12,7 +12,7 @@ model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/jupiter-cirrascale-2
-weka: false
+weka: true
 dataset:
   sources:
   - name: adult_content
