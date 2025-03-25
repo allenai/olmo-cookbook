@@ -225,6 +225,28 @@ def add_secret_to_beaker_workspace(
 
 
 @run_func_in_venv
+def get_beaker_token() -> str:
+    try:
+        import beaker  # pyright: ignore
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
+
+    client = beaker.Beaker.from_env()
+    return client.account.config.user_token
+
+
+@run_func_in_venv
+def get_beaker_user() -> str:
+    try:
+        import beaker  # pyright: ignore
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
+
+    client = beaker.Beaker.from_env()
+    return client.account.name
+
+
+@run_func_in_venv
 def check_if_secret_exists_in_beaker_workspace(
     secret_name: str,
     workspace: str,
