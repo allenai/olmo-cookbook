@@ -1,26 +1,65 @@
 # OLMo Cookbook
 
-OLMost every recipe you need to perform data interventions with the OLMo family of models.
+OLMost every recipe you need to experiment with the OLMo family of models.
 
 ## How To Train an OLMo Model
 
+### Prepare your environments
+
+#### Local
+1) Install the cookbook CLI
+
+```shell
+pip install -e .
+```
+
+2) Set up your environment
+
+Optional: (Only if you are using Weka storage for token files)
+```shell
+  export WEKA_ENDPOINT_URL=<weka-endpoint-url>
+  export WEKA_PROFILE=WEKA
+```
+*Note: Make sure you have WEKA and S3 profiles in your ~/.aws/config and ~/.aws/credentials files.*
+
+#### Remote (Beaker)
+
+1) Create a `Beaker` user account, request access to AI2 clusters, and create a Beaker user token.
+2) Set up your workspace
+
+```shell
+olmo-cookbook prepare-user-workspace \
+  --workspace <workspace> \
+  --beaker-token <beaker-token> \
+  --aws-config <aws-config> \
+  --aws-credentials <aws-credentials> \
+  --wandb-api-key <wandb-api-key>
+```
+*Note: Weka / R2 endpoint urls only need to be set if you are using them for storage.*
+
+If you plan to run jobs on `ai2/augusta-google-1` then your workspace will also require the `Beaker` secrets:
+```
+GS_INTEROP_KEY
+GS_INTEROP_SECRET
+```
+
 ### Build your training configuration
 
-See src/cookbook/recipes/train-1b-1xC-dclm.yaml for an example to clone
+See `src/cookbook/recipes/train-1b-1xC-dclm.yaml` for an example to clone.
+
+*Note: This cookbook relies on `beaker-py` under the hood and thus requires committing and pushing changes to configuration files before launching a job.*
 
 ### Launch your training job
 
 1) `olmo-cookbook launch -c src/cookbook/recipes/train-1b-1xC-dclm.yaml`
-
-2) Follow the interactive prompts. A link to the Beaker job will be provided upon successful submission.
-
-3) Monitor your training job in wandb or Beaker
+2) Follow the interactive prompts. A link to the `Beaker` job will be provided upon successful submission.
+3) Monitor your training job in `wandb` or the `Beaker` UI.
 
 ## How To Evaluate an OLMo Model
 
 ### Convert Checkpoint
 
-#### For models trained with old trainer
+#### For models trained with [OLMo](https://github.com/allenai/olmo)
 
 ```shell
 olmo-cookbook-eval convert \
@@ -30,7 +69,7 @@ olmo-cookbook-eval convert \
   --huggingface-tokenizer allenai/dolma2-tokenizer
 ```
 
-#### For models trained with OLMo core
+#### For models trained with [OLMo-core](https://github.com/allenai/olmo-core)
 
 ```shell
 olmo-cookbook-eval convert \
@@ -53,7 +92,7 @@ olmo-cookbook-eval evaluate \
   --dashboard olmoe-0125
 ```
 
-Another example is running evaluation for a Hugging Face model
+Example evaluating a HuggingFace model:
 
 ```shell
 olmo-cookbook-eval evaluate \
@@ -72,4 +111,16 @@ olmo-cookbook-eval evaluate \
 olmo-cookbook-eval results \
   olmoe-0125 \
   --tasks gen
+```
+
+## Running OLMo-core script
+
+```shell
+olmo-cookbook-core launch \
+  -d stackexchange \
+  -m OLMo2-1B \
+  -n 10e9T \
+  -i petew/olmo-core-tch260cu126-v2.0.1 \
+  -p urgent \
+  -c ai2/jupiter-cirrascale-2
 ```

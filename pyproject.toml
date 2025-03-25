@@ -37,7 +37,7 @@ wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@revert-147-epwalsh/mixture-fix",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@undfined/cookbook-pin",
     "beaker-py",
     "GitPython>=3.0,<4.0",
     "wandb",
@@ -46,6 +46,7 @@ all = [
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
+olmo-cookbook-core = "cookbook.cli:core.cli"
 
 
 [tool.black]

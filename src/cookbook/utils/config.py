@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import cast, List, Tuple
+from typing import List, Tuple, cast
 
 import yaml
 from olmo_core.launch.beaker import (
@@ -57,26 +57,26 @@ def mk_source_instances(
 
 
 def mk_experiments(
-    config: ExperimentConfig, group_uuid: str, priors: Tuple[dict[str, float], int]
+    config: ExperimentConfig, group_id: str, priors: Tuple[dict[str, float], int]
 ) -> list[ExperimentInstance]:
     """Generate source instances from a config."""
     return [
         ExperimentInstance(
-            name=f"{config.name}-{group_uuid}",
+            name=f"{config.name}-{group_id}",
             sources=mk_source_instances(config.dataset.sources, priors),
         )
     ]
 
 
 def mk_experiment_group(
-    config: ExperimentConfig, priors: Tuple[dict[str, float], int], group_uuid: str
+    config: ExperimentConfig, priors: Tuple[dict[str, float], int], group_id: str
 ) -> ExperimentGroup:
     """Build an experiment group from an experiment config."""
 
     return ExperimentGroup(
         config=config,
-        group_id=group_uuid,
-        instances=mk_experiments(config, group_uuid, priors),
+        group_id=group_id,
+        instances=mk_experiments(config, group_id, priors),
     )
 
 
@@ -113,7 +113,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     config = TransformerConfigBuilder(
         beaker_user=beaker_user,
         cluster=base_config.cluster,
-        downstream_evaluator=base_config.downstream_evaluator,
+        downstream_evaluators=base_config.downstream_evaluators,
         dtype=base_config.dataset.dtype,
         eval_interval=base_config.eval_interval,
         group_id=group_id.strip(),
@@ -130,6 +130,10 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         tokenizer=base_config.tokenizer,
         wandb_config=base_config.wandb,
         weka=base_config.weka,
+        rank_microbatch_size=base_config.rank_microbatch_size,
+        global_batch_size=base_config.global_batch_size,
+        load_path=base_config.load_path,
+        learning_rate=base_config.learning_rate,
     ).build()
 
     device = get_default_device()

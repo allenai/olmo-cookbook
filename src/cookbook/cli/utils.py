@@ -1,5 +1,7 @@
 import json
 import os
+import configparser
+from io import StringIO
 import re
 import shlex
 import shutil
@@ -99,16 +101,18 @@ def get_aws_access_key_id() -> Optional[str]:
             )
             return output.stdout.decode().strip()
         except Exception:
-            return None
-    elif "AWS_ACCESS_KEY_ID" in os.environ:
+            pass
+
+    if "AWS_ACCESS_KEY_ID" in os.environ:
         return os.environ["AWS_ACCESS_KEY_ID"]
-    elif os.path.exists("~/.aws/credentials"):
+
+    if os.path.exists("~/.aws/credentials"):
         with open("~/.aws/credentials", "r") as f:
             for line in f:
                 if line.startswith("aws_access_key_id"):
                     return line.split("=")[1].strip()
-    else:
-        return None
+
+    return None
 
 
 def get_aws_secret_access_key() -> Optional[str]:
@@ -121,16 +125,18 @@ def get_aws_secret_access_key() -> Optional[str]:
             )
             return output.stdout.decode().strip()
         except Exception:
-            return None
-    elif "AWS_SECRET_ACCESS_KEY" in os.environ:
+            pass
+
+    if "AWS_SECRET_ACCESS_KEY" in os.environ:
         return os.environ["AWS_SECRET_ACCESS_KEY"]
-    elif os.path.exists("~/.aws/credentials"):
+
+    if os.path.exists("~/.aws/credentials"):
         with open("~/.aws/credentials", "r") as f:
             for line in f:
                 if line.startswith("aws_secret_access_key"):
                     return line.split("=")[1].strip()
-    else:
-        return None
+
+    return None
 
 
 def install_oe_eval(
@@ -219,6 +225,28 @@ def add_secret_to_beaker_workspace(
         client.secret.write(full_secret_name, secret_value)
 
     return full_secret_name
+
+
+@run_func_in_venv
+def get_beaker_token() -> str:
+    try:
+        import beaker  # pyright: ignore
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
+
+    client = beaker.Beaker.from_env()
+    return client.account.config.user_token
+
+
+@run_func_in_venv
+def get_beaker_user() -> str:
+    try:
+        import beaker  # pyright: ignore
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
+
+    client = beaker.Beaker.from_env()
+    return client.account.name
 
 
 @run_func_in_venv
@@ -354,6 +382,33 @@ def install_olmo_core(commit_hash: str | None, env: PythonEnv | None = None) -> 
     subprocess.run(shlex.split(f"{env.pip} install ."), check=True, cwd=olmo_dir, env=env.path())
 
     return olmo_dir
+
+
+def make_aws_config(profile_name: str = "default", **kwargs) -> str:
+    aws_config = configparser.ConfigParser()
+    aws_config[profile_name] = {"region": "us-east-1", "output": "json", **kwargs}
+
+    # Create a StringIO object to serve as a file-like destination
+    string_buffer = StringIO()
+
+    # Write the configuration to the StringIO object
+    aws_config.write(string_buffer)
+
+    # Get the string value
+    return string_buffer.getvalue()
+
+
+def make_aws_credentials(aws_access_key_id: str, aws_secret_access_key: str, profile_name: str = "default", **kwargs) -> str:
+    aws_credentials = configparser.ConfigParser()
+    aws_credentials[profile_name] = {
+        "aws_access_key_id": aws_access_key_id,
+        "aws_secret_access_key": aws_secret_access_key,
+        **kwargs,
+    }
+
+    string_buffer = StringIO()
+    aws_credentials.write(string_buffer)
+    return string_buffer.getvalue()
 
 
 def make_destination_dir(input_dir: str, suffix: str, output_dir: str | None = None) -> str:

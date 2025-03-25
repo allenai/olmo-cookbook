@@ -107,3 +107,8 @@ class WrappedTransformerConfig:
 class SupportedTokenizers(Enum):
     dolma2 = TokenizerConfig.dolma2()
     gpt_neox = TokenizerConfig.gpt_neox_olmo_dolma_v1_5()
+
+
+MODEL_TO_LR_MAP = {
+    "olmo2_1B": 1.8e-3,
+}
