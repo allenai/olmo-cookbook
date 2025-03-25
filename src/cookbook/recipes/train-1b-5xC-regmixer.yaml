@@ -6,7 +6,7 @@ nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
-sequence_length: 4096
+sequence_length: 2048
 seed: 1337
 model: "olmo2_1B"
 tokenizer: "dolma2"
@@ -111,7 +111,6 @@ dataset:
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/travel_and_tourism/**/*.npy
     target_ratio: 0.01667626901270792
-    repetition_factor: 5
 downstream_evaluators:
 - arc_challenge_test_rc_5shot
 - arc_easy_test_rc_5shot
