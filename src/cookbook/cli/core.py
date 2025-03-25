@@ -242,14 +242,18 @@ def launch(
         )
         aws_config_name = add_secret_to_beaker_workspace(
             secret_name="AWS_CONFIG",
-            secret_value=make_aws_config(),
+            secret_value=make_aws_config(profile_name="S3"),
             workspace=workspace,
             env=env     # pyright: ignore
         )
 
         aws_credentials_name = add_secret_to_beaker_workspace(
             secret_name="AWS_CREDENTIALS",
-            secret_value=make_aws_credentials(aws_access_key_id, aws_secret_access_key),
+            secret_value=make_aws_credentials(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                profile_name="S3"
+            ),
             workspace=workspace,
             env=env     # pyright: ignore
         )

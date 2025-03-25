@@ -383,9 +383,9 @@ def install_olmo_core(commit_hash: str | None, env: PythonEnv | None = None) -> 
     return olmo_dir
 
 
-def make_aws_config(env: PythonEnv | None = None, **kwargs) -> str:
+def make_aws_config(profile_name: str = "default", **kwargs) -> str:
     aws_config = configparser.ConfigParser()
-    aws_config["default"] = {"region": "us-east-1", "output": "json", **kwargs}
+    aws_config[profile_name] = {"region": "us-east-1", "output": "json", **kwargs}
 
     # Create a StringIO object to serve as a file-like destination
     string_buffer = StringIO()
@@ -397,9 +397,9 @@ def make_aws_config(env: PythonEnv | None = None, **kwargs) -> str:
     return string_buffer.getvalue()
 
 
-def make_aws_credentials(aws_access_key_id: str, aws_secret_access_key: str, **kwargs) -> str:
+def make_aws_credentials(aws_access_key_id: str, aws_secret_access_key: str, profile_name: str = "default", **kwargs) -> str:
     aws_credentials = configparser.ConfigParser()
-    aws_credentials["default"] = {
+    aws_credentials[profile_name] = {
         "aws_access_key_id": aws_access_key_id,
         "aws_secret_access_key": aws_secret_access_key,
         **kwargs,
