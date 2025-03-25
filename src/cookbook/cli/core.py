@@ -1,5 +1,3 @@
-from email.policy import default
-from genericpath import exists
 import logging
 from pathlib import Path
 import re
@@ -9,7 +7,6 @@ import click
 from cookbook.cli.utils import (
     get_aws_access_key_id,
     get_aws_secret_access_key,
-    get_huggingface_token,
 )
 
 import json
@@ -23,41 +20,12 @@ import yaml
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
-    discover_weka_mount,
-    download_tokenizer,
-    install_olmo,
     install_olmo_core,
     get_beaker_token,
-    install_transformers,
-    make_destination_dir,
-    remove_conflicting_packages,
-)
-from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
-    DEFAULT_OLMO2_TOKENIZER,
-    DEFAULT_OLMO_CORE_TOKENIZER,
-    DEFAULT_OLMOE_TOKENIZER,
-    OLMO2_COMMIT_HASH,
-    OLMO2_CONVERSION_SCRIPT,
-    OLMO2_UNSHARD_SCRIPT,
-    OLMO_CORE_COMMIT_HASH,
-    OLMO_CORE_UNSHARD_CONVERT_SCRIPT,
-    OLMOE_CONVERSION_SCRIPT,
-    OLMOE_UNSHARD_SCRIPT,
-    TRANSFORMERS_COMMIT_HASH,
+    make_aws_config,
+    make_aws_credentials,
 )
 
-
-# from cookbook.constants import (
-#     ALL_NAMED_GROUPS,
-#     OLMO2_COMMIT_HASH,
-#     OLMO_CORE_COMMIT_HASH,
-#     OLMO_TYPES,
-#     OLMOE_COMMIT_HASH,
-#     TRANSFORMERS_COMMIT_HASH,
-# )
-# from cookbook.eval.conversion import convert_checkpoint
-# from cookbook.eval.evaluation import evaluate_checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -272,8 +240,24 @@ def launch(
             workspace=workspace,
             env=env     # pyright: ignore
         )
+        aws_config_name = add_secret_to_beaker_workspace(
+            secret_name="AWS_CONFIG",
+            secret_value=make_aws_config(),
+            workspace=workspace,
+            env=env     # pyright: ignore
+        )
+
+        aws_credentials_name = add_secret_to_beaker_workspace(
+            secret_name="AWS_CREDENTIALS",
+            secret_value=make_aws_credentials(aws_access_key_id, aws_secret_access_key),
+            workspace=workspace,
+            env=env     # pyright: ignore
+        )
+
         env_secrets.append({"name": "AWS_ACCESS_KEY_ID", "secret": aws_access_key_id_name})
         env_secrets.append({"name": "AWS_SECRET_ACCESS_KEY", "secret": aws_secret_access_key_name})
+        env_secrets.append({"name": "AWS_CONFIG", "secret": aws_config_name})
+        env_secrets.append({"name": "AWS_CREDENTIALS", "secret": aws_credentials_name})
 
     flags.append(f"--launch.env_secrets='{json.dumps(env_secrets)}'")
 

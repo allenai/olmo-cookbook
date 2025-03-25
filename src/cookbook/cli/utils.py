@@ -1,5 +1,7 @@
 import ast
 import os
+import configparser
+from io import StringIO
 import re
 import shlex
 import shutil
@@ -379,6 +381,33 @@ def install_olmo_core(commit_hash: str | None, env: PythonEnv | None = None) -> 
     subprocess.run(shlex.split(f"{env.pip} install ."), check=True, cwd=olmo_dir, env=env.path())
 
     return olmo_dir
+
+
+def make_aws_config(env: PythonEnv | None = None, **kwargs) -> str:
+    aws_config = configparser.ConfigParser()
+    aws_config["default"] = {"region": "us-east-1", "output": "json", **kwargs}
+
+    # Create a StringIO object to serve as a file-like destination
+    string_buffer = StringIO()
+
+    # Write the configuration to the StringIO object
+    aws_config.write(string_buffer)
+
+    # Get the string value
+    return string_buffer.getvalue()
+
+
+def make_aws_credentials(aws_access_key_id: str, aws_secret_access_key: str, **kwargs) -> str:
+    aws_credentials = configparser.ConfigParser()
+    aws_credentials["default"] = {
+        "aws_access_key_id": aws_access_key_id,
+        "aws_secret_access_key": aws_secret_access_key,
+        **kwargs,
+    }
+
+    string_buffer = StringIO()
+    aws_credentials.write(string_buffer)
+    return string_buffer.getvalue()
 
 
 def make_destination_dir(input_dir: str, suffix: str, output_dir: str | None = None) -> str:
