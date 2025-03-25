@@ -138,4 +138,4 @@ downstream_evaluators:
 - codex_humaneval_gold_bpb_0shot
 - codex_mbpp_gold_bpb_0shot
 - copycolors_10way
-
+lm_evaluator: true
