@@ -1,27 +1,24 @@
+import json
 import logging
-from pathlib import Path
+import math
+import os
 import re
+import shlex
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
 
 import click
 
 from cookbook.cli.utils import (
-    get_aws_access_key_id,
-    get_aws_secret_access_key,
-)
-
-import json
-import os
-import shlex
-import shutil
-import subprocess
-
-import yaml
-
-from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
-    install_olmo_core,
+    get_aws_access_key_id,
+    get_aws_secret_access_key,
     get_beaker_token,
+    install_beaker_py,
+    install_olmo_core,
     make_aws_config,
     make_aws_credentials,
 )
@@ -30,9 +27,101 @@ from cookbook.cli.utils import (
 logger = logging.getLogger(__name__)
 
 
-OLMO_CORE_TRAIN_COMMIT_HASH = "78be552957a19ba4ea6dd7ba0398bf9a0028ea65"
+OLMO_CORE_TRAIN_COMMIT_HASH = "2f66fd95c17c9779be9930f8fb80803293c2dc30"
 NAMED_MIXES_CONFIG_DIR = Path(__file__).parent.parent / "data/mixes"
 OLMO_CORE_EXAMPLES_BASE_DIR = "src/scripts/train"
+
+
+
+def guess_model_size(model: str) -> int:
+    current_size = 0
+    for cand_size, cand_unit in re.findall(r"(\d+)([bBmM])", model):
+        mult = 1e6 if cand_unit.lower() == "m" else 1e9
+        current_size = max(current_size, int(cand_size * mult))
+
+    if current_size == 0:
+        raise ValueError(f"Could not guess model size for {model}")
+
+    return current_size
+
+
+def estimate_batch_size(
+    sequence_length: int,
+    total_tokens: int | None = None,
+    total_steps: int | None = None,
+    _factor: float = 8,
+) -> int:
+    """
+    We estimate instant critical batch size as bs = factor * sqrt(total_steps)
+    """
+    if total_steps:
+        critical_batch_size = _factor * total_steps ** (1/2)
+    elif total_tokens:
+        critical_batch_size = ((_factor ** 2) * (total_tokens / sequence_length)) ** (1/3)
+    else:
+        raise ValueError("Either total_steps or total_tokens must be provided")
+
+    safe_batch_size = int(2 ** math.floor(math.log2(critical_batch_size)))
+    max_batch_size = 2 ** 24 // sequence_length # 16M tokens from llama 3 405B
+    return min(safe_batch_size, max_batch_size)
+
+
+@dataclass(frozen=True)
+class ConfigLengths:
+    sequence_length: int
+    rank_microbatch_size: int
+    global_batch_size: int
+    warmup_steps: int
+
+
+    @classmethod
+    def parse(cls, model_script: str, env: PythonEnv, olmo_core_dir: str) -> "ConfigLengths":
+        # try running in dry_run mode
+        command = [
+            env.python,
+            model_script,
+            "dry_run",
+            "temporary_run_name_name",
+            "temporary_cluster_name"
+        ]
+        process = subprocess.Popen(
+            shlex.split(" ".join(command)),
+            cwd=olmo_core_dir,
+            env=env.path(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise RuntimeError(f"Error dry-running {model_script}: {stderr.decode()}")
+
+        global_batch_size: int | None = None
+        sequence_length: int | None = None
+        rank_microbatch_size: int | None = None
+        warmup_steps: int | None = None
+
+        # parse sequence length
+        for ln in stdout.decode().split("\n"):
+            if match := re.search(r"\bsequence_length=(\d+)", ln):
+                sequence_length = int(match.group(1))
+            elif match := re.search(r"\brank_microbatch_size=(\d+)", ln):
+                rank_microbatch_size = int(match.group(1))
+            elif match := re.search(r"\bglobal_batch_size=(\d+)", ln):
+                global_batch_size = int(match.group(1))
+            elif match := re.search(r"\bwarmup_steps=(\d+)", ln):
+                warmup_steps = int(match.group(1))
+
+        assert sequence_length is not None, f"Could not guess sequence length for {model_script}"
+        assert rank_microbatch_size is not None, f"Could not guess rank microbatch size for {model_script}"
+        assert global_batch_size is not None, f"Could not guess global batch size for {model_script}"
+        assert warmup_steps is not None, f"Could not guess warmup steps for {model_script}"
+
+        return cls(
+            sequence_length=sequence_length,
+            rank_microbatch_size=rank_microbatch_size,
+            global_batch_size=global_batch_size,
+            warmup_steps=warmup_steps
+        )
 
 
 @click.option(
@@ -88,10 +177,10 @@ OLMO_CORE_EXAMPLES_BASE_DIR = "src/scripts/train"
     default=OLMO_CORE_TRAIN_COMMIT_HASH,
 )
 @click.option(
-    "--num-nodes",
+    "-g", "--num-gpus",
     type=int,
-    default=1,
-    help="Number of nodes to use for training. Each node has 8 GPUs."
+    default=8,
+    help="Number of GPUs to use for training. Each node has 8 GPUs."
 )
 @click.option(
     "--dry-run",
@@ -149,7 +238,7 @@ def launch(
     env_name: str,
     duration: str,
     olmo_core_commit_hash: str,
-    num_nodes: int,
+    num_gpus: int,
     dry_run: bool,
     use_wandb: bool,
     workspace: str,
@@ -161,11 +250,15 @@ def launch(
     beaker_image: str | None,
 ):
     env = PythonEnv.create(name=env_name, force=force_venv)
+
+    # deal with installation of libraries
+    install_beaker_py(env=env)
     olmo_core_dir = install_olmo_core(commit_hash=olmo_core_commit_hash, env=env)
 
     config_names = {str(p.stem): p for p in (Path(olmo_core_dir) / OLMO_CORE_EXAMPLES_BASE_DIR).glob("*.py")}
     assert model in config_names or (Path(olmo_core_dir) / model).exists(), \
         f"Model {model} not found in {config_names}"
+    model_script_path = str(config_names.get(model, Path(model)).relative_to(olmo_core_dir))
 
     flags: list[str] = []
 
@@ -184,13 +277,13 @@ def launch(
 
     ## FIGURE OUT TRAINING DURATION ##
     # extract
-    duration_match = re.match(r"^(\d+(.\d+)?(e\d+)?)([tesTES])$", duration)
+    duration_match = re.match(r"^(\d+(.\d+)?(e\d+)?)([tsTS])$", duration)
     assert duration_match, f"Invalid duration format {duration}"
     duration_value = int(float(duration_match.group(1)))
     duration_unit = duration_match.group(4)
 
     # parse unit
-    duration_map = {"t": "tokens", "e": "epochs", "s": "steps"}
+    duration_map = {"t": "tokens", "s": "steps"}
     if (duration_unit_parsed := duration_map.get(duration_unit.lower())) is None:
         raise ValueError(f"Invalid duration unit {duration_unit}")
     # add to flags
@@ -275,11 +368,35 @@ def launch(
 
     flags.append(f"--launch.env_secrets='{json.dumps(env_secrets)}'")
 
+    ## SET UP BATCH SIZE, SEQUENCE LENGTH, AND WARMUP STEPS ##
+
+    # we run the script in dry-run mode to get the config lengths (global batch size, rank microbatch size, warmup steps, sequence length)
+    config_lengths = ConfigLengths.parse(model_script=model_script_path, env=env, olmo_core_dir=olmo_core_dir)
+
+    # we estimate the batch size based on the sequence length and the duration,
+    # and override the values from the dry-run
+    new_batch_size = estimate_batch_size(
+        sequence_length=config_lengths.sequence_length,
+        total_tokens=duration_value if duration_unit_parsed == "tokens" else None,
+        total_steps=duration_value if duration_unit_parsed == "steps" else None,
+    )
+    new_global_batch_size = new_batch_size * config_lengths.sequence_length
+    new_rank_microbatch_size = new_global_batch_size // (config_lengths.global_batch_size // config_lengths.rank_microbatch_size)
+    flags.append(f"--data_loader.global_batch_size={new_global_batch_size}")
+    flags.append(f"--train_module.rank_microbatch_size={new_rank_microbatch_size}")
+
+    # we warm up for 10% or the previous warmup steps, whichever is smaller
+    new_total_steps = duration_value if duration_unit_parsed == "steps" else (duration_value // new_global_batch_size)
+    new_warmup_steps = min(config_lengths.warmup_steps, int(new_total_steps * 0.1))
+    flags.append(f"--train_module.scheduler.warmup_steps={new_warmup_steps}")
+
     ## SET UP COMMAND ##
+    num_nodes = num_gpus / 8
+    assert num_nodes.is_integer(), "Number of GPUs must be a multiple of 8"
 
     # num nodes and cluster
     if num_nodes > 1:
-        flags.append(f"--launch.num_nodes={num_nodes}")
+        flags.append(f"--launch.num_nodes={num_nodes:.0f}")
     flags.append(f"--launch.priority={priority}")
     flags.append(f"--launch.budget={budget}")
     flags.append(f"--launch.workspace={workspace}")
@@ -294,7 +411,7 @@ def launch(
     command = " ".join(
         [
             env.python,
-            str(config_names.get(model, Path(model)).relative_to(olmo_core_dir)),
+            model_script_path,
             command,
             run_name,
             cluster,
@@ -302,42 +419,14 @@ def launch(
         ]
     )
     print(f"\n\nCommand:\n{command}\nFrom:\n{olmo_core_dir}\n\n")
-    # Run the command and stream output in real-time
-    process = subprocess.Popen(
+
+    if dry_run:
+        return
+
+    return subprocess.run(
         shlex.split(command),
         cwd=olmo_core_dir,
-        env=env.path(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1
-    )
-
-    # Print output as it comes
-    stdout_lines = []
-    stderr_lines = []
-
-    while True:
-        stdout_line = process.stdout.readline() if process.stdout else ""
-        stderr_line = process.stderr.readline() if process.stderr else ""
-
-        if not stdout_line and not stderr_line and process.poll() is not None:
-            break
-
-        if stdout_line:
-            print(stdout_line, end="")
-            stdout_lines.append(stdout_line)
-
-        if stderr_line:
-            print(stderr_line, end="")
-            stderr_lines.append(stderr_line)
-
-    # Get return code
-    returncode = process.wait()
-
-    if returncode != 0:
-        raise RuntimeError(f"Error running command: {command}")
-
+        env=env.path(), stdout=sys.stdout, stderr=sys.stderr)
 
 @click.group()
 def cli():
