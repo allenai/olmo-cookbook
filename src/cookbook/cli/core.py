@@ -414,7 +414,12 @@ def launch(
         return
 
     return subprocess.run(
-        shlex.split(command), cwd=olmo_core_dir, env=env.path(), stdout=sys.stdout, stderr=sys.stderr
+        shlex.split(command),
+        cwd=olmo_core_dir,
+        env=env.path(),
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+        stdin=sys.stdin,
     )
 
 
