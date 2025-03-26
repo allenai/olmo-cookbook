@@ -176,3 +176,7 @@ cython_debug/
 
 # vscode
 .vscode/
+
+# temporary directory
+tmp/
+temp/

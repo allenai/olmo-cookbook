@@ -105,14 +105,34 @@ olmo-cookbook-eval evaluate \
   --dashboard peteish32
 ```
 
-### Running OLMo-core script
+## Running OLMo-core script
+
+You can launch any OLMo core training script using the cookbook.
+By default, any script in [src/scripts/train](https://github.com/allenai/OLMo-core/tree/main/src/scripts/train) can be launched.
+
+Here's an example of how to train a 1B model for 50B tokens on 16 GPUs on the `ai2/augusta-google-1` cluster.
 
 ```shell
 olmo-cookbook-core launch \
-  -d stackexchange \
+  -d dolmino50 \
   -m OLMo2-1B \
-  -n 10e9T \
+  -n 50e9T \
   -i petew/olmo-core-tch260cu126-v2.0.1 \
   -p urgent \
-  -c ai2/jupiter-cirrascale-2
+  -c ai2/augusta-google-1 \
+  -g 16
 ```
+
+Let's break down the command:
+
+- `-d dolmino50`: The data mix to use for training. This data mix is at [data/mixes/dolmino50.yaml](src/cookbook/data/mixes), but you can use any path to a data mix file (i.e., a plain text file with a list on npy tokens files)
+- `-m OLMo2-1B`: The model to train. This is the configuration [src/scripts/train/OLMo2-1B.py](https://github.com/allenai/OLMo-core/blob/main/src/scripts/train/OLMo2-1B.py). You can also provide a path to any training script written in OLMo-core.
+- `-n 50e9T`: The number of tokens to train on (50B tokens).
+- `-i petew/olmo-core-tch260cu126-v2.0.1`: The image to use for training.
+- `-p urgent`: The priority of the job.
+- `-c ai2/augusta-google-1`: The cluster to use for training.
+- `-g 16`: The number of GPUs to use for training.
+
+Use the `--dry-run` flag to print the command without launching the job; to view all available flags, run `olmo-cookbook-core launch --help`.
+
+At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai/OLMo-core/tree/2f66fd95c17c9779be9930f8fb80803293c2dc30), but you can override this by setting the `--olmo-core-commit-hash` flag.
