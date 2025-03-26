@@ -19,98 +19,122 @@ dataset:
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/adult_content/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: art_and_design
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/art_and_design/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: crime_and_law
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/crime_and_law/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: education_and_jobs
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/education_and_jobs/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: electronics_and_hardware
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/electronics_and_hardware/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: entertainment
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/entertainment/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: fashion_and_beauty
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: finance_and_business
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/finance_and_business/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: food_and_dining
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/food_and_dining/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: games
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/games/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: health
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/health/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: history_and_geography
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/history_and_geography/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: home_and_hobbies
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/home_and_hobbies/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: industrial
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/industrial/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: literature
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/literature/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: politics
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/politics/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: religion
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/religion/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: science_math_and_technology
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/science_math_and_technology/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: social_life
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/social_life/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: software
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/software/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: software_development
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/software_development/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: sports_and_fitness
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/sports_and_fitness/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: transportation
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/transportation/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
   - name: travel_and_tourism
     paths:
       - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/travel_and_tourism/**/*.npy
     target_ratio: 0.041666666666666664
+    repetition_factor: 10
 downstream_evaluators:
 - arc_challenge_test_rc_5shot
 - arc_easy_test_rc_5shot
