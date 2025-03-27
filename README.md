@@ -143,7 +143,7 @@ At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai
 The EC2 CLI is a tool for managing EC2 instances.
 
 ```shell
- olmo-cookbook-ec2 create --name test-cli-cookbook-3 --number 2
+olmo-cookbook-ec2 create --name test-cli-cookbook-3 --number 2
 ```
 
 Creates 2 instances with the name `test-cli-cookbook-3` in the `us-east-1` region. By default instances will be `i4i.xlarge` and will be tagged with the project name and owner.
@@ -165,3 +165,10 @@ olmo-cookbook-ec2 terminate --name test-cli-cookbook-3
 ```
 
 This terminates all instances with the name `test-cli-cookbook-3`.
+
+
+```shell
+olmo-cookbook-ec2 list --name test-cli-cookbook-3
+```
+
+This lists all instances with the name `test-cli-cookbook-3`.
