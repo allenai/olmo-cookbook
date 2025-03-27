@@ -136,3 +136,32 @@ Let's break down the command:
 Use the `--dry-run` flag to print the command without launching the job; to view all available flags, run `olmo-cookbook-core launch --help`.
 
 At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai/OLMo-core/tree/2f66fd95c17c9779be9930f8fb80803293c2dc30), but you can override this by setting the `--olmo-core-commit-hash` flag.
+
+
+## EC2 CLI
+
+The EC2 CLI is a tool for managing EC2 instances.
+
+```shell
+ olmo-cookbook-ec2 create --name test-cli-cookbook-3 --number 2
+```
+
+Creates 2 instances with the name `test-cli-cookbook-3` in the `us-east-1` region. By default instances will be `i4i.xlarge` and will be tagged with the project name and owner.
+
+```shell
+olmo-cookbook-ec2 setup --name test-cli-cookbook-3
+```
+
+This sets up AWS instances for data processing; as of now, it only configures AWS credentials.
+
+```shell
+olmo-cookbook-ec2 run --name test-cli-cookbook-3 --command "echo 'Hello, world!'"
+```
+
+This runs a command on all instances with the name `test-cli-cookbook-3`.
+
+```shell
+olmo-cookbook-ec2 terminate --name test-cli-cookbook-3
+```
+
+This terminates all instances with the name `test-cli-cookbook-3`.

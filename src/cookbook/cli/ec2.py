@@ -737,8 +737,11 @@ def setup_instances(
     aws_config_base64 = base64.b64encode(aws_config.encode("utf-8")).decode("utf-8")
     aws_credentials_base64 = base64.b64encode(aws_credentials.encode("utf-8")).decode("utf-8")
 
-    print(aws_config_base64)
-    print(aws_credentials_base64)
+    setup_command = [
+        "mkdir -p ~/.aws",
+        f"echo '{aws_config_base64}' | base64 -d > ~/.aws/config",
+        f"echo '{aws_credentials_base64}' | base64 -d > ~/.aws/credentials",
+    ]
 
     # execute command on the instance to echo aws config to .aws/config and aws credentials to .aws/credentials
     run_command(
@@ -746,7 +749,7 @@ def setup_instances(
         region=region,
         owner=owner,
         instance_id=instance_id,
-        command=f"echo '{aws_config_base64}' > .aws/config && echo '{aws_credentials_base64}' > .aws/credentials",
+        command=" && ".join(setup_command),
         ssh_key_path=ssh_key_path,
         wait_for_response=True,
     )
