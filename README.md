@@ -10,7 +10,7 @@ OLMost every recipe you need to experiment with the OLMo family of models.
 1) Install the cookbook CLI
 
 ```shell
-pip install -e .
+pip install -e .[all]
 ```
 
 2) Set up your environment
