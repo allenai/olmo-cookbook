@@ -47,6 +47,7 @@ all = [
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
 olmo-cookbook-core = "cookbook.cli:core.cli"
+olmo-cookbook-ec2 = "cookbook.cli:ec2.cli"
 
 
 [tool.black]
