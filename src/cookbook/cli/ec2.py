@@ -1,15 +1,16 @@
 import subprocess
 import shlex
 import boto3
-import time
+import base64
 import click
 import os
 import logging
 import hashlib
 from cookbook.cli.utils import (
-    PythonEnv,
     make_aws_config,
     make_aws_credentials,
+    get_aws_access_key_id,
+    get_aws_secret_access_key,
 )
 
 def setup_logging():
@@ -479,7 +480,7 @@ def cli():
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
     help="Path to the SSH private key file",
 )
-def spin_up_instances(
+def create_instances(
     name: str,
     instance: str,
     number: int,
@@ -504,7 +505,7 @@ def spin_up_instances(
     existing_instances = list_ec2_instances_by_tags(region=region, tags=tags)
 
     for i in range(len(existing_instances), len(existing_instances) + number):
-        logger.info(f"Creating instance {i} of {number}...")
+        logger.info(f"Creating instance {i + 1} of {number}...")
         instance_id = create_ec2_instance(
             instance_type=instance,
             tags={**tags, "Name": f"{name}-{i:04d}"},
@@ -584,7 +585,7 @@ def list_instances(
     default=None,
     help="Instance ID to terminate; if none, terminate all instances with the given name and owner",
 )
-def terminate_instance(
+def terminate_instances(
     name: str,
     region: str,
     owner: str,
@@ -680,10 +681,82 @@ def run_command(
         print()
 
 
-cli.command(name="spin-up")(spin_up_instances)
+@click.option(
+    "--name",
+    type=str,
+    required=True,
+    help="Name of the project connected to the instance",
+)
+@click.option(
+    "--region",
+    type=str,
+    default="us-east-1",
+    help="Region to spin up the instances in",
+)
+@click.option(
+    "--owner",
+    type=str,
+    default=os.getenv("USER") or os.getenv("USERNAME"),
+    help="Owner of the project connected to the instance",
+)
+@click.option(
+    "--instance-id",
+    type=str,
+    default=None,
+    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
+)
+@click.option(
+    "--ssh-key-path",
+    type=str,
+    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
+    help="Path to the SSH private key file",
+)
+def setup_instances(
+    name: str,
+    region: str,
+    owner: str,
+    instance_id: str | None,
+    ssh_key_path: str,
+):
+    aws_access_key_id = get_aws_access_key_id()
+    aws_secret_access_key = get_aws_secret_access_key()
+
+    if aws_access_key_id is None or aws_secret_access_key is None:
+        raise ValueError(
+            "No AWS credentials found; "
+            "please set the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"
+        )
+
+    aws_config = make_aws_config()
+    aws_credentials = make_aws_credentials(
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key
+    )
+
+    # base64 encode the aws config and credentials
+    aws_config_base64 = base64.b64encode(aws_config.encode("utf-8")).decode("utf-8")
+    aws_credentials_base64 = base64.b64encode(aws_credentials.encode("utf-8")).decode("utf-8")
+
+    print(aws_config_base64)
+    print(aws_credentials_base64)
+
+    # execute command on the instance to echo aws config to .aws/config and aws credentials to .aws/credentials
+    run_command(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        command=f"echo '{aws_config_base64}' > .aws/config && echo '{aws_credentials_base64}' > .aws/credentials",
+        ssh_key_path=ssh_key_path,
+        wait_for_response=True,
+    )
+
+
+cli.command(name="create")(create_instances)
 cli.command(name="list")(list_instances)
-cli.command(name="terminate")(terminate_instance)
+cli.command(name="terminate")(terminate_instances)
 cli.command(name="run")(run_command)
+cli.command(name="setup")(setup_instances)
 
 
 if __name__ == "__main__":
