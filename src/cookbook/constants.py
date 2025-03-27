@@ -1,3 +1,5 @@
+import json
+
 TRANSFORMERS_GIT_URL = "https://github.com/huggingface/transformers.git"
 TRANSFORMERS_COMMIT_HASH = "241c04d36867259cdf11dbb4e9d9a60f9cb65ebc"  # v4.47.1
 
@@ -188,6 +190,49 @@ STARCODER_PASS_AT_1_TASKS = [
     "mbpp::starcoder_pass@1",
 ]
 
+STARCODER_INFILLING = {
+    "context_kwargs": {"lead_token": "<fim_prefix>", "center_token": "<fim_suffix>", "end_token": "<fim_middle>"},
+    "generation_kwargs": {
+        "stop_sequences": ["<|eot_id|>", "<|endoftext|>", "<|filename|>", "<file_sep>"],
+    },
+}
+
+SANTACODER_INFILLING = {
+    "context_kwargs": {"lead_token": "<fim-prefix>", "center_token": "<fim-suffix>", "end_token": "<fim-middle>"},
+    "generation_kwargs": {
+        "stop_sequences": ["<|eot_id|>", "<|endoftext|>", "<|filename|>", "<file_sep>"],
+    },
+}
+
+DEEPSEEK_CODER_INFILLING = {
+    "context_kwargs": {"lead_token": "<｜fim▁begin｜>", "center_token": "<｜fim▁hole｜>", "end_token": "<｜fim▁end｜>"},
+    "generation_kwargs": {"stop_sequences": ["<|eot_id|>", "<|endoftext|>", "<|EOT|>"]},
+}
+
+SINGLE_FIM_TASK = {"task_name": "codex_humanevalfim_single:temp0.2", "metric_kwargs": {"n_exe_workers": 20}}
+MULTI_FIM_TASK = {"task_name": "codex_humanevalfim_multi:temp0.2", "metric_kwargs": {"n_exe_workers": 20}}
+RANDOM_FIM_TASK = {"task_name": "codex_humanevalfim_random:temp0.2", "metric_kwargs": {"n_exe_workers": 20}}
+INFILLING_STARCODER = [
+    json.dumps({**SINGLE_FIM_TASK, **STARCODER_INFILLING}),
+    json.dumps({**MULTI_FIM_TASK, **STARCODER_INFILLING}),
+    json.dumps({**RANDOM_FIM_TASK, **STARCODER_INFILLING}),
+]
+INFILLING_SANTACODER = [
+    json.dumps({**SINGLE_FIM_TASK, **SANTACODER_INFILLING}),
+    json.dumps({**MULTI_FIM_TASK, **SANTACODER_INFILLING}),
+    json.dumps({**RANDOM_FIM_TASK, **SANTACODER_INFILLING}),
+]
+INFILLING_DEEPSEEK_CODER = [
+    json.dumps({**SINGLE_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
+    json.dumps({**MULTI_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
+    json.dumps({**RANDOM_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
+]
+FIM_TOKEN_TYPES = {
+    "santacoder": INFILLING_SANTACODER,
+    "starcoder": INFILLING_STARCODER,
+    "deepseek-coder": INFILLING_DEEPSEEK_CODER,
+}
+
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
@@ -200,6 +245,7 @@ ALL_NAMED_GROUPS = {
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+    **{f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()},
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
