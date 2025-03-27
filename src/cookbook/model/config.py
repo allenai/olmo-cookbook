@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from olmo_core.optim.config import OptimConfig
 from olmo_core.config import Config, DType
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
 from olmo_core.distributed.parallel import DataParallelType
@@ -17,7 +18,7 @@ from olmo_core.train import TrainerConfig
 @dataclass
 class ModelTrainConfig(Config):
     model: TransformerConfig
-    optim: AdamWConfig
+    optim: OptimConfig
     dataset: NumpyDatasetConfig
     data_loader: NumpyDataLoaderConfig
     trainer: TrainerConfig
@@ -93,6 +94,51 @@ class WrappedTransformerConfig:
         )
 
     @classmethod
+    def olmo2_core_7B(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
+        """
+        OLMo2 7b
+        """
+        return getattr(TransformerConfig, "olmo2_7B")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            compile=True,
+            dp_config=TransformerDataParallelConfig(
+                name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+            ),
+        )
+
+    @classmethod
+    def olmo2_core_13B(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
+        """
+        OLMo2 7b
+        """
+        return getattr(TransformerConfig, "olmo2_13B")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            compile=True,
+            dp_config=TransformerDataParallelConfig(
+                name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+            ),
+        )
+
+    @classmethod
+    def olmo2_core_32B(cls, dp_type: Optional[DataParallelType] = None) -> TransformerConfig:
+        """
+        OLMo2 7b
+        """
+        return getattr(TransformerConfig, "olmo2_32B")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            compile=True,
+            dp_config=TransformerDataParallelConfig(
+                name=dp_type if dp_type else DefaultTransformerProperties.dp_type,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+            ),
+        )
+
+    @classmethod
     def from_model_identifier(cls, model_identifier: str) -> TransformerConfig:
         if model_identifier == "olmo_30m":
             return cls.olmo_30m(TokenizerConfig.gpt_neox_olmo_dolma_v1_5())
@@ -100,6 +146,12 @@ class WrappedTransformerConfig:
             return cls.olmo2_core_190M()
         elif model_identifier == "olmo2_1B":
             return cls.olmo2_core_1B()
+        elif model_identifier == "olmo2_7B":
+            return cls.olmo2_core_7B()
+        elif model_identifier == "olmo2_13B":
+            return cls.olmo2_core_13B()
+        elif model_identifier == "olmo2_32B":
+            return cls.olmo2_core_32B()
         else:
             raise ValueError(f"Model identifier {model_identifier} is not supported.")
 
