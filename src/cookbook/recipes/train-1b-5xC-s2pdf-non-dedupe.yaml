@@ -1,7 +1,7 @@
 name: "olmo-cookbook-1b-5xC-olmo2-s2pdf"
 description: "Cookbook olmo2-1b mix with tokenized s2pdfs included to see how good of a dataset we have"
 budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+workspace: "ai2/oe-data-s2pdf"
 nodes: 4
 gpus: 8
 preemptible: false
@@ -10,7 +10,7 @@ sequence_length: 4096
 seed: 1337
 model: "olmo2_1B"
 tokenizer: "dolma2"
-priority: high
+priority: normal
 cluster: ai2/jupiter-cirrascale-2
 weka: true
 dataset:
