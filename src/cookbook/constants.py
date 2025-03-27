@@ -227,7 +227,7 @@ INFILLING_DEEPSEEK_CODER = [
     json.dumps({**MULTI_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
     json.dumps({**RANDOM_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
 ]
-INFILLING_TOKEN_TYPES = {
+FIM_TOKEN_TYPES = {
     "santacoder": INFILLING_SANTACODER,
     "starcoder": INFILLING_STARCODER,
     "deepseek-coder": INFILLING_DEEPSEEK_CODER,
@@ -245,7 +245,7 @@ ALL_NAMED_GROUPS = {
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    **{f"infilling-{name}": tasks for name, tasks in INFILLING_TOKEN_TYPES.items()},
+    **{f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()},
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
