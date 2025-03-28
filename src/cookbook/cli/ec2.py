@@ -1,17 +1,25 @@
-import subprocess
-import shlex
-import boto3
 import base64
-import click
-import os
-import logging
 import hashlib
+import logging
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+import time
+
+import boto3
+import click
+import paramiko
+
 from cookbook.cli.utils import (
-    make_aws_config,
-    make_aws_credentials,
     get_aws_access_key_id,
     get_aws_secret_access_key,
+    make_aws_config,
+    make_aws_credentials,
 )
+
 
 def setup_logging():
     logger = logging.getLogger(__name__)
@@ -22,6 +30,7 @@ def setup_logging():
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     return logger
+
 
 logger = setup_logging()
 
@@ -69,57 +78,121 @@ cargo build --release
 """
 
 
-D2TK_TEST_SCRIPT = """
-#!/bin/bash
+class Session:
+    def __init__(
+        self,
+        instance_id: str,
+        region: str = "us-east-1",
+        private_key_path: str | None = None,
+        user: str = "ec2-user",
+    ):
+        self.instance_id = instance_id
+        self.region = region
+        self.private_key_path = private_key_path
+        self.user = user
 
-# Check if an argument was provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <directory-name>"
-    echo "Example: $0 CC-MAIN-2023-06"
-    echo "See one of the folders in s3://ai2-oe-data/contrib/datacomp/DCLM-pool/"
-    exit 1
-fi
+    def get_public_ip(self) -> str:
+        ec2_client = boto3.client("ec2", region_name=self.region)
+        response = ec2_client.describe_instances(InstanceIds=[self.instance_id])
+        return response["Reservations"][0]["Instances"][0]["PublicIpAddress"]
 
-# Store the input argument
-X=$1
-echo "Processing directory: $X"
+    def is_running(self) -> bool:
+        ec2_client = boto3.client("ec2", region_name=self.region)
+        response = ec2_client.describe_instances(InstanceIds=[self.instance_id])
+        return response["Reservations"][0]["Instances"][0]["State"]["Name"] == "running"
 
-# Step 1: Copy from S3 to local storage
-echo "Copying data from S3 to local storage..."
-s5cmd cp -sp "s3://allennlp-mattj/scratch/test_all_dressed/$X/*" "/mnt/raid0/$X"
-mkdir -p "/mnt/raid0/${X}_output"
+    def make_ssh_client(self) -> paramiko.SSHClient:
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        return client
 
-# Step 2: Run the map operation
-echo "Running map operation..."
-cd ~/datamap-rs
-git checkout dclm
-cargo run --release -- map --input-dir "/mnt/raid0/$X" --output-dir "/mnt/raid0/${X}_output" --config examples/all_dressed/config.yaml > "/mnt/raid0/${X}_output/map.log"
+    def connect(self) -> paramiko.SSHClient:
+        client = self.make_ssh_client()
+        if self.private_key_path:
+            private_key = paramiko.RSAKey.from_private_key_file(self.private_key_path)
+            client.connect(self.get_public_ip(), username=self.user, pkey=private_key)
+        else:
+            client.connect(self.get_public_ip(), username=self.user)
 
-# Step 3: Run the deduplication operation on JUST the outputs
-echo "Running deduplication..."
-cd ~/minhash-rs
-git checkout refac2025
-cargo run --release -- exact-dedup  --config examples/all_dressed/ed_stub.yaml --input-dir-override "/mnt/raid0/${X}_output/step_final" --output-dir-override "/mnt/raid0/${X}_output/step_final_exactdedup" > "/mnt/raid0/${X}_output/exactdedup.log"
+        return client
 
+    def shell(self, client: paramiko.SSHClient) -> paramiko.Channel:
+        # Get local terminal size
+        term_width, term_height = (t := shutil.get_terminal_size()).columns, t.lines
 
-# Step 4: Reshard the output data to be a better size
-cd ~/datamap-rs
-git checkout reshardh
-cargo run --release -- reshard --input-dir "/mnt/raid0/${X}_output/step_final_exactdedup/" --output-dir "/mnt/raid0/${X}_output/step_final_exactdedup_reshard/" --max-lines 65536
+        # Open a channel and invoke a shell
+        channel = client.invoke_shell()
 
-# Step 5: Copy results back to S3
-echo "Copying results back to S3..."
-s5cmd cp -sp "/mnt/raid0/${X}_output/step_final_exactdedup_reshard/" "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed/$X/"
-s5cmd cp -sp "/mnt/raid0/${X}_output/step_12/" "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/non_english/$X/"
+        # Set the remote terminal size to match local terminal
+        channel.resize_pty(width=term_width, height=term_height)
 
-# Step 6: Clean up local storage
-echo "Cleaning up local storage..."
-rm -rf "/mnt/raid0/${X}_output"
-rm -rf "/mnt/raid0/$X"
-rm -rf "/mnt/raid0/ed_working_dir"
+        return channel
 
-echo "Processing complete for $X"
-"""
+    def run(self, command: str, detach: bool = False, timeout: int = 600) -> str:
+        client: None | paramiko.SSHClient = None
+        command_hash = hashlib.md5(command.encode()).hexdigest()[:12]
+
+        try:
+            client = self.connect()
+
+            logger.info(f"Connected to {self.get_public_ip()}")
+
+            channel = self.shell(client)
+
+            # Create a new screen session
+            screen_name = f"olmo-cookbook-{command_hash}-{time.time()}"
+            channel.send(f"screen -S {screen_name}\n".encode("utf-8"))
+            time.sleep(0.1)  # Wait for screen to initialize
+
+            # Buffer for the output
+            output = ""
+
+            completion_marker = f"CMD_COMPLETED_{command_hash[:20]}"
+
+            # send the command to the server
+            channel.send(f"{command}; echo '{completion_marker}'".encode("utf-8"))
+
+            # send enter to run the command
+            channel.send(b"\n")
+
+            # Wait for the command to complete (looking for our marker)
+
+            buffer = ""
+            start_time = time.time()
+
+            while not detach:
+                # Check if we have data to receive
+                if channel.recv_ready():
+                    chunk = channel.recv(4096).decode("utf-8")
+                    buffer += chunk
+                    output += chunk
+
+                    # Print to stdout in real-time
+                    sys.stdout.write(chunk)
+                    sys.stdout.flush()
+
+                    # Check if our completion marker is in the output
+                    if re.search(r"\r?\n" + completion_marker + r"\r?\n", buffer):
+                        break
+
+                # Check for timeout
+                if time.time() - start_time > timeout:
+                    logger.warning(f"\nTimeout waiting for command: {command}")
+                    break
+
+                # Small delay to prevent CPU spinning
+                time.sleep(0.1)
+
+            # Detach from screen (Ctrl+A, then d)
+            channel.send(b"\x01d")
+            time.sleep(0.5)
+
+            client.close()
+            return output
+
+        except Exception as e:
+            client and client.close()  # type: ignore
+            raise e
 
 
 def create_ec2_instance(
@@ -128,7 +201,7 @@ def create_ec2_instance(
     region: str,
     ami_id: str | None = None,
     wait_for_status: bool = True,
-    key_name: str | None = None
+    key_name: str | None = None,
 ) -> str:
     """
     Creates a new EC2 instance and waits until it's running.
@@ -145,69 +218,56 @@ def create_ec2_instance(
         The instance ID of the newly created EC2 instance
     """
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client('ec2', region_name=region)
+    ec2_client = boto3.client("ec2", region_name=region)
 
     # If AMI ID is not provided, use a default Amazon Linux 2 AMI based on region
     if not ami_id:
         # Get the latest Amazon Linux 2 AMI
         response = ec2_client.describe_images(
-            Owners=['amazon'],
+            Owners=["amazon"],
             Filters=[
-                {
-                    'Name': 'name',
-                    'Values': ['amzn2-ami-hvm-*-x86_64-gp2']
-                },
-                {
-                    'Name': 'state',
-                    'Values': ['available']
-                }
-            ]
+                {"Name": "name", "Values": ["amzn2-ami-hvm-*-x86_64-gp2"]},
+                {"Name": "state", "Values": ["available"]},
+            ],
         )
 
         # Sort images by creation date and get the latest one
-        ami_id = sorted(
-            response['Images'],
-            key=lambda x: x['CreationDate'],
-            reverse=True
-        )[0]['ImageId']
+        ami_id = sorted(response["Images"], key=lambda x: x["CreationDate"], reverse=True)[0]["ImageId"]
 
     # Prepare the tags format required by EC2
     tag_specifications = [
-        {
-            'ResourceType': 'instance',
-            'Tags': [{'Key': key, 'Value': value} for key, value in tags.items()]
-        }
+        {"ResourceType": "instance", "Tags": [{"Key": key, "Value": value} for key, value in tags.items()]}
     ]
 
     # Prepare instance launch parameters
     launch_params = {
-        'ImageId': ami_id,
-        'InstanceType': instance_type,
-        'MinCount': 1,
-        'MaxCount': 1,
-        'TagSpecifications': tag_specifications
+        "ImageId": ami_id,
+        "InstanceType": instance_type,
+        "MinCount": 1,
+        "MaxCount": 1,
+        "TagSpecifications": tag_specifications,
     }
 
     # Add key pair if provided
     if key_name:
-        launch_params['KeyName'] = key_name
+        launch_params["KeyName"] = key_name
 
     # Launch the EC2 instance
     response = ec2_client.run_instances(**launch_params)
 
     # Get the instance ID
-    instance_id = response['Instances'][0]['InstanceId']
+    instance_id = response["Instances"][0]["InstanceId"]
     logger.info(f"Created instance {instance_id}")
 
     # Wait for the instance to be in running state if requested
     if wait_for_status:
         logger.info("Waiting for instance to enter 'running' state...")
-        waiter = ec2_client.get_waiter('instance_running')
+        waiter = ec2_client.get_waiter("instance_running")
         waiter.wait(InstanceIds=[instance_id])
 
         # Additionally wait for status checks to pass
         logger.info("Instance is running. Waiting for status checks to pass...")
-        waiter = ec2_client.get_waiter('instance_status_ok')
+        waiter = ec2_client.get_waiter("instance_status_ok")
         waiter.wait(InstanceIds=[instance_id])
         logger.info(f"Instance {instance_id} is now available and ready to use")
 
@@ -226,16 +286,13 @@ def list_ec2_instances_by_tags(region: str, tags: dict[str, str]) -> list:
         List of dictionaries containing instance details (id, state, name, etc.)
     """
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client('ec2', region_name=region)
+    ec2_client = boto3.client("ec2", region_name=region)
 
     # Prepare filters if tags are provided
     filters = []
     if tags:
         for key, value in tags.items():
-            filters.append({
-                'Name': f'tag:{key}',
-                'Values': [value]
-            })
+            filters.append({"Name": f"tag:{key}", "Values": [value]})
 
     # Describe instances with the given filters
     if filters:
@@ -246,27 +303,27 @@ def list_ec2_instances_by_tags(region: str, tags: dict[str, str]) -> list:
     instances = []
 
     # Extract instance information from the response
-    for reservation in response['Reservations']:
-        for instance in reservation['Instances']:
+    for reservation in response["Reservations"]:
+        for instance in reservation["Instances"]:
             # Extract instance tags into a more accessible format
             instance_tags = {}
-            if 'Tags' in instance:
-                for tag in instance['Tags']:
-                    instance_tags[tag['Key']] = tag['Value']
+            if "Tags" in instance:
+                for tag in instance["Tags"]:
+                    instance_tags[tag["Key"]] = tag["Value"]
 
             # Extract name from tags if available
-            name = instance_tags.get('Name', 'Unnamed')
+            name = instance_tags.get("Name", "Unnamed")
 
             # Create a simplified instance object with relevant details
             instance_info = {
-                'InstanceId': instance['InstanceId'],
-                'InstanceType': instance['InstanceType'],
-                'State': instance['State']['Name'],
-                'PublicIpAddress': instance.get('PublicIpAddress', 'N/A'),
-                'PrivateIpAddress': instance.get('PrivateIpAddress', 'N/A'),
-                'Name': name,
-                'LaunchTime': instance['LaunchTime'],
-                'Tags': instance_tags
+                "InstanceId": instance["InstanceId"],
+                "InstanceType": instance["InstanceType"],
+                "State": instance["State"]["Name"],
+                "PublicIpAddress": instance.get("PublicIpAddress", "N/A"),
+                "PrivateIpAddress": instance.get("PrivateIpAddress", "N/A"),
+                "Name": name,
+                "LaunchTime": instance["LaunchTime"],
+                "Tags": instance_tags,
             }
 
             instances.append(instance_info)
@@ -287,29 +344,29 @@ def terminate_ec2_instance(instance_id: str, region: str, wait_for_termination: 
         Boolean indicating if the termination was successful
     """
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client('ec2', region_name=region)
+    ec2_client = boto3.client("ec2", region_name=region)
 
     try:
         # Check if the instance exists before attempting to terminate
         response = ec2_client.describe_instances(InstanceIds=[instance_id])
-        if not response['Reservations'] or not response['Reservations'][0]['Instances']:
+        if not response["Reservations"] or not response["Reservations"][0]["Instances"]:
             logger.info(f"Instance {instance_id} not found in region {region}")
             return False
 
         # Get current state
-        current_state = response['Reservations'][0]['Instances'][0]['State']['Name']
+        current_state = response["Reservations"][0]["Instances"][0]["State"]["Name"]
 
         # If instance is already terminated or terminating, inform the user
-        if current_state in ['terminated', 'shutting-down']:
+        if current_state in ["terminated", "shutting-down"]:
             logger.info(f"Instance {instance_id} is already {current_state}")
             return True
 
         # Get instance name if available
         instance_name = "Unnamed"
-        if 'Tags' in response['Reservations'][0]['Instances'][0]:
-            for tag in response['Reservations'][0]['Instances'][0]['Tags']:
-                if tag['Key'] == 'Name':
-                    instance_name = tag['Value']
+        if "Tags" in response["Reservations"][0]["Instances"][0]:
+            for tag in response["Reservations"][0]["Instances"][0]["Tags"]:
+                if tag["Key"] == "Name":
+                    instance_name = tag["Value"]
                     break
 
         # Terminate the instance
@@ -319,15 +376,15 @@ def terminate_ec2_instance(instance_id: str, region: str, wait_for_termination: 
         # Wait for the instance to be fully terminated if requested
         if wait_for_termination:
             logger.info("Waiting for instance to be fully terminated...")
-            waiter = ec2_client.get_waiter('instance_terminated')
+            waiter = ec2_client.get_waiter("instance_terminated")
             waiter.wait(InstanceIds=[instance_id])
             logger.info(f"Instance {instance_id} has been terminated")
 
         return True
 
     except ec2_client.exceptions.ClientError as e:
-        error_code = e.response.get('Error', {}).get('Code', 'Unknown')
-        if error_code == 'InvalidInstanceID.NotFound':
+        error_code = e.response.get("Error", {}).get("Code", "Unknown")
+        if error_code == "InvalidInstanceID.NotFound":
             logger.info(f"Instance {instance_id} not found in region {region}")
         else:
             logger.error(f"Error terminating instance {instance_id}: {str(e)}")
@@ -347,7 +404,7 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
         The key pair ID if the import was successful.
     """
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client('ec2', region_name=region)
+    ec2_client = boto3.client("ec2", region_name=region)
 
     # Use default SSH public key path if not specified
     if not private_key_path:
@@ -360,7 +417,7 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
     # Generate public key from private key
     try:
         # Load the private key
-        with open(private_key_path, 'r') as key_file:
+        with open(private_key_path, "r") as key_file:
             private_key_material = key_file.read().strip()
 
         # Generate public key using ssh-keygen command
@@ -369,11 +426,11 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
             subprocess.run(
                 ["ssh-keygen", "-y", "-f", private_key_path],
                 check=True,
-                stdout=open(ssh_public_key_path, 'w'),
-                stderr=subprocess.PIPE
+                stdout=open(ssh_public_key_path, "w"),
+                stderr=subprocess.PIPE,
             )
             # Read the generated public key
-            with open(ssh_public_key_path, 'r') as pub_key_file:
+            with open(ssh_public_key_path, "r") as pub_key_file:
                 public_key_material = pub_key_file.read().strip()
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Failed to generate public key: {e.stderr.decode()}")
@@ -387,7 +444,7 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
     key_name = f"{key_name}-{h}"
 
     # Read the public key file
-    with open(ssh_public_key_path, 'r') as key_file:
+    with open(ssh_public_key_path, "r") as key_file:
         public_key_material = key_file.read().strip()
 
     h = hashlib.sha256(public_key_material.encode()).hexdigest()
@@ -404,12 +461,9 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
             pass
 
         # Import the key
-        response = ec2_client.import_key_pair(
-            KeyName=key_name,
-            PublicKeyMaterial=public_key_material
-        )
+        response = ec2_client.import_key_pair(KeyName=key_name, PublicKeyMaterial=public_key_material)
 
-        if response['KeyFingerprint'] is None:
+        if response["KeyFingerprint"] is None:
             raise ValueError(f"Failed to import key pair '{key_name}' to region {region}")
 
         logger.info(f"Successfully imported key pair '{key_name}' to region {region}")
@@ -420,26 +474,27 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
         raise e
 
 
-
 def execute_command_on_ec2(
     instance_id: str,
-    command: str,
+    command: str | None,
+    script: str | None,
     region: str,
     private_key_path: str,
     user: str = "ec2-user",
-    wait_for_response: bool = True,
-    timeout: int = 60
+    detach: bool = False,
+    timeout: int = 600,
 ) -> tuple[bool, str, str]:
     """
-    Executes a command on an EC2 instance over SSH.
+    Executes a command on an EC2 instance over SSH in a screen session.
 
     Args:
         instance_id: The ID of the EC2 instance to connect to
         command: The command to execute on the instance
+        script: Path to a script file to execute on the instance
         region: AWS region where the instance is located
         private_key_path: Path to the SSH private key file for authentication
         user: SSH username to use for connection (defaults to ec2-user)
-        wait_for_response: Whether to wait for command completion (True) or run in background (False)
+        detach: Whether to run the command in the background (True) or wait for completion (False)
         timeout: Connection timeout in seconds (only applicable when wait_for_response is True)
 
     Returns:
@@ -448,93 +503,30 @@ def execute_command_on_ec2(
         - stdout: Command's standard output (empty string if wait_for_response is False)
         - stderr: Command's standard error (empty string if wait_for_response is False)
     """
-    # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client('ec2', region_name=region)
 
-    # Get instance details to obtain the public IP address
-    response = ec2_client.describe_instances(InstanceIds=[instance_id])
+    if script is not None:
+        with open(script, "r") as f:
+            script_content = f.read()
 
-    if not response['Reservations'] or not response['Reservations'][0]['Instances']:
-        logger.error(f"Instance {instance_id} not found in region {region}")
-        return False, "", f"Instance {instance_id} not found"
+        # encode script using base64
+        script_content = base64.b64encode(script_content.encode()).decode()
+        command = f"echo {script_content} | base64 -d | bash"
+    elif command is None:
+        raise ValueError("command and script cannot both be None")
 
-    instance = response['Reservations'][0]['Instances'][0]
+    session = Session(
+        instance_id=instance_id,
+        region=region,
+        private_key_path=private_key_path,
+        user=user,
+    )
 
-    # Check if instance is running
-    if instance['State']['Name'] != 'running':
-        logger.error(f"Instance {instance_id} is not in running state (current state: {instance['State']['Name']})")
-        return False, "", f"Instance is not running (state: {instance['State']['Name']})"
+    if not session.is_running():
+        raise ValueError(f"Instance {instance_id} is not running")
 
-    # Get the public IP address
-    if 'PublicIpAddress' not in instance:
-        logger.error(f"Instance {instance_id} does not have a public IP address")
-        return False, "", "Instance does not have a public IP address"
+    output = session.run(command, detach=detach, timeout=timeout)
+    return True, output, ""
 
-    public_ip = instance['PublicIpAddress']
-
-    # Check if private key file exists
-    if not os.path.isfile(private_key_path):
-        logger.error(f"Private key file not found at {private_key_path}")
-        return False, "", f"Private key file not found at {private_key_path}"
-
-    # Set correct permissions for the private key file (required by SSH)
-    try:
-        os.chmod(private_key_path, 0o600)
-    except Exception as e:
-        logger.warning(f"Could not set permissions on private key file: {str(e)}")
-
-    # Construct SSH command
-    ssh_options = [
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", f"ConnectTimeout={timeout}",
-        "-i", private_key_path
-    ]
-
-    if wait_for_response:
-        # Execute command and wait for response
-        logger.info(f"Executing command on {instance_id} ({public_ip}) and waiting for response")
-        ssh_command = ["ssh"] + ssh_options + [f"{user}@{public_ip}", f"'{command}'"]
-
-        print(" ".join(ssh_command))
-
-        process = subprocess.run(
-            shlex.split(" ".join(ssh_command)),
-            capture_output=True,
-            text=True
-        )
-
-        success = process.returncode == 0
-        stdout = process.stdout
-        stderr = process.stderr
-
-        if success:
-            logger.info(f"Command executed successfully on {instance_id}")
-        else:
-            logger.error(f"Command execution failed on {instance_id}: {stderr}")
-
-        return success, stdout, stderr
-    else:
-        # Execute command in background
-        logger.info(f"Executing command on {instance_id} ({public_ip}) in background")
-        # Use nohup to allow the command to continue running after SSH connection closes
-        background_cmd = f"nohup {command} > /dev/null 2>&1 &"
-        ssh_command = ["ssh"] + ssh_options + [f"{user}@{public_ip}", background_cmd]
-
-        process = subprocess.run(
-            ssh_command,
-            capture_output=True,
-            text=True
-        )
-
-        success = process.returncode == 0
-
-        if success:
-            logger.info(f"Background command started on {instance_id}")
-        else:
-            logger.error(f"Failed to start background command on {instance_id}: {process.stderr}")
-
-        return success, "", process.stderr
 
 @click.group()
 def cli():
@@ -577,13 +569,26 @@ def cli():
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
     help="Path to the SSH private key file",
 )
+@click.option(
+    "--ami-id",
+    type=str,
+    default=None,
+    help="AMI ID to use for the instances",
+)
+@click.option(
+    "--wait-for-status/--no-wait-for-status",
+    default=True,
+    help="Whether to wait for the instances to be running",
+)
 def create_instances(
     name: str,
     instance: str,
     number: int,
     region: str,
     owner: str,
-    ssh_key_path: str
+    ssh_key_path: str,
+    ami_id: str | None,
+    wait_for_status: bool,
 ):
     """
     Spin up one or more EC2 instances.
@@ -602,13 +607,14 @@ def create_instances(
     existing_instances = list_ec2_instances_by_tags(region=region, tags=tags)
 
     for i in range(len(existing_instances), len(existing_instances) + number):
-        logger.info(f"Creating instance {i + 1} of {number}...")
+        logger.info(f"Creating instance {i + 1} of {len(existing_instances) + number}...")
         instance_id = create_ec2_instance(
             instance_type=instance,
             tags={**tags, "Name": f"{name}-{i:04d}"},
             region=region,
-            wait_for_status=True,
+            wait_for_status=wait_for_status,
             key_name=key_name,
+            ami_id=ami_id,
         )
         logger.info(f"Created instance {instance_id}")
 
@@ -650,10 +656,10 @@ def list_instances(
         print(f"IP:     {instance['PublicIpAddress']}")
         print("Tags:")
         # Find the maximum length of tag keys for padding
-        max_key_length = max(len(key) for key in instance['Tags'].keys()) if instance['Tags'] else 0
+        max_key_length = max(len(key) for key in instance["Tags"].keys()) if instance["Tags"] else 0
 
         # Print each tag with padded key names
-        for key, value in instance['Tags'].items():
+        for key, value in instance["Tags"].items():
             print(f"  {key:{max_key_length}}: {value}")
         print()
 
@@ -690,7 +696,7 @@ def terminate_instances(
 ):
     if instance_id is None:
         instances = [
-            instance['InstanceId']
+            instance["InstanceId"]
             for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
         ]
     else:
@@ -730,14 +736,20 @@ def terminate_instances(
 @click.option(
     "--command",
     type=str,
-    required=True,
+    default=None,
     help="Command to run on the instance",
 )
 @click.option(
-    "--wait-for-response",
+    "--script",
+    type=click.Path(exists=True),
+    default=None,
+    help="Path to the script to run on the instance",
+)
+@click.option(
+    "--detach/--no-detach",
     type=bool,
-    default=True,
-    help="Whether to wait for the command to complete",
+    default=False,
+    help="Whether to run the command in the background",
 )
 @click.option(
     "--ssh-key-path",
@@ -750,13 +762,21 @@ def run_command(
     region: str,
     owner: str,
     instance_id: str | None,
-    command: str,
+    command: str | None,
+    script: str | None,
     ssh_key_path: str,
-    wait_for_response: bool,
+    detach: bool,
 ):
+
+    if command is None and script is None:
+        raise click.UsageError("Either --command or --script must be provided")
+
+    if command is not None and script is not None:
+        raise click.UsageError("--command and --script cannot both be provided")
+
     if instance_id is None:
         instances = [
-            instance['InstanceId']
+            instance["InstanceId"]
             for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
         ]
     else:
@@ -766,10 +786,11 @@ def run_command(
         success, stdout, stderr = execute_command_on_ec2(
             instance_id=instance,
             command=command,
+            script=script,
             region=region,
             private_key_path=ssh_key_path,
             user="ec2-user",
-            wait_for_response=wait_for_response
+            detach=detach,
         )
         print(f"Id:      {instance}")
         print(f"Stdout:  {stdout}")
@@ -808,12 +829,19 @@ def run_command(
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
     help="Path to the SSH private key file",
 )
+@click.option(
+    "--detach/--no-detach",
+    type=bool,
+    default=False,
+    help="Whether to run the command in the background",
+)
 def setup_instances(
     name: str,
     region: str,
     owner: str,
     instance_id: str | None,
     ssh_key_path: str,
+    detach: bool,
 ):
     aws_access_key_id = get_aws_access_key_id()
     aws_secret_access_key = get_aws_secret_access_key()
@@ -826,8 +854,7 @@ def setup_instances(
 
     aws_config = make_aws_config()
     aws_credentials = make_aws_credentials(
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key
+        aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key
     )
 
     # base64 encode the aws config and credentials
@@ -847,10 +874,10 @@ def setup_instances(
         owner=owner,
         instance_id=instance_id,
         command=" && ".join(setup_command),
+        script=None,
         ssh_key_path=ssh_key_path,
-        wait_for_response=True,
+        detach=detach,
     )
-
 
 
 @click.option(
@@ -883,12 +910,19 @@ def setup_instances(
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
     help="Path to the SSH private key file",
 )
+@click.option(
+    "--detach/--no-detach",
+    type=bool,
+    default=False,
+    help="Whether to run the command in the background",
+)
 def setup_dolma2_toolkit(
     name: str,
     region: str,
     owner: str,
     instance_id: str | None,
     ssh_key_path: str,
+    detach: bool,
 ):
 
     logger.info("Setting up AWS credentials...")
@@ -898,6 +932,7 @@ def setup_dolma2_toolkit(
         owner=owner,
         instance_id=instance_id,
         ssh_key_path=ssh_key_path,
+        detach=detach,
     )
 
     base64_encoded_setup_command = base64.b64encode(D2TK_SETUP.encode("utf-8")).decode("utf-8")
@@ -915,8 +950,9 @@ def setup_dolma2_toolkit(
         owner=owner,
         instance_id=instance_id,
         command=" && ".join(command),
+        script=None,
         ssh_key_path=ssh_key_path,
-        wait_for_response=True,
+        detach=detach,
     )
 
 
@@ -945,37 +981,34 @@ def setup_dolma2_toolkit(
     help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
 )
 @click.option(
+    "--scripts-dir",
+    type=click.Path(exists=True, dir_okay=True, file_okay=False),
+    default=None,
+    help="Path to the directory containing the scripts to run on the instance",
+)
+@click.option(
+    "--detach/--no-detach",
+    type=bool,
+    default=False,
+    help="Whether to run the command in the background",
+)
+@click.option(
     "--ssh-key-path",
     type=str,
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
     help="Path to the SSH private key file",
 )
-def test_dolma2_toolkit(
+def map_commands(
     name: str,
     region: str,
     owner: str,
     instance_id: str | None,
+    scripts_dir: str | None,
     ssh_key_path: str,
+    detach: bool,
 ):
+    pass
 
-    base64_encoded_test_command = base64.b64encode(D2TK_TEST_SCRIPT.encode("utf-8")).decode("utf-8")
-
-    command = [
-        f"echo '{base64_encoded_test_command}' | base64 -d > test.sh",
-        "chmod +x test.sh",
-        "./test.sh cc_2021_49_small",
-    ]
-
-    logger.info("Testing data processing...")
-    run_command(
-        name=name,
-        region=region,
-        owner=owner,
-        instance_id=instance_id,
-        command="; ".join(command),
-        ssh_key_path=ssh_key_path,
-        wait_for_response=True,
-    )
 
 cli.command(name="create")(create_instances)
 cli.command(name="list")(list_instances)
@@ -983,7 +1016,6 @@ cli.command(name="terminate")(terminate_instances)
 cli.command(name="run")(run_command)
 cli.command(name="setup")(setup_instances)
 cli.command(name="setup-d2tk")(setup_dolma2_toolkit)
-cli.command(name="test-d2tk")(test_dolma2_toolkit)
 
 
 if __name__ == "__main__":
