@@ -718,7 +718,7 @@ def terminate_instances(
         instances = [instance_id]
 
     for instance in instances:
-        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=not detach)
+        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=True)
         print(f"Id:      {instance}")
         print(f"Success: {success}")
         print()
