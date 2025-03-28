@@ -1140,10 +1140,10 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/part-187-00004.npy
     - weka://oe-training-default/ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-0-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-1-00000.npy
-  - name: s2pdf-non-dedupe
+  - name: s2pdf-dedupe
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/s2pdf/dolma2-tokenizer-non-dedupe/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe20_600B_04_tokenized/*.npy
 downstream_evaluators:
 - arc_challenge_test_rc_5shot
 - arc_easy_test_rc_5shot
