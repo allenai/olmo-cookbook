@@ -1,7 +1,7 @@
 name: "olmo-cookbook-1b-5xC-olmo2"
 description: "Cookbook olmo2-1b mix baseline"
-budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+budget: "ai2/oe-data"
+workspace: "ai2/dolma2"
 nodes: 4
 gpus: 8
 preemptible: false
