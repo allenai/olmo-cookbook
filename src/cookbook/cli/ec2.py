@@ -129,7 +129,7 @@ class Session:
 
         return channel
 
-    def run(self, command: str, detach: bool = False, timeout: int = 600) -> str:
+    def run(self, command: str, detach: bool = False, terminate: bool = True, timeout: int = 600) -> str:
         client: None | paramiko.SSHClient = None
         command_hash = hashlib.md5(command.encode()).hexdigest()[:12]
 
@@ -151,7 +151,10 @@ class Session:
             completion_marker = f"CMD_COMPLETED_{command_hash[:20]}"
 
             # send the command to the server
-            channel.send(f"{command}; echo '{completion_marker}'".encode("utf-8"))
+            if terminate:
+                channel.send(f"{command}; echo '{completion_marker}'; screen -X quit".encode("utf-8"))
+            else:
+                channel.send(f"{command}; echo '{completion_marker}'".encode("utf-8"))
 
             # send enter to run the command
             channel.send(b"\n")
@@ -184,9 +187,10 @@ class Session:
                 # Small delay to prevent CPU spinning
                 time.sleep(0.1)
 
-            # Detach from screen (Ctrl+A, then d)
-            channel.send(b"\x01d")
-            time.sleep(0.5)
+            if not terminate:
+                # Detach from screen (Ctrl+A, then d)
+                channel.send(b"\x01d")
+                time.sleep(0.5)
 
             client.close()
             return output
@@ -988,12 +992,6 @@ def setup_dolma2_toolkit(
     help="Path to the directory containing the scripts to run on the instance",
 )
 @click.option(
-    "--detach/--no-detach",
-    type=bool,
-    default=False,
-    help="Whether to run the command in the background",
-)
-@click.option(
     "--ssh-key-path",
     type=str,
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
@@ -1006,7 +1004,6 @@ def map_commands(
     instance_id: str | None,
     scripts_dir: str,
     ssh_key_path: str,
-    detach: bool,
 ):
     random.seed(42)
 
@@ -1034,12 +1031,12 @@ def map_commands(
     for i, script in enumerate(scripts):
         instance_to_scripts[i % len(instances)][1].append(script)
 
-    for instance_id, scripts in instance_to_scripts:
+    for instance_id, instance_scripts in instance_to_scripts:
 
         # base64 encode the scripts
         run_command_scripts = []
 
-        for script in scripts:
+        for script in instance_scripts:
             with open(script, "rb") as f:
                 base64_encoded_script = base64.b64encode(f.read()).decode("utf-8")
 
@@ -1047,8 +1044,6 @@ def map_commands(
             run_command_scripts.append(f"echo {base64_encoded_script} | base64 -d > {filename}")
             run_command_scripts.append(f"chmod +x {filename}")
             run_command_scripts.append(f"./{filename}")
-
-        breakpoint()
 
         run_command(
             name=name,
@@ -1061,7 +1056,7 @@ def map_commands(
             detach=True,
         )
 
-    logger.info(f"Mapping {len(instance_to_scripts)} scripts to {len(instances)} instances")
+        logger.info(f"Mapped {len(instance_scripts)} scripts to instance {instance_id}")
 
 
 cli.command(name="create")(create_instances)
@@ -1070,7 +1065,7 @@ cli.command(name="terminate")(terminate_instances)
 cli.command(name="run")(run_command)
 cli.command(name="setup")(setup_instances)
 cli.command(name="setup-d2tk")(setup_dolma2_toolkit)
-
+cli.command(name="map")(map_commands)
 
 if __name__ == "__main__":
     cli({})
