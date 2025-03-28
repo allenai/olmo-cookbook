@@ -140,35 +140,55 @@ At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai
 
 ## EC2 CLI
 
-The EC2 CLI is a tool for managing EC2 instances.
+The EC2 CLI is a tool for managing EC2 instances. We will describe its use by example.
+
+First, you want to install the cookbook CLI.
 
 ```shell
-olmo-cookbook-ec2 create --name test-cli-cookbook-3 --number 2
+pip install -e .
 ```
 
-Creates 2 instances with the name `test-cli-cookbook-3` in the `us-east-1` region. By default instances will be `i4i.xlarge` and will be tagged with the project name and owner.
+Then, you can create a cluster of instances; by default, instances will be `i4i.xlarge` and will be tagged with the project name and owner; they will use the `us-east-1` region and use your SSH key at `~/.ssh/id_rsa`.
+
+Let's say you wanna create a cluster named `chipstest`:
 
 ```shell
-olmo-cookbook-ec2 setup --name test-cli-cookbook-3
+olmo-cookbook-ec2 create --name chipstest --number 5 --instance i4i.2xlarge --detach
 ```
 
-This sets up AWS instances for data processing; as of now, it only configures AWS credentials.
+This will create 5 instances as part of a cluster with the name `chipstest`; the `--detach` flag means that the
+process will return immediately and the instances will be created in the background.
+
+You can check the status of the instances by listing them:
 
 ```shell
-olmo-cookbook-ec2 run --name test-cli-cookbook-3 --command "echo 'Hello, world!'"
+olmo-cookbook-ec2 list --name chipstest
 ```
 
-This runs a command on all instances with the name `test-cli-cookbook-3`.
+After the instances are create, you wanna set up AWS credentials and D2TK pipeline on them. You can do this by running the following command:
 
 ```shell
-olmo-cookbook-ec2 terminate --name test-cli-cookbook-3
+olmo-cookbook-ec2 setup-d2tk --name chipstest
 ```
 
-This terminates all instances with the name `test-cli-cookbook-3`.
-
+To run a command on all instances in the cluster, you can use the following command:
 
 ```shell
-olmo-cookbook-ec2 list --name test-cli-cookbook-3
+olmo-cookbook-ec2 run --name chipstest --command "echo 'Hello, world!'"
 ```
 
-This lists all instances with the name `test-cli-cookbook-3`.
+But, most likely you wanna queue a bunch of jobs to run on the instances. You can do this by creating a directory with as many bash scripts as job units, and then running the following command:
+
+```shell
+olmo-cookbook-ec2 map --name chipstest --scripts-dir tmp/test_scripts
+```
+
+This will run all the scripts in the `tmp/test_scripts` directory on all the instances in the cluster.
+
+Once you are done with the jobs, you can terminate the cluster:
+
+```shell
+olmo-cookbook-ec2 terminate --name chipstest
+```
+
+This will terminate all the instances in the cluster and delete the cluster.

@@ -205,7 +205,7 @@ def create_ec2_instance(
     tags: dict[str, str],
     region: str,
     ami_id: str | None = None,
-    wait_for_status: bool = True,
+    detach: bool = False,
     key_name: str | None = None,
 ) -> str:
     """
@@ -216,7 +216,7 @@ def create_ec2_instance(
         tags: Dictionary of tags to apply to the instance
         region: AWS region where to launch the instance
         ami_id: AMI ID to use (defaults to Amazon Linux 2 in the specified region)
-        wait_for_status: Whether to wait for the instance to be in running state
+        detach: Whether to detach from the instances after creation
         key_name: Name of the key pair to use for SSH access to the instance
 
     Returns:
@@ -265,16 +265,18 @@ def create_ec2_instance(
     logger.info(f"Created instance {instance_id}")
 
     # Wait for the instance to be in running state if requested
-    if wait_for_status:
-        logger.info("Waiting for instance to enter 'running' state...")
-        waiter = ec2_client.get_waiter("instance_running")
-        waiter.wait(InstanceIds=[instance_id])
+    if detach:
+        return instance_id
 
-        # Additionally wait for status checks to pass
-        logger.info("Instance is running. Waiting for status checks to pass...")
-        waiter = ec2_client.get_waiter("instance_status_ok")
-        waiter.wait(InstanceIds=[instance_id])
-        logger.info(f"Instance {instance_id} is now available and ready to use")
+    logger.info("Waiting for instance to enter 'running' state...")
+    waiter = ec2_client.get_waiter("instance_running")
+    waiter.wait(InstanceIds=[instance_id])
+
+    # Additionally wait for status checks to pass
+    logger.info("Instance is running. Waiting for status checks to pass...")
+    waiter = ec2_client.get_waiter("instance_status_ok")
+    waiter.wait(InstanceIds=[instance_id])
+    logger.info(f"Instance {instance_id} is now available and ready to use")
 
     return instance_id
 
@@ -581,9 +583,10 @@ def cli():
     help="AMI ID to use for the instances",
 )
 @click.option(
-    "--wait-for-status/--no-wait-for-status",
-    default=True,
-    help="Whether to wait for the instances to be running",
+    "--detach/--no-detach",
+    type=bool,
+    default=False,
+    help="Whether to detach from the instances after creation",
 )
 def create_instances(
     name: str,
@@ -593,7 +596,7 @@ def create_instances(
     owner: str,
     ssh_key_path: str,
     ami_id: str | None,
-    wait_for_status: bool,
+    detach: bool,
 ):
     """
     Spin up one or more EC2 instances.
@@ -617,7 +620,7 @@ def create_instances(
             instance_type=instance,
             tags={**tags, "Name": f"{name}-{i:04d}"},
             region=region,
-            wait_for_status=wait_for_status,
+            detach=detach,
             key_name=key_name,
             ami_id=ami_id,
         )
@@ -693,11 +696,18 @@ def list_instances(
     default=None,
     help="Instance ID to terminate; if none, terminate all instances with the given name and owner",
 )
+@click.option(
+    "--detach/--no-detach",
+    type=bool,
+    default=False,
+    help="Whether to detach from the instances after termination",
+)
 def terminate_instances(
     name: str,
     region: str,
     owner: str,
     instance_id: str | None,
+    detach: bool,
 ):
     if instance_id is None:
         instances = [
@@ -708,7 +718,7 @@ def terminate_instances(
         instances = [instance_id]
 
     for instance in instances:
-        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=True)
+        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=not detach)
         print(f"Id:      {instance}")
         print(f"Success: {success}")
         print()
