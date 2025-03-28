@@ -2,6 +2,7 @@ import base64
 import hashlib
 import logging
 import os
+import random
 import re
 import shlex
 import shutil
@@ -53,7 +54,7 @@ sudo chown -R $USER /mnt/raid0
 sudo yum install gcc -y
 sudo yum install cmake -y
 sudo yum install openssl-devel -y
-sudo yum install g++ -y
+sudo yum install gcc-c++ -y
 sudo yum install htop -y
 wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
 tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
@@ -66,7 +67,7 @@ source ~/.bashrc
 cd
 git clone https://github.com/revbucket/datamap-rs.git
 cd datamap-rs
-git checkout dclm
+# git checkout dclm (we work from)
 s5cmd run examples/all_dressed/s5cmd_asset_downloader.txt
 cargo build --release
 # Do minhash-rs setups
@@ -1003,11 +1004,64 @@ def map_commands(
     region: str,
     owner: str,
     instance_id: str | None,
-    scripts_dir: str | None,
+    scripts_dir: str,
     ssh_key_path: str,
     detach: bool,
 ):
-    pass
+    random.seed(42)
+
+    # get all the scripts in the scripts directory
+    scripts = [
+        os.path.join(scripts_dir, f)
+        for f in os.listdir(scripts_dir)
+        if os.path.isfile(os.path.join(scripts_dir, f))
+    ]
+    random.shuffle(scripts)
+
+    logger.info(f"Found {len(scripts)} scripts in {scripts_dir}")
+
+    # get all the instances with the given name and owner
+    instances = [
+        instance["InstanceId"]
+        for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
+    ]
+    random.shuffle(instances)
+
+    logger.info(f"Found {len(instances)} instances with the given name and owner")
+
+    # partition scripts into instances
+    instance_to_scripts = [(instance_id, []) for instance_id in instances]
+    for i, script in enumerate(scripts):
+        instance_to_scripts[i % len(instances)][1].append(script)
+
+    for instance_id, scripts in instance_to_scripts:
+
+        # base64 encode the scripts
+        run_command_scripts = []
+
+        for script in scripts:
+            with open(script, "rb") as f:
+                base64_encoded_script = base64.b64encode(f.read()).decode("utf-8")
+
+            filename = os.path.basename(script)
+            run_command_scripts.append(f"echo {base64_encoded_script} | base64 -d > {filename}")
+            run_command_scripts.append(f"chmod +x {filename}")
+            run_command_scripts.append(f"./{filename}")
+
+        breakpoint()
+
+        run_command(
+            name=name,
+            region=region,
+            owner=owner,
+            instance_id=instance_id,
+            command="; ".join(run_command_scripts),
+            script=None,
+            ssh_key_path=ssh_key_path,
+            detach=True,
+        )
+
+    logger.info(f"Mapping {len(instance_to_scripts)} scripts to {len(instances)} instances")
 
 
 cli.command(name="create")(create_instances)
