@@ -19,6 +19,7 @@ dependencies = [
     "s3fs",
     "yaspin",
     "PyYAML>=6.0,<7.0",
+    "paramiko>=3.5,<3.6",
 ]
 
 [project.optional-dependencies]
@@ -47,6 +48,7 @@ all = [
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
 olmo-cookbook-core = "cookbook.cli:core.cli"
+olmo-cookbook-ec2 = "cookbook.cli:ec2.cli"
 
 
 [tool.black]
