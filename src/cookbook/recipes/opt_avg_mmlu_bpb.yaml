@@ -1,0 +1,165 @@
+name: 1b-5xC-dclm-baseline-regmix-opt-avg-mmlu
+description: 1B-5xC regmix mixture optimizing avg mmlu bpb, one reg per task, DCLM baseline sample
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 113184153600
+sequence_length: 2048
+seed: 1337
+model: olmo2_1B
+tokenizer: dolma2
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: adult_content
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/adult_content/**/*.npy
+    target_ratio: 0.0022353714607107394
+    repetition_factor: 10
+  - name: art_and_design
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/art_and_design/**/*.npy
+    target_ratio: 0.004629245570807399
+    repetition_factor: 10
+  - name: crime_and_law
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/crime_and_law/**/*.npy
+    target_ratio: 0.008428022684594926
+    repetition_factor: 10
+  - name: education_and_jobs
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/education_and_jobs/**/*.npy
+    target_ratio: 0.013242890001919154
+    repetition_factor: 10
+  - name: electronics_and_hardware
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/electronics_and_hardware/**/*.npy
+    target_ratio: 0.02512782479693322
+    repetition_factor: 10
+  - name: entertainment
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/entertainment/**/*.npy
+    target_ratio: 0.23125240097032163
+    repetition_factor: 10
+  - name: fashion_and_beauty
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy
+    target_ratio: 0.0021685388373134887
+    repetition_factor: 10
+  - name: finance_and_business
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/finance_and_business/**/*.npy
+    target_ratio: 0.01990743849742549
+    repetition_factor: 10
+  - name: food_and_dining
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/food_and_dining/**/*.npy
+    target_ratio: 0.007756021184494974
+    repetition_factor: 10
+  - name: games
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/games/**/*.npy
+    target_ratio: 0.014136223915094066
+    repetition_factor: 10
+  - name: health
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/health/**/*.npy
+    target_ratio: 0.3024259223083078
+    repetition_factor: 10
+  - name: history_and_geography
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/history_and_geography/**/*.npy
+    target_ratio: 0.005694109260489857
+    repetition_factor: 10
+  - name: home_and_hobbies
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/home_and_hobbies/**/*.npy
+    target_ratio: 0.013506687248268721
+    repetition_factor: 10
+  - name: industrial
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/industrial/**/*.npy
+    target_ratio: 0.002075630794728218
+    repetition_factor: 10
+  - name: literature
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/literature/**/*.npy
+    target_ratio: 0.013535447747657242
+    repetition_factor: 10
+  - name: politics
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/politics/**/*.npy
+    target_ratio: 0.1299573401765656
+    repetition_factor: 10
+  - name: religion
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/religion/**/*.npy
+    target_ratio: 0.008827216713549479
+    repetition_factor: 10
+  - name: science_math_and_technology
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/science_math_and_technology/**/*.npy
+    target_ratio: 0.1451419586511605
+    repetition_factor: 10
+  - name: social_life
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/social_life/**/*.npy
+    target_ratio: 0.011944493999012406
+    repetition_factor: 10
+  - name: software
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/software/**/*.npy
+    target_ratio: 0.004573005339398566
+    repetition_factor: 10
+  - name: software_development
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/software_development/**/*.npy
+    target_ratio: 0.01601513963830017
+    repetition_factor: 10
+  - name: sports_and_fitness
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/sports_and_fitness/**/*.npy
+    target_ratio: 0.006679083567913441
+    repetition_factor: 10
+  - name: transportation
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/transportation/**/*.npy
+    target_ratio: 0.007117474169175677
+    repetition_factor: 10
+  - name: travel_and_tourism
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/regmixer/v0-sample/allenai/dolma2-tokenizer/travel_and_tourism/**/*.npy
+    target_ratio: 0.0036225124658573653
+    repetition_factor: 10
+downstream_evaluators:
+- arc_challenge_test_rc_5shot
+- arc_easy_test_rc_5shot
+- hellaswag_rc_5shot
+- winogrande_val_rc_5shot
+- csqa_val_rc_5shot
+- piqa_val_rc_5shot
+- socialiqa_val_rc_5shot
+- mmlu_stem_val_rc_5shot
+- mmlu_humanities_val_rc_5shot
+- mmlu_social_sciences_val_rc_5shot
+- mmlu_other_val_rc_5shot
+- mmlu_stem_test_rc_5shot
+- mmlu_humanities_test_rc_5shot
+- mmlu_social_sciences_test_rc_5shot
+- mmlu_other_test_rc_5shot
+- gsm8k_gold_bpb_5shot
+- minerva_math_algebra_gold_bpb_0shot
+- minerva_math_counting_and_probability_gold_bpb_0shot
+- minerva_math_geometry_gold_bpb_0shot
+- minerva_math_intermediate_algebra_gold_bpb_0shot
+- minerva_math_number_theory_gold_bpb_0shot
+- minerva_math_prealgebra_gold_bpb_0shot
+- minerva_math_precalculus_gold_bpb_0shot
+- codex_humaneval_gold_bpb_0shot
+- codex_mbpp_gold_bpb_0shot
+- copycolors_10way
+lm_evaluator: true
