@@ -25,6 +25,103 @@ def setup_logging():
 
 logger = setup_logging()
 
+
+D2TK_SETUP = """
+#!/bin/bash
+# Set up raid drives
+sudo yum install mdadm -y
+NUM_DRIVES=$(echo "$(ls /dev/nvme*n1 | wc -l) - 1" | bc)
+MDADM_CMD="sudo mdadm --create /dev/md0 --level=0 --raid-devices=$NUM_DRIVES"
+for i in $(seq 1 $NUM_DRIVES); do
+  MDADM_CMD="$MDADM_CMD /dev/nvme${i}n1"
+done
+eval $MDADM_CMD
+sudo mkfs.xfs /dev/md0
+sudo mkdir /mnt/raid0
+sudo mount /dev/md0 /mnt/raid0
+sudo chown -R $USER /mnt/raid0
+# Download and set up all packages we need
+sudo yum install gcc -y
+sudo yum install cmake -y
+sudo yum install openssl-devel -y
+sudo yum install g++ -y
+sudo yum install htop -y
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
+tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+sudo mv s5cmd /usr/local/bin
+sudo yum install git -y
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh
+bash rustup.sh -y
+source ~/.bashrc
+# Do datamap-rs setups
+cd
+git clone https://github.com/revbucket/datamap-rs.git
+cd datamap-rs
+git checkout dclm
+s5cmd run examples/all_dressed/s5cmd_asset_downloader.txt
+cargo build --release
+# Do minhash-rs setups
+cd
+git clone https://github.com/revbucket/minhash-rs.git
+cd minhash-rs
+git checkout refac2025
+cargo build --release
+"""
+
+
+D2TK_TEST_SCRIPT = """
+#!/bin/bash
+
+# Check if an argument was provided
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <directory-name>"
+    echo "Example: $0 CC-MAIN-2023-06"
+    echo "See one of the folders in s3://ai2-oe-data/contrib/datacomp/DCLM-pool/"
+    exit 1
+fi
+
+# Store the input argument
+X=$1
+echo "Processing directory: $X"
+
+# Step 1: Copy from S3 to local storage
+echo "Copying data from S3 to local storage..."
+s5cmd cp -sp "s3://allennlp-mattj/scratch/test_all_dressed/$X/*" "/mnt/raid0/$X"
+mkdir -p "/mnt/raid0/${X}_output"
+
+# Step 2: Run the map operation
+echo "Running map operation..."
+cd ~/datamap-rs
+git checkout dclm
+cargo run --release -- map --input-dir "/mnt/raid0/$X" --output-dir "/mnt/raid0/${X}_output" --config examples/all_dressed/config.yaml > "/mnt/raid0/${X}_output/map.log"
+
+# Step 3: Run the deduplication operation on JUST the outputs
+echo "Running deduplication..."
+cd ~/minhash-rs
+git checkout refac2025
+cargo run --release -- exact-dedup  --config examples/all_dressed/ed_stub.yaml --input-dir-override "/mnt/raid0/${X}_output/step_final" --output-dir-override "/mnt/raid0/${X}_output/step_final_exactdedup" > "/mnt/raid0/${X}_output/exactdedup.log"
+
+
+# Step 4: Reshard the output data to be a better size
+cd ~/datamap-rs
+git checkout reshardh
+cargo run --release -- reshard --input-dir "/mnt/raid0/${X}_output/step_final_exactdedup/" --output-dir "/mnt/raid0/${X}_output/step_final_exactdedup_reshard/" --max-lines 65536
+
+# Step 5: Copy results back to S3
+echo "Copying results back to S3..."
+s5cmd cp -sp "/mnt/raid0/${X}_output/step_final_exactdedup_reshard/" "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed/$X/"
+s5cmd cp -sp "/mnt/raid0/${X}_output/step_12/" "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/non_english/$X/"
+
+# Step 6: Clean up local storage
+echo "Cleaning up local storage..."
+rm -rf "/mnt/raid0/${X}_output"
+rm -rf "/mnt/raid0/$X"
+rm -rf "/mnt/raid0/ed_working_dir"
+
+echo "Processing complete for $X"
+"""
+
+
 def create_ec2_instance(
     instance_type: str,
     tags: dict[str, str],
@@ -755,11 +852,138 @@ def setup_instances(
     )
 
 
+
+@click.option(
+    "--name",
+    type=str,
+    required=True,
+    help="Name of the project connected to the instance",
+)
+@click.option(
+    "--region",
+    type=str,
+    default="us-east-1",
+    help="Region to spin up the instances in",
+)
+@click.option(
+    "--owner",
+    type=str,
+    default=os.getenv("USER") or os.getenv("USERNAME"),
+    help="Owner of the project connected to the instance",
+)
+@click.option(
+    "--instance-id",
+    type=str,
+    default=None,
+    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
+)
+@click.option(
+    "--ssh-key-path",
+    type=str,
+    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
+    help="Path to the SSH private key file",
+)
+def setup_dolma2_toolkit(
+    name: str,
+    region: str,
+    owner: str,
+    instance_id: str | None,
+    ssh_key_path: str,
+):
+
+    logger.info("Setting up AWS credentials...")
+    setup_instances(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        ssh_key_path=ssh_key_path,
+    )
+
+    base64_encoded_setup_command = base64.b64encode(D2TK_SETUP.encode("utf-8")).decode("utf-8")
+
+    command = [
+        f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
+        "chmod +x setup.sh",
+        "./setup.sh",
+    ]
+
+    logger.info("Setting up data processing...")
+    run_command(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        command=" && ".join(command),
+        ssh_key_path=ssh_key_path,
+        wait_for_response=True,
+    )
+
+
+@click.option(
+    "--name",
+    type=str,
+    required=True,
+    help="Name of the project connected to the instance",
+)
+@click.option(
+    "--region",
+    type=str,
+    default="us-east-1",
+    help="Region to spin up the instances in",
+)
+@click.option(
+    "--owner",
+    type=str,
+    default=os.getenv("USER") or os.getenv("USERNAME"),
+    help="Owner of the project connected to the instance",
+)
+@click.option(
+    "--instance-id",
+    type=str,
+    default=None,
+    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
+)
+@click.option(
+    "--ssh-key-path",
+    type=str,
+    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
+    help="Path to the SSH private key file",
+)
+def test_dolma2_toolkit(
+    name: str,
+    region: str,
+    owner: str,
+    instance_id: str | None,
+    ssh_key_path: str,
+):
+
+    base64_encoded_test_command = base64.b64encode(D2TK_TEST_SCRIPT.encode("utf-8")).decode("utf-8")
+
+    command = [
+        f"echo '{base64_encoded_test_command}' | base64 -d > test.sh",
+        "chmod +x test.sh",
+        "./test.sh cc_2021_49_small",
+    ]
+
+    logger.info("Testing data processing...")
+    run_command(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        command="; ".join(command),
+        ssh_key_path=ssh_key_path,
+        wait_for_response=True,
+    )
+
 cli.command(name="create")(create_instances)
 cli.command(name="list")(list_instances)
 cli.command(name="terminate")(terminate_instances)
 cli.command(name="run")(run_command)
 cli.command(name="setup")(setup_instances)
+cli.command(name="setup-d2tk")(setup_dolma2_toolkit)
+cli.command(name="test-d2tk")(test_dolma2_toolkit)
 
 
 if __name__ == "__main__":
