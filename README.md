@@ -10,7 +10,7 @@ OLMost every recipe you need to experiment with the OLMo family of models.
 1) Install the cookbook CLI
 
 ```shell
-pip install -e .
+pip install -e .[all]
 ```
 
 2) Set up your environment
@@ -105,14 +105,90 @@ olmo-cookbook-eval evaluate \
   --dashboard peteish32
 ```
 
-### Running OLMo-core script
+## Running OLMo-core script
+
+You can launch any OLMo core training script using the cookbook.
+By default, any script in [src/scripts/train](https://github.com/allenai/OLMo-core/tree/main/src/scripts/train) can be launched.
+
+Here's an example of how to train a 1B model for 50B tokens on 16 GPUs on the `ai2/augusta-google-1` cluster.
 
 ```shell
 olmo-cookbook-core launch \
-  -d stackexchange \
+  -d dolmino50 \
   -m OLMo2-1B \
-  -n 10e9T \
+  -n 50e9T \
   -i petew/olmo-core-tch260cu126-v2.0.1 \
   -p urgent \
-  -c ai2/jupiter-cirrascale-2
+  -c ai2/augusta-google-1 \
+  -g 16
 ```
+
+Let's break down the command:
+
+- `-d dolmino50`: The data mix to use for training. This data mix is at [data/mixes/dolmino50.yaml](src/cookbook/data/mixes), but you can use any path to a data mix file (i.e., a plain text file with a list on npy tokens files)
+- `-m OLMo2-1B`: The model to train. This is the configuration [src/scripts/train/OLMo2-1B.py](https://github.com/allenai/OLMo-core/blob/main/src/scripts/train/OLMo2-1B.py). You can also provide a path to any training script written in OLMo-core.
+- `-n 50e9T`: The number of tokens to train on (50B tokens).
+- `-i petew/olmo-core-tch260cu126-v2.0.1`: The image to use for training.
+- `-p urgent`: The priority of the job.
+- `-c ai2/augusta-google-1`: The cluster to use for training.
+- `-g 16`: The number of GPUs to use for training.
+
+Use the `--dry-run` flag to print the command without launching the job; to view all available flags, run `olmo-cookbook-core launch --help`.
+
+At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai/OLMo-core/tree/2f66fd95c17c9779be9930f8fb80803293c2dc30), but you can override this by setting the `--olmo-core-commit-hash` flag.
+
+
+## EC2 CLI
+
+The EC2 CLI is a tool for managing EC2 instances. We will describe its use by example.
+
+First, you want to install the cookbook CLI.
+
+```shell
+pip install -e .
+```
+
+Then, you can create a cluster of instances; by default, instances will be `i4i.xlarge` and will be tagged with the project name and owner; they will use the `us-east-1` region and use your SSH key at `~/.ssh/id_rsa`.
+
+Let's say you wanna create a cluster named `chipstest`:
+
+```shell
+olmo-cookbook-ec2 create --name chipstest --number 5 --instance i4i.2xlarge --detach
+```
+
+This will create 5 instances as part of a cluster with the name `chipstest`; the `--detach` flag means that the
+process will return immediately and the instances will be created in the background.
+
+You can check the status of the instances by listing them:
+
+```shell
+olmo-cookbook-ec2 list --name chipstest
+```
+
+After the instances are create, you wanna set up AWS credentials and D2TK pipeline on them. You can do this by running the following command:
+
+```shell
+olmo-cookbook-ec2 setup-d2tk --name chipstest
+```
+
+To run a command on all instances in the cluster, you can use the following command:
+
+```shell
+olmo-cookbook-ec2 run --name chipstest --command "echo 'Hello, world!'"
+```
+
+But, most likely you wanna queue a bunch of jobs to run on the instances. You can do this by creating a directory with as many bash scripts as job units, and then running the following command:
+
+```shell
+olmo-cookbook-ec2 map --name chipstest --scripts-dir tmp/test_scripts
+```
+
+This will run all the scripts in the `tmp/test_scripts` directory on all the instances in the cluster.
+
+Once you are done with the jobs, you can terminate the cluster:
+
+```shell
+olmo-cookbook-ec2 terminate --name chipstest
+```
+
+This will terminate all the instances in the cluster and delete the cluster.
