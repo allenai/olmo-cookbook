@@ -9,10 +9,12 @@ import shutil
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 
 import boto3
 import click
 import paramiko
+from paramiko.channel import ChannelFile, ChannelStdinFile
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -79,6 +81,34 @@ cargo build --release
 """
 
 
+@dataclass(frozen=True)
+class SessionContent:
+    stdout: str
+    stderr: str
+
+    @classmethod
+    def from_channel(cls, channel: paramiko.Channel) -> "SessionContent":
+        return cls(
+            stdout=channel.recv(4096).decode("utf-8"),
+            stderr=channel.recv(4096).decode("utf-8"),
+        )
+
+    @classmethod
+    def from_command(
+        cls,
+        channel_stdin: ChannelStdinFile,
+        channel_stdout: ChannelFile,
+        channel_stderr: ChannelFile,
+    ) -> "SessionContent":
+        return cls(
+            stdout=channel_stdout.read().decode("utf-8"),
+            stderr=channel_stderr.read().decode("utf-8"),
+        )
+
+    def __str__(self) -> str:
+        return f"stdout: {self.stdout.strip()}\nstderr: {self.stderr.strip()}"
+
+
 class Session:
     def __init__(
         self,
@@ -129,7 +159,19 @@ class Session:
 
         return channel
 
-    def run(self, command: str, detach: bool = False, terminate: bool = True, timeout: int = 600) -> str:
+    def run_single(self, command: str, timeout: int | None = None, get_pty: bool = False) -> SessionContent:
+        # run without screens
+        client = self.connect()
+        response = client.exec_command(command, timeout=timeout, get_pty=get_pty)
+        return SessionContent.from_command(*response)
+
+    def run_in_screen(
+        self,
+        command: str,
+        detach: bool = False,
+        timeout: int | None = None,
+        terminate: bool = True,
+    ) -> SessionContent:
         client: None | paramiko.SSHClient = None
         command_hash = hashlib.md5(command.encode()).hexdigest()[:12]
 
@@ -145,9 +187,6 @@ class Session:
             channel.send(f"screen -S {screen_name}\n".encode("utf-8"))
             time.sleep(0.1)  # Wait for screen to initialize
 
-            # Buffer for the output
-            output = ""
-
             completion_marker = f"CMD_COMPLETED_{command_hash[:20]}"
 
             # send the command to the server
@@ -160,7 +199,6 @@ class Session:
             channel.send(b"\n")
 
             # Wait for the command to complete (looking for our marker)
-
             buffer = ""
             start_time = time.time()
 
@@ -169,7 +207,6 @@ class Session:
                 if channel.recv_ready():
                     chunk = channel.recv(4096).decode("utf-8")
                     buffer += chunk
-                    output += chunk
 
                     # Print to stdout in real-time
                     sys.stdout.write(chunk)
@@ -180,7 +217,7 @@ class Session:
                         break
 
                 # Check for timeout
-                if time.time() - start_time > timeout:
+                if timeout and time.time() - start_time > timeout:
                     logger.warning(f"\nTimeout waiting for command: {command}")
                     break
 
@@ -193,11 +230,25 @@ class Session:
                 time.sleep(0.5)
 
             client.close()
-            return output
+            return SessionContent(stdout=buffer, stderr=buffer)
 
         except Exception as e:
             client and client.close()  # type: ignore
             raise e
+
+    def run(
+        self,
+        command: str,
+        use_screen: bool = True,
+        get_pty: bool = False,
+        detach: bool = False,
+        terminate: bool = True,
+        timeout: int | None = None,
+    ) -> SessionContent:
+        if use_screen:
+            return self.run_in_screen(command, detach=detach, terminate=terminate, timeout=(timeout or 600))
+        else:
+            return self.run_single(command, get_pty=get_pty, timeout=timeout)
 
 
 def create_ec2_instance(
@@ -489,8 +540,9 @@ def execute_command_on_ec2(
     private_key_path: str,
     user: str = "ec2-user",
     detach: bool = False,
-    timeout: int = 600,
-) -> tuple[bool, str, str]:
+    timeout: int | None = None,
+    use_screen: bool = True,
+) -> SessionContent:
     """
     Executes a command on an EC2 instance over SSH in a screen session.
 
@@ -531,8 +583,7 @@ def execute_command_on_ec2(
     if not session.is_running():
         raise ValueError(f"Instance {instance_id} is not running")
 
-    output = session.run(command, detach=detach, timeout=timeout)
-    return True, output, ""
+    return session.run(command, detach=detach, timeout=timeout, use_screen=use_screen)
 
 
 @click.group()
@@ -613,9 +664,18 @@ def create_instances(
 
     # first, look up to see if there are any existing instances with the same tags
     existing_instances = list_ec2_instances_by_tags(region=region, tags=tags)
+    if len(existing_instances) > 0:
+        logger.info(f"Found {len(existing_instances)} existing instances with the same tags.")
+        start_id = max(
+            int(_match.group(1))
+            for instance in existing_instances
+            if (_match := re.search(r"-(\d+)$", instance["Name"])) is not None
+        )
+    else:
+        start_id = 0
 
-    for i in range(len(existing_instances), len(existing_instances) + number):
-        logger.info(f"Creating instance {i + 1} of {len(existing_instances) + number}...")
+    for i in range(start_id, (total_to_create := start_id + number)):
+        logger.info(f"Creating instance {i + 1} of {total_to_create}...")
         instance_id = create_ec2_instance(
             instance_type=instance,
             tags={**tags, "Name": f"{name}-{i:04d}"},
@@ -693,8 +753,9 @@ def list_instances(
 @click.option(
     "--instance-id",
     type=str,
+    multiple=True,
     default=None,
-    help="Instance ID to terminate; if none, terminate all instances with the given name and owner",
+    help="Instance ID to terminate; can be used multiple times. If none, terminate all instances with the given name and owner",
 )
 @click.option(
     "--detach/--no-detach",
@@ -702,23 +763,19 @@ def list_instances(
     default=False,
     help="Whether to detach from the instances after termination",
 )
-def terminate_instances(
-    name: str,
-    region: str,
-    owner: str,
-    instance_id: str | None,
-    detach: bool,
-):
+def terminate_instances(name: str, region: str, owner: str, instance_id: tuple[str, ...] | None, detach: bool):
     if instance_id is None:
         instances = [
             instance["InstanceId"]
             for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
         ]
+    elif isinstance(instance_id, tuple):
+        instances = list(instance_id)
     else:
         instances = [instance_id]
 
     for instance in instances:
-        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=True)
+        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=not detach)
         print(f"Id:      {instance}")
         print(f"Success: {success}")
         print()
@@ -767,6 +824,12 @@ def terminate_instances(
     help="Whether to run the command in the background",
 )
 @click.option(
+    "--screen/--no-screen",
+    type=bool,
+    default=True,
+    help="Whether to use screen to run the command",
+)
+@click.option(
     "--ssh-key-path",
     type=str,
     default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
@@ -781,6 +844,7 @@ def run_command(
     script: str | None,
     ssh_key_path: str,
     detach: bool,
+    screen: bool,
 ):
 
     if command is None and script is None:
@@ -798,7 +862,7 @@ def run_command(
         instances = [instance_id]
 
     for instance in instances:
-        success, stdout, stderr = execute_command_on_ec2(
+        output_ = execute_command_on_ec2(
             instance_id=instance,
             command=command,
             script=script,
@@ -806,11 +870,10 @@ def run_command(
             private_key_path=ssh_key_path,
             user="ec2-user",
             detach=detach,
+            use_screen=screen,
         )
-        print(f"Id:      {instance}")
-        print(f"Stdout:  {stdout}")
-        print(f"Stderr:  {stderr}")
-        print(f"Success: {success}")
+        print(f"Instance {instance}:")
+        print(output_)
         print()
 
 
@@ -892,6 +955,7 @@ def setup_instances(
         script=None,
         ssh_key_path=ssh_key_path,
         detach=detach,
+        screen=True,
     )
 
 
@@ -968,6 +1032,7 @@ def setup_dolma2_toolkit(
         script=None,
         ssh_key_path=ssh_key_path,
         detach=detach,
+        screen=True,
     )
 
 
@@ -1019,29 +1084,28 @@ def map_commands(
 
     # get all the scripts in the scripts directory
     scripts = [
-        os.path.join(scripts_dir, f)
-        for f in os.listdir(scripts_dir)
-        if os.path.isfile(os.path.join(scripts_dir, f))
+        file_path
+        for root, _, files in os.walk(scripts_dir)
+        for file_name in files
+        if os.path.isfile(file_path := os.path.join(root, file_name)) and os.access(file_path, os.X_OK)
     ]
-    random.shuffle(scripts)
+    assert len(scripts) > 0, "No executable scripts found in the given directory"
 
-    logger.info(f"Found {len(scripts)} scripts in {scripts_dir}")
+    random.shuffle(scripts)
+    logger.info(f"Found {len(scripts):,} scripts in `{scripts_dir}`...")
 
     # get all the instances with the given name and owner
     instances = [
         instance["InstanceId"]
         for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
     ]
+    assert len(instances) > 0, "No instances found with the given name and owner"
     random.shuffle(instances)
 
-    logger.info(f"Found {len(instances)} instances with the given name and owner")
+    logger.info(f"Found {len(instances):,} instances to map {len(scripts):,} scripts to...")
 
-    # partition scripts into instances
-    instance_to_scripts = [(instance_id, []) for instance_id in instances]
-    for i, script in enumerate(scripts):
-        instance_to_scripts[i % len(instances)][1].append(script)
-
-    for instance_id, instance_scripts in instance_to_scripts:
+    for i, instance_id in enumerate(instances):
+        instance_scripts = scripts[round((r := len(scripts) / len(instances)) * i) : round(r * (i + 1))]
 
         # base64 encode the scripts
         run_command_scripts = []
@@ -1055,6 +1119,11 @@ def map_commands(
             run_command_scripts.append(f"chmod +x {filename}")
             run_command_scripts.append(f"./{filename}")
 
+        logger.info(
+            f"Running {len(instance_scripts):,} scripts on instance {instance_id}..."
+            + f"({';'.join(['`' + s + '`' for s in instance_scripts])})"
+        )
+
         run_command(
             name=name,
             region=region,
@@ -1064,9 +1133,8 @@ def map_commands(
             script=None,
             ssh_key_path=ssh_key_path,
             detach=True,
+            screen=True,
         )
-
-        logger.info(f"Mapped {len(instance_scripts)} scripts to instance {instance_id}")
 
 
 cli.command(name="create")(create_instances)
