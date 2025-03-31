@@ -1,10 +1,10 @@
 import base64
 import hashlib
+import json
 import logging
 import os
 import random
 import re
-import shlex
 import shutil
 import subprocess
 import sys
@@ -670,7 +670,7 @@ def create_instances(
             int(_match.group(1))
             for instance in existing_instances
             if (_match := re.search(r"-(\d+)$", instance["Name"])) is not None
-        )
+        ) + 1
     else:
         start_id = 0
 
@@ -716,19 +716,13 @@ def list_instances(
 
     tags = {"Project": name, "Owner": owner}
     instances = list_ec2_instances_by_tags(region=region, tags=tags)
-    for instance in instances:
+    for instance in sorted(instances, key=lambda x: x["Name"]):
         # print the instance id, name, state, public ip, private ip, and tags
         print(f"Id:     {instance['InstanceId']}")
         print(f"Name:   {instance['Name']}")
         print(f"State:  {instance['State']}")
         print(f"IP:     {instance['PublicIpAddress']}")
-        print("Tags:")
-        # Find the maximum length of tag keys for padding
-        max_key_length = max(len(key) for key in instance["Tags"].keys()) if instance["Tags"] else 0
-
-        # Print each tag with padded key names
-        for key, value in instance["Tags"].items():
-            print(f"  {key:{max_key_length}}: {value}")
+        print(f"Tags:   {json.dumps(instance['Tags'], sort_keys=True)}")
         print()
 
 
