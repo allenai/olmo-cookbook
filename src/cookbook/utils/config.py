@@ -18,7 +18,7 @@ from cookbook.aliases import (
     SourceConfig,
     SourceInstance,
 )
-from cookbook.model.builder import TransformerConfigBuilder
+from cookbook.model.builder import TransformerConfigBuilder, TransformerAnnealConfigBuilder
 from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
@@ -110,7 +110,9 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
     dp_world_size = base_config.nodes * base_config.gpus
 
-    config = TransformerConfigBuilder(
+    config_class = TransformerAnnealConfigBuilder if base_config.anneal else TransformerConfigBuilder
+
+    config = config_class(
         beaker_user=beaker_user,
         cluster=base_config.cluster,
         downstream_evaluators=base_config.downstream_evaluators,
@@ -134,6 +136,8 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
         learning_rate=base_config.learning_rate,
+        warmup_steps=base_config.warmup_steps,
+        scheduler_type=base_config.scheduler_type,
     ).build()
 
     device = get_default_device()
@@ -154,6 +158,11 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         optim = config.optim.build(model)
         data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
         trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
+
+        # ANNEAL: If we don't have a checkpoint for this run, try to load the pretraining checkpoint
+        if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
+            trainer.load_checkpoint(base_config.load_path, load_trainer_state=False)
+
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
