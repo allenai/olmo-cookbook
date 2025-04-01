@@ -1,4 +1,5 @@
 import base64
+import datetime
 import hashlib
 import json
 import logging
@@ -10,11 +11,17 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from functools import reduce
+from typing import TYPE_CHECKING, Callable, TypeVar, Union
 
 import boto3
 import click
 import paramiko
 from paramiko.channel import ChannelFile, ChannelStdinFile
+
+if TYPE_CHECKING:
+    from mypy_boto3_ec2.client import EC2Client
+    from mypy_boto3_ec2.type_defs import InstanceTypeDef
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -69,14 +76,12 @@ source ~/.bashrc
 cd
 git clone https://github.com/revbucket/datamap-rs.git
 cd datamap-rs
-# git checkout dclm (we work from)
 s5cmd run examples/all_dressed/s5cmd_asset_downloader.txt
 cargo build --release
 # Do minhash-rs setups
 cd
 git clone https://github.com/revbucket/minhash-rs.git
 cd minhash-rs
-git checkout refac2025
 cargo build --release
 """
 
@@ -109,6 +114,265 @@ class SessionContent:
         return f"stdout: {self.stdout.strip()}\nstderr: {self.stderr.strip()}"
 
 
+@dataclass(frozen=True)
+class InstanceInfo:
+    """
+    Represents information about an EC2 instance.
+
+    This class encapsulates all relevant details about an EC2 instance and provides
+    methods for instance management operations like creation, description, and termination.
+
+    Attributes:
+        instance_id: The unique identifier for the EC2 instance
+        instance_type: The type of the instance (e.g., t2.micro, m5.large)
+        image_id: The AMI ID used to launch the instance
+        state: Current state of the instance (e.g., running, stopped)
+        public_ip_address: The public IP address assigned to the instance
+        public_dns_name: The public DNS name assigned to the instance
+        name: The Name tag value of the instance
+        tags: Dictionary of all tags applied to the instance
+        zone: The availability zone where the instance is running
+        region: The AWS region where the instance is located
+    """
+
+    instance_id: str
+    instance_type: str
+    image_id: str
+    state: str
+    public_ip_address: str
+    public_dns_name: str
+    name: str
+    tags: dict[str, str]
+    zone: str
+    created_at: datetime.datetime
+    region: str = "us-east-1"
+
+    @classmethod
+    def from_instance(cls, instance: Union[dict, "InstanceTypeDef"]) -> "InstanceInfo":
+        """
+        Creates an InstanceInfo object from an EC2 instance dictionary.
+
+        Args:
+            instance: Dictionary containing EC2 instance details or boto3 InstanceTypeDef
+
+        Returns:
+            An InstanceInfo object populated with the instance details
+        """
+        name = str(next((tag.get("Value") for tag in instance.get("Tags", []) if tag.get("Key") == "Name"), ""))
+        return cls(
+            instance_id=instance.get("InstanceId", ""),
+            instance_type=instance.get("InstanceType", ""),
+            image_id=instance.get("ImageId", ""),
+            state=instance.get("State", {}).get("Name", ""),
+            public_ip_address=instance.get("PublicIpAddress", ""),
+            public_dns_name=instance.get("PublicDnsName", ""),
+            name=name,
+            created_at=instance.get("LaunchTime", datetime.datetime.min),
+            tags={tag["Key"]: tag.get("Value", "") for tag in instance.get("Tags", []) if "Key" in tag},
+            zone=instance.get("Placement", {}).get("AvailabilityZone", ""),
+        )
+
+    @classmethod
+    def describe_instances(
+        cls,
+        instance_ids: list[str] | None = None,
+        tags: dict[str, str] | None = None,
+        only_running: bool = True,
+        client: Union["EC2Client", None] = None,
+        region: str | None = None,
+    ) -> list["InstanceInfo"]:
+        """
+        Retrieves information about multiple EC2 instances based on filters.
+
+        Args:
+            instance_ids: Optional list of instance IDs to filter by
+            tags: Optional dictionary of tags to filter instances by
+            only_running: If True, only return instances in 'running' state
+            client: Optional boto3 EC2 client to use
+            region: AWS region to query (defaults to class region)
+
+        Returns:
+            List of InstanceInfo objects matching the specified criteria
+        """
+        # Use provided client or create a new one with the specified region
+        client = client or boto3.client("ec2", region_name=region or cls.region)
+
+        filters = []
+
+        # Add filters based on parameters
+        if only_running:
+            filters.append({"Name": "instance-state-name", "Values": ["running"]})
+
+        if instance_ids:
+            filters.append({"Name": "instance-id", "Values": instance_ids})
+
+        if tags:
+            for key, value in tags.items():
+                filters.append({"Name": f"tag:{key}", "Values": [value]})
+
+        # Query EC2 API with filters if any are specified
+        response = client.describe_instances(**({"Filters": filters} if filters else {}))
+
+        # Extract and convert instances from the response
+        instances = [
+            InstanceInfo.from_instance(instance)
+            for reservation in response.get("Reservations", [])
+            for instance in reservation.get("Instances", [])
+        ]
+
+        return instances
+
+    @classmethod
+    def describe_instance(
+        cls,
+        instance_id: str,
+        client: Union["EC2Client", None] = None,
+        region: str | None = None,
+    ) -> "InstanceInfo":
+        """
+        Retrieves detailed information about a specific EC2 instance.
+
+        Args:
+            instance_id: The ID of the instance to describe
+            client: Optional boto3 EC2 client to use
+            region: AWS region where the instance is located
+
+        Returns:
+            InstanceInfo object containing the instance details
+        """
+        client = client or boto3.client("ec2", region_name=region or cls.region)
+        response = client.describe_instances(InstanceIds=[instance_id])
+        return InstanceInfo.from_instance(response.get("Reservations", [])[0].get("Instances", [])[0])
+
+    def terminate(self, client: Union["EC2Client", None] = None, wait_for_termination: bool = True) -> bool:
+        """
+        Terminates this EC2 instance.
+
+        Args:
+            client: Optional boto3 EC2 client to use
+            wait_for_termination: If True, wait until the instance is fully terminated
+
+        Returns:
+            True if termination was successful, False otherwise
+        """
+        client = client or boto3.client("ec2", region_name=self.region)
+
+        try:
+            # Terminate the instance
+            logger.info(f"Terminating instance {self.instance_id} ({self.name})...")
+            client.terminate_instances(InstanceIds=[self.instance_id])
+
+            # Wait for the instance to be fully terminated if requested
+            if wait_for_termination:
+                logger.info("Waiting for instance to be fully terminated...")
+                waiter = client.get_waiter("instance_terminated")
+                waiter.wait(InstanceIds=[self.instance_id])
+                logger.info(f"Instance {self.instance_id} has been terminated")
+
+            return True
+
+        except client.exceptions.ClientError as e:
+            # Handle common error cases
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            if error_code == "InvalidInstanceID.NotFound":
+                logger.info(f"Instance {self.instance_id} not found in region {self.region}")
+            else:
+                logger.error(f"Error terminating instance {self.instance_id}: {str(e)}")
+            return False
+
+    @classmethod
+    def create_instance(
+        cls,
+        instance_type: str,
+        tags: dict[str, str],
+        region: str,
+        ami_id: str | None = None,
+        wait_for_completion: bool = True,
+        key_name: str | None = None,
+        client: Union["EC2Client", None] = None,
+    ) -> "InstanceInfo":
+        """
+        Creates a new EC2 instance and waits until it's running.
+
+        Args:
+            instance_type: The EC2 instance type (e.g., 't2.micro')
+            tags: Dictionary of tags to apply to the instance
+            region: AWS region where to launch the instance
+            ami_id: AMI ID to use (defaults to Amazon Linux 2 in the specified region)
+            wait_for_completion: Whether to wait for the instance to be running
+            key_name: Name of the key pair to use for SSH access to the instance
+            client: Optional boto3 EC2 client to use
+
+        Returns:
+            InstanceInfo object representing the newly created EC2 instance
+        """
+        # Initialize the EC2 client with the specified region
+        client = client or boto3.client("ec2", region_name=region)
+
+        # If AMI ID is not provided, use a default Amazon Linux 2 AMI based on region
+        if not ami_id:
+            # Get the latest Amazon Linux 2 AMI
+            response = client.describe_images(
+                Owners=["amazon"],
+                Filters=[
+                    {"Name": "name", "Values": ["amzn2-ami-hvm-*-x86_64-gp2"]},
+                    {"Name": "state", "Values": ["available"]},
+                ],
+            )
+
+            # Sort images by creation date and get the latest one
+            ami_id = sorted(
+                response["Images"],
+                key=lambda x: x.get("CreationDate", datetime.datetime.min),
+                reverse=True,
+            )[0].get("ImageId")
+            assert ami_id, "No AMI ID found"
+
+        # Prepare the tags format required by EC2
+        tag_specifications = [
+            {"ResourceType": "instance", "Tags": [{"Key": key, "Value": value} for key, value in tags.items()]}
+        ]
+
+        # Prepare instance launch parameters
+        launch_params = {
+            "ImageId": ami_id,
+            "InstanceType": instance_type,
+            "MinCount": 1,
+            "MaxCount": 1,
+            "TagSpecifications": tag_specifications,
+        }
+
+        # Add key pair if provided
+        if key_name:
+            launch_params["KeyName"] = key_name
+
+        # Launch the EC2 instance
+        response = client.run_instances(**launch_params)
+
+        # Extract instance information from the response
+        if (instance_def := next(iter(response["Instances"]), None)) is None:
+            raise Exception("No instance created")
+        else:
+            instance = InstanceInfo.from_instance(instance_def)
+
+        # Log instance creation
+        logger.info(f"Created instance {instance.instance_id}")
+
+        # Wait for the instance to be in running state if requested
+        if wait_for_completion:
+            logger.info("Waiting for instance to enter 'running' state...")
+            waiter = client.get_waiter("instance_running")
+            waiter.wait(InstanceIds=[instance.instance_id])
+
+            # Additionally wait for status checks to pass
+            logger.info("Instance is running. Waiting for status checks to pass...")
+            waiter = client.get_waiter("instance_status_ok")
+            waiter.wait(InstanceIds=[instance.instance_id])
+            logger.info(f"Instance {instance.instance_id} is now available and ready to use")
+
+        return instance
+
+
 class Session:
     def __init__(
         self,
@@ -116,21 +380,12 @@ class Session:
         region: str = "us-east-1",
         private_key_path: str | None = None,
         user: str = "ec2-user",
+        client: Union["EC2Client", None] = None,
     ):
-        self.instance_id = instance_id
-        self.region = region
+
         self.private_key_path = private_key_path
         self.user = user
-
-    def get_public_ip(self) -> str:
-        ec2_client = boto3.client("ec2", region_name=self.region)
-        response = ec2_client.describe_instances(InstanceIds=[self.instance_id])
-        return response["Reservations"][0]["Instances"][0]["PublicIpAddress"]
-
-    def is_running(self) -> bool:
-        ec2_client = boto3.client("ec2", region_name=self.region)
-        response = ec2_client.describe_instances(InstanceIds=[self.instance_id])
-        return response["Reservations"][0]["Instances"][0]["State"]["Name"] == "running"
+        self.instance = InstanceInfo.describe_instance(instance_id=instance_id, region=region, client=client)
 
     def make_ssh_client(self) -> paramiko.SSHClient:
         client = paramiko.SSHClient()
@@ -141,9 +396,9 @@ class Session:
         client = self.make_ssh_client()
         if self.private_key_path:
             private_key = paramiko.RSAKey.from_private_key_file(self.private_key_path)
-            client.connect(self.get_public_ip(), username=self.user, pkey=private_key)
+            client.connect(self.instance.public_ip_address, username=self.user, pkey=private_key)
         else:
-            client.connect(self.get_public_ip(), username=self.user)
+            client.connect(self.instance.public_ip_address, username=self.user)
 
         return client
 
@@ -178,7 +433,7 @@ class Session:
         try:
             client = self.connect()
 
-            logger.info(f"Connected to {self.get_public_ip()}")
+            logger.info(f"Connected to {self.instance.public_ip_address}")
 
             channel = self.shell(client)
 
@@ -239,214 +494,18 @@ class Session:
     def run(
         self,
         command: str,
-        use_screen: bool = True,
         get_pty: bool = False,
         detach: bool = False,
         terminate: bool = True,
         timeout: int | None = None,
     ) -> SessionContent:
-        if use_screen:
+
+        assert self.instance.state == "running", f"Instance {self.instance.instance_id} is not running"
+
+        if detach:
             return self.run_in_screen(command, detach=detach, terminate=terminate, timeout=(timeout or 600))
         else:
             return self.run_single(command, get_pty=get_pty, timeout=timeout)
-
-
-def create_ec2_instance(
-    instance_type: str,
-    tags: dict[str, str],
-    region: str,
-    ami_id: str | None = None,
-    detach: bool = False,
-    key_name: str | None = None,
-) -> str:
-    """
-    Creates a new EC2 instance and waits until it's running.
-
-    Args:
-        instance_type: The EC2 instance type (e.g., 't2.micro')
-        tags: Dictionary of tags to apply to the instance
-        region: AWS region where to launch the instance
-        ami_id: AMI ID to use (defaults to Amazon Linux 2 in the specified region)
-        detach: Whether to detach from the instances after creation
-        key_name: Name of the key pair to use for SSH access to the instance
-
-    Returns:
-        The instance ID of the newly created EC2 instance
-    """
-    # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
-
-    # If AMI ID is not provided, use a default Amazon Linux 2 AMI based on region
-    if not ami_id:
-        # Get the latest Amazon Linux 2 AMI
-        response = ec2_client.describe_images(
-            Owners=["amazon"],
-            Filters=[
-                {"Name": "name", "Values": ["amzn2-ami-hvm-*-x86_64-gp2"]},
-                {"Name": "state", "Values": ["available"]},
-            ],
-        )
-
-        # Sort images by creation date and get the latest one
-        ami_id = sorted(response["Images"], key=lambda x: x["CreationDate"], reverse=True)[0]["ImageId"]
-
-    # Prepare the tags format required by EC2
-    tag_specifications = [
-        {"ResourceType": "instance", "Tags": [{"Key": key, "Value": value} for key, value in tags.items()]}
-    ]
-
-    # Prepare instance launch parameters
-    launch_params = {
-        "ImageId": ami_id,
-        "InstanceType": instance_type,
-        "MinCount": 1,
-        "MaxCount": 1,
-        "TagSpecifications": tag_specifications,
-    }
-
-    # Add key pair if provided
-    if key_name:
-        launch_params["KeyName"] = key_name
-
-    # Launch the EC2 instance
-    response = ec2_client.run_instances(**launch_params)
-
-    # Get the instance ID
-    instance_id = response["Instances"][0]["InstanceId"]
-    logger.info(f"Created instance {instance_id}")
-
-    # Wait for the instance to be in running state if requested
-    if detach:
-        return instance_id
-
-    logger.info("Waiting for instance to enter 'running' state...")
-    waiter = ec2_client.get_waiter("instance_running")
-    waiter.wait(InstanceIds=[instance_id])
-
-    # Additionally wait for status checks to pass
-    logger.info("Instance is running. Waiting for status checks to pass...")
-    waiter = ec2_client.get_waiter("instance_status_ok")
-    waiter.wait(InstanceIds=[instance_id])
-    logger.info(f"Instance {instance_id} is now available and ready to use")
-
-    return instance_id
-
-
-def list_ec2_instances_by_tags(region: str, tags: dict[str, str]) -> list:
-    """
-    Lists all EC2 instances in a region that match the specified tags.
-
-    Args:
-        region: AWS region to search for instances
-        tags: Optional dictionary of tags to filter instances by (key-value pairs)
-
-    Returns:
-        List of dictionaries containing instance details (id, state, name, etc.)
-    """
-    # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
-
-    # Prepare filters if tags are provided
-    filters = []
-    if tags:
-        for key, value in tags.items():
-            filters.append({"Name": f"tag:{key}", "Values": [value]})
-
-    # Describe instances with the given filters
-    if filters:
-        response = ec2_client.describe_instances(Filters=filters)
-    else:
-        response = ec2_client.describe_instances()
-
-    instances = []
-
-    # Extract instance information from the response
-    for reservation in response["Reservations"]:
-        for instance in reservation["Instances"]:
-            # Extract instance tags into a more accessible format
-            instance_tags = {}
-            if "Tags" in instance:
-                for tag in instance["Tags"]:
-                    instance_tags[tag["Key"]] = tag["Value"]
-
-            # Extract name from tags if available
-            name = instance_tags.get("Name", "Unnamed")
-
-            # Create a simplified instance object with relevant details
-            instance_info = {
-                "InstanceId": instance["InstanceId"],
-                "InstanceType": instance["InstanceType"],
-                "State": instance["State"]["Name"],
-                "PublicIpAddress": instance.get("PublicIpAddress", "N/A"),
-                "PrivateIpAddress": instance.get("PrivateIpAddress", "N/A"),
-                "Name": name,
-                "LaunchTime": instance["LaunchTime"],
-                "Tags": instance_tags,
-            }
-
-            instances.append(instance_info)
-
-    return instances
-
-
-def terminate_ec2_instance(instance_id: str, region: str, wait_for_termination: bool = True) -> bool:
-    """
-    Terminates an EC2 instance given its ID.
-
-    Args:
-        instance_id: The ID of the instance to terminate
-        region: AWS region where the instance is located
-        wait_for_termination: Whether to wait until the instance is fully terminated
-
-    Returns:
-        Boolean indicating if the termination was successful
-    """
-    # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
-
-    try:
-        # Check if the instance exists before attempting to terminate
-        response = ec2_client.describe_instances(InstanceIds=[instance_id])
-        if not response["Reservations"] or not response["Reservations"][0]["Instances"]:
-            logger.info(f"Instance {instance_id} not found in region {region}")
-            return False
-
-        # Get current state
-        current_state = response["Reservations"][0]["Instances"][0]["State"]["Name"]
-
-        # If instance is already terminated or terminating, inform the user
-        if current_state in ["terminated", "shutting-down"]:
-            logger.info(f"Instance {instance_id} is already {current_state}")
-            return True
-
-        # Get instance name if available
-        instance_name = "Unnamed"
-        if "Tags" in response["Reservations"][0]["Instances"][0]:
-            for tag in response["Reservations"][0]["Instances"][0]["Tags"]:
-                if tag["Key"] == "Name":
-                    instance_name = tag["Value"]
-                    break
-
-        # Terminate the instance
-        logger.info(f"Terminating instance {instance_id} ({instance_name})...")
-        ec2_client.terminate_instances(InstanceIds=[instance_id])
-
-        # Wait for the instance to be fully terminated if requested
-        if wait_for_termination:
-            logger.info("Waiting for instance to be fully terminated...")
-            waiter = ec2_client.get_waiter("instance_terminated")
-            waiter.wait(InstanceIds=[instance_id])
-            logger.info(f"Instance {instance_id} has been terminated")
-
-        return True
-
-    except ec2_client.exceptions.ClientError as e:
-        error_code = e.response.get("Error", {}).get("Code", "Unknown")
-        if error_code == "InvalidInstanceID.NotFound":
-            logger.info(f"Instance {instance_id} not found in region {region}")
-        else:
-            logger.error(f"Error terminating instance {instance_id}: {str(e)}")
-        return False
 
 
 def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> str:
@@ -532,58 +591,34 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
         raise e
 
 
-def execute_command_on_ec2(
-    instance_id: str,
-    command: str | None,
-    script: str | None,
-    region: str,
-    private_key_path: str,
-    user: str = "ec2-user",
-    detach: bool = False,
-    timeout: int | None = None,
-    use_screen: bool = True,
-) -> SessionContent:
+def script_to_command(script_path: str, to_file: bool = True) -> str:
     """
-    Executes a command on an EC2 instance over SSH in a screen session.
+    Convert a script to a command that can be executed on an EC2 instance.
 
     Args:
-        instance_id: The ID of the EC2 instance to connect to
-        command: The command to execute on the instance
-        script: Path to a script file to execute on the instance
-        region: AWS region where the instance is located
-        private_key_path: Path to the SSH private key file for authentication
-        user: SSH username to use for connection (defaults to ec2-user)
-        detach: Whether to run the command in the background (True) or wait for completion (False)
-        timeout: Connection timeout in seconds (only applicable when wait_for_response is True)
+        script_path: Path to the script to convert
+        to_file: Whether to save the script to a file and run it from there
 
     Returns:
-        Tuple containing (success_flag, stdout, stderr)
-        - success_flag: Boolean indicating if the command execution was successful
-        - stdout: Command's standard output (empty string if wait_for_response is False)
-        - stderr: Command's standard error (empty string if wait_for_response is False)
+        The command to execute the script on the EC2 instance
     """
+    # check if the script path is a file
+    assert os.path.isfile(script_path), f"Script file not found: {script_path}"
 
-    if script is not None:
-        with open(script, "r") as f:
-            script_content = f.read()
+    # read the script content
+    with open(script_path, "rb") as f:
+        script_content = f.read()
 
-        # encode script using base64
-        script_content = base64.b64encode(script_content.encode()).decode()
-        command = f"echo {script_content} | base64 -d | bash"
-    elif command is None:
-        raise ValueError("command and script cannot both be None")
+    # encode script using base64
+    b64_script_content = base64.b64encode(script_content).decode()
 
-    session = Session(
-        instance_id=instance_id,
-        region=region,
-        private_key_path=private_key_path,
-        user=user,
-    )
-
-    if not session.is_running():
-        raise ValueError(f"Instance {instance_id} is not running")
-
-    return session.run(command, detach=detach, timeout=timeout, use_screen=use_screen)
+    if to_file:
+        file_name, extension = os.path.splitext(os.path.basename(script_path))
+        h = hashlib.sha256(script_content).hexdigest()
+        script_path = f"{file_name}-{h}{extension}"
+        return f"echo {b64_script_content} > {script_path} && chmod +x {script_path} && {script_path}"
+    else:
+        return f"echo {b64_script_content} | base64 -d | bash"
 
 
 @click.group()
@@ -591,355 +626,410 @@ def cli():
     pass
 
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--instance",
-    type=str,
-    default="i4i.xlarge",
-    help="Instance type to use",
-)
-@click.option(
-    "--number",
-    type=int,
-    default=1,
-    help="Number of instances to spin up",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
-@click.option(
-    "--ssh-key-path",
-    type=str,
-    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
-    help="Path to the SSH private key file",
-)
-@click.option(
-    "--ami-id",
-    type=str,
-    default=None,
-    help="AMI ID to use for the instances",
-)
-@click.option(
-    "--detach/--no-detach",
-    type=bool,
-    default=False,
-    help="Whether to detach from the instances after creation",
-)
+T = TypeVar("T", bound=Callable)
+
+
+def common_cli_options(f: T) -> T:
+    ssh_home = os.path.join(os.path.expanduser("~"), ".ssh")
+    default_key_names = ["id_rsa", "id_dsa", "id_ecdsa", "id_ed25519"]
+    default_key_path = next(
+        (
+            os.path.join(ssh_home, key_name)
+            for key_name in default_key_names
+            if os.path.exists(os.path.join(ssh_home, key_name))
+        ),
+        None,
+    )
+
+    def validate_command_or_script(
+        ctx: click.Context, param: click.Parameter, value: str | None
+    ) -> str | list[str] | None:
+        if param.name == "script" and value is not None:
+            if ctx.params.get("command", None) is not None:
+                raise click.UsageError("Cannot provide both --command and --script")
+            if os.path.isfile(value):
+                return os.path.abspath(value)
+            if os.path.isdir(value):
+                # get all the scripts in the scripts directory
+                scripts = [
+                    os.path.abspath(file_path)
+                    for root, _, files in os.walk(value)
+                    for file_name in files
+                    if os.path.isfile(file_path := os.path.join(root, file_name)) and os.access(file_path, os.X_OK)
+                ]
+                assert len(scripts) > 0, "No executable scripts found in the given directory"
+                return scripts
+            raise click.UsageError(f"Script file or directory not found: {value}")
+        elif param.name == "command" and value is not None:
+            if ctx.params.get("script", None) is not None:
+                raise click.UsageError("Cannot provide both --command and --script")
+            return value
+
+    click_decorators = [
+        click.option("-n", "--name", type=str, required=True, help="Cluster name"),
+        click.option("-t", "--instance-type", type=str, default="i4i.xlarge", help="Instance type"),
+        click.option("-N", "--number", type=int, default=1, help="Number of instances"),
+        click.option("-r", "--region", type=str, default="us-east-1", help="Region"),
+        click.option("-T", "--timeout", type=int, default=None, help="Timeout for the command"),
+        click.option(
+            "-o",
+            "--owner",
+            type=str,
+            default=os.getenv("USER") or os.getenv("USERNAME"),
+            help="Owner of the cluster. Useful for cost tracking.",
+        ),
+        click.option(
+            "-i",
+            "--instance-id",
+            multiple=True,
+            default=None,
+            type=click.UNPROCESSED,
+            callback=lambda _, __, value: list(value) or None,
+            help="Instance ID to work on; can be used multiple times. If none, command applies to all instances",
+        ),
+        click.option(
+            "-k",
+            "--ssh-key-path",
+            type=click.Path(exists=True, file_okay=True, dir_okay=False),
+            default=default_key_path,
+            help="Path to the SSH private key file",
+        ),
+        click.option(
+            "-a",
+            "--ami-id",
+            type=str,
+            default=None,
+            help="AMI ID to use for the instances",
+        ),
+        click.option(
+            "-d/-nd",
+            "--detach/--no-detach",
+            "detach",
+            type=bool,
+            default=False,
+            help="Whether to detach from the instances after creation",
+        ),
+        click.option(
+            "-c",
+            "--command",
+            type=str,
+            default=None,
+            callback=validate_command_or_script,
+            help="Command to execute on the instances",
+        ),
+        click.option(
+            "-s",
+            "--script",
+            type=click.Path(exists=True, file_okay=True, dir_okay=True),
+            default=None,
+            callback=validate_command_or_script,
+            help="Path to a script file or directory containing scripts to execute on the instances",
+        ),
+    ]
+
+    return reduce(lambda f, decorator: decorator(f), click_decorators, f)
+
+
+@common_cli_options
 def create_instances(
     name: str,
-    instance: str,
+    instance_type: str,
     number: int,
     region: str,
     owner: str,
     ssh_key_path: str,
     ami_id: str | None,
     detach: bool,
+    **kwargs,
 ):
     """
     Spin up one or more EC2 instances.
+
+    Args:
+        name: Project name to tag instances with
+        instance_type: EC2 instance type (e.g., t2.micro)
+        number: Number of instances to create
+        region: AWS region to create instances in
+        owner: Owner name to tag instances with
+        ssh_key_path: Path to SSH private key file
+        ami_id: Optional AMI ID to use (if None, latest Amazon Linux 2 AMI will be used)
+        detach: Whether to detach after creation without waiting for completion
+        **kwargs: Additional keyword arguments
+
+    Returns:
+        List of created InstanceInfo objects
     """
+    logger.info(f"Creating {number} instances of type {instance_type} in region {region}")
 
     assert owner is not None, "Cannot determine owner from environment; please specify --owner"
 
-    # these are shared tags
+    # Create tags for the instances
     tags = {"Project": name, "Owner": owner}
+    logger.info(f"Using tags: {tags}")
 
-    # add ssh key to ec2
+    # Import SSH key to EC2
     logger.info(f"Importing SSH key to EC2 in region {region}...")
     key_name = import_ssh_key_to_ec2(key_name=f"{owner}-{name}", region=region, private_key_path=ssh_key_path)
+    logger.info(f"Imported SSH key with name: {key_name}")
 
-    # first, look up to see if there are any existing instances with the same tags
-    existing_instances = list_ec2_instances_by_tags(region=region, tags=tags)
+    # Check for existing instances with the same tags to determine starting index
+    existing_instances = InstanceInfo.describe_instances(region=region, tags=tags)
     if len(existing_instances) > 0:
         logger.info(f"Found {len(existing_instances)} existing instances with the same tags.")
-        start_id = max(
-            int(_match.group(1))
-            for instance in existing_instances
-            if (_match := re.search(r"-(\d+)$", instance["Name"])) is not None
-        ) + 1
+        # Extract the highest numeric suffix from existing instance names
+        start_id = (
+            max(
+                int(_match.group(1))
+                for instance in existing_instances
+                if (_match := re.search(r"-(\d+)$", instance.name)) is not None
+            )
+            + 1
+        )
+        logger.info(f"Will start numbering new instances from {start_id}")
     else:
         start_id = 0
+        logger.info("No existing instances found. Starting with index 0")
 
-    for i in range(start_id, (total_to_create := start_id + number)):
-        logger.info(f"Creating instance {i + 1} of {total_to_create}...")
-        instance_id = create_ec2_instance(
-            instance_type=instance,
-            tags={**tags, "Name": f"{name}-{i:04d}"},
-            region=region,
-            detach=detach,
+    # Initialize the EC2 client with the specified region
+    ec2_client = boto3.client("ec2", region_name=region)
+    logger.debug(f"Initialized EC2 client for region {region}")
+
+    instances = []
+    total_to_create = start_id + number
+
+    # Create each instance
+    for i in range(start_id, total_to_create):
+        logger.info(f"Creating instance {i + 1 - start_id} of {number} (index: {i})...")
+
+        instance = InstanceInfo.create_instance(
+            instance_type=instance_type,
+            tags=tags | {"Name": f"{name}-{i}"},  # Add Name tag with index
             key_name=key_name,
+            region=region,
             ami_id=ami_id,
+            wait_for_completion=not detach,
         )
-        logger.info(f"Created instance {instance_id}")
+        logger.info(f"Created instance {instance.instance_id} with name {instance.name}")
+        instances.append(instance)
+
+    logger.info(f"Successfully created {len(instances)} instances")
+    return instances
 
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
+@common_cli_options
 def list_instances(
     name: str,
     region: str,
     owner: str,
+    **kwargs,
 ):
     """
     List all instances with the given name and owner.
+
+    Args:
+        name: Project name to filter instances by
+        region: AWS region to search in
+        owner: Owner name to filter instances by
+        **kwargs: Additional keyword arguments
     """
+    logger.info(f"Listing instances with project={name}, owner={owner} in region {region}")
 
+    # Create filter tags
     tags = {"Project": name, "Owner": owner}
-    instances = list_ec2_instances_by_tags(region=region, tags=tags)
-    for instance in sorted(instances, key=lambda x: x["Name"]):
-        # print the instance id, name, state, public ip, private ip, and tags
-        print(f"Id:     {instance['InstanceId']}")
-        print(f"Name:   {instance['Name']}")
-        print(f"State:  {instance['State']}")
-        print(f"IP:     {instance['PublicIpAddress']}")
-        print(f"Tags:   {json.dumps(instance['Tags'], sort_keys=True)}")
+
+    # Retrieve matching instances
+    instances = InstanceInfo.describe_instances(region=region, tags=tags)
+    logger.info(f"Found {len(instances)} matching instances")
+
+    # Display instance details
+    for instance in sorted(instances, key=lambda x: x.name):
+        print(f"Id:     {instance.instance_id}")
+        print(f"Name:   {instance.name}")
+        print(f"Type:   {instance.instance_type}")
+        print(f"State:  {instance.state}")
+        print(f"IP:     {instance.public_ip_address}")
+        print(f"Tags:   {json.dumps(instance.tags, sort_keys=True)}")
         print()
 
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
-@click.option(
-    "--instance-id",
-    type=str,
-    multiple=True,
-    default=None,
-    help="Instance ID to terminate; can be used multiple times. If none, terminate all instances with the given name and owner",
-)
-@click.option(
-    "--detach/--no-detach",
-    type=bool,
-    default=False,
-    help="Whether to detach from the instances after termination",
-)
-def terminate_instances(name: str, region: str, owner: str, instance_id: tuple[str, ...] | None, detach: bool):
-    if instance_id is None:
-        instances = [
-            instance["InstanceId"]
-            for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
-        ]
-    elif isinstance(instance_id, tuple):
-        instances = list(instance_id)
-    else:
-        instances = [instance_id]
+@common_cli_options
+def terminate_instances(
+    name: str,
+    region: str,
+    owner: str,
+    instance_id: list[str] | None,
+    detach: bool,
+    **kwargs,
+):
+    """
+    Terminate EC2 instances matching the specified criteria.
 
+    Args:
+        name: Project name to filter instances by
+        region: AWS region where instances are located
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to terminate
+        detach: Whether to return immediately without waiting for termination to complete
+        **kwargs: Additional keyword arguments
+    """
+    logger.info(f"Terminating instances with project={name}, owner={owner} in region {region}")
+
+    # Retrieve instances matching the project and owner tags
+    instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
+    logger.info(f"Found {len(instances)} instances matching the specified tags")
+
+    # Filter by instance ID if provided
+    if instance_id is not None:
+        logger.info(f"Filtering to {len(instance_id)} specified instance IDs")
+        instances = [instance for instance in instances if instance.instance_id in instance_id]
+        logger.info(f"After filtering, {len(instances)} instances will be terminated")
+
+    # Terminate each instance
     for instance in instances:
-        success = terminate_ec2_instance(instance_id=instance, region=region, wait_for_termination=not detach)
-        print(f"Id:      {instance}")
-        print(f"Success: {success}")
-        print()
+        logger.info(f"Terminating instance {instance.instance_id} ({instance.name})")
+        success = instance.terminate(wait_for_termination=not detach)
+        if success:
+            logger.info(f"Successfully terminated instance {instance.instance_id} ({instance.name})")
+        else:
+            logger.error(f"Failed to terminate instance {instance.instance_id} ({instance.name})")
+
+    logger.info(f"Termination commands completed for {len(instances)} instances")
 
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
-@click.option(
-    "--instance-id",
-    type=str,
-    default=None,
-    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
-)
-@click.option(
-    "--command",
-    type=str,
-    default=None,
-    help="Command to run on the instance",
-)
-@click.option(
-    "--script",
-    type=click.Path(exists=True),
-    default=None,
-    help="Path to the script to run on the instance",
-)
-@click.option(
-    "--detach/--no-detach",
-    type=bool,
-    default=False,
-    help="Whether to run the command in the background",
-)
-@click.option(
-    "--screen/--no-screen",
-    type=bool,
-    default=True,
-    help="Whether to use screen to run the command",
-)
-@click.option(
-    "--ssh-key-path",
-    type=str,
-    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
-    help="Path to the SSH private key file",
-)
+@common_cli_options
 def run_command(
     name: str,
     region: str,
     owner: str,
-    instance_id: str | None,
+    instance_id: list[str] | None,
     command: str | None,
     script: str | None,
     ssh_key_path: str,
     detach: bool,
-    screen: bool,
+    timeout: int | None = None,
+    **kwargs,
 ):
+    """
+    Run a command or script on EC2 instances.
 
+    Args:
+        name: Project name to filter instances by
+        region: AWS region where instances are located
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to run command on
+        command: Command string to execute on instances
+        script: Path to script file to execute on instances
+        ssh_key_path: Path to SSH private key for authentication
+        detach: Whether to run command in detached mode
+        timeout: Optional timeout in seconds for command execution
+        **kwargs: Additional keyword arguments
+    """
+    logger.info(f"Running command on instances with project={name}, owner={owner} in region {region}")
+
+    # Validate command/script parameters
     if command is None and script is None:
         raise click.UsageError("Either --command or --script must be provided")
 
     if command is not None and script is not None:
         raise click.UsageError("--command and --script cannot both be provided")
 
-    if instance_id is None:
-        instances = [
-            instance["InstanceId"]
-            for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
-        ]
-    else:
-        instances = [instance_id]
+    # Retrieve instances matching the project and owner tags
+    instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
+    logger.info(f"Found {len(instances)} instances matching the specified tags")
 
+    # Filter by instance ID if provided
+    if instance_id is not None:
+        logger.info(f"Filtering to {len(instance_id)} specified instance IDs")
+        instances = [instance for instance in instances if instance.instance_id in instance_id]
+        logger.info(f"After filtering, command will run on {len(instances)} instances")
+
+    # Process each instance
     for instance in instances:
-        output_ = execute_command_on_ec2(
-            instance_id=instance,
-            command=command,
-            script=script,
+        logger.info(f"Running command on instance {instance.instance_id} ({instance.name})")
+
+        # Convert script to command if script is provided
+        command_to_run = script_to_command(script, to_file=False) if script is not None else command
+        assert command_to_run is not None, "command and script cannot both be None"  # this should never happen
+
+        # Create SSH session
+        session = Session(
+            instance_id=instance.instance_id,
             region=region,
             private_key_path=ssh_key_path,
             user="ec2-user",
-            detach=detach,
-            use_screen=screen,
         )
-        print(f"Instance {instance}:")
+
+        # Verify instance is running
+        if instance.state != "running":
+            logger.error(f"Instance {instance.instance_id} is not running (state: {instance.state})")
+            raise ValueError(f"Instance {instance.instance_id} is not running")
+
+        # Execute command
+        logger.debug(f"Executing command on {instance.instance_id}")
+        output_ = session.run(command_to_run, detach=detach, timeout=timeout)
+        print(f"Instance {instance.instance_id}:")
         print(output_)
         print()
 
+    logger.info(f"Command execution completed on {len(instances)} instances")
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
-@click.option(
-    "--instance-id",
-    type=str,
-    default=None,
-    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
-)
-@click.option(
-    "--ssh-key-path",
-    type=str,
-    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
-    help="Path to the SSH private key file",
-)
-@click.option(
-    "--detach/--no-detach",
-    type=bool,
-    default=False,
-    help="Whether to run the command in the background",
-)
+
+@common_cli_options
 def setup_instances(
     name: str,
     region: str,
     owner: str,
-    instance_id: str | None,
+    instance_id: list[str] | None,
     ssh_key_path: str,
     detach: bool,
+    **kwargs,
 ):
+    """
+    Set up AWS credentials on EC2 instances.
+
+    Args:
+        name: Project name to filter instances by
+        region: AWS region where instances are located
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to set up
+        ssh_key_path: Path to SSH private key for authentication
+        detach: Whether to run setup in detached mode
+        **kwargs: Additional keyword arguments
+    """
+    logger.info(f"Setting up AWS credentials on instances with project={name}, owner={owner} in region {region}")
+
+    # Get AWS credentials from environment
     aws_access_key_id = get_aws_access_key_id()
     aws_secret_access_key = get_aws_secret_access_key()
 
+    # Validate credentials
     if aws_access_key_id is None or aws_secret_access_key is None:
+        logger.error("AWS credentials not found in environment variables")
         raise ValueError(
             "No AWS credentials found; "
             "please set the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"
         )
 
+    # Generate AWS config files
+    logger.debug("Generating AWS config and credentials files")
     aws_config = make_aws_config()
     aws_credentials = make_aws_credentials(
         aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key
     )
 
-    # base64 encode the aws config and credentials
+    # Base64 encode the AWS config and credentials for secure transfer
     aws_config_base64 = base64.b64encode(aws_config.encode("utf-8")).decode("utf-8")
     aws_credentials_base64 = base64.b64encode(aws_credentials.encode("utf-8")).decode("utf-8")
 
+    # Create setup command to create AWS config directory and write files
     setup_command = [
         "mkdir -p ~/.aws",
         f"echo '{aws_config_base64}' | base64 -d > ~/.aws/config",
         f"echo '{aws_credentials_base64}' | base64 -d > ~/.aws/credentials",
     ]
 
-    # execute command on the instance to echo aws config to .aws/config and aws credentials to .aws/credentials
+    # Execute command on the instances
+    logger.info("Running AWS credential setup command on instances")
     run_command(
         name=name,
         region=region,
@@ -951,54 +1041,33 @@ def setup_instances(
         detach=detach,
         screen=True,
     )
+    logger.info("AWS credential setup completed")
 
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
-@click.option(
-    "--instance-id",
-    type=str,
-    default=None,
-    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
-)
-@click.option(
-    "--ssh-key-path",
-    type=str,
-    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
-    help="Path to the SSH private key file",
-)
-@click.option(
-    "--detach/--no-detach",
-    type=bool,
-    default=False,
-    help="Whether to run the command in the background",
-)
+@common_cli_options
 def setup_dolma2_toolkit(
     name: str,
     region: str,
     owner: str,
-    instance_id: str | None,
+    instance_id: list[str] | None,
     ssh_key_path: str,
     detach: bool,
+    **kwargs,
 ):
+    """
+    Set up the Dolma2 toolkit on EC2 instances.
 
-    logger.info("Setting up AWS credentials...")
+    Args:
+        name: Project name to filter instances by
+        region: AWS region to search in
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to target
+        ssh_key_path: Path to SSH private key file
+        detach: Whether to run setup in detached mode
+        **kwargs: Additional keyword arguments
+    """
+    # First set up AWS credentials on the instances
+    logger.info(f"Setting up AWS credentials on instances with project={name}, owner={owner} in region {region}")
     setup_instances(
         name=name,
         region=region,
@@ -1008,15 +1077,19 @@ def setup_dolma2_toolkit(
         detach=detach,
     )
 
+    # Encode the Dolma2 toolkit setup script for secure transfer
+    logger.debug("Preparing Dolma2 toolkit setup script")
     base64_encoded_setup_command = base64.b64encode(D2TK_SETUP.encode("utf-8")).decode("utf-8")
 
+    # Create command to write and execute the setup script
     command = [
         f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
         "chmod +x setup.sh",
         "./setup.sh",
     ]
 
-    logger.info("Setting up data processing...")
+    # Run the Dolma2 toolkit setup command on the instances
+    logger.info(f"Setting up Dolma2 toolkit on instances with project={name}, owner={owner}")
     run_command(
         name=name,
         region=region,
@@ -1028,101 +1101,86 @@ def setup_dolma2_toolkit(
         detach=detach,
         screen=True,
     )
+    logger.info("Dolma2 toolkit setup completed")
 
 
-@click.option(
-    "--name",
-    type=str,
-    required=True,
-    help="Name of the project connected to the instance",
-)
-@click.option(
-    "--region",
-    type=str,
-    default="us-east-1",
-    help="Region to spin up the instances in",
-)
-@click.option(
-    "--owner",
-    type=str,
-    default=os.getenv("USER") or os.getenv("USERNAME"),
-    help="Owner of the project connected to the instance",
-)
-@click.option(
-    "--instance-id",
-    type=str,
-    default=None,
-    help="Instance ID to run the command on; if none, run the command on all instances with the given name and owner",
-)
-@click.option(
-    "--scripts-dir",
-    type=click.Path(exists=True, dir_okay=True, file_okay=False),
-    default=None,
-    help="Path to the directory containing the scripts to run on the instance",
-)
-@click.option(
-    "--ssh-key-path",
-    type=str,
-    default=os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"),
-    help="Path to the SSH private key file",
-)
+@common_cli_options
 def map_commands(
     name: str,
     region: str,
     owner: str,
-    instance_id: str | None,
-    scripts_dir: str,
+    instance_id: list[str] | None,
     ssh_key_path: str,
+    script: list[str],
+    **kwargs,
 ):
+    """
+    Map and distribute scripts across multiple EC2 instances.
+
+    This function distributes a list of scripts evenly across available instances
+    and executes them in parallel.
+
+    Args:
+        name: Project name to filter instances by
+        region: AWS region to search in
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to target
+        ssh_key_path: Path to SSH private key file
+        script: List of script paths to distribute and execute
+        **kwargs: Additional keyword arguments
+    """
+    # Set random seed for reproducible distribution
     random.seed(42)
 
-    # get all the scripts in the scripts directory
-    scripts = [
-        file_path
-        for root, _, files in os.walk(scripts_dir)
-        for file_name in files
-        if os.path.isfile(file_path := os.path.join(root, file_name)) and os.access(file_path, os.X_OK)
-    ]
-    assert len(scripts) > 0, "No executable scripts found in the given directory"
+    # Validate script input
+    assert isinstance(script, list) and len(script) > 0, "script must be a list with at least one script"
 
-    random.shuffle(scripts)
-    logger.info(f"Found {len(scripts):,} scripts in `{scripts_dir}`...")
+    # Make a copy of the script list and shuffle it for even distribution
+    script = script[:]
+    random.shuffle(script)
+    logger.info(f"Found {len(script):,} scripts to distribute")
 
-    # get all the instances with the given name and owner
-    instances = [
-        instance["InstanceId"]
-        for instance in list_ec2_instances_by_tags(region=region, tags={"Project": name, "Owner": owner})
-    ]
+    # Get all the instances with the given name and owner
+    logger.info(f"Retrieving instances with project={name}, owner={owner} in region {region}")
+    instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
     assert len(instances) > 0, "No instances found with the given name and owner"
     random.shuffle(instances)
 
-    logger.info(f"Found {len(instances):,} instances to map {len(scripts):,} scripts to...")
+    logger.info(f"Found {len(instances):,} instances to map {len(script):,} scripts to")
 
-    for i, instance_id in enumerate(instances):
-        instance_scripts = scripts[round((r := len(scripts) / len(instances)) * i) : round(r * (i + 1))]
+    # Distribute scripts across instances
+    for i, instance in enumerate(instances):
+        # Calculate the range of scripts for this instance
+        ratio = len(script) / len(instances)
+        start_idx = round(ratio * i)
+        end_idx = round(ratio * (i + 1))
+        instance_scripts = script[start_idx:end_idx]
 
-        # base64 encode the scripts
+        # Prepare commands to transfer and execute scripts
         run_command_scripts = []
-
-        for script in instance_scripts:
-            with open(script, "rb") as f:
+        for one_script in instance_scripts:
+            # Read and base64 encode each script
+            with open(one_script, "rb") as f:
                 base64_encoded_script = base64.b64encode(f.read()).decode("utf-8")
 
-            filename = os.path.basename(script)
+            # Create commands to decode, save, and execute the script
+            filename = os.path.basename(one_script)
             run_command_scripts.append(f"echo {base64_encoded_script} | base64 -d > {filename}")
             run_command_scripts.append(f"chmod +x {filename}")
             run_command_scripts.append(f"./{filename}")
 
+        # Log which scripts are being sent to which instance
+        script_names = [f"`{os.path.basename(s)}`" for s in instance_scripts]
         logger.info(
-            f"Running {len(instance_scripts):,} scripts on instance {instance_id}..."
-            + f"({';'.join(['`' + s + '`' for s in instance_scripts])})"
+            f"Running {len(instance_scripts):,} scripts on instance {instance.instance_id}: {'; '.join(script_names)}"
         )
 
+        # Execute the scripts on the instance
         run_command(
             name=name,
             region=region,
             owner=owner,
-            instance_id=instance_id,
+            instance_id=[instance.instance_id],
             command="; ".join(run_command_scripts),
             script=None,
             ssh_key_path=ssh_key_path,

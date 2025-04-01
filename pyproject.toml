@@ -26,9 +26,9 @@ dependencies = [
 dev = [
     "ruff",
     "mypy>=1.0,<1.4",
-    "black>=23.1,<24.0",
-    "isort>=5.12,<5.13",
-    "pytest",
+    "ruff",
+    "mypy>=1.0,<1.4",
+    "boto3-stubs[essential,ec2,s3]",
 ]
 beaker = [
     "beaker-py",
