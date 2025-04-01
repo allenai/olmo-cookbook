@@ -192,3 +192,82 @@ olmo-cookbook-ec2 terminate --name chipstest
 ```
 
 This will terminate all the instances in the cluster and delete the cluster.
+
+## Poor Man's Ray (PMR) CLI
+
+The PMR CLI is a minimal alternative to Ray for distributed data processing on EC2 instances. It is primarily designed to work with version 2 of the Dolma toolkit.
+
+First, install the cookbook CLI:
+
+```shell
+pip install -e .[all]
+```
+
+The CLI offers several commands for managing EC2 instances and executing tasks:
+
+### Create a cluster of instances
+
+```shell
+olmo-cookbook-pmr create --name chipstest --number 5 --instance i4i.2xlarge --detach
+```
+
+This will create 5 instances as part of a cluster named `chipstest`. The `--detach` flag makes the process return immediately while instances are created in the background.
+
+### List instances in a cluster
+
+```shell
+olmo-cookbook-pmr list --name chipstest --region us-east-1
+```
+
+### Set up AWS credentials and D2TK pipeline on instances
+
+```shell
+olmo-cookbook-pmr setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
+```
+
+### Run a command on all instances in a cluster
+
+```shell
+olmo-cookbook-pmr run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
+```
+
+### Distribute and run scripts across instances
+
+You can distribute multiple scripts across your instances by creating a directory with bash scripts and using the `map` command:
+
+```shell
+olmo-cookbook-pmr map --name chipstest --script tmp/test_scripts --ssh-key-path ~/.ssh/id_rsa
+```
+
+This will distribute all executable scripts in the `tmp/test_scripts` directory evenly across all instances in the cluster.
+
+### Terminate instances
+
+```shell
+olmo-cookbook-pmr terminate --name chipstest --region us-east-1
+```
+
+This will terminate all instances in the cluster.
+
+By default, instances will be `i4i.xlarge`, tagged with the project name and owner, use the `us-east-1` region, and use your SSH key at `~/.ssh/id_rsa`.
+
+### Common Command Line Options
+
+All PMR CLI commands support the following options:
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--name` | `-n` | (required) | Cluster name |
+| `--instance-type` | `-t` | `i4i.xlarge` | EC2 instance type |
+| `--number` | `-N` | `1` | Number of instances to create |
+| `--region` | `-r` | `us-east-1` | AWS region |
+| `--timeout` | `-T` | None | Command timeout in seconds |
+| `--owner` | `-o` | Current user | Owner name for tagging instances |
+| `--instance-id` | `-i` | None | Specific instance ID(s) to target (can be used multiple times) |
+| `--ssh-key-path` | `-k` | `~/.ssh/id_rsa` | Path to SSH private key |
+| `--ami-id` | `-a` | None | Custom AMI ID (defaults to latest Amazon Linux 2) |
+| `--detach/--no-detach` | `-d/-nd` | `--no-detach` | Whether to detach after command execution |
+| `--command` | `-c` | None | Command to execute on instances |
+| `--script` | `-s` | None | Path to script file or directory to execute |
+
+Note that you can provide either `--command` or `--script`, but not both. When using `--script` with a directory path, all executable files in that directory will be distributed across the instances.

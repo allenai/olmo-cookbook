@@ -1,3 +1,47 @@
+"""
+Poor Man's Ray
+==============
+
+This module provides a command-line interface (CLI) to start, stop, and manage EC2 instances,
+providing a minimal alternative to Ray for distributed data processing. It is primarily designed
+to work with version 2 of the Dolma toolkit.
+
+The CLI offers several commands for managing EC2 instances and executing tasks:
+- create: Launch new EC2 instances with specified configurations
+- list: Display information about running instances
+- terminate: Shut down and remove instances
+- run: Execute commands on instances
+- setup: Configure AWS credentials on instances
+- setup-d2tk: Install and configure the Dolma2 toolkit
+- map: Distribute scripts across multiple instances for parallel execution
+
+Examples:
+---------
+
+Create a cluster of instances:
+    olmo-cookbook-pmr create --name chipstest --number 5 --instance i4i.2xlarge --detach
+
+List instances in a cluster:
+    olmo-cookbook-pmr list --name chipstest --region us-east-1
+
+Set up AWS credentials and D2TK pipeline on instances:
+    olmo-cookbook-pmr setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
+
+Run a command on all instances in a cluster:
+    olmo-cookbook-pmr run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
+
+Distribute and run multiple scripts across instances:
+    olmo-cookbook-pmr map --name chipstest --script tmp/test_scripts/* --ssh-key-path ~/.ssh/id_rsa
+
+Terminate all instances in a cluster:
+    olmo-cookbook-pmr terminate --name chipstest --region us-east-1
+
+
+Author: Luca Soldaini
+Email: luca@soldaini.net
+"""
+
+
 import base64
 import datetime
 import hashlib
