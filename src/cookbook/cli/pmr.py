@@ -19,28 +19,27 @@ Examples:
 ---------
 
 Create a cluster of instances:
-    olmo-cookbook-pmr create --name chipstest --number 5 --instance i4i.2xlarge --detach
+    poormanray create --name chipstest --number 5 --instance i4i.2xlarge --detach
 
 List instances in a cluster:
-    olmo-cookbook-pmr list --name chipstest --region us-east-1
+    poormanray list --name chipstest --region us-east-1
 
 Set up AWS credentials and D2TK pipeline on instances:
-    olmo-cookbook-pmr setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
+    poormanray setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
 
 Run a command on all instances in a cluster:
-    olmo-cookbook-pmr run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
+    poormanray run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
 
 Distribute and run multiple scripts across instances:
-    olmo-cookbook-pmr map --name chipstest --script tmp/test_scripts/* --ssh-key-path ~/.ssh/id_rsa
+    poormanray map --name chipstest --script tmp/test_scripts/* --ssh-key-path ~/.ssh/id_rsa
 
 Terminate all instances in a cluster:
-    olmo-cookbook-pmr terminate --name chipstest --region us-east-1
+    poormanray terminate --name chipstest --region us-east-1
 
 
 Author: Luca Soldaini
 Email: luca@soldaini.net
 """
-
 
 import base64
 import datetime
@@ -865,6 +864,7 @@ def list_instances(
     name: str,
     region: str,
     owner: str,
+    instance_id: list[str] | None,
     **kwargs,
 ):
     """
@@ -887,6 +887,9 @@ def list_instances(
 
     # Display instance details
     for instance in sorted(instances, key=lambda x: x.name):
+        if instance_id is not None and instance.instance_id not in instance_id:
+            continue
+
         print(f"Id:     {instance.instance_id}")
         print(f"Name:   {instance.name}")
         print(f"Type:   {instance.instance_type}")

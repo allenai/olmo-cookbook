@@ -193,7 +193,7 @@ olmo-cookbook-ec2 terminate --name chipstest
 
 This will terminate all the instances in the cluster and delete the cluster.
 
-## Poor Man's Ray (PMR) CLI
+## Poor Man's Ray CLI
 
 The PMR CLI is a minimal alternative to Ray for distributed data processing on EC2 instances. It is primarily designed to work with version 2 of the Dolma toolkit.
 
@@ -208,7 +208,7 @@ The CLI offers several commands for managing EC2 instances and executing tasks:
 ### Create a cluster of instances
 
 ```shell
-olmo-cookbook-pmr create --name chipstest --number 5 --instance i4i.2xlarge --detach
+poormanray create --name chipstest --number 5 --instance i4i.2xlarge --detach
 ```
 
 This will create 5 instances as part of a cluster named `chipstest`. The `--detach` flag makes the process return immediately while instances are created in the background.
@@ -216,19 +216,19 @@ This will create 5 instances as part of a cluster named `chipstest`. The `--deta
 ### List instances in a cluster
 
 ```shell
-olmo-cookbook-pmr list --name chipstest --region us-east-1
+poormanray list --name chipstest --region us-east-1
 ```
 
 ### Set up AWS credentials and D2TK pipeline on instances
 
 ```shell
-olmo-cookbook-pmr setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
+poormanray setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
 ```
 
 ### Run a command on all instances in a cluster
 
 ```shell
-olmo-cookbook-pmr run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
+poormanray run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
 ```
 
 ### Distribute and run scripts across instances
@@ -236,7 +236,7 @@ olmo-cookbook-pmr run --name chipstest --command "echo 'Hello, world!'" --ssh-ke
 You can distribute multiple scripts across your instances by creating a directory with bash scripts and using the `map` command:
 
 ```shell
-olmo-cookbook-pmr map --name chipstest --script tmp/test_scripts --ssh-key-path ~/.ssh/id_rsa
+poormanray map --name chipstest --script tmp/test_scripts --ssh-key-path ~/.ssh/id_rsa
 ```
 
 This will distribute all executable scripts in the `tmp/test_scripts` directory evenly across all instances in the cluster.
@@ -244,7 +244,7 @@ This will distribute all executable scripts in the `tmp/test_scripts` directory 
 ### Terminate instances
 
 ```shell
-olmo-cookbook-pmr terminate --name chipstest --region us-east-1
+poormanray terminate --name chipstest --region us-east-1
 ```
 
 This will terminate all instances in the cluster.
