@@ -846,7 +846,7 @@ def create_instances(
 
         instance = InstanceInfo.create_instance(
             instance_type=instance_type,
-            tags=tags | {"Name": f"{name}-{i}"},  # Add Name tag with index
+            tags=tags | {"Name": f"{name}-{i:04d}"},  # Add Name tag with index
             key_name=key_name,
             region=region,
             ami_id=ami_id,
