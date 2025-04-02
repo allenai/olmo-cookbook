@@ -263,7 +263,7 @@ class InstanceInfo:
             for instance in reservation.get("Instances", [])
         ]
 
-        return instances
+        return sorted(instances, key=lambda x: x.name)
 
     @classmethod
     def describe_instance(
@@ -1190,10 +1190,15 @@ def map_commands(
     # Get all the instances with the given name and owner
     logger.info(f"Retrieving instances with project={name}, owner={owner} in region {region}")
     instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
+
+    # filter by instance_id if provided
+    if instance_id is not None:
+        instances = [instance for instance in instances if instance.instance_id in instance_id]
+
     assert len(instances) > 0, "No instances found with the given name and owner"
     random.shuffle(instances)
 
-    logger.info(f"Found {len(instances):,} instances to map {len(script):,} scripts to")
+    logger.info(f"Found {len(instances):,} instances to map {len(script):,} scripts to!")
 
     # Distribute scripts across instances
     for i, instance in enumerate(instances):
