@@ -7,6 +7,7 @@ from typing import Optional
 import click
 import yaml
 from beaker import Beaker
+from beaker.exceptions import SecretNotFound
 from beaker.services.job import JobClient
 from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
@@ -349,6 +350,14 @@ def prepare_user_workspace(
         if secret_value:
             beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
             print(f"Succesfully wrote '{secret_name}' to {target_workspace.full_name}")
+        
+        # If a workspace secret doesn't exist at this point, then write in a blank value
+        try:
+            beaker.secret.get(secret_name, workspace=target_workspace)
+        except SecretNotFound:
+            if user not in secret_name:
+                beaker.secret.write(secret_name, "[blank]", workspace=target_workspace)
+                print(f"Writing blank value for {secret_name}")
 
 
 cli.command()(evaluate)

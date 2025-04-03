@@ -10,7 +10,7 @@ OLMost every recipe you need to experiment with the OLMo family of models.
 1) Install the cookbook CLI
 
 ```shell
-pip install -e .
+pip install -e .[all]
 ```
 
 2) Set up your environment
@@ -104,3 +104,170 @@ olmo-cookbook-eval evaluate \
   --model-backend vllm
   --dashboard peteish32
 ```
+
+## Running OLMo-core script
+
+You can launch any OLMo core training script using the cookbook.
+By default, any script in [src/scripts/train](https://github.com/allenai/OLMo-core/tree/main/src/scripts/train) can be launched.
+
+Here's an example of how to train a 1B model for 50B tokens on 16 GPUs on the `ai2/augusta-google-1` cluster.
+
+```shell
+olmo-cookbook-core launch \
+  -d dolmino50 \
+  -m OLMo2-1B \
+  -n 50e9T \
+  -i petew/olmo-core-tch260cu126-v2.0.1 \
+  -p urgent \
+  -c ai2/augusta-google-1 \
+  -g 16
+```
+
+Let's break down the command:
+
+- `-d dolmino50`: The data mix to use for training. This data mix is at [data/mixes/dolmino50.yaml](src/cookbook/data/mixes), but you can use any path to a data mix file (i.e., a plain text file with a list on npy tokens files)
+- `-m OLMo2-1B`: The model to train. This is the configuration [src/scripts/train/OLMo2-1B.py](https://github.com/allenai/OLMo-core/blob/main/src/scripts/train/OLMo2-1B.py). You can also provide a path to any training script written in OLMo-core.
+- `-n 50e9T`: The number of tokens to train on (50B tokens).
+- `-i petew/olmo-core-tch260cu126-v2.0.1`: The image to use for training.
+- `-p urgent`: The priority of the job.
+- `-c ai2/augusta-google-1`: The cluster to use for training.
+- `-g 16`: The number of GPUs to use for training.
+
+Use the `--dry-run` flag to print the command without launching the job; to view all available flags, run `olmo-cookbook-core launch --help`.
+
+At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai/OLMo-core/tree/2f66fd95c17c9779be9930f8fb80803293c2dc30), but you can override this by setting the `--olmo-core-commit-hash` flag.
+
+
+## EC2 CLI
+
+The EC2 CLI is a tool for managing EC2 instances. We will describe its use by example.
+
+First, you want to install the cookbook CLI.
+
+```shell
+pip install -e .
+```
+
+Then, you can create a cluster of instances; by default, instances will be `i4i.xlarge` and will be tagged with the project name and owner; they will use the `us-east-1` region and use your SSH key at `~/.ssh/id_rsa`.
+
+Let's say you wanna create a cluster named `chipstest`:
+
+```shell
+olmo-cookbook-ec2 create --name chipstest --number 5 --instance i4i.2xlarge --detach
+```
+
+This will create 5 instances as part of a cluster with the name `chipstest`; the `--detach` flag means that the
+process will return immediately and the instances will be created in the background.
+
+You can check the status of the instances by listing them:
+
+```shell
+olmo-cookbook-ec2 list --name chipstest
+```
+
+After the instances are create, you wanna set up AWS credentials and D2TK pipeline on them. You can do this by running the following command:
+
+```shell
+olmo-cookbook-ec2 setup-d2tk --name chipstest
+```
+
+To run a command on all instances in the cluster, you can use the following command:
+
+```shell
+olmo-cookbook-ec2 run --name chipstest --command "echo 'Hello, world!'"
+```
+
+But, most likely you wanna queue a bunch of jobs to run on the instances. You can do this by creating a directory with as many bash scripts as job units, and then running the following command:
+
+```shell
+olmo-cookbook-ec2 map --name chipstest --scripts-dir tmp/test_scripts
+```
+
+This will run all the scripts in the `tmp/test_scripts` directory on all the instances in the cluster.
+
+Once you are done with the jobs, you can terminate the cluster:
+
+```shell
+olmo-cookbook-ec2 terminate --name chipstest
+```
+
+This will terminate all the instances in the cluster and delete the cluster.
+
+## Poor Man's Ray CLI
+
+The PMR CLI is a minimal alternative to Ray for distributed data processing on EC2 instances. It is primarily designed to work with version 2 of the Dolma toolkit.
+
+First, install the cookbook CLI:
+
+```shell
+pip install -e .[all]
+```
+
+The CLI offers several commands for managing EC2 instances and executing tasks:
+
+### Create a cluster of instances
+
+```shell
+poormanray create --name chipstest --number 5 --instance i4i.2xlarge --detach
+```
+
+This will create 5 instances as part of a cluster named `chipstest`. The `--detach` flag makes the process return immediately while instances are created in the background.
+
+### List instances in a cluster
+
+```shell
+poormanray list --name chipstest --region us-east-1
+```
+
+### Set up AWS credentials and D2TK pipeline on instances
+
+```shell
+poormanray setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
+```
+
+### Run a command on all instances in a cluster
+
+```shell
+poormanray run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
+```
+
+### Distribute and run scripts across instances
+
+You can distribute multiple scripts across your instances by creating a directory with bash scripts and using the `map` command:
+
+```shell
+poormanray map --name chipstest --script tmp/test_scripts --ssh-key-path ~/.ssh/id_rsa
+```
+
+This will distribute all executable scripts in the `tmp/test_scripts` directory evenly across all instances in the cluster.
+
+### Terminate instances
+
+```shell
+poormanray terminate --name chipstest --region us-east-1
+```
+
+This will terminate all instances in the cluster.
+
+By default, instances will be `i4i.xlarge`, tagged with the project name and owner, use the `us-east-1` region, and use your SSH key at `~/.ssh/id_rsa`.
+
+### Common Command Line Options
+
+All PMR CLI commands support the following options:
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--name` | `-n` | (required) | Cluster name |
+| `--instance-type` | `-t` | `i4i.xlarge` | EC2 instance type |
+| `--number` | `-N` | `1` | Number of instances to create |
+| `--region` | `-r` | `us-east-1` | AWS region |
+| `--timeout` | `-T` | None | Command timeout in seconds |
+| `--owner` | `-o` | Current user | Owner name for tagging instances |
+| `--instance-id` | `-i` | None | Specific instance ID(s) to target (can be used multiple times) |
+| `--ssh-key-path` | `-k` | `~/.ssh/id_rsa` | Path to SSH private key |
+| `--ami-id` | `-a` | None | Custom AMI ID (defaults to latest Amazon Linux 2) |
+| `--detach/--no-detach` | `-d/-nd` | `--no-detach` | Whether to detach after command execution |
+| `--command` | `-c` | None | Command to execute on instances |
+| `--script` | `-s` | None | Path to script file or directory to execute |
+
+Note that you can provide either `--command` or `--script`, but not both. When using `--script` with a directory path, all executable files in that directory will be distributed across the instances.

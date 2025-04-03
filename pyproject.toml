@@ -19,15 +19,16 @@ dependencies = [
     "s3fs",
     "yaspin",
     "PyYAML>=6.0,<7.0",
+    "paramiko>=3.5,<3.6",
 ]
 
 [project.optional-dependencies]
 dev = [
     "ruff",
     "mypy>=1.0,<1.4",
-    "black>=23.1,<24.0",
-    "isort>=5.12,<5.13",
-    "pytest",
+    "ruff",
+    "mypy>=1.0,<1.4",
+    "boto3-stubs[essential,ec2,s3]",
 ]
 beaker = [
     "beaker-py",
@@ -46,6 +47,8 @@ all = [
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
+olmo-cookbook-core = "cookbook.cli:core.cli"
+poormanray = "cookbook.cli:pmr.cli"
 
 
 [tool.black]

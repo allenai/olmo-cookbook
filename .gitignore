@@ -173,3 +173,10 @@ cython_debug/
 
 # MacOS files
 .DS_Store
+
+# vscode
+.vscode/
+
+# temporary directory
+tmp/
+temp/

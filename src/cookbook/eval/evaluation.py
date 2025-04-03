@@ -1,3 +1,4 @@
+import json
 import re
 import shlex
 import subprocess
@@ -48,6 +49,7 @@ def evaluate_checkpoint(
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
+    model_args: dict | None,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -132,10 +134,12 @@ def evaluate_checkpoint(
     flags.append("--push-datalake")
 
     # figure out model args based on cli
-    model_args = {"model_path": checkpoint_path, "add_bos_token": "true" if add_bos_token else "false"}
-    if model_backend == "vllm":
-        # if we are using vllm, we need to set the memory utilization
-        model_args["gpu_memory_utilization"] = str(vllm_memory_utilization)
+    model_args = {
+        "model_path": checkpoint_path,
+        "add_bos_token": "true" if add_bos_token else "false",
+        **({"gpu_memory_utilization": str(vllm_memory_utilization)} if model_backend == "vllm" else {}),
+        **(model_args or {}),
+    }
     model_args_str = ",".join(f"{k}={v}" for k, v in model_args.items())
 
     # set model info
@@ -166,7 +170,9 @@ def evaluate_checkpoint(
 
             # add all tasks in the partition as flag
             partition_tasks = tasks_names[i : i + partition_size] if partition_size else tasks_names
-            local_flags.append(f"--task {' '.join(partition_tasks)}")
+            escaped_partition_tasks = [json.dumps(task) if task[0] == "{" else task for task in partition_tasks]
+
+            local_flags.append(f"--task {' '.join(escaped_partition_tasks)}")
 
             if add_aws_flags(
                 aws_access_key_id=aws_access_key_id,
