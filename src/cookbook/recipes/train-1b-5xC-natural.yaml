@@ -1,18 +1,19 @@
 name: "olmo-cookbook-1b-5xC-dclm-baseline-natural"
-description: "Olmo-cookbook 1B-5xC using natural mixture on DCLM baseline sample"
+description: "Olmo-cookbook 1B-5xC dclm baseline natural (4096)"
 budget: "ai2/oe-data"
 workspace: "ai2/dolma2"
 nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
-sequence_length: 2048
+sequence_length: 4096 #2048
 seed: 1337
 model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/jupiter-cirrascale-2
 weka: true
+rank_microbatch_size: 16_384
 dataset:
   sources:
   - name: adult_content

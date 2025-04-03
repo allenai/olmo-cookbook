@@ -110,5 +110,5 @@ class SupportedTokenizers(Enum):
 
 
 MODEL_TO_LR_MAP = {
-    "olmo2_1B": 1.8e-3,
+    "olmo2_1B": 4e-4 #1.8e-3,
 }
