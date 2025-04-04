@@ -807,7 +807,7 @@ def create_instances(
     assert owner is not None, "Cannot determine owner from environment; please specify --owner"
 
     # Create tags for the instances
-    tags = {"Project": name, "Owner": owner}
+    tags = {"Project": name, "Owner": owner, "Contact": owner}
     logger.info(f"Using tags: {tags}")
 
     # Import SSH key to EC2
