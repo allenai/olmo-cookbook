@@ -1,7 +1,7 @@
-name: "olmo-cookbook-1b-5xC-dclm-baseline-natural"
-description: "Olmo-cookbook 1B-5xC dclm baseline natural (4096)"
+name: "olmo-cookbook-1b-5xC-dclm-baseline-natural-2048-4e-4"
+description: "Olmo-cookbook 1B-5xC dclm baseline natural (2048 4e-4)"
 budget: "ai2/oe-data"
-workspace: "ai2/dolma2"
+workspace: "ai2/oe-data" #"ai2/dolma2"
 nodes: 4
 gpus: 8
 preemptible: true
