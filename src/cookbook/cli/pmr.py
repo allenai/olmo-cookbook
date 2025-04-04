@@ -827,7 +827,7 @@ def common_cli_options(f: T) -> T:
         ),
         click.option(
             "-S/-NS",
-            "--suicide/--no-suicide",
+            "--spindown/--no-spindown",
             type=bool,
             default=False,
             help="Whether to have the instance self-terminate after the command is run",
@@ -1062,7 +1062,7 @@ def run_command(
     script: str | None,
     ssh_key_path: str,
     detach: bool,
-    suicide: bool,
+    spindown: bool,
     timeout: int | None = None,
     **kwargs,
 ):
@@ -1108,7 +1108,7 @@ def run_command(
         command_to_run = script_to_command(script, to_file=False) if script is not None else command
         assert command_to_run is not None, "command and script cannot both be None"  # this should never happen
 
-        if suicide:
+        if spindown:
             # have the instance self-terminate after the command is run
             command_to_run = f"{command_to_run}; aws ec2 terminate-instances --instance-ids {instance.instance_id}"
 
@@ -1200,7 +1200,7 @@ def setup_instances(
         script=None,
         ssh_key_path=ssh_key_path,
         detach=detach,
-        suicide=False,
+        spindown=False,
         screen=True,
     )
     logger.info("AWS credential setup completed")
@@ -1261,7 +1261,7 @@ def setup_dolma2_toolkit(
         script=None,
         ssh_key_path=ssh_key_path,
         detach=detach,
-        suicide=False,
+        spindown=False,
         screen=True,
     )
     logger.info("Dolma2 toolkit setup completed")
@@ -1274,7 +1274,7 @@ def map_commands(
     instance_id: list[str] | None,
     ssh_key_path: str,
     script: list[str],
-    suicide: bool,
+    spindown: bool,
     **kwargs,
 ):
     """
@@ -1351,7 +1351,7 @@ def map_commands(
             command="; ".join(run_command_scripts),
             script=None,
             ssh_key_path=ssh_key_path,
-            suicide=suicide,
+            spindown=spindown,
             detach=True,
             screen=True,
         )
