@@ -1,5 +1,5 @@
 name: "olmo-cookbook-1b-5xC-dclm-baseline-natural-4096-4e-4-bsz-2097152"
-description: "Olmo-cookbook 1B-5xC dclm baseline natural (4096 4e-4, 2_097_152 global batch)"
+description: "Olmo-cookbook 1B-5xC dclm baseline natural (4096 4e-4, 2_097_152 global batch, 32_768 rank microbatch)"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data" #"ai2/dolma2"
 nodes: 4
@@ -13,7 +13,7 @@ tokenizer: "dolma2"
 priority: high
 cluster: ai2/jupiter-cirrascale-2
 weka: true
-#rank_microbatch_size: 16_384
+rank_microbatch_size: 32_768
 global_batch_size: 2_097_152
 dataset:
   sources:
