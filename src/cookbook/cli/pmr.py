@@ -55,7 +55,7 @@ import sys
 import time
 from dataclasses import dataclass
 from functools import reduce
-from typing import TYPE_CHECKING, Callable, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union
 
 import boto3
 import click
@@ -64,7 +64,7 @@ from paramiko.channel import ChannelFile, ChannelStdinFile
 
 if TYPE_CHECKING:
     from mypy_boto3_ec2.client import EC2Client
-    from mypy_boto3_ec2.type_defs import InstanceTypeDef
+    from mypy_boto3_ec2.type_defs import InstanceTypeDef, InstanceStatusTypeDef
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -128,6 +128,8 @@ cd minhash-rs
 cargo build --release
 """
 
+VALID_EC2_STATUSES = ["pending", "running", "shutting-down", "terminated", "stopping", "stopped"]
+
 
 @dataclass(frozen=True)
 class SessionContent:
@@ -157,7 +159,7 @@ class SessionContent:
         return f"stdout: {self.stdout.strip()}\nstderr: {self.stderr.strip()}"
 
 
-@dataclass(frozen=True)
+@dataclass
 class InstanceInfo:
     """
     Represents information about an EC2 instance.
@@ -190,8 +192,64 @@ class InstanceInfo:
     created_at: datetime.datetime
     region: str = "us-east-1"
 
+    def __post_init__(self):
+        self._status: list[tuple[str, str]] = []
+
+    def _update_status(self, name: str, status: str):
+        self._status.append((name, status))
+
+    @property
+    def checks(self) -> str:
+        all_status = len(self._status)
+        all_ok = sum(1 for _, status in self._status if status == "ok")
+        return f"{all_ok}/{all_status}"
+
+    @property
+    def pretty_checks(self) -> str:
+        if sum(1 for _, status in self._status if status == "ok") == len(self._status):
+            # bracket text in green
+            start, end = "\033[92m", "\033[0m"
+        elif len(self._status) == 0:
+            # bracket text in yellow
+            start, end = "\033[93m", "\033[0m"
+        else:
+            # bracket text in red
+            start, end = "\033[91m", "\033[0m"
+
+        return f"{start}{self.checks}{end}"
+
+    @property
+    def pretty_state(self) -> str:
+        if self.state == "running":
+            # bracket text in green
+            start, end = "\033[92m", "\033[0m"
+        elif self.state == "pending":
+            # bracket text in blue
+            start, end = "\033[94m", "\033[0m"
+        elif self.state == "shutting-down":
+            # bracket text in red
+            start, end = "\033[91m", "\033[0m"
+        else:
+            # bracket text in yellow
+            start, end = "\033[93m", "\033[0m"
+
+        return f"{start}{self.state}{end}"
+
+    @property
+    def pretty_id(self) -> str:
+        return f"\033[1m{self.instance_id}\033[0m"
+
+    @property
+    def pretty_ip(self) -> str:
+        # make the ip address italic
+        return f"\033[3m{self.public_ip_address}\033[0m"
+
     @classmethod
-    def from_instance(cls, instance: Union[dict, "InstanceTypeDef"]) -> "InstanceInfo":
+    def from_instance(
+        cls,
+        description: Union[dict, "InstanceTypeDef"],
+        status: Optional[Union[dict, "InstanceStatusTypeDef"]] = None,
+    ) -> "InstanceInfo":
         """
         Creates an InstanceInfo object from an EC2 instance dictionary.
 
@@ -201,28 +259,37 @@ class InstanceInfo:
         Returns:
             An InstanceInfo object populated with the instance details
         """
-        name = str(next((tag.get("Value") for tag in instance.get("Tags", []) if tag.get("Key") == "Name"), ""))
-        return cls(
-            instance_id=instance.get("InstanceId", ""),
-            instance_type=instance.get("InstanceType", ""),
-            image_id=instance.get("ImageId", ""),
-            state=instance.get("State", {}).get("Name", ""),
-            public_ip_address=instance.get("PublicIpAddress", ""),
-            public_dns_name=instance.get("PublicDnsName", ""),
+        name = str(next((tag.get("Value") for tag in description.get("Tags", []) if tag.get("Key") == "Name"), ""))
+
+        instance = cls(
+            instance_id=description.get("InstanceId", ""),
+            instance_type=description.get("InstanceType", ""),
+            image_id=description.get("ImageId", ""),
+            state=description.get("State", {}).get("Name", ""),
+            public_ip_address=description.get("PublicIpAddress", ""),
+            public_dns_name=description.get("PublicDnsName", ""),
             name=name,
-            created_at=instance.get("LaunchTime", datetime.datetime.min),
-            tags={tag["Key"]: tag.get("Value", "") for tag in instance.get("Tags", []) if "Key" in tag},
-            zone=instance.get("Placement", {}).get("AvailabilityZone", ""),
+            created_at=description.get("LaunchTime", datetime.datetime.min),
+            tags={tag["Key"]: tag.get("Value", "") for tag in description.get("Tags", []) if "Key" in tag},
+            zone=description.get("Placement", {}).get("AvailabilityZone", ""),
         )
+
+        for instance_status, instance_value in (status or {}).items():
+            if instance_status.endswith("Status"):
+                assert isinstance(instance_value, dict), f"{instance_value} is {type(instance_value)}, not dict"
+                instance._update_status(name=instance_status, status=instance_value.get("Status", ""))
+        return instance
 
     @classmethod
     def describe_instances(
         cls,
         instance_ids: list[str] | None = None,
-        tags: dict[str, str] | None = None,
-        only_running: bool = True,
         client: Union["EC2Client", None] = None,
         region: str | None = None,
+        project: str | None = None,
+        owner: str | None = None,
+        contact: str | None = None,
+        statuses: list[str] | None = None,
     ) -> list["InstanceInfo"]:
         """
         Retrieves information about multiple EC2 instances based on filters.
@@ -230,37 +297,63 @@ class InstanceInfo:
         Args:
             instance_ids: Optional list of instance IDs to filter by
             tags: Optional dictionary of tags to filter instances by
-            only_running: If True, only return instances in 'running' state
             client: Optional boto3 EC2 client to use
             region: AWS region to query (defaults to class region)
 
         Returns:
             List of InstanceInfo objects matching the specified criteria
         """
+
+        # default statuses
+        statuses = statuses or ["pending", "running", "shutting-down", "stopping"]
+        assert all(status in VALID_EC2_STATUSES for status in statuses), "Invalid status"
+
         # Use provided client or create a new one with the specified region
         client = client or boto3.client("ec2", region_name=region or cls.region)
 
         filters = []
 
         # Add filters based on parameters
-        if only_running:
-            filters.append({"Name": "instance-state-name", "Values": ["running"]})
+        filters.append({"Name": "instance-state-name", "Values": statuses})
 
         if instance_ids:
             filters.append({"Name": "instance-id", "Values": instance_ids})
 
-        if tags:
-            for key, value in tags.items():
-                filters.append({"Name": f"tag:{key}", "Values": [value]})
+        # raise a warning if owner is set (deprecated)
+        if owner:
+            logger.warning("The owner tag is deprecated. Use the contact tag instead.")
+
+        if contact:
+            filters.append({"Name": "tag:Contact", "Values": [contact]})
+
+        if project:
+            filters.append({"Name": "tag:Project", "Values": [project]})
 
         # Query EC2 API with filters if any are specified
-        response = client.describe_instances(**({"Filters": filters} if filters else {}))
+        response_describe = client.describe_instances(**({"Filters": filters} if filters else {}))
+
+        # Get instance status
+        response_status = client.describe_instance_status(
+            InstanceIds=[
+                id_
+                for reservation in response_describe.get("Reservations", [])
+                for instance in reservation.get("Instances", [])
+                if isinstance(id_ := instance.get("InstanceId"), str)
+            ]
+        )
+
+        instance_statuses = {
+            id_: status
+            for status in response_status.get("InstanceStatuses", [])
+            if isinstance((id_ := status.get("InstanceId")), str)
+        }
 
         # Extract and convert instances from the response
         instances = [
-            InstanceInfo.from_instance(instance)
-            for reservation in response.get("Reservations", [])
+            InstanceInfo.from_instance(description=instance, status=instance_statuses.get(id_, None))
+            for reservation in response_describe.get("Reservations", [])
             for instance in reservation.get("Instances", [])
+            if isinstance((id_ := instance.get("InstanceId")), str)
         ]
 
         return sorted(instances, key=lambda x: x.name)
@@ -722,6 +815,13 @@ def common_cli_options(f: T) -> T:
             help="Owner of the cluster. Useful for cost tracking.",
         ),
         click.option(
+            "-S/-NS",
+            "--suicide/--no-suicide",
+            type=bool,
+            default=False,
+            help="Whether to have the instance self-terminate after the command is run",
+        ),
+        click.option(
             "-i",
             "--instance-id",
             multiple=True,
@@ -807,7 +907,7 @@ def create_instances(
     assert owner is not None, "Cannot determine owner from environment; please specify --owner"
 
     # Create tags for the instances
-    tags = {"Project": name, "Owner": owner, "Contact": owner}
+    tags = {"Project": name, "Contact": owner}
     logger.info(f"Using tags: {tags}")
 
     # Import SSH key to EC2
@@ -816,7 +916,7 @@ def create_instances(
     logger.info(f"Imported SSH key with name: {key_name}")
 
     # Check for existing instances with the same tags to determine starting index
-    existing_instances = InstanceInfo.describe_instances(region=region, tags=tags)
+    existing_instances = InstanceInfo.describe_instances(region=region, project=name)
     if len(existing_instances) > 0:
         logger.info(f"Found {len(existing_instances)} existing instances with the same tags.")
         # Extract the highest numeric suffix from existing instance names
@@ -863,7 +963,6 @@ def create_instances(
 def list_instances(
     name: str,
     region: str,
-    owner: str,
     instance_id: list[str] | None,
     **kwargs,
 ):
@@ -876,34 +975,34 @@ def list_instances(
         owner: Owner name to filter instances by
         **kwargs: Additional keyword arguments
     """
-    logger.info(f"Listing instances with project={name}, owner={owner} in region {region}")
-
-    # Create filter tags
-    tags = {"Project": name, "Owner": owner}
+    logger.info(f"Listing instances with project={name} in region {region}")
 
     # Retrieve matching instances
-    instances = InstanceInfo.describe_instances(region=region, tags=tags)
+    instances = InstanceInfo.describe_instances(region=region, project=name)
     logger.info(f"Found {len(instances)} matching instances")
 
     # Display instance details
-    for instance in sorted(instances, key=lambda x: x.name):
+    for i, instance in enumerate(sorted(instances, key=lambda x: x.name)):
         if instance_id is not None and instance.instance_id not in instance_id:
             continue
 
-        print(f"Id:     {instance.instance_id}")
+        print(f"Id:     {instance.pretty_id}")
         print(f"Name:   {instance.name}")
         print(f"Type:   {instance.instance_type}")
-        print(f"State:  {instance.state}")
-        print(f"IP:     {instance.public_ip_address}")
+        print(f"State:  {instance.pretty_state}")
+        print(f"IP:     {instance.pretty_ip}")
+        print(f"Status: {instance.pretty_checks}")
         print(f"Tags:   {json.dumps(instance.tags, sort_keys=True)}")
-        print()
+
+        if i < len(instances) - 1:
+            # add separator before next instance
+            print()
 
 
 @common_cli_options
 def terminate_instances(
     name: str,
     region: str,
-    owner: str,
     instance_id: list[str] | None,
     detach: bool,
     **kwargs,
@@ -919,10 +1018,10 @@ def terminate_instances(
         detach: Whether to return immediately without waiting for termination to complete
         **kwargs: Additional keyword arguments
     """
-    logger.info(f"Terminating instances with project={name}, owner={owner} in region {region}")
+    logger.info(f"Terminating instances with project={name} in region {region}")
 
     # Retrieve instances matching the project and owner tags
-    instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
+    instances = InstanceInfo.describe_instances(region=region, project=name)
     logger.info(f"Found {len(instances)} instances matching the specified tags")
 
     # Filter by instance ID if provided
@@ -947,12 +1046,12 @@ def terminate_instances(
 def run_command(
     name: str,
     region: str,
-    owner: str,
     instance_id: list[str] | None,
     command: str | None,
     script: str | None,
     ssh_key_path: str,
     detach: bool,
+    suicide: bool,
     timeout: int | None = None,
     **kwargs,
 ):
@@ -971,7 +1070,7 @@ def run_command(
         timeout: Optional timeout in seconds for command execution
         **kwargs: Additional keyword arguments
     """
-    logger.info(f"Running command on instances with project={name}, owner={owner} in region {region}")
+    logger.info(f"Running command on instances with project={name} in region {region}")
 
     # Validate command/script parameters
     if command is None and script is None:
@@ -981,7 +1080,7 @@ def run_command(
         raise click.UsageError("--command and --script cannot both be provided")
 
     # Retrieve instances matching the project and owner tags
-    instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
+    instances = InstanceInfo.describe_instances(region=region, project=name)
     logger.info(f"Found {len(instances)} instances matching the specified tags")
 
     # Filter by instance ID if provided
@@ -997,6 +1096,10 @@ def run_command(
         # Convert script to command if script is provided
         command_to_run = script_to_command(script, to_file=False) if script is not None else command
         assert command_to_run is not None, "command and script cannot both be None"  # this should never happen
+
+        if suicide:
+            # have the instance self-terminate after the command is run
+            command_to_run = f"{command_to_run}; aws ec2 terminate-instances --instance-ids {instance.instance_id}"
 
         # Create SSH session
         session = Session(
@@ -1086,6 +1189,7 @@ def setup_instances(
         script=None,
         ssh_key_path=ssh_key_path,
         detach=detach,
+        suicide=False,
         screen=True,
     )
     logger.info("AWS credential setup completed")
@@ -1146,6 +1250,7 @@ def setup_dolma2_toolkit(
         script=None,
         ssh_key_path=ssh_key_path,
         detach=detach,
+        suicide=False,
         screen=True,
     )
     logger.info("Dolma2 toolkit setup completed")
@@ -1155,10 +1260,10 @@ def setup_dolma2_toolkit(
 def map_commands(
     name: str,
     region: str,
-    owner: str,
     instance_id: list[str] | None,
     ssh_key_path: str,
     script: list[str],
+    suicide: bool,
     **kwargs,
 ):
     """
@@ -1188,8 +1293,8 @@ def map_commands(
     logger.info(f"Found {len(script):,} scripts to distribute")
 
     # Get all the instances with the given name and owner
-    logger.info(f"Retrieving instances with project={name}, owner={owner} in region {region}")
-    instances = InstanceInfo.describe_instances(region=region, tags={"Project": name, "Owner": owner})
+    logger.info(f"Retrieving instances with project={name} in region {region}")
+    instances = InstanceInfo.describe_instances(region=region, project=name)
 
     # filter by instance_id if provided
     if instance_id is not None:
@@ -1231,11 +1336,11 @@ def map_commands(
         run_command(
             name=name,
             region=region,
-            owner=owner,
             instance_id=[instance.instance_id],
             command="; ".join(run_command_scripts),
             script=None,
             ssh_key_path=ssh_key_path,
+            suicide=suicide,
             detach=True,
             screen=True,
         )
