@@ -29,7 +29,7 @@ from olmo_core.train.callbacks import (
 from olmo_core.train.common import LoadStrategy
 
 from cookbook.aliases import SourceInstance, WandbConfig
-from cookbook.data.dataset import MixtureBuilder
+from cookbook.data.dataset import MixtureBuilder, SingleDatasetBuilder
 from cookbook.model.config import (
     MODEL_TO_LR_MAP,
     DefaultOptimizerProperties,
@@ -323,9 +323,7 @@ class TransformerConfigBuilder:
                 dtype=self.dataset_dtype,
             ).build()
         else:
-            source_paths = []
-            for source in self.sources:
-                source_paths.extend(source.paths)
+            source_paths = SingleDatasetBuilder(sources=self.sources).build_source_paths()
 
         dataset_config = NumpyDatasetConfig(
             paths=source_paths,

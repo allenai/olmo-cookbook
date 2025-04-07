@@ -44,3 +44,16 @@ class MixtureBuilder:
             dtype=self.dtype,
             processes=self.processes,
         )
+
+@dataclass
+class SingleDatasetBuilder:
+    sources: List[SourceInstance]
+    fs: s3fs.S3FileSystem = field(default_factory=lambda: s3fs.S3FileSystem())
+    
+    def build_source_paths(self) -> List[str]:
+        paths = []
+        for source in self.sources:
+            globs = [path for path in source.paths if "*" in path]
+            paths.extend(paths + expand_globs(self.fs, globs))
+        return paths
+    
