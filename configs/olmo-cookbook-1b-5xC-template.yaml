@@ -1,0 +1,25 @@
+name: "olmo-cookbook-1b-5xC-{POOL}-{MIX}"
+description: "{POOL}-{MIX}"
+budget: "ai2/oe-data"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 140_000_000_000
+sequence_length: 2048
+global_batch_size: 2097152
+lr: 1.8e-3
+seed: 1337
+model: "olmo2_1B"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+wandb:
+  project: "olmo3-data-quality"
+dataset:
+  sources:
+  - name: {POOL}-{MIX}
+    target_ratio: 1.0
+    repetition_factor: 1.0
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/ablations/{POOL}-{MIX}/*.npy
