@@ -89,7 +89,6 @@ def setup_logging():
 logger = setup_logging()
 
 
-
 D2TK_SETUP = """
 #!/bin/bash
 # Set up raid drives
@@ -546,13 +545,13 @@ class InstanceInfo:
         # Initialize the EC2 client with the specified region
         client = client or boto3.client("ec2", region_name=region)
 
-        # If AMI ID is not provided, use a default Amazon Linux 2 AMI based on region
+        # If AMI ID is not provided, use a default Amazon Linux 2023 AMI based on region
         if not ami_id:
-            # Get the latest Amazon Linux 2 AMI
+            # Get the latest Amazon Linux 2023 AMI
             response = client.describe_images(
                 Owners=["amazon"],
                 Filters=[
-                    {"Name": "name", "Values": ["amzn2-ami-hvm-*-x86_64-gp2"]},
+                    {"Name": "name", "Values": ["al2023-ami-*-x86_64"]},
                     {"Name": "state", "Values": ["available"]},
                 ],
             )
