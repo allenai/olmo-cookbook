@@ -192,6 +192,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
                 BeakerEnvSecret(name="AWS_CONFIG", secret=f"{beaker_user}_AWS_CONFIG"),
                 BeakerEnvSecret(name="AWS_CREDENTIALS", secret=f"{beaker_user}_AWS_CREDENTIALS"),
+                BeakerEnvSecret(name="AWS_ACCESS_KEY_ID", secret=f"{beaker_user}_AWS_ACCESS_KEY_ID"),
+                BeakerEnvSecret(name="AWS_SECRET_ACCESS_KEY", secret=f"{beaker_user}_AWS_SECRET_ACCESS_KEY"),
                 BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
             ],
