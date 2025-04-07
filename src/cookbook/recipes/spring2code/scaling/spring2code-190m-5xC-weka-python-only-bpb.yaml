@@ -11,11 +11,12 @@ seed: 1337
 model: "olmo2_190M"
 tokenizer: "dolma2"
 priority: high
+eval_interval: 100
 global_batch_size: 1_048_576 # Half of the 1B
 learning_rate: 3.6e-3 # Double the 1B
 cluster: ai2/jupiter-cirrascale-2
 weka: true
-evaluators:
+downstream_evaluators:
   - CODEX_MBPP_BPB
   - CODEX_HUMANEVAL_BPB
 dataset:
