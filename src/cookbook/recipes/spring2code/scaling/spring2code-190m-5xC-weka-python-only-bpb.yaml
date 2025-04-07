@@ -17,8 +17,8 @@ learning_rate: 3.6e-3 # Double the 1B
 cluster: ai2/jupiter-cirrascale-2
 weka: true
 downstream_evaluators:
-  - CODEX_MBPP_BPB
-  - CODEX_HUMANEVAL_BPB
+  - codex_humaneval_gold_bpb_0shot
+  - codex_mbpp_gold_bpb_0shot
 dataset:
   sources:
   - name: the-stack-v2-ai2v0
