@@ -11,7 +11,8 @@ seed: 1337
 model: "olmo2_190M"
 tokenizer: "dolma2"
 priority: high
-learning_rate: 3.6e-3 # Double the LR of 1B
+global_batch_size: 1_048_576 # Half of the 1B
+learning_rate: 3.6e-3 # Double the 1B
 cluster: ai2/jupiter-cirrascale-2
 weka: true
 evaluators:
