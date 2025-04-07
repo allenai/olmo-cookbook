@@ -89,6 +89,7 @@ def setup_logging():
 logger = setup_logging()
 
 
+
 D2TK_SETUP = """
 #!/bin/bash
 # Set up raid drives
@@ -118,7 +119,7 @@ bash rustup.sh -y
 source ~/.bashrc
 # Do datamap-rs setups
 cd
-git clone https://github.com/revbucket/datamap-rs.git
+git clone https://github.com/allenai/datamap-rs.git
 cd datamap-rs
 s5cmd run examples/all_dressed/s5cmd_asset_downloader.txt
 cargo build --release
