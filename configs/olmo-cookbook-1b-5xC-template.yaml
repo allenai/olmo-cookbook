@@ -1,7 +1,7 @@
 name: "olmo-cookbook-1b-5xC-{POOL}-{MIX}"
 description: "{POOL}-{MIX}"
 budget: "ai2/oe-data"
-workspace: "ai2/oe-data"
+workspace: "ai2/olmo3-data-quality"
 nodes: 4
 gpus: 8
 preemptible: true
