@@ -282,8 +282,10 @@ def evaluate(
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
 
-    parsed_model_args = {}
+    parsed_model_args: dict[str, str] = {}
     for arg in model_args.split(","):
+        if not (arg := arg.strip()):
+            continue
         key, value = arg.split("=")
         parsed_model_args[key] = value
 
