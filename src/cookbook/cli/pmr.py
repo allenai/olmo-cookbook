@@ -813,7 +813,7 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
             ec2_client.describe_key_pairs(KeyNames=[key_name])
             logger.info(f"Key pair '{key_name}' already exists in region {region}. Skipping import.")
             return key_name
-        except ec2_client.exceptions.ClientError as e:
+        except ec2_client.exceptions.ClientError:
             # Key doesn't exist, continue with import
             pass
 
@@ -1059,6 +1059,7 @@ def create_instances(
             region=region,
             ami_id=ami_id,
             wait_for_completion=not detach,
+            client=ec2_client,
         )
         logger.info(f"Created instance {instance.instance_id} with name {instance.name}")
         instances.append(instance)
@@ -1085,11 +1086,14 @@ def list_instances(
     """
     logger.info(f"Listing instances with project={name} in region {region}")
 
+    client = boto3.client("ec2", region_name=region)
+
     # Retrieve matching instances
     instances = InstanceInfo.describe_instances(
         region=region,
         project=name,
         statuses=InstanceStatus.unterminated(),
+        client=client,
     )
     logger.info(f"Found {len(instances)} matching instances")
 
@@ -1131,8 +1135,15 @@ def terminate_instances(
     """
     logger.info(f"Terminating instances with project={name} in region {region}")
 
+    client = boto3.client("ec2", region_name=region)
+
     # Retrieve instances matching the project and owner tags
-    instances = InstanceInfo.describe_instances(region=region, project=name)
+    instances = InstanceInfo.describe_instances(
+        region=region,
+        project=name,
+        statuses=InstanceStatus.unterminated(),
+        client=client,
+    )
     logger.info(f"Found {len(instances)} instances matching the specified tags")
 
     # Filter by instance ID if provided
@@ -1144,7 +1155,7 @@ def terminate_instances(
     # Terminate each instance
     for instance in instances:
         logger.info(f"Terminating instance {instance.instance_id} ({instance.name})")
-        success = instance.terminate(wait_for_termination=not detach)
+        success = instance.terminate(wait_for_termination=not detach, client=client)
         if success:
             logger.info(f"Successfully terminated instance {instance.instance_id} ({instance.name})")
         else:
@@ -1173,11 +1184,14 @@ def pause_instances(
     """
     logger.info(f"Pausing instances with project={name} in region {region}")
 
+    client = boto3.client("ec2", region_name=region)
+
     # Retrieve instances matching the project and owner tags
     instances = InstanceInfo.describe_instances(
         region=region,
         project=name,
-        statuses=[InstanceStatus.RUNNING]
+        statuses=[InstanceStatus.RUNNING],
+        client=client,
     )
     logger.info(f"Found {len(instances)} instances matching the specified tags")
 
@@ -1190,7 +1204,7 @@ def pause_instances(
     # Pause each instance
     for instance in instances:
         logger.info(f"Pausing instance {instance.instance_id} ({instance.name})")
-        success = instance.pause(wait_for_completion=not detach)
+        success = instance.pause(wait_for_completion=not detach, client=client)
         if success:
             logger.info(f"Successfully paused instance {instance.instance_id} ({instance.name})")
         else:
@@ -1214,13 +1228,16 @@ def resume_instances(
         instance_id: Optional list of specific instance IDs to resume
         detach: Whether to return immediately without waiting for resume to complete
     """
+    client = boto3.client("ec2", region_name=region)
+
     logger.info(f"Resuming instances with project={name} in region {region}")
 
     # Retrieve instances matching the project and owner tags
     instances = InstanceInfo.describe_instances(
         region=region,
         project=name,
-        statuses=[InstanceStatus.STOPPED]
+        statuses=[InstanceStatus.STOPPED],
+        client=client,
     )
     logger.info(f"Found {len(instances)} instances matching the specified tags")
 
@@ -1232,7 +1249,7 @@ def resume_instances(
 
     # Resume each instance
     for instance in instances:
-        success = instance.resume(wait_for_completion=not detach)
+        success = instance.resume(wait_for_completion=not detach, client=client)
         if success:
             logger.info(f"Successfully resumed instance {instance.instance_id} ({instance.name})")
         else:
