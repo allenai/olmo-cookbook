@@ -28,7 +28,7 @@ dev = [
     "mypy>=1.0,<1.4",
     "ruff",
     "mypy>=1.0,<1.4",
-    "boto3-stubs[essential,ec2,s3]",
+    "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 beaker = [
     "beaker-py",

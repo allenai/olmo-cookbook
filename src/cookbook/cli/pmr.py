@@ -66,6 +66,7 @@ from paramiko.channel import ChannelFile, ChannelStdinFile
 if TYPE_CHECKING:
     from mypy_boto3_ec2.client import EC2Client
     from mypy_boto3_ec2.type_defs import InstanceTypeDef, InstanceStatusTypeDef
+    from mypy_boto3_ssm.client import SSMClient
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -176,7 +177,7 @@ sudo mkdir /mnt/raid0
 sudo mount /dev/md0 /mnt/raid0
 sudo chown -R $USER /mnt/raid0
 # Download and set up all packages we need
-sudo yum install gcc -cmake openssl-devel gcc-c++ htop wget tmux screen -y
+sudo yum install gcc cmake openssl-devel gcc-c++ htop wget tmux screen -y
 wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
 tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
 sudo mv s5cmd /usr/local/bin
@@ -584,6 +585,27 @@ class InstanceInfo:
                 logger.error(f"Error terminating instance {self.instance_id}: {str(e)}")
             return False
 
+
+    @classmethod
+    def get_latest_ami_id(cls, instance_type: str, client: Union["SSMClient", None] = None) -> str:
+        """
+        Get the latest AMI ID for a given instance type and region
+        """
+        is_arm = instance_type.startswith(('a1', 'c6g', 'c7g', 'm6g', 'm7g', 'r6g', 'r7g', 't4g', 'im4gn', 'g5g'))
+
+        # Select appropriate AMI based on architecture
+        if is_arm:
+            image_id = '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64'
+        else:
+            image_id = '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64'
+
+        client = client or boto3.client('ssm')
+        parameter = client.get_parameter(Name=image_id, WithDecryption=False)
+        ami_id = parameter.get('Parameter', {}).get('Value')
+        assert ami_id, f"No AMI ID found for {image_id}"
+        return ami_id
+
+
     @classmethod
     def create_instance(
         cls,
@@ -613,24 +635,8 @@ class InstanceInfo:
         # Initialize the EC2 client with the specified region
         client = client or boto3.client("ec2", region_name=region)
 
-        # If AMI ID is not provided, use a default Amazon Linux 2023 AMI based on region
-        if not ami_id:
-            # Get the latest Amazon Linux 2023 AMI
-            response = client.describe_images(
-                Owners=["amazon"],
-                Filters=[
-                    {"Name": "name", "Values": ["al2023-ami-*-x86_64"]},
-                    {"Name": "state", "Values": ["available"]},
-                ],
-            )
-
-            # Sort images by creation date and get the latest one
-            ami_id = sorted(
-                response["Images"],
-                key=lambda x: x.get("CreationDate", datetime.datetime.min),
-                reverse=True,
-            )[0].get("ImageId")
-            assert ami_id, "No AMI ID found"
+        # If AMI ID is not provided, use a default Amazon Linux 2023 AMI (x86_64 or arm64 based on instance type)
+        ami_id = ami_id or cls.get_latest_ami_id(instance_type)
 
         # Prepare the tags format required by EC2
         tag_specifications = [
