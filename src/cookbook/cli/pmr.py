@@ -1388,7 +1388,7 @@ def run_command(
         logger.info(f"Running command on instance {instance.instance_id} ({instance.name})")
 
         # Convert script to command if script is provided
-        command_to_run = script_to_command(script, to_file=False) if script is not None else command
+        command_to_run = script_to_command(script, to_file=True) if script is not None else command
         assert command_to_run is not None, "command and script cannot both be None"  # this should never happen
 
         if spindown:
