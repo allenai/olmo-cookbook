@@ -89,6 +89,78 @@ def setup_logging():
 logger = setup_logging()
 
 
+
+PACKAGE_MANAGER_DETECTOR = """
+#!/bin/bash
+
+# Determine package manager based on OS information in /etc/os-release
+determine_package_manager() {
+  # Source the OS release file to get variables
+  source /etc/os-release
+
+  # First try using ID_LIKE if available
+  if [[ -n "$ID_LIKE" ]]; then
+    # Debian-based systems
+    if [[ "$ID_LIKE" == *"debian"* ]]; then
+      echo "apt"
+      return
+    # Red Hat / Fedora based systems
+    elif [[ "$ID_LIKE" == *"fedora"* || "$ID_LIKE" == *"rhel"* ]]; then
+      if command -v dnf &>/dev/null; then
+        echo "dnf"
+      else
+        echo "yum"
+      fi
+      return
+    # SUSE-based systems
+    elif [[ "$ID_LIKE" == *"suse"* ]]; then
+      echo "zypper"
+      return
+    fi
+  fi
+
+  # Fall back to ID if ID_LIKE didn't match or isn't available
+  case "$ID" in
+    debian|ubuntu|mint|pop|elementary|zorin|kali|parrot|deepin)
+      echo "apt"
+      ;;
+    fedora)
+      echo "dnf"
+      ;;
+    rhel|centos)
+      if command -v dnf &>/dev/null; then
+        echo "dnf"
+      else
+        echo "yum"
+      fi
+      ;;
+    amzn)
+      if [[ "$VERSION_ID" == "2023"* ]]; then
+        echo "dnf"
+      else
+        echo "yum"
+      fi
+      ;;
+    opensuse*|sles|suse)
+      echo "zypper"
+      ;;
+    alpine)
+      echo "apk"
+      ;;
+    arch|manjaro|endeavouros)
+      echo "pacman"
+      ;;
+    *)
+      echo "unknown"
+      ;;
+  esac
+}
+
+# Get and display the package manager
+PKG_MANAGER=$(determine_package_manager)
+"""
+
+
 D2TK_SETUP = """
 #!/bin/bash
 # Set up raid drives
@@ -104,11 +176,7 @@ sudo mkdir /mnt/raid0
 sudo mount /dev/md0 /mnt/raid0
 sudo chown -R $USER /mnt/raid0
 # Download and set up all packages we need
-sudo yum install gcc -y
-sudo yum install cmake -y
-sudo yum install openssl-devel -y
-sudo yum install gcc-c++ -y
-sudo yum install htop -y
+sudo yum install gcc -cmake openssl-devel gcc-c++ htop wget tmux screen -y
 wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
 tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
 sudo mv s5cmd /usr/local/bin
@@ -127,7 +195,7 @@ cd
 git clone https://github.com/revbucket/minhash-rs.git
 cd minhash-rs
 cargo build --release
-"""
+""".strip()
 
 
 class InstanceStatus(Enum):
@@ -663,6 +731,10 @@ class Session:
         timeout: int | None = None,
         terminate: bool = True,
     ) -> SessionContent:
+        # run a simple command to check if screen is installed
+        if "screen" not in self.run_single("which screen").stdout:
+            raise RuntimeError("screen is not installed; cannot run in screen")
+
         client: None | paramiko.SSHClient = None
         command_hash = hashlib.md5(command.encode()).hexdigest()[:12]
 
@@ -1347,7 +1419,6 @@ def setup_instances(
     owner: str,
     instance_id: list[str] | None,
     ssh_key_path: str,
-    detach: bool,
     **kwargs,
 ):
     """
@@ -1387,11 +1458,17 @@ def setup_instances(
     aws_config_base64 = base64.b64encode(aws_config.encode("utf-8")).decode("utf-8")
     aws_credentials_base64 = base64.b64encode(aws_credentials.encode("utf-8")).decode("utf-8")
 
+    screen_install = f"{PACKAGE_MANAGER_DETECTOR} sudo ${{PKG_MANAGER}} install -y screen"
+    screen_install_base64 = base64.b64encode(screen_install.encode("utf-8")).decode("utf-8")
+
     # Create setup command to create AWS config directory and write files
     setup_command = [
         "mkdir -p ~/.aws",
         f"echo '{aws_config_base64}' | base64 -d > ~/.aws/config",
         f"echo '{aws_credentials_base64}' | base64 -d > ~/.aws/credentials",
+        f"echo '{screen_install_base64}' | base64 -d > screen_setup.sh",
+        "chmod +x screen_setup.sh",
+        "./screen_setup.sh",
     ]
 
     # Execute command on the instances
@@ -1404,7 +1481,7 @@ def setup_instances(
         command=" && ".join(setup_command),
         script=None,
         ssh_key_path=ssh_key_path,
-        detach=detach,
+        detach=False,
         spindown=False,
         screen=True,
     )
@@ -1441,7 +1518,6 @@ def setup_dolma2_toolkit(
         owner=owner,
         instance_id=instance_id,
         ssh_key_path=ssh_key_path,
-        detach=detach,
     )
 
     # Encode the Dolma2 toolkit setup script for secure transfer
