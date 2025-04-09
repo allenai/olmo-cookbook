@@ -98,7 +98,7 @@ def convert(
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
-        input_dir=input_dir,
+        input_dir=input_dir.rstrip("/"),
         olmo_core_commit_hash=olmo_core_commit_hash,
         olmo_type=olmo_type,
         olmo2_commit_hash=olmo2_commit_hash,
