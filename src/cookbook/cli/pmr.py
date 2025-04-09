@@ -934,7 +934,7 @@ def script_to_command(script_path: str, to_file: bool = True) -> str:
         file_name, extension = os.path.splitext(os.path.basename(script_path))
         h = hashlib.sha256(script_content).hexdigest()
         script_path = f"{file_name}-{h}{extension}"
-        return f"echo {b64_script_content} > {script_path} && chmod +x {script_path} && {script_path}"
+        return f"echo '{b64_script_content}' | base64 -d > {script_path} && chmod +x {script_path} && bash {script_path}"
     else:
         return f"echo {b64_script_content} | base64 -d | bash"
 
