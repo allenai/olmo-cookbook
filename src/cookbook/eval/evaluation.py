@@ -225,7 +225,7 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            if model_backend == "vllm" and task_group == "gen" and compute_gold_bpb:
+            if compute_gold_bpb:
                 local_flags.append("--task-args compute_gold_bpb=true")
 
             # run oe-eval
