@@ -180,3 +180,4 @@ cython_debug/
 # temporary directory
 tmp/
 temp/
+uv.lock
