@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
-from typing import List, Optional
+from typing import List, Optional, Union
 from urllib.parse import urlparse
 
 from cookbook.constants import (
@@ -23,7 +23,7 @@ from cookbook.constants import (
 
 @dataclass(frozen=True)
 class PythonEnv:
-    name: str | None
+    name: Optional[str]
     python: str
     pip: str
 
@@ -139,7 +139,10 @@ def get_aws_secret_access_key() -> Optional[str]:
 
 
 def install_oe_eval(
-    commit_hash: str | None, env: PythonEnv | None = None, no_dependencies: bool = True, is_editable: bool = False
+    commit_hash: Optional[str],
+    env: Optional[PythonEnv] = None,
+    no_dependencies: bool = True,
+    is_editable: bool = False,
 ) -> str:
     env = env or PythonEnv.null()
 
@@ -164,7 +167,7 @@ def install_oe_eval(
 def run_func_in_venv(fn):
     """Wrap any function so that it can run inside a virtual environment"""
 
-    def wrapper(*args, env: PythonEnv | None = None, **kwargs):
+    def wrapper(*args, env: Optional[PythonEnv] = None, **kwargs):
         if env is None:
             return fn(*args, **kwargs)
 
@@ -276,7 +279,7 @@ def add_aws_flags(
     aws_secret_access_key: Optional[str],
     workspace: str,
     flags: List[str],
-    env: PythonEnv | None = None,
+    env: Optional[PythonEnv] = None,
 ) -> bool:
     if any(flag.startswith("--gantry-secret-aws-access-key-id") for flag in flags) and any(
         flag.startswith("--gantry-secret-aws-secret-access") for flag in flags
@@ -324,7 +327,7 @@ def make_eval_run_name(checkpoint_path: str, add_bos_token: bool) -> str:
     )
 
 
-def clone_repository(git_url: str, commit_hash: str | None = None) -> str:
+def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
     # current directory
     current_dir = os.getcwd()
 
@@ -361,7 +364,7 @@ def clone_repository(git_url: str, commit_hash: str | None = None) -> str:
         os.chdir(current_dir)
 
 
-def install_olmo(commit_hash: str | None, env: PythonEnv | None = None) -> str:
+def install_olmo(commit_hash: Optional[str], env: Optional[PythonEnv] = None) -> str:
     env = env or PythonEnv.null()
 
     # Clone the repository
@@ -374,7 +377,7 @@ def install_olmo(commit_hash: str | None, env: PythonEnv | None = None) -> str:
     return olmo_dir
 
 
-def install_olmo_core(commit_hash: str | None, env: PythonEnv | None = None) -> str:
+def install_olmo_core(commit_hash: Optional[str], env: Optional[PythonEnv] = None) -> str:
     env = env or PythonEnv.null()
 
     # Clone the repository
@@ -416,7 +419,7 @@ def make_aws_credentials(
     return string_buffer.getvalue()
 
 
-def make_destination_dir(input_dir: str, suffix: str, output_dir: str | None = None) -> str:
+def make_destination_dir(input_dir: str, suffix: str, output_dir: Optional[str] = None) -> str:
     if output_dir is None:
         input_base, input_fn = os.path.split(input_dir)
         output_dir = os.path.join(input_base, f"{input_fn.rstrip('/')}-{suffix}")
@@ -426,7 +429,7 @@ def make_destination_dir(input_dir: str, suffix: str, output_dir: str | None = N
     return output_dir
 
 
-def download_tokenizer(huggingface_tokenizer: str, env: PythonEnv | None = None) -> str:
+def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = None) -> str:
     env = env or PythonEnv.null()
     tokenizer_dir = mkdtemp()
     try:
@@ -447,7 +450,7 @@ def download_tokenizer(huggingface_tokenizer: str, env: PythonEnv | None = None)
     return tokenizer_dir
 
 
-def install_transformers(commit_hash: str | None, env: PythonEnv | None = None) -> str:
+def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = None) -> str:
     env = env or PythonEnv.null()
 
     # Clone the repository
@@ -466,7 +469,7 @@ def install_transformers(commit_hash: str | None, env: PythonEnv | None = None) 
     return transformers_dir
 
 
-def remove_conflicting_packages(env: PythonEnv | None = None):
+def remove_conflicting_packages(env: Optional[PythonEnv] = None):
     env = env or PythonEnv.null()
     is_flash_attention_installed = (
         subprocess.run(
@@ -489,7 +492,7 @@ def remove_conflicting_packages(env: PythonEnv | None = None):
         subprocess.run(shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"), env=env.path())
 
 
-def check_beaker_dependencies(env: PythonEnv | None = None):
+def check_beaker_dependencies(env: Optional[PythonEnv] = None):
     env = env or PythonEnv.null()
     is_beaker_py_installed = (
         subprocess.run(shlex.split(f"{env.pip} show beaker-py"), capture_output=True, env=env.path()).returncode
@@ -506,7 +509,7 @@ def check_beaker_dependencies(env: PythonEnv | None = None):
         raise RuntimeError("When using --beaker, both beaker-py and beaker-gantry must be installed")
 
 
-def find_repository_root(current: str | Path = __file__) -> Path:
+def find_repository_root(current: Union[str, Path] = __file__) -> Path:
     # go up from current dir until we find a .git directory
     current = Path(current).resolve().absolute()
     if current.is_file():
@@ -521,7 +524,7 @@ def find_repository_root(current: str | Path = __file__) -> Path:
     return find_repository_root(current.parent)
 
 
-def discover_weka_mount(path: str | Path | None = None) -> str | None:
+def discover_weka_mount(path: Union[str, Path, None] = None) -> str | None:
     if path is None:
         return None
 
