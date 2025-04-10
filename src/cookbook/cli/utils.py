@@ -1,12 +1,12 @@
 import ast
-import os
 import configparser
-from io import StringIO
+import os
 import re
 import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
 from typing import List, Optional
@@ -251,6 +251,7 @@ def get_beaker_user() -> str:
 def install_beaker_py(env: PythonEnv) -> None:
     subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
 
+
 @run_func_in_venv
 def check_if_secret_exists_in_beaker_workspace(
     secret_name: str,
@@ -400,7 +401,9 @@ def make_aws_config(profile_name: str = "default", **kwargs) -> str:
     return string_buffer.getvalue()
 
 
-def make_aws_credentials(aws_access_key_id: str, aws_secret_access_key: str, profile_name: str = "default", **kwargs) -> str:
+def make_aws_credentials(
+    aws_access_key_id: str, aws_secret_access_key: str, profile_name: str = "default", **kwargs
+) -> str:
     aws_credentials = configparser.ConfigParser()
     aws_credentials[profile_name] = {
         "aws_access_key_id": aws_access_key_id,

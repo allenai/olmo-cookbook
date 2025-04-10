@@ -55,37 +55,37 @@ def read_config_files(path_patterns: List[str]) -> Dict[str, List[str]]:
         filename = Path(file).name
         paths = []
 
-        if filename.endswith('.yaml'):
-            with open(file, 'r') as f:
+        if filename.endswith(".yaml"):
+            with open(file, "r") as f:
                 config = yaml.safe_load(f)
                 # Get paths from data.paths in yaml
-                data_paths = config.get('data', {}).get('paths', [])
+                data_paths = config.get("data", {}).get("paths", [])
                 for line in data_paths:
                     line = line.strip()
-                    if not line or line.startswith('#'):
+                    if not line or line.startswith("#"):
                         continue
-                    if ',' in line:
-                        path = line.split(',')[1]
+                    if "," in line:
+                        path = line.split(",")[1]
                     else:
                         path = line
-                    if path.endswith('.npy'):
+                    if path.endswith(".npy"):
                         paths.append(path)
         else:
             # Handle txt files as before
-            with open(file, 'r') as f:
+            with open(file, "r") as f:
                 for line in f:
                     line = line.strip()
                     # Skip empty lines and comments
-                    if not line or line.startswith('#'):
+                    if not line or line.startswith("#"):
                         continue
 
                     # Handle comma-separated format
-                    if ',' in line:
-                        path = line.split(',')[1]
+                    if "," in line:
+                        path = line.split(",")[1]
                     else:
                         path = line
 
-                    if path.endswith('.npy'):
+                    if path.endswith(".npy"):
                         paths.append(path)
 
         paths_by_file[filename] = paths
@@ -97,24 +97,25 @@ def normalize_storage_path(path: str) -> str:
     """
     Normalize a file path by converting backslashes to forward slashes,
     stripping known URL schemes and domains, and removing leading slashes.
-    
+
     Args:
         path: The original file path.
-    
+
     Returns:
         The normalized file path.
     """
     # Replace backslashes with forward slashes
-    path = path.replace('\\', '/')
-    
+    path = path.replace("\\", "/")
+
     # If the path appears to be a URL (e.g., starts with http, https, s3, or gs),
     # parse it and take only the path portion.
-    if re.match(r'^(https?|s3|gs):', path, re.IGNORECASE):
+    if re.match(r"^(https?|s3|gs):", path, re.IGNORECASE):
         parsed = urlparse(path)
         path = parsed.path  # This drops the scheme and netloc
-    
+
     # Remove any leading slashes for consistency
-    return path.lstrip('/')
+    return path.lstrip("/")
+
 
 def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
     """
@@ -128,24 +129,24 @@ def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str
         Tuple of (base path counts dict, file totals dict)
     """
     base_path_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    
+
     for filename, paths in paths_by_file.items():
         for path in paths:
             # Normalize the incoming path to remove extraneous prefixes
             norm_path = normalize_storage_path(path)
-            
+
             # Special handling for dclm paths: extract the part up to the "tokenizer" folder.
-            if 'dclm/' in norm_path.lower():
-                match = re.match(r'(.*dclm/.+?tokenizer)(?:/.*)?$', norm_path, re.IGNORECASE)
+            if "dclm/" in norm_path.lower():
+                match = re.match(r"(.*dclm/.+?tokenizer)(?:/.*)?$", norm_path, re.IGNORECASE)
                 base_path = match.group(1) if match else os.path.normpath(norm_path)
             else:
                 # For all other paths, group by the normalized full path (removing the last component).
-                parts = norm_path.split('/')
+                parts = norm_path.split("/")
                 if len(parts) > 1:
                     base_path = os.path.normpath(os.path.join(*parts[:-1]))
                 else:
                     base_path = norm_path  # If there's no directory structure, use the path as-is.
-            
+
             base_path_counts[base_path][filename] += 1
 
     # Optionally, compute the total number of paths for each file.
@@ -153,41 +154,37 @@ def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str
     return base_path_counts, file_totals
 
 
-
-def format_results(base_path_counts: Dict[str, Dict[str, int]], 
-                              file_totals: Dict[str, int]) -> None:
+def format_results(base_path_counts: Dict[str, Dict[str, int]], file_totals: Dict[str, int]) -> None:
     """
     Format and print results using tabulate.
-    
+
     Args:
         base_path_counts: Dictionary mapping base paths to counts per file.
         file_totals: Dictionary mapping filenames to total counts.
     """
     # Sort filenames by their totals in descending order.
     sorted_filenames = sorted(file_totals.keys(), key=lambda x: file_totals[x], reverse=True)
-    
+
     # Sort base paths by counts in the largest file (i.e. first sorted filename).
     largest_file = sorted_filenames[0]
     sorted_base_paths = sorted(
-        base_path_counts.keys(),
-        key=lambda x: base_path_counts[x].get(largest_file, 0),
-        reverse=True
+        base_path_counts.keys(), key=lambda x: base_path_counts[x].get(largest_file, 0), reverse=True
     )
-    
+
     # Prepare headers and table data.
-    headers = ['Base Path'] + sorted_filenames + ['Match']
+    headers = ["Base Path"] + sorted_filenames + ["Match"]
     table_data = []
-    
+
     for base_path in sorted_base_paths:
         # Build a row for each base_path.
         row = [base_path]
         counts = [base_path_counts[base_path].get(filename, 0) for filename in sorted_filenames]
         # Use the count if greater than 0, else '-'
-        row.extend([count if count > 0 else '-' for count in counts])
-        
+        row.extend([count if count > 0 else "-" for count in counts])
+
         # Add a checkmark if all counts are the same.
         all_same = True
-        if counts: 
+        if counts:
             first_val = counts[0]
             for count in counts:
                 if count != first_val:
@@ -195,16 +192,16 @@ def format_results(base_path_counts: Dict[str, Dict[str, int]],
                     break
         else:
             all_same = False
-        row.append('✓' if all_same else '')
-        
+        row.append("✓" if all_same else "")
+
         table_data.append(row)
-    
+
     # Build totals row.
-    totals_row = ['Total'] + [file_totals[filename] for filename in sorted_filenames] + ['']
+    totals_row = ["Total"] + [file_totals[filename] for filename in sorted_filenames] + [""]
     table_data.append(totals_row)
-    
+
     # Print formatted table using tabulate.
-    print("\n" + tabulate(table_data, headers, tablefmt='grid'))
+    print("\n" + tabulate(table_data, headers, tablefmt="grid"))
 
 
 def compare_config_files(path_patterns: List[str]) -> None:
@@ -223,7 +220,7 @@ def compare_config_files(path_patterns: List[str]) -> None:
 
 
 @click.command()
-@click.argument('path_patterns', nargs=-1, required=True)
+@click.argument("path_patterns", nargs=-1, required=True)
 def main(path_patterns: Tuple[str, ...]) -> None:
     """Compare text files containing paths and print counts of .npy files under each base path."""
     compare_config_files(list(path_patterns))

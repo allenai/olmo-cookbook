@@ -205,7 +205,11 @@ SANTACODER_INFILLING = {
 }
 
 DEEPSEEK_CODER_INFILLING = {
-    "context_kwargs": {"lead_token": "<｜fim▁begin｜>", "center_token": "<｜fim▁hole｜>", "end_token": "<｜fim▁end｜>"},
+    "context_kwargs": {
+        "lead_token": "<｜fim▁begin｜>",
+        "center_token": "<｜fim▁hole｜>",
+        "end_token": "<｜fim▁end｜>",
+    },
     "generation_kwargs": {"stop_sequences": ["<|eot_id|>", "<|endoftext|>", "<|EOT|>"]},
 }
 

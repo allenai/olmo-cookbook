@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+import olmo_core.train.train_module as train_module
+from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -9,9 +11,18 @@ from olmo_core.data import (
     NumpyDatasetType,
     TokenizerConfig,
 )
-from olmo_core.config import DType
 from olmo_core.data.types import NumpyDatasetDType
+from olmo_core.distributed.parallel import DataParallelType
+from olmo_core.float8 import Float8Config
 from olmo_core.nn.transformer import TransformerConfig
+from olmo_core.optim import (
+    CosWithWarmup,
+    OptimConfig,
+    OptimGroupOverride,
+    Scheduler,
+    SkipStepAdamWConfig,
+)
+from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -25,11 +36,6 @@ from olmo_core.train.callbacks import (
     WandBCallback,
 )
 from olmo_core.train.common import LoadStrategy
-from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.float8 import Float8Config
-from olmo_core.optim import CosWithWarmup, OptimGroupOverride, SkipStepAdamWConfig, Scheduler, OptimConfig
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay
-import olmo_core.train.train_module as train_module
 
 from cookbook.aliases import SourceInstance, WandbConfig
 from cookbook.data.dataset import MixtureBuilder
