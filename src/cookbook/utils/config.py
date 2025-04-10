@@ -136,24 +136,16 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         learning_rate=base_config.learning_rate,
     ).build()
 
-    device = get_default_device()
-    world_mesh = config.model.build_mesh(device=device)
-
     seed_all(config.init_seed)
     config_dict = config.as_config_dict()
-
     trainer = None
+
     if not dry_run:
-        model = config.model.build(
-            init_device="meta",
-            device=device,
-            mesh=world_mesh,
-            max_seq_len=config.dataset.sequence_length,
-        )
         dataset = config.dataset.build()
-        optim = config.optim.build(model)
-        data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
-        trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
+        model = config.model.build(init_device="meta")
+        train_module = config.train_module.build(model)
+        data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
+        trainer = config.trainer.build(train_module, data_loader)
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
