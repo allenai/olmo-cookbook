@@ -39,7 +39,8 @@ wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@undfined/cookbook-pin",
+    # Pinned to core v2.x and removal of t_max from scheduling
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@522b05521065af9097aea65be9acad9a900b9db6",
     "beaker-py",
     "GitPython>=3.0,<4.0",
     "wandb",
