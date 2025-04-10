@@ -35,11 +35,23 @@ import yaml
 from tabulate import tabulate
 
 
-def parse_run_path(run_path: str) -> str:
-    """For convenience, we allow run paths as well as URLs."""
+def parse_wandb_run_path(run_path: str) -> str:
+    """
+    Parse a Weights & Biases run path, either in the form "entity/project/run_id" 
+    or as a full wandb.ai URL.
+
+    Args:
+        run_path: Either a W&B run path like "ai2-llm/olmo-medium/cej4ya39" 
+                 or URL like "https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39"
+                 or URL with username like "https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39?nw=nwusersoldni"
+
+    Returns:
+        Standardized run path in the form "entity/project/run_id"
+        If input is not a W&B path/URL, returns the original string unchanged
+    """
     run_path = run_path.strip("/")
     run_path_re = re.compile(r"^[^/]+/[^/]+/[^/]+$")
-    run_path_url = re.compile(r"^https?://wandb.ai/([^/]+)/([^/]+)/runs/([^/]+)")
+    run_path_url = re.compile(r"^https?://wandb.ai/([^/]+)/([^/]+)/runs/([^/?]+)")
     
     if run_path_re.match(run_path):
         return run_path
@@ -49,7 +61,7 @@ def parse_run_path(run_path: str) -> str:
         entity, project, run_id = m.groups()
         return f"{entity}/{project}/{run_id}"
 
-    return run_path  # Return original path if it's a local file
+    return run_path  # Return original path if it's not a W&B path
 
 
 def read_config_files(path_patterns: List[str]) -> Dict[str, List[str]]:
@@ -70,7 +82,7 @@ def read_config_files(path_patterns: List[str]) -> Dict[str, List[str]]:
             # Handle Wandb URLs
             import wandb
             api = wandb.Api()
-            run_path = parse_run_path(pattern)
+            run_path = parse_wandb_run_path(pattern)
             try:
                 run = api.run(run_path)
                 config_raw = run._attrs["rawconfig"]
