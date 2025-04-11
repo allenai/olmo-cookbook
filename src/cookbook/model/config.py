@@ -65,11 +65,21 @@ class WrappedTransformerConfig:
     @classmethod
     def olmo2_core_1B(cls) -> TransformerConfig:
         """
-        OLMo2 1b (1_336_035_328 parameters)
+        OLMo2 1b (1_336_035_328 total params, 1_130_514_432 non-embedding params)
         """
         return getattr(TransformerConfig, "olmo2_1B")(
             vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
         )
+
+    @classmethod
+    def olmo2_core_1B_v2(cls) -> TransformerConfig:
+        """
+        OLMo2 1b v2 (1_484_916_736 total params, 1_279_395_840 non-embedding params)
+        """
+        return getattr(TransformerConfig, "olmo2_1B_v2")(
+            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+        )
+
 
     @classmethod
     def from_model_identifier(cls, model_identifier: str) -> TransformerConfig:
@@ -79,6 +89,8 @@ class WrappedTransformerConfig:
             return cls.olmo2_core_190M()
         elif model_identifier == "olmo2_1B":
             return cls.olmo2_core_1B()
+        elif model_identifier == "olmo2_1B_v2":
+            return cls.olmo2_core_1B_v2()
         else:
             raise ValueError(f"Model identifier {model_identifier} is not supported.")
 
@@ -90,4 +102,5 @@ class SupportedTokenizers(Enum):
 
 MODEL_TO_LR_MAP = {
     "olmo2_1B": 1.8e-3,
+    "olmo2_1B_v2": 1.8e-3,
 }

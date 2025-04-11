@@ -5,10 +5,10 @@ workspace: "ai2/oe-data" #"ai2/dolma2"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 113_184_153_600
+max_tokens: 127_939_584_000 # for olmo2_1B_v2, we have  1_279_395_840 non-embedding params
 sequence_length: 4096 #4096, 2048
 seed: 1337
-model: "olmo2_1B"
+model: "olmo2_1B_v2"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/jupiter-cirrascale-2
