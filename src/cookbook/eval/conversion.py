@@ -299,6 +299,12 @@ def convert_checkpoint(
         else PythonEnv.null()
     )
 
+    if max_sequence_length is None:
+        max_sequence_length = 4096
+
+        if olmo_type == "olmo-core":
+            print("max_sequence_length is required for olmo-core conversion. Defaulting to 4096.")
+
     if use_beaker:
         print("Installing beaker and gantry clients...")
         subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
@@ -403,10 +409,6 @@ def convert_checkpoint(
             env=env,
         )
     elif olmo_type == "olmo-core":
-        if max_sequence_length is None:
-            print("max_sequence_length is required for olmo-core conversion. Defaulting to 4096.")
-            max_sequence_length = 4096
-
         return convert_olmo_core(
             input_dir=input_dir,
             max_sequence_length=max_sequence_length,
