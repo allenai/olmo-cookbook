@@ -19,7 +19,14 @@ Usage:
     # Compare Wandb runs
     python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39 https://wandb.ai/ai2-llm/olmoe/runs/rzsn9tlc
 
+    # Compare a Wandb run on old OLMo configs with local files with new OLMo configs
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/yh8qbwif\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/79h5h3aa\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt
+
 Note that the counts are not file size; they are just number of `npy` files under each base path, which could be different sizes.
+
+@kylel
+
 """
 
 import glob
