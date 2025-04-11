@@ -37,6 +37,7 @@ from cookbook.constants import (
 
 def convert_olmo_core(
     input_dir: str,
+    max_sequence_length: int,
     huggingface_tokenizer: str = DEFAULT_OLMO_CORE_TOKENIZER,
     unsharded_output_dir: Optional[str] = None,
     huggingface_output_dir: Optional[str] = None,
@@ -84,14 +85,12 @@ def convert_olmo_core(
         cmd = [
             env.python,
             OLMO_CORE_UNSHARD_CONVERT_SCRIPT,
-            "--checkpoint-input-dir",
+            "--checkpoint-input-path",
             input_dir,
-            "--unsharded-output-dir",
-            unsharded_output_dir,
+            "--max-sequence-length",
+            max_sequence_length,
             "--huggingface-output-dir",
             huggingface_output_dir,
-            "--tokenizer-name-or-path",
-            huggingface_tokenizer,
         ]
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
         print(f"Conversion of OLMo core checkpoint complete. Huggingface model saved to {huggingface_output_dir}.")
@@ -292,6 +291,7 @@ def convert_checkpoint(
     use_system_python: bool,
     python_venv_name: str,
     python_venv_force: bool,
+    max_sequence_length: Optional[int] = None,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -351,6 +351,7 @@ def convert_checkpoint(
             f"--olmo2-commit-hash {olmo2_commit_hash}",
             f"--olmo-core-commit-hash {olmo_core_commit_hash}",
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
+            f"--max-sequence-length {max_sequence_length}",
             "--use-system-python",
         ]
         remote_command_str = " ".join(remote_command)
@@ -402,8 +403,13 @@ def convert_checkpoint(
             env=env,
         )
     elif olmo_type == "olmo-core":
+        if max_sequence_length is None:
+            print("max_sequence_length is required for olmo-core conversion. Defaulting to 4096.")
+            max_sequence_length = 4096
+
         return convert_olmo_core(
             input_dir=input_dir,
+            max_sequence_length=max_sequence_length,
             unsharded_output_dir=unsharded_output_dir,
             huggingface_output_dir=huggingface_output_dir,
             huggingface_tokenizer=huggingface_tokenizer or DEFAULT_OLMO_CORE_TOKENIZER,

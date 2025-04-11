@@ -59,6 +59,12 @@ logger = logging.getLogger(__name__)
     default="oe-conversion-venv",
     help="Name of the environment to use for conversion",
 )
+@click.option(
+    "--max-sequence-length",
+    type=int,
+    default=None,
+    help="Maximum sequence length of the model (olmo-core only)",
+)
 def convert(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -84,6 +90,7 @@ def convert(
     use_beaker: bool,
     env_name: str,
     beaker_preemptible: bool,
+    max_sequence_length: Optional[int] = None,
 ):
     convert_checkpoint(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -110,6 +117,7 @@ def convert(
         unsharded_output_suffix=unsharded_output_suffix,
         use_beaker=use_beaker,
         use_system_python=use_system_python,
+        max_sequence_length=max_sequence_length,
     )
 
 
