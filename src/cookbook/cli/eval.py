@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Optional
 
 import click
 
@@ -67,17 +68,17 @@ def convert(
     beaker_priority: str,
     beaker_workspace: str,
     force_venv: bool,
-    huggingface_output_dir: str | None,
+    huggingface_output_dir: Optional[str],
     huggingface_output_suffix: str,
-    huggingface_token: str | None,
-    huggingface_tokenizer: str | None,
+    huggingface_token: Optional[str],
+    huggingface_tokenizer: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     huggingface_transformers_commit_hash: str,
-    unsharded_output_dir: str | None,
+    unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_system_python: bool,
     use_beaker: bool,

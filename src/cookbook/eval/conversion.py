@@ -4,6 +4,8 @@ import shlex
 import shutil
 import subprocess
 
+from typing import Optional
+
 import yaml
 
 from cookbook.cli.utils import (
@@ -36,13 +38,13 @@ from cookbook.constants import (
 def convert_olmo_core(
     input_dir: str,
     huggingface_tokenizer: str = DEFAULT_OLMO_CORE_TOKENIZER,
-    unsharded_output_dir: str | None = None,
-    huggingface_output_dir: str | None = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
     olmo_commit_hash: str = OLMO_CORE_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
-    env: PythonEnv | None = None,
+    env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
 
@@ -107,13 +109,13 @@ def convert_olmo_core(
 def convert_olmoe(
     input_dir: str,
     huggingface_tokenizer: str = DEFAULT_OLMOE_TOKENIZER,
-    unsharded_output_dir: str | None = None,
-    huggingface_output_dir: str | None = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
-    olmo_commit_hash: str | None = None,
-    transformers_commit_hash: str | None = None,
-    env: PythonEnv | None = None,
+    olmo_commit_hash: Optional[str] = None,
+    transformers_commit_hash: Optional[str] = None,
+    env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
 
@@ -188,13 +190,13 @@ def convert_olmoe(
 def convert_olmo2(
     input_dir: str,
     huggingface_tokenizer: str = DEFAULT_OLMO2_TOKENIZER,
-    unsharded_output_dir: str | None = None,
-    huggingface_output_dir: str | None = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
     olmo_commit_hash: str = OLMO2_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
-    env: PythonEnv | None = None,
+    env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
     current_directory = os.getcwd()
@@ -274,17 +276,17 @@ def convert_checkpoint(
     beaker_priority: str,
     beaker_workspace: str,
     beaker_preemptible: bool,
-    huggingface_output_dir: str | None,
+    huggingface_output_dir: Optional[str],
     huggingface_output_suffix: str,
-    huggingface_token: str | None,
-    huggingface_tokenizer: str | None,
+    huggingface_token: Optional[str],
+    huggingface_tokenizer: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     huggingface_transformers_commit_hash: str,
-    unsharded_output_dir: str | None,
+    unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_beaker: bool,
     use_system_python: bool,

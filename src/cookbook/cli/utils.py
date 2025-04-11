@@ -28,7 +28,7 @@ class PythonEnv:
     pip: str
 
     @classmethod
-    def _find_root_dir(cls, _base: Path | None = None) -> Path:
+    def _find_root_dir(cls, _base: Optional[Path] = None) -> Path:
         if _base is None:
             return cls._find_root_dir(Path(__file__).absolute().parent)
 
@@ -61,7 +61,7 @@ class PythonEnv:
         return hasher.hexdigest()[:6]
 
     @classmethod
-    def create(cls, name: Optional[str], force: bool = False, root: Path | None = None) -> "PythonEnv":
+    def create(cls, name: Optional[str], force: bool = False, root: Optional[Path] = None) -> "PythonEnv":
         name = name or f"oe-py-env-{cls._generate_hash()}"
         path = (root or cls._find_root_dir()) / ".venv" / name
         if path.exists() and force:
@@ -524,7 +524,7 @@ def find_repository_root(current: Union[str, Path] = __file__) -> Path:
     return find_repository_root(current.parent)
 
 
-def discover_weka_mount(path: Union[str, Path, None] = None) -> str | None:
+def discover_weka_mount(path: Union[str, Path, None] = None) -> Optional[str]:
     if path is None:
         return None
 
