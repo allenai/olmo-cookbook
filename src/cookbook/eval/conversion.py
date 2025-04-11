@@ -88,7 +88,7 @@ def convert_olmo_core(
             "--checkpoint-input-path",
             input_dir,
             "--max-sequence-length",
-            max_sequence_length,
+            str(max_sequence_length),
             "--huggingface-output-dir",
             huggingface_output_dir,
         ]
