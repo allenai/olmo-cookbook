@@ -1,5 +1,5 @@
-name: "olmo-cookbook-core-v2-1b-5xC-dclm-baseline-natural-4096-1.8e-3-bsz-2097152"
-description: "Olmo-cookbook 1B-5xC dclm baseline natural (core v2 4096 1.8e-3, 2_097_152 global batch, 32_768 rank microbatch)"
+name: "olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-natural-4096-1.8e-3-bsz-2097152"
+description: "Olmo-cookbook 1Bv2-5xC dclm baseline natural (core v2 4096 1.8e-3, 2_097_152 global batch, 32_768 rank microbatch)"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data" #"ai2/dolma2"
 nodes: 4
