@@ -5,7 +5,7 @@ workspace: "ai2/oe-data" #"ai2/dolma2"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 113_184_153_600
+max_tokens: 113_184_153_600 
 sequence_length: 4096 #4096 #2048
 seed: 1337
 model: "olmo2_1B"

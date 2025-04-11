@@ -371,8 +371,8 @@ class TransformerConfigBuilder:
         global_batch_size, rank_microbatch_size = self.get_batch_sizes()
         learning_rate = self.get_learning_rate()
 
-        if self.sequence_length == 4096:
-            learning_rate /= 4
+        #if self.sequence_length == 4096:
+        #    learning_rate /= 4
 
         dataset_config = self.build_dataset_config()
         optim_config = self.get_optimizer_config()
