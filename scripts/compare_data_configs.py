@@ -201,7 +201,6 @@ def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str
     file_totals = {filename: len(paths) for filename, paths in paths_by_file.items()}
     return base_path_counts, file_totals
 
-
 def format_results(base_path_counts: Dict[str, Dict[str, int]], 
                               file_totals: Dict[str, int]) -> None:
     """
@@ -231,7 +230,16 @@ def format_results(base_path_counts: Dict[str, Dict[str, int]],
     )
     
     # Prepare headers and table data.
-    headers = ['Base Path'] + sorted_filenames + ['Match']
+    # Truncate filenames that are too long (over 30 chars)
+    truncated_filenames = []
+    for filename in sorted_filenames:
+        if len(filename) > 30:
+            truncated = filename[:27] + "..."
+        else:
+            truncated = filename
+        truncated_filenames.append(truncated)
+    
+    headers = ['Base Path'] + truncated_filenames + ['Match']
     table_data = []
     
     for base_path in sorted_base_paths:
