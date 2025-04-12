@@ -1,21 +1,15 @@
-name: "olmo-cookbook-1b-5xC-5shards-dclm_baseline"
-description: "5shards-dclm_baseline"
+name: "olmo-core-1b_v2-6ishxC-5shards-dclm_baseline"
+description: "olmo-cookbook 1Bv2-6ishxC dclm baseline natural (core v2 4096 1.8e-3, 2_097_152 global batch, 32_768 rank microbatch)"
 budget: "ai2/oe-data"
 workspace: "ai2/olmo3-data-quality"
+cluster: ai2/jupiter-cirrascale-2
+priority: high
+preemptible: true
 nodes: 4
 gpus: 8
-preemptible: true
-max_tokens: 140_000_000_000
-sequence_length: 2048
-global_batch_size: 2097152
-lr: 1.8e-3
-seed: 1337
-model: "olmo2_1B"
-tokenizer: "dolma2"
-priority: high
-cluster: ai2/jupiter-cirrascale-2
 wandb:
   project: "olmo3-data-quality"
+
 dataset:
   sources:
   - name: "5shards-dclm_baseline"
@@ -23,6 +17,16 @@ dataset:
     repetition_factor: 1.0
     paths:
     - "s3://ai2-llm/preprocessed/dclm/ablations/5shards-dclm_baseline/*.npy"
+
+max_tokens: 150_000_000_000 # 127_939_584_000 # for olmo2_1B_v2, we have  1_279_395_840 non-embedding params
+sequence_length: 4096 # 4096, 2048
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+weka: false
+rank_microbatch_size: 32_768
+global_batch_size: 2_097_152 # 4_194_304, 2_097_152
+
 downstream_evaluators:
 - arc_challenge_test_rc_5shot
 - arc_easy_test_rc_5shot
