@@ -42,7 +42,7 @@ class WandbConfig(BaseModel):
     project: str
 
 
-class ExperimentConfig(BaseModel):
+class ExperimentConfig(BaseModel, extra="forbid"):
     name: str
     description: str
     budget: str

@@ -4,6 +4,7 @@ import shlex
 import subprocess
 from copy import deepcopy
 from hashlib import md5
+from typing import Optional
 from urllib.parse import urlparse
 
 from cookbook.cli.utils import (
@@ -49,6 +50,7 @@ def evaluate_checkpoint(
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
+    model_args: Optional[dict],
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -133,10 +135,12 @@ def evaluate_checkpoint(
     flags.append("--push-datalake")
 
     # figure out model args based on cli
-    model_args = {"model_path": checkpoint_path, "add_bos_token": "true" if add_bos_token else "false"}
-    if model_backend == "vllm":
-        # if we are using vllm, we need to set the memory utilization
-        model_args["gpu_memory_utilization"] = str(vllm_memory_utilization)
+    model_args = {
+        "model_path": checkpoint_path,
+        "add_bos_token": "true" if add_bos_token else "false",
+        **({"gpu_memory_utilization": str(vllm_memory_utilization)} if model_backend == "vllm" else {}),
+        **(model_args or {}),
+    }
     model_args_str = ",".join(f"{k}={v}" for k, v in model_args.items())
 
     # set model info
@@ -222,7 +226,7 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            if model_backend == "vllm" and task_group == "gen" and compute_gold_bpb:
+            if compute_gold_bpb:
                 local_flags.append("--task-args compute_gold_bpb=true")
 
             # run oe-eval

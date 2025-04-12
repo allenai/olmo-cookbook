@@ -136,24 +136,16 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         learning_rate=base_config.learning_rate,
     ).build()
 
-    device = get_default_device()
-    world_mesh = config.model.build_mesh(device=device)
-
     seed_all(config.init_seed)
     config_dict = config.as_config_dict()
-
     trainer = None
+
     if not dry_run:
-        model = config.model.build(
-            init_device="meta",
-            device=device,
-            mesh=world_mesh,
-            max_seq_len=config.dataset.sequence_length,
-        )
         dataset = config.dataset.build()
-        optim = config.optim.build(model)
-        data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
-        trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
+        model = config.model.build(init_device="meta")
+        train_module = config.train_module.build(model)
+        data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
+        trainer = config.trainer.build(train_module, data_loader)
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
@@ -185,7 +177,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch260cu124",
+            beaker_image="petew/olmo-core-tch270cu128-v2.1",
             priority=group.config.priority,
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
@@ -204,6 +196,10 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install -e '.[all]'",
+                # Temporary until they release a fix for 2.7.0
+                "pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128",
+                # filler comment
+                "ls",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",

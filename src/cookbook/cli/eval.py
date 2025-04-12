@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Optional
 
 import click
 
@@ -67,17 +68,17 @@ def convert(
     beaker_priority: str,
     beaker_workspace: str,
     force_venv: bool,
-    huggingface_output_dir: str | None,
+    huggingface_output_dir: Optional[str],
     huggingface_output_suffix: str,
-    huggingface_token: str | None,
-    huggingface_tokenizer: str | None,
+    huggingface_token: Optional[str],
+    huggingface_tokenizer: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     huggingface_transformers_commit_hash: str,
-    unsharded_output_dir: str | None,
+    unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_system_python: bool,
     use_beaker: bool,
@@ -98,7 +99,7 @@ def convert(
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
-        input_dir=input_dir,
+        input_dir=input_dir.rstrip("/"),
         olmo_core_commit_hash=olmo_core_commit_hash,
         olmo_type=olmo_type,
         olmo2_commit_hash=olmo2_commit_hash,
@@ -238,6 +239,12 @@ def convert(
     type=bool,
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
+@click.option(
+    "--model-args",
+    type=str,
+    default="",
+    help="Extra arguments to pass to the model",
+)
 def evaluate(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -266,6 +273,7 @@ def evaluate(
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
+    model_args: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -274,6 +282,13 @@ def evaluate(
 
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
+    parsed_model_args: dict[str, str] = {}
+    for arg in model_args.split(","):
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_model_args[key] = value
 
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
@@ -303,6 +318,7 @@ def evaluate(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        model_args=parsed_model_args,
     )
 
 

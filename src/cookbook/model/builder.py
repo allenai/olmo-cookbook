@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+import olmo_core.train.train_module as train_module
+from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -10,8 +12,17 @@ from olmo_core.data import (
     TokenizerConfig,
 )
 from olmo_core.data.types import NumpyDatasetDType
+from olmo_core.distributed.parallel import DataParallelType
+from olmo_core.float8 import Float8Config
 from olmo_core.nn.transformer import TransformerConfig
-from olmo_core.optim import AdamWConfig, CosWithWarmup, OptimGroupOverride, Scheduler
+from olmo_core.optim import (
+    CosWithWarmup,
+    OptimConfig,
+    OptimGroupOverride,
+    Scheduler,
+    SkipStepAdamWConfig,
+)
+from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -20,10 +31,8 @@ from olmo_core.train.callbacks import (
     DownstreamEvaluatorCallbackConfig,
     GarbageCollectorCallback,
     GPUMemoryMonitorCallback,
-    GradClipperCallback,
     LMEvaluatorCallbackConfig,
     ProfilerCallback,
-    SchedulerCallback,
     WandBCallback,
 )
 from olmo_core.train.common import LoadStrategy
@@ -32,7 +41,6 @@ from cookbook.aliases import SourceInstance, WandbConfig
 from cookbook.data.dataset import MixtureBuilder, SingleDatasetBuilder
 from cookbook.model.config import (
     MODEL_TO_LR_MAP,
-    DefaultOptimizerProperties,
     ModelTrainConfig,
     SupportedTokenizers,
     WrappedTransformerConfig,
@@ -259,11 +267,9 @@ class TransformerConfigBuilder:
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
 
-    def build_callbacks(self, model: TransformerConfig) -> Dict[str, Callback]:
+    def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
-            "lr_scheduler": SchedulerCallback(scheduler=CosWithWarmup(warmup_steps=self.get_warmup_steps())),
             "gpu_monitor": GPUMemoryMonitorCallback(),
-            "grad_clipper": GradClipperCallback(max_grad_norm=self.max_grad_norm),
             "garbage_collector": GarbageCollectorCallback(),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
@@ -330,16 +336,20 @@ class TransformerConfigBuilder:
             source_mixture_config=mixture_config,
             name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
-            max_target_sequence_length=self.max_target_sequence_length,
+            #max_target_sequence_length=self.max_target_sequence_length,
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
         )
         return dataset_config
 
-    def get_scheduler_config(self, scheduler_type: str = "cosine") -> Scheduler:
+    def get_scheduler_config(self, scheduler_type: str = "cos_linear") -> Scheduler:
         if scheduler_type == "cosine":
             return CosWithWarmup(warmup_steps=self.get_warmup_steps())
+        elif scheduler_type == "cos_linear":
+            return CosWithWarmupAndLinearDecay(
+                warmup_steps=self.get_warmup_steps(),
+            )
         elif scheduler_type == "wsd":
             return WSD(
                 warmup_steps=self.get_warmup_steps(),
@@ -347,27 +357,20 @@ class TransformerConfigBuilder:
         else:
             raise ValueError(f"Unsupported scheduler type: {scheduler_type}")
 
-    def get_optimizer_config(self) -> AdamWConfig:
-        return AdamWConfig(
+    def get_optimizer_config(self) -> OptimConfig:
+        return SkipStepAdamWConfig(
             lr=self.get_learning_rate(),
-            eps=DefaultOptimizerProperties.eps,
-            betas=DefaultOptimizerProperties.betas,
-            group_overrides=[
-                OptimGroupOverride(
-                    params=["embeddings.weight"],
-                    opts=dict(weight_decay=0.0),
-                )
-            ],
-            fused=True,
-            weight_decay=DefaultOptimizerProperties.weight_decay,
+            weight_decay=0.033,
+            betas=(0.9, 0.95),
+            group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
         )
 
     def build(self) -> ModelTrainConfig:
         global_batch_size, rank_microbatch_size = self.get_batch_sizes()
         learning_rate = self.get_learning_rate()
 
-        if self.sequence_length == 4096:
-            learning_rate /= 4
+        #if self.sequence_length == 4096:
+        #    learning_rate /= 4
 
         dataset_config = self.build_dataset_config()
         optim_config = self.get_optimizer_config()
@@ -380,22 +383,37 @@ class TransformerConfigBuilder:
 
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
+        train_module_config = train_module.TransformerTrainModuleConfig(
+            rank_microbatch_size=rank_microbatch_size,
+            max_sequence_length=self.sequence_length,
+            optim=SkipStepAdamWConfig(
+                lr=learning_rate,
+                weight_decay=0.033,
+                betas=(0.9, 0.95),
+                group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+            ),
+            compile_model=True,
+            dp_config=train_module.TransformerDataParallelConfig(
+                name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
+            ),
+            float8_config=Float8Config(enabled=False),
+            z_loss_multiplier=1e-5,
+            max_grad_norm=1.0,
+            scheduler=self.get_scheduler_config(),
+        )
 
         trainer_config = TrainerConfig(
             load_path=load_path,
             load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
-            rank_microbatch_size=rank_microbatch_size,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
-            compile_loss=True,
-            z_loss_multiplier=1e-5,
             max_duration=Duration.tokens(self.max_tokens),
         )
 
-        for callback_name, callback in self.build_callbacks(self.transformer_config).items():
+        for callback_name, callback in self.build_callbacks().items():
             trainer_config.callbacks[callback_name] = callback
 
         return ModelTrainConfig(
@@ -405,4 +423,5 @@ class TransformerConfigBuilder:
             dataset=dataset_config,
             data_loader=data_loader_config,
             trainer=trainer_config,
+            train_module=train_module_config,
         )

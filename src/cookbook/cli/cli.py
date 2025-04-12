@@ -350,7 +350,7 @@ def prepare_user_workspace(
         if secret_value:
             beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
             print(f"Succesfully wrote '{secret_name}' to {target_workspace.full_name}")
-        
+
         # If a workspace secret doesn't exist at this point, then write in a blank value
         try:
             beaker.secret.get(secret_name, workspace=target_workspace)

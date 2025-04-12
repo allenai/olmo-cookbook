@@ -20,6 +20,7 @@ dependencies = [
     "yaspin",
     "PyYAML>=6.0,<7.0",
     "paramiko>=3.5,<3.6",
+    "tabulate",
 ]
 
 [project.optional-dependencies]
@@ -28,7 +29,7 @@ dev = [
     "mypy>=1.0,<1.4",
     "ruff",
     "mypy>=1.0,<1.4",
-    "boto3-stubs[essential,ec2,s3]",
+    "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 beaker = [
     "beaker-py",
@@ -38,7 +39,8 @@ wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@undfined/cookbook-pin",
+    # Pinned to core v2.x and removal of t_max from scheduling
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@main",
     "beaker-py",
     "GitPython>=3.0,<4.0",
     "wandb",
