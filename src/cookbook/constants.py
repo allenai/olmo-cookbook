@@ -158,7 +158,7 @@ ALL_GEN_TASKS = [
     "gsm8k::olmo1",
 ]
 
-ALL_MATH_TASKS = [
+ALL_MINERVA_TASKS = [
     "minerva_math_algebra::olmes",
     "minerva_math_counting_and_probability::olmes",
     "minerva_math_geometry::olmes",
@@ -166,6 +166,12 @@ ALL_MATH_TASKS = [
     "minerva_math_number_theory::olmes",
     "minerva_math_prealgebra::olmes",
     "minerva_math_precalculus::olmes",
+]
+
+ALL_MATH_TASKS = [
+    *ALL_MINERVA_TASKS,
+    "gsm8k::olmo1",
+    "gsm8k::olmes"
 ]
 
 
@@ -237,6 +243,12 @@ FIM_TOKEN_TYPES = {
     "deepseek-coder": INFILLING_DEEPSEEK_CODER,
 }
 
+# TODO: clean up such that tasks kwargs are separate from task aliases.
+FIM_TASKS = {f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()}
+
+
+# named groups are things you should able to average; they
+# should just contain aliases
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
@@ -244,12 +256,12 @@ ALL_NAMED_GROUPS = {
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+    "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    **{f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()},
 }
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
