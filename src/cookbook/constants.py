@@ -250,6 +250,8 @@ ALL_NAMED_GROUPS = {
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
+    "core-all-splits:rc": [f"{task}:rc::all_splits" for task in ALL_CORE_TASKS],
+    "core-all-splits:mc": [f"{task}:mc::all_splits" for task in ALL_CORE_TASKS],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "minerva": ALL_MINERVA_TASKS,
