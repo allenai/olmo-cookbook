@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from dataclasses import field, dataclass
 import re
-from typing import Generator, Callable
+from typing import Generator, Callable, Iterable
 from rich.table import Table
 from rich.console import Console
 
@@ -97,6 +97,21 @@ class MiniFrame:
             table.add_row(row, *formatted_values)
 
         console.print(table)
+
+    def __getitem__(self, item: Iterable[str]) -> float | None:
+        try:
+            col, row = item
+        except ValueError:
+            raise ValueError(f"Invalid item: {item}")
+
+        return self._data[col].get(row, None)
+
+    def __setitem__(self, item: Iterable[str], val: float | None):
+        try:
+            col, row = item
+        except ValueError:
+            raise ValueError(f"Invalid item: {item}")
+        return self.add(row=row, col=col, val=val)
 
     def __contains__(self, col: str) -> bool:
         return col in self._data
