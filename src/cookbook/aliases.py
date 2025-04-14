@@ -56,7 +56,6 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     tokenizer: str
     priority: Priority  # pyright: ignore
     dataset: DatasetConfig
-    tokenizer: str
     model: str
     load_path: Optional[str] = None
     rank_microbatch_size: Optional[int] = None
