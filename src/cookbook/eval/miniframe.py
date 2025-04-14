@@ -22,11 +22,10 @@ class MiniFrame:
             self.add(row=row, col=col, val=val)
 
     def sort(self, col: str, reverse: bool = False) -> "MiniFrame":
-        sorted_keys = [
-            k for k, _ in sorted(self._data[col].items(), key=lambda x: x[1] or float("-inf"), reverse=reverse)
-        ]
+        all_keys = {row for col in self._data for row in self._data[col]}
+        sorted_keys = sorted(all_keys, key=lambda row: self._data[col].get(row) or float("-inf"), reverse=reverse)
         new_frame = MiniFrame(title=self.title)
-        new_frame.add_many(*((row, col, self._data[col][row]) for col in self._data for row in sorted_keys))
+        new_frame.add_many(*((row, col, self._data[col].get(row)) for col in self.columns for row in sorted_keys))
         return new_frame
 
     def _make_fn(self, val: str | re.Pattern | list[str], reverse: bool, strict: bool) -> Callable[[str], bool]:
@@ -56,7 +55,6 @@ class MiniFrame:
 
     def drop_rows(self, row: str | re.Pattern | list[str]) -> "MiniFrame":
         fn = self._make_fn(val=row, reverse=True, strict=False)
-
         new_frame = MiniFrame(title=self.title)
         new_frame.add_many(*((r, c, self._data[c][r]) for c in self._data for r in self._data[c] if fn(r)))
         return new_frame

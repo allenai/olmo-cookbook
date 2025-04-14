@@ -1,7 +1,8 @@
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.constants import ALL_NAMED_GROUPS
+from cookbook.eval.miniframe import MiniFrame
+import re
 
-from .miniframe import MiniFrame
 
 def make_dashboard_table(
     dashboard: str,
@@ -89,5 +90,5 @@ if __name__ == "__main__":
     import sys
     all_metrics, all_averages = make_dashboard_table(sys.argv[1])
 
-
+    # all_averages.show()
     all_averages.sort(col="mmlu:mc", reverse=True).show()
