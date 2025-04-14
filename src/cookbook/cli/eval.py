@@ -244,6 +244,12 @@ def convert(
     default="",
     help="Extra arguments to pass to the model",
 )
+@click.option(
+    "--vllm-use-v1-spec/--no-vllm-use-v1-spec",
+    default=False,
+    type=bool,
+    help="Whether to use v1 spec for vLLM models",
+)
 def evaluate(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -273,6 +279,7 @@ def evaluate(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    vllm_use_v1_spec: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -318,6 +325,7 @@ def evaluate(
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
         model_args=parsed_model_args,
+        use_vllm_v1_spec=vllm_use_v1_spec,
     )
 
 
