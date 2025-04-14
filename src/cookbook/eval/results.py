@@ -29,7 +29,6 @@ def make_dashboard_table(
 
         # we add primary metric after checking that we have a model name
         assert metric.model_name is not None
-        assert metric.alias is not None
 
         if not re.search(task_regex, metric.alias):
             # skip if task does not match regex
