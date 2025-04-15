@@ -357,11 +357,18 @@ def evaluate(
     default="table",
     help="Output results in JSON format",
 )
+@click.option(
+    "--sort-by",
+    type=str,
+    default="",
+    help="Sort results by a specific column",
+)
 def results(
     dashboard: str,
     models: list[str],
     tasks: list[str],
     format: str,
+    sort_by: str,
 ) -> None:
 
     all_metrics, all_averages = make_dashboard_table(
@@ -380,6 +387,10 @@ def results(
 
     if len(models) > 0:
         results = results.keep_rows(*[re.compile(m) for m in models])
+
+    # sort by provided column, or first column if not provided
+    sort_by = sort_by or next(iter(results.columns))
+    results = results.sort(col=sort_by, reverse=True)
 
     if format == "json":
         print(json.dumps(results._data))
