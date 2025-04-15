@@ -352,13 +352,13 @@ def evaluate(
     multiple=True,
 )
 @click.option(
-    "--format",
+    "-f", "--format",
     type=click.Choice(["json", "table"]),
     default="table",
     help="Output results in JSON format",
 )
 @click.option(
-    "--sort-by",
+    "-s", "--sort-by",
     type=str,
     default="",
     help="Sort results by a specific column",
