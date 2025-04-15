@@ -72,7 +72,7 @@ def make_dashboard_table(
         elif "gen" in group_name and not average_generative:
             continue
 
-        tasks_table = all_metrics_table.keep_cols(tasks)
+        tasks_table = all_metrics_table.keep_cols(*tasks)
         if len(tasks_table) == 0:
             # no need to keep averages for groups that have no models evaluated against their tasks
             continue
@@ -82,12 +82,3 @@ def make_dashboard_table(
             avg_metrics_table.add(col=group_name, row=model, val=average)
 
     return all_metrics_table, avg_metrics_table
-
-
-
-if __name__ == "__main__":
-    import sys
-    all_metrics, all_averages = make_dashboard_table(sys.argv[1])
-
-    # all_averages.show()
-    all_averages.sort(col="mmlu:mc", reverse=True).show()

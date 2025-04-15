@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 
@@ -9,6 +10,7 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
+    ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
@@ -18,6 +20,8 @@ from cookbook.constants import (
 )
 from cookbook.eval.conversion import convert_checkpoint
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.results import make_dashboard_table
+from cookbook.eval.datalake import AddToDashboard, RemoveFromDashboard
 
 logger = logging.getLogger(__name__)
 
@@ -329,6 +333,86 @@ def evaluate(
     )
 
 
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    default=None,
+    help="Set specific models to show. Can be specified multiple times.",
+)
+@click.option(
+    "-t",
+    "--tasks",
+    type=str,
+    required=True,
+    multiple=True,
+)
+@click.option(
+    "--format",
+    type=click.Choice(["json", "table"]),
+    default="table",
+    help="Output results in JSON format",
+)
+def results(
+    dashboard: str,
+    models: list[str] | None,
+    tasks: list[str],
+    format: str,
+) -> None:
+
+    all_metrics, all_averages = make_dashboard_table(
+        dashboard=dashboard,
+        show_rc=True,
+        show_mc=True,
+        show_generative=True,
+        show_partial=True,
+        average_mmlu=True,
+        average_core=True,
+        average_generative=True,
+        show_bpb=False,
+    )
+    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
+    results = (all_averages + all_metrics).keep_cols(*task_patterns)
+
+    if format == "json":
+        print(json.dumps(results._data))
+    elif format == "table":
+        results.show()
+    else:
+        raise ValueError(f"Invalid format: {format}")
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    required=True,
+    help="Models to add to the dashboard",
+)
+def add_to_dashboard(dashboard: str, models: list[str]) -> None:
+    resp = AddToDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+    print(f"Added {len(resp)} models to the dashboard")
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    required=True,
+    multiple=True,
+)
+def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
+    resp = RemoveFromDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+    print(f"Removed {len(resp)} models from the dashboard")
+
+
 @click.group()
 def cli():
     pass
@@ -336,6 +420,10 @@ def cli():
 
 cli.command()(convert)
 cli.command()(evaluate)
+cli.command()(results)
+cli.command()(add_to_dashboard)
+cli.command()(remove_from_dashboard)
+
 
 if __name__ == "__main__":
     cli({})

@@ -63,7 +63,7 @@ See `src/cookbook/recipes/train-1b-1xC-dclm.yaml` for an example to clone.
 
 ```shell
 olmo-cookbook-eval convert \
-  -i /oe-training-default/kevinf/checkpoints/OLMo-medium/peteish7-medlr/step477000 \
+  "/oe-training-default/kevinf/checkpoints/OLMo-medium/peteish7-medlr/step477000" \
   -t olmo2 \
   --use-beaker \
   --huggingface-tokenizer allenai/dolma2-tokenizer

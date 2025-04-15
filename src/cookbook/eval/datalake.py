@@ -42,6 +42,8 @@ class BaseDatalakeItem(Generic[T]):
         quiet: bool = False
     ) -> list[V]:
         # Validate input arguments
+        if len(fns) == 0:
+            return []
 
         results: list[V] = []
         with ExitStack() as stack:
@@ -110,7 +112,6 @@ class Tag:
     @classmethod
     def from_str(cls, s: str) -> list[Self]:
         return [cls(*pair.split("=", 1)) for pair in s.split(",")] if (s := s.strip()) else []
-
 
 @dataclass
 class FindExperiments(BaseDatalakeItem):
@@ -249,7 +250,7 @@ class RemoveFromDashboard(BaseDatalakeItem):
         return cls(**(response.json() or {}))
 
     @classmethod
-    def run(cls, model_name: str, dashboard: str) -> List[Self]:
+    def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name, dashboard=dashboard)
 
         fns = []
@@ -257,6 +258,8 @@ class RemoveFromDashboard(BaseDatalakeItem):
             new_tags = [tag for tag in run.tags if (tag.key != "dashboard" or tag.value != dashboard)]
             fn = partial(cls._endpoint_request, experiment_id=run.experiment_id, tags=new_tags, overwrite=True)
             fns.append(fn)
+
+        print(f"Removing {len(runs):,} experiments from dashboard {dashboard}")
 
         if cls._is_prun():
             # if we are already running in parallel, then we can use _prun() to create more parallelism
@@ -270,11 +273,14 @@ class RemoveFromDashboard(BaseDatalakeItem):
 @dataclass
 class AddToDashboard(RemoveFromDashboard):
     @classmethod
-    def run(cls, model_name: str, dashboard: str) -> List[Self]:
+    def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name)
 
         fns = []
         for run in runs:
+            if not fuzzy and run.model_name != model_name:
+                continue
+
             # we first check if the dashboard tag is already present
             if any(tag.key == "dashboard" and tag.value == dashboard for tag in run.tags):
                 continue
@@ -283,6 +289,8 @@ class AddToDashboard(RemoveFromDashboard):
             new_tags = [Tag(key="dashboard", value=dashboard)]
             fn = partial(cls._endpoint_request, experiment_id=run.experiment_id, tags=new_tags, overwrite=False)
             fns.append(fn)
+
+        print(f"Adding {len(runs):,} experiments to dashboard {dashboard}")
 
         if cls._is_prun():
             # if we are already running in parallel, then we can use _prun() to create more parallelism

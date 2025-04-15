@@ -1,9 +1,11 @@
 from collections import OrderedDict
 from dataclasses import field, dataclass
+from functools import partial
 import re
 from typing import Generator, Callable, Iterable
 from rich.table import Table
 from rich.console import Console
+from cookbook.constants import SHORT_NAMES
 
 
 @dataclass
@@ -28,39 +30,40 @@ class MiniFrame:
         new_frame.add_many(*((row, col, self._data[col].get(row)) for col in self.columns for row in sorted_keys))
         return new_frame
 
-    def _make_fn(self, val: str | re.Pattern | list[str], reverse: bool, strict: bool) -> Callable[[str], bool]:
-        if isinstance(val, str):
-            fn = lambda x: (x == val) if strict else (x in val)
-        elif isinstance(val, re.Pattern):
-            fn = lambda x: val.search(x) is not None
-        elif isinstance(val, list):
-            fn = lambda x: x in val if strict else any(c in x for c in val)     # pyright: ignore
-        else:
-            raise ValueError(f"Invalid column filter: {val}")
+    def _make_fn(self, vals: tuple[str | re.Pattern, ...], reverse: bool) -> Callable[[str], bool]:
+        def fn(x: str, _vals: tuple[str | re.Pattern, ...], reverse: bool) -> bool:
+            for val in _vals:
+                if isinstance(val, str):
+                    if x == val:
+                        return not reverse
+                elif isinstance(val, re.Pattern):
+                    if val.search(x) is not None:
+                        return not reverse
+                else:
+                    raise ValueError(f"Invalid column filter: {val}")
+            return reverse
+        return partial(fn, _vals=vals, reverse=reverse)
 
-        fn_ = lambda x: not fn(x) if reverse else fn(x)
-        return fn_
-
-    def drop_cols(self, col: str | re.Pattern | list[str]) -> "MiniFrame":
-        fn = self._make_fn(val=col, reverse=True, strict=False)
+    def drop_cols(self, *col: str | re.Pattern) -> "MiniFrame":
+        fn = self._make_fn(vals=col, reverse=True)
         new_frame = MiniFrame(title=self.title)
         new_frame.add_many(*((r, c, self._data[c][r]) for c in self._data for r in self._data[c] if fn(c)))
         return new_frame
 
-    def keep_cols(self, col: str | re.Pattern | list[str]) -> "MiniFrame":
-        fn = self._make_fn(val=col, reverse=False, strict=False)
+    def keep_cols(self, *col: str | re.Pattern) -> "MiniFrame":
+        fn = self._make_fn(vals=col, reverse=False)
         new_frame = MiniFrame(title=self.title)
         new_frame.add_many(*((r, c, self._data[c][r]) for c in self._data for r in self._data[c] if fn(c)))
         return new_frame
 
-    def drop_rows(self, row: str | re.Pattern | list[str]) -> "MiniFrame":
-        fn = self._make_fn(val=row, reverse=True, strict=False)
+    def drop_rows(self, *row: str | re.Pattern) -> "MiniFrame":
+        fn = self._make_fn(vals=row, reverse=True)
         new_frame = MiniFrame(title=self.title)
         new_frame.add_many(*((r, c, self._data[c][r]) for c in self._data for r in self._data[c] if fn(r)))
         return new_frame
 
-    def keep_rows(self, row: str | re.Pattern | list[str]) -> "MiniFrame":
-        fn = self._make_fn(val=row, reverse=False, strict=False)
+    def keep_rows(self, *row: str | re.Pattern) -> "MiniFrame":
+        fn = self._make_fn(vals=row, reverse=False)
         new_frame = MiniFrame(title=self.title)
         new_frame.add_many(*((r, c, self._data[c][r]) for c in self._data for r in self._data[c] if fn(r)))
         return new_frame
@@ -82,14 +85,19 @@ class MiniFrame:
 
     def drop_empty(self) -> "MiniFrame":
         has_empty_column = {col for col in self._data if any(v is None for v in self._data[col].values())}
-        return self.drop_cols(list(has_empty_column))
+        return self.drop_cols(*has_empty_column)
 
     def show(self):
         console = Console()
         table = Table(title=self.title)
 
-        table.add_column("")
+        table.add_column("") # this is the column for the row name
         for col in self.columns:
+            # we shorten the column name if it is in the SHORT_NAMES dict
+            for pattern, replacement in SHORT_NAMES.items():
+                col = re.sub(pattern, replacement, col)
+
+            # we add column and center the text
             table.add_column(col, justify="center")
 
         for row, values in self.rows:
@@ -123,3 +131,14 @@ class MiniFrame:
         if len(self._data) == 0:
             return 0, 0
         return len(self._data), len(max(self._data.values(), key=len))
+
+    def __add__(self, other: "MiniFrame") -> "MiniFrame":
+        new_frame = MiniFrame(title=self.title)
+        # first add all columns from this frame
+        new_frame.add_many(*((row, col, val) for col in self._data for row, val in self._data[col].items()))
+        # then add all columns from the other frame
+        new_frame.add_many(*((row, col, val) for col in other._data for row, val in other._data[col].items()))
+        return new_frame
+
+    def __radd__(self, other: "MiniFrame") -> "MiniFrame":
+        return other + self
