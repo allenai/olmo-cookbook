@@ -52,3 +52,7 @@ class DatalakeCache(Generic[T]):
                 json.dump(value, f)
 
         return DatalakeCacheResult(success=True, value=value)
+
+    def delete(self, **kwargs) -> None:
+        if os.path.exists(cache_file := self._make_cache_path(**kwargs)):
+            os.remove(cache_file)

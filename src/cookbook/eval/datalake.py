@@ -1,14 +1,16 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from contextlib import ExitStack
-from dataclasses import dataclass, fields as dataclass_fields, field as dataclass_field
-from functools import partial
-from typing import List, ClassVar, Self, TypeVar, Generic, Callable
-from threading import main_thread, current_thread
 import hashlib
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import ExitStack
+from dataclasses import dataclass, field as dataclass_field, fields as dataclass_fields
+from functools import partial
+from threading import current_thread, main_thread
+from typing import Callable, ClassVar, Generic, List, Self, TypeVar
 
 import requests
 from tqdm import tqdm
+
+from cookbook.eval.cache import DatalakeCache
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -221,21 +223,35 @@ class MetricsAll(BaseDatalakeItem):
         return self.task_config.get("metadata", {}).get("num_tasks", 0) > 0
 
     @classmethod
-    def run(cls, experiment_id: str) -> List[Self]:
-        response = requests.get(
-            f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
-            headers={"accept": "application/json"},
-        )
-        response.raise_for_status()
-        return [cls(**metric) for metric in response.json()]
+    def run(cls, experiment_id: str, force: bool = False) -> List[Self]:
+        cache = DatalakeCache(invalidate=force)
+
+        if not (result := cache.get(experiment_id=experiment_id)).success:
+            response = requests.get(
+                f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
+                headers={"accept": "application/json"},
+            )
+            response.raise_for_status()
+            result = cache.set(response.json(), experiment_id=experiment_id)
+
+        result = [cls(**metric) for metric in (result.value or [])]
+
+        return result
 
 
 @dataclass
 class RemoveFromDashboard(BaseDatalakeItem):
+    """Remove an experiment from a dashboard."""
+
     _endpoint: ClassVar[str] = "bluelake/add-experiment-tags/"
 
     @classmethod
     def _endpoint_request(cls, experiment_id: str, tags: list[Tag], overwrite: bool = True) -> Self:
+        """
+        Making a request to update the tags of an experiment; override=True replaces all tags,
+        while override=False adds the new tags without removing the existing ones.
+        """
+
         params = {
             "tags": ",".join([str(tag) for tag in tags]),
             "overwrite": overwrite,
@@ -252,9 +268,17 @@ class RemoveFromDashboard(BaseDatalakeItem):
     @classmethod
     def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name, dashboard=dashboard)
+        cache = DatalakeCache()
 
         fns = []
         for run in runs:
+
+            # if the experiment is in the cache, we remove it since we changed its tags
+            cache.delete(experiment_id=run.experiment_id)
+
+            if not fuzzy and run.model_name != model_name:
+                continue
+
             new_tags = [tag for tag in run.tags if (tag.key != "dashboard" or tag.value != dashboard)]
             fn = partial(cls._endpoint_request, experiment_id=run.experiment_id, tags=new_tags, overwrite=True)
             fns.append(fn)
@@ -272,14 +296,19 @@ class RemoveFromDashboard(BaseDatalakeItem):
 
 @dataclass
 class AddToDashboard(RemoveFromDashboard):
+    """Add an experiment to a dashboard."""
+
     @classmethod
     def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name)
-
+        cache = DatalakeCache()
         fns = []
         for run in runs:
             if not fuzzy and run.model_name != model_name:
                 continue
+
+            # if the experiment is in the cache, we remove it since we changed its tags
+            cache.delete(experiment_id=run.experiment_id)
 
             # we first check if the dashboard tag is already present
             if any(tag.key == "dashboard" and tag.value == dashboard for tag in run.tags):

@@ -382,6 +382,11 @@ def results(
         average_generative=True,
         show_bpb=False,
     )
+
+    # if a task starts with *, it means it is a named group and we need to expand it
+    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+
+    # after that, we check for task patterns
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (all_averages + all_metrics).keep_cols(*task_patterns)
 
