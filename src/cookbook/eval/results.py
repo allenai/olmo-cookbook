@@ -82,7 +82,8 @@ def make_dashboard_table(
             continue
 
         for model, scores in tasks_table.rows:
-            average = sum(filtered_scores := [s for s in scores if s is not None]) / len(filtered_scores)
+            filtered_scores = [s for s in scores if s is not None]
+            average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
             avg_metrics_table.add(col=group_name, row=model, val=average)
 
     return all_metrics_table, avg_metrics_table
