@@ -359,7 +359,7 @@ def evaluate(
 )
 def results(
     dashboard: str,
-    models: list[str] | None,
+    models: list[str],
     tasks: list[str],
     format: str,
 ) -> None:
@@ -377,6 +377,9 @@ def results(
     )
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (all_averages + all_metrics).keep_cols(*task_patterns)
+
+    if len(models) > 0:
+        results = results.keep_rows(*[re.compile(m) for m in models])
 
     if format == "json":
         print(json.dumps(results._data))

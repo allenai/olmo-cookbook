@@ -2,6 +2,7 @@ import pytest
 import re
 from collections import OrderedDict
 from cookbook.eval.miniframe import MiniFrame
+from cookbook.constants import SHORT_NAMES
 
 
 @pytest.fixture
@@ -129,8 +130,8 @@ class TestMiniFrame:
         assert len(rows) == 1
         assert rows[0] == "model2"
 
-        # Drop rows using a list
-        frame = sample_frame.drop_rows(["model1", "model2"])
+        # Drop multiple rows
+        frame = sample_frame.drop_rows("model1", "model2")
         rows = [r for r, _ in frame.rows]
         assert len(rows) == 1
         assert rows[0] == "model3"
@@ -149,8 +150,8 @@ class TestMiniFrame:
         assert len(rows) == 2
         assert "model3" not in rows
 
-        # Keep rows using a list
-        frame = sample_frame.keep_rows(["model1", "model3"])
+        # Keep multiple rows
+        frame = sample_frame.keep_rows("model1", "model3")
         rows = [r for r, _ in frame.rows]
         assert len(rows) == 2
         assert "model2" not in rows
@@ -167,6 +168,17 @@ class TestMiniFrame:
         frame = sample_frame.drop_cols(re.compile(r"metric\d"))
         assert len(frame) == 0
 
+        # Drop multiple columns
+        test_frame = MiniFrame(title="Multi-column Test")
+        test_frame.add_many(
+            ("row1", "col1", 0.1),
+            ("row1", "col2", 0.2),
+            ("row1", "col3", 0.3),
+        )
+        result = test_frame.drop_cols("col1", "col3")
+        assert len(result) == 1
+        assert list(result.columns) == ["col2"]
+
     def test_keep_cols(self, sample_frame):
         """Test keeping only specified columns"""
         # Keep a single column
@@ -175,14 +187,19 @@ class TestMiniFrame:
         assert len(cols) == 1
         assert cols[0] == "metric1"
 
-        # Keep using a list
+        # Keep multiple columns
         frame = MiniFrame(title="Test")
         frame.add_many(
             ("row1", "col1", 0.1),
             ("row1", "col2", 0.2),
             ("row1", "col3", 0.3),
         )
-        result = frame.keep_cols(["col1", "col3"])
+        result = frame.keep_cols("col1", "col3")
+        assert len(result) == 2
+        assert "col2" not in list(result.columns)
+
+        # Keep using regex pattern
+        result = frame.keep_cols(re.compile(r"col[13]"))
         assert len(result) == 2
         assert "col2" not in list(result.columns)
 
@@ -355,44 +372,37 @@ class TestMiniFrame:
         with pytest.raises(ValueError):
             frame.drop_rows({"key": "value"})  # Dict isn't a valid filter type  # pyright: ignore
 
-    def test_strict_filtering(self):
-        """Test the strict filtering behavior in _make_fn"""
-        frame = MiniFrame(title="Strict Filter Test")
-
-        # Add data with specific patterns for testing strict mode
-        frame.add(row="abc", col="col1", val=0.1)
-        frame.add(row="def", col="col1", val=0.2)
-        frame.add(row="abcdef", col="col1", val=0.3)
-        frame.add(row="abc", col="col2", val=0.4)
-
-        # Test strict=True with string matching (exact match only)
-        fn = frame._make_fn(val="abc", reverse=False, strict=True)
+    def test_make_fn(self):
+        """Test the _make_fn function implementation"""
+        frame = MiniFrame(title="Make Function Test")
+        
+        # Test exact match with single string filter (not reverse)
+        fn = frame._make_fn(vals=("abc",), reverse=False)
         assert fn("abc") is True
-        assert fn("abcdef") is False
-        assert fn("ab") is False
-
-        # Test strict=False with string matching
-        # Based on actual implementation in MiniFrame._make_fn
-        # When strict=False for strings, it checks if the filter value (x) is in the input string,
-        # not the other way around
-        fn = frame._make_fn(val="abc", reverse=False, strict=False)
-        assert fn("abc") is True
-        # The actual implementation has x in val, not val in x
-        assert fn("abcdef") is False  # "abc" is not in "abcdef"
-        assert fn("c") is True  # "c" is in "abc"
-
-        # Test strict=True with list matching (exact match only)
-        fn = frame._make_fn(val=["abc", "def"], reverse=False, strict=True)
+        assert fn("def") is False
+        
+        # Test exact match with multiple string filters (not reverse)
+        fn = frame._make_fn(vals=("abc", "def"), reverse=False)
         assert fn("abc") is True
         assert fn("def") is True
-        assert fn("abcdef") is False
-
-        # Test strict=False with list matching (substring works)
-        fn = frame._make_fn(val=["abc", "def"], reverse=False, strict=False)
-        assert fn("abc") is True
+        assert fn("ghi") is False
+        
+        # Test exact match with single string filter (reverse=True)
+        fn = frame._make_fn(vals=("abc",), reverse=True)
+        assert fn("abc") is False
         assert fn("def") is True
-        assert fn("abcdef") is True
-        assert fn("xy") is False
+        
+        # Test with regex filter (not reverse)
+        pattern = re.compile(r"model\d")
+        fn = frame._make_fn(vals=(pattern,), reverse=False)
+        assert fn("model1") is True
+        assert fn("model23") is True
+        assert fn("something") is False
+        
+        # Test with regex filter (reverse=True)
+        fn = frame._make_fn(vals=(pattern,), reverse=True)
+        assert fn("model1") is False
+        assert fn("something") is True
 
     def test_sort_nonexistent_column(self):
         """Test sorting when column name doesn't exist in the data"""
@@ -433,12 +443,29 @@ class TestMiniFrame:
         none_frame.add(row="row1", col="col1", val=None)
         none_frame.show()
 
+    def test_short_names(self):
+        """Test that column names are properly shortened in show method using SHORT_NAMES"""
+        # Create a frame with column names that match SHORT_NAMES patterns
+        frame = MiniFrame(title="Short Names Test")
+        frame.add(row="row1", col="arc_challenge::olmes", val=0.5)
+        frame.add(row="row1", col="hellaswag::olmes", val=0.7)
+        frame.add(row="row1", col="gsm8k::olmo1", val=0.6)
+        
+        # We can't directly test the output of show(), but we can check that
+        # SHORT_NAMES constants are available and have the expected patterns
+        assert isinstance(SHORT_NAMES, dict)
+        assert r"::olmes$" in SHORT_NAMES
+        assert r"^gsm8k::olmo1$" in SHORT_NAMES
+        
+        # Just make sure show() doesn't crash
+        frame.show()
+
     def test_chained_operations(self, sample_frame):
         """Test chaining multiple operations together"""
         # Chain multiple operations to test fluent interface
         result = (sample_frame
                  .sort(col="metric1")
-                 .keep_rows(["model1", "model2"])
+                 .keep_rows("model1", "model2")
                  .drop_cols("metric2"))
 
         # Verify the result has the expected shape and contents
@@ -467,3 +494,70 @@ class TestMiniFrame:
         # First row should be model1 since sort is reversed and we removed model3
         first_row = rows[0]
         assert first_row == "model1"
+        
+    def test_add_operator(self):
+        """Test the __add__ operator for combining MiniFrames"""
+        # Create two frames to combine
+        frame1 = MiniFrame(title="Frame 1")
+        frame1.add(row="row1", col="col1", val=0.1)
+        frame1.add(row="row2", col="col1", val=0.2)
+        
+        frame2 = MiniFrame(title="Frame 2")
+        frame2.add(row="row1", col="col2", val=0.3)
+        frame2.add(row="row3", col="col2", val=0.4)
+        
+        # Combine frames with + operator
+        combined = frame1 + frame2
+        
+        # Check that combined frame has all columns
+        columns = list(combined.columns)
+        assert len(columns) == 2
+        assert "col1" in columns
+        assert "col2" in columns
+        
+        # Check that combined frame has all rows
+        rows = [r for r, _ in combined.rows]
+        assert len(rows) == 3
+        assert "row1" in rows
+        assert "row2" in rows
+        assert "row3" in rows
+        
+        # Check specific values
+        assert combined["col1", "row1"] == 0.1
+        assert combined["col2", "row1"] == 0.3
+        assert combined["col1", "row3"] is None
+        assert combined["col2", "row3"] == 0.4
+        
+    def test_radd_operator(self):
+        """Test the __radd__ operator for combining MiniFrames with sum()"""
+        # Create multiple frames
+        frame1 = MiniFrame(title="Frame 1")
+        frame1.add(row="row1", col="col1", val=0.1)
+        
+        frame2 = MiniFrame(title="Frame 2")
+        frame2.add(row="row1", col="col2", val=0.2)
+        
+        frame3 = MiniFrame(title="Frame 3")
+        frame3.add(row="row2", col="col1", val=0.3)
+        
+        # Combine with sum()
+        combined = sum([frame1, frame2, frame3], MiniFrame(title="Combined"))
+        
+        # Check title is preserved from the start value
+        assert combined.title == "Combined"
+        
+        # Check columns and rows
+        assert len(combined) == 2
+        assert "col1" in list(combined.columns)
+        assert "col2" in list(combined.columns)
+        
+        rows = [r for r, _ in combined.rows]
+        assert len(rows) == 2
+        assert "row1" in rows
+        assert "row2" in rows
+        
+        # Check values
+        assert combined["col1", "row1"] == 0.1
+        assert combined["col2", "row1"] == 0.2
+        assert combined["col1", "row2"] == 0.3
+        assert combined["col2", "row2"] is None

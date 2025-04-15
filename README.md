@@ -105,6 +105,19 @@ olmo-cookbook-eval evaluate \
   --dashboard peteish32
 ```
 
+### Get results
+
+```shell
+olmo-cookbook-eval results --dashboard peteish32 --tasks olmo2:int:mc
+```
+
+This will return a table that includes the results using internal MC tasks from olmo 2 days.
+You can also provide a list of `--tasks` to get results for specific tasks.
+
+You can also provide a list of `--models` regular expressions to filter the models by name.
+
+
+
 ## Running OLMo-core script
 
 You can launch any OLMo core training script using the cookbook.
