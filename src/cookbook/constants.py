@@ -297,7 +297,7 @@ ALL_DISPLAY_TASKS = {
         r"^mmlu_pro:mc$",
         r"^agi_eval$",
     ],
-    "olmo2:int:mc": [
+    "olmo2:dev:7b": [
         r"arc_challenge:mc.*",
         r"arc_easy:mc.*",
         r"hellaswag:mc.*",
@@ -307,7 +307,7 @@ ALL_DISPLAY_TASKS = {
         r"^core:mc$",
         r"^gen$",
     ],
-    "olmo2:int:rc": [
+    "olmo2:dev:1b": [
         r"arc_challenge:rc.*",
         r"arc_easy:rc.*",
         r"hellaswag:rc.*",
