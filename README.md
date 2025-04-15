@@ -63,7 +63,7 @@ See `src/cookbook/recipes/train-1b-1xC-dclm.yaml` for an example to clone.
 
 ```shell
 olmo-cookbook-eval convert \
-  -i /oe-training-default/kevinf/checkpoints/OLMo-medium/peteish7-medlr/step477000 \
+  "/oe-training-default/kevinf/checkpoints/OLMo-medium/peteish7-medlr/step477000" \
   -t olmo2 \
   --use-beaker \
   --huggingface-tokenizer allenai/dolma2-tokenizer
@@ -104,6 +104,19 @@ olmo-cookbook-eval evaluate \
   --model-backend vllm
   --dashboard peteish32
 ```
+
+### Get results
+
+```shell
+olmo-cookbook-eval results --dashboard peteish32 --tasks olmo2:int:mc
+```
+
+This will return a table that includes the results using internal MC tasks from olmo 2 days.
+You can also provide a list of `--tasks` to get results for specific tasks.
+
+You can also provide a list of `--models` regular expressions to filter the models by name.
+
+
 
 ## Running OLMo-core script
 
