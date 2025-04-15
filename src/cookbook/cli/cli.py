@@ -15,6 +15,7 @@ from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
 from cookbook.cli.eval import convert, evaluate
+from cookbook.cli.analysis import download, run
 from cookbook.utils.config import (
     build_train_config,
     config_from_path,

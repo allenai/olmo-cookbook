@@ -181,3 +181,9 @@ cython_debug/
 tmp/
 temp/
 uv.lock
+
+# Custom exclusions
+/.eval_data/
+img/
+*.parquet
+OLMo-ladder/
