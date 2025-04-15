@@ -363,12 +363,18 @@ def evaluate(
     default="",
     help="Sort results by a specific column",
 )
+@click.option(
+    "-f", "--force",
+    is_flag=True,
+    help="Force re-fetch results from the datalake",
+)
 def results(
     dashboard: str,
     models: list[str],
     tasks: list[str],
     format: str,
     sort_by: str,
+    force: bool,
 ) -> None:
 
     all_metrics, all_averages = make_dashboard_table(
@@ -381,6 +387,7 @@ def results(
         average_core=True,
         average_generative=True,
         show_bpb=False,
+        force=force,
     )
 
     # if a task starts with *, it means it is a named group and we need to expand it

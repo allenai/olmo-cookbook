@@ -16,9 +16,13 @@ def make_dashboard_table(
     show_rc: bool = False,
     show_generative: bool = True,
     show_partial: bool = True,
+    force: bool = False,
 ) -> tuple[MiniFrame, MiniFrame]:
     experiments = FindExperiments.run(dashboard=dashboard)
-    metrics = MetricsAll.prun(experiment_id=[experiment.experiment_id for experiment in experiments])
+    metrics = MetricsAll.prun(
+        experiment_id=[experiment.experiment_id for experiment in experiments],
+        force=[force for _ in experiments],
+    )
 
     all_metrics_table = MiniFrame(title=dashboard)
 
