@@ -56,7 +56,7 @@ class ModelConfigIdentifier:
     A dynamic registry for model identifiers that auto-initializes when used.
     """
 
-    _registry = {}
+    _registry: dict[str, str] = {}
     _initialized = False
 
     def __init__(self, identifier):
@@ -73,13 +73,13 @@ class ModelConfigIdentifier:
         self.value = identifier
         self.name = identifier
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ModelConfigIdentifier({self.value!r})"
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, str):
             return self.value == other
         elif isinstance(other, ModelConfigIdentifier):
@@ -87,7 +87,7 @@ class ModelConfigIdentifier:
         return False
 
     @classmethod
-    def _get_model_methods(cls, target_class):
+    def _get_model_methods(cls, target_class) -> list[str]:
         """Get all classmethods of a class that might represent model configurations."""
         return [
             attr
@@ -98,11 +98,10 @@ class ModelConfigIdentifier:
         ]
 
     @classmethod
-    def _initialize_identifiers(cls):
+    def _initialize_identifiers(cls) -> None:
         """Initialize the model identifier registry with methods from TransformerConfig and WrappedTransformerConfig."""
         # Add default models
         cls._registry["default"] = "default"
-        cls._registry["olmo2_1B"] = "olmo2_1B"
 
         # Add methods from WrappedTransformerConfig
         for method_name in cls._get_model_methods(WrappedTransformerConfig):
@@ -116,18 +115,53 @@ class ModelConfigIdentifier:
         cls._initialized = True
 
     @classmethod
-    def keys(cls):
+    def keys(cls) -> list[str]:
         """Return all valid model identifier keys."""
         if not cls._initialized:
             cls._initialize_identifiers()
         return list(cls._registry.keys())
 
     @classmethod
-    def values(cls):
+    def values(cls) -> list[str]:
         """Return all valid model identifier values."""
         if not cls._initialized:
             cls._initialize_identifiers()
         return list(cls._registry.values())
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, _source_type, _handler):
+        from pydantic_core import core_schema
+
+        def validate_identifier(value, info):
+            # Ensure registry is initialized
+            if not cls._initialized:
+                cls._initialize_identifiers()
+
+            # Handle existing instances
+            if isinstance(value, cls):
+                return value
+
+            # Handle string values
+            if not isinstance(value, str):
+                raise ValueError(f"Expected string or {cls.__name__}, got {type(value)}")
+
+            # Validate against registry
+            if value not in cls._registry:
+                valid_values = ", ".join(cls._registry.keys())
+                raise ValueError(
+                    f"'{value}' is not a valid model identifier. " f"Available models: {valid_values}"
+                )
+
+            return cls(value)
+
+        return core_schema.with_info_plain_validator_function(
+            validate_identifier,
+            serialization=core_schema.plain_serializer_function_ser_schema(lambda instance: instance.value),
+            metadata={
+                "type": "enum-like",
+                "values": list(cls.keys()),
+            },
+        )
 
 
 class WrappedTransformerConfig:
