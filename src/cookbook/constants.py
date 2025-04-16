@@ -15,7 +15,8 @@ OLMOE_UNSHARD_SCRIPT = "scripts/unshard.py"
 OLMO2_COMMIT_HASH = "69362b95c66655191d513e9c1420d54aa8477d92"
 OLMO2_UNSHARD_SCRIPT = "scripts/unshard.py"
 
-OLMO_CORE_COMMIT_HASH = "c149b73b4b02675140af67e1e32bac9d9bf116f8"
+OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
+OLMO_CORE_V2_COMMIT_HASH = "c149b73b4b02675140af67e1e32bac9d9bf116f8"
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
 
 DEFAULT_OLMOE_TOKENIZER = "allenai/eleuther-ai-gpt-neox-20b-pii-special"
@@ -29,7 +30,7 @@ BEAKER_DEFAULT_PRIORITY = "normal"
 BEAKER_PY = "beaker-py<1.34.2"
 BEAKER_GANTRY = "beaker-gantry<1.15.0"
 
-OLMO_TYPES = ["olmoe", "olmo2", "olmo-core"]
+OLMO_TYPES = ["olmoe", "olmo2", "olmo-core", "olmo-core-v2"]
 
 WEKA_MOUNTS = [
     "ai1-default",
@@ -188,11 +189,7 @@ ALL_MINERVA_TASKS = [
     "minerva_math_precalculus::olmes",
 ]
 
-ALL_MATH_TASKS = [
-    *ALL_MINERVA_TASKS,
-    "gsm8k::olmo1",
-    "gsm8k::olmes"
-]
+ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
 
 
 ALL_AGI_EVAL_TASKS = [

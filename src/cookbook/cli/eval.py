@@ -15,6 +15,7 @@ from cookbook.constants import (
     ALL_NAMED_GROUPS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
@@ -37,6 +38,9 @@ logger = logging.getLogger(__name__)
 @click.option("--olmoe-commit-hash", type=str, default=OLMOE_COMMIT_HASH, help="OLMoE commit hash")
 @click.option("--olmo2-commit-hash", type=str, default=OLMO2_COMMIT_HASH, help="OLMo2 commit hash")
 @click.option("--olmo-core-commit-hash", type=str, default=OLMO_CORE_COMMIT_HASH, help="OLMo core commit hash")
+@click.option(
+    "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
+)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -87,6 +91,7 @@ def convert(
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
+    olmo_core_v2_commit_hash: str,
     huggingface_transformers_commit_hash: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
@@ -112,6 +117,7 @@ def convert(
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
         olmo_core_commit_hash=olmo_core_commit_hash,
+        olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
         olmo_type=olmo_type,
         olmo2_commit_hash=olmo2_commit_hash,
         olmoe_commit_hash=olmoe_commit_hash,
@@ -342,8 +348,6 @@ def evaluate(
     )
 
 
-
-
 @click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
 @click.option(
     "-m",
@@ -361,19 +365,22 @@ def evaluate(
     multiple=True,
 )
 @click.option(
-    "-f", "--format",
+    "-f",
+    "--format",
     type=click.Choice(["json", "table"]),
     default="table",
     help="Output results in JSON format",
 )
 @click.option(
-    "-s", "--sort-by",
+    "-s",
+    "--sort-by",
     type=str,
     default="",
     help="Sort results by a specific column",
 )
 @click.option(
-    "-f", "--force",
+    "-f",
+    "--force",
     is_flag=True,
     help="Force re-fetch results from the datalake",
 )
