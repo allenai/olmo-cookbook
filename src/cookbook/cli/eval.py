@@ -441,16 +441,25 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
-@click.argument("tasks", type=str)
-def list_tasks(tasks: str):
-    table = Table(title=f"Listing {tasks.capitalize()} tasks")
+@click.argument("subset_type", type=str)
+@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
+def list_tasks(subset_type: str, task: list[str] | None):
+    valid_tasks = [re.compile(t) for t in task] if task else []
+
+    table = Table(title=f"Listing {subset_type.capitalize()} tasks")
     table.add_column("Group")
     table.add_column("Tasks")
+    table.add_column("Count")
 
-    assert tasks in ['display', 'named'], f"Invalid task type: {tasks}"
+    assert subset_type in ['display', 'named'], f"Invalid task type: {subset_type}"
 
-    for task_group, task_names in (ALL_DISPLAY_TASKS if tasks == 'display' else ALL_NAMED_GROUPS).items():
-        table.add_row(task_group, "\n".join(task_names))
+    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == 'display' else ALL_NAMED_GROUPS).items():
+        if len(valid_tasks) > 0:
+            valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
+            valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
+            if not valid_task_in_key and not valid_task_in_names:
+                continue
+        table.add_row(task_group, "\n".join(task_names), f"{len(task_names):,}")
 
     console = Console()
     console.print(table)
@@ -467,7 +476,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
     table.add_column("Model Name")
     table.add_column("Task Name")
     table.add_column("Tags")
-
+    table.add_column("Count")
     for experiment in experiments:
         tasks_in_experiment = experiment.task_name.split(",")
         if valid_tasks:
@@ -481,6 +490,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
             experiment.model_name,
             "\n".join(tasks_in_experiment),
             "\n".join(map(str, experiment.tags)),
+            f"{len(tasks_in_experiment):,}",
         )
 
     console = Console()
