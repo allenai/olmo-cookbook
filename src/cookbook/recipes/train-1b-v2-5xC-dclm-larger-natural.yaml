@@ -12,7 +12,7 @@ model: "olmo2_1B_v2"
 tokenizer: "dolma2"
 priority: urgent
 cluster: ai2/augusta-google-1 # ai2/jupiter-cirrascale-2
-weka: false
+weka: true
 rank_microbatch_size: 32_768
 global_batch_size: 2_097_152 # 4_194_304, 2_097_152
 dataset:
