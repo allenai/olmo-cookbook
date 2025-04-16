@@ -51,8 +51,40 @@ class DefaultTransformerProperties:
     rope_theta: int = 500_000
 
 
-class ModelConfigIdentifier(Enum):
-    default = "default"
+class ModelConfigIdentifier:
+    """
+    A dynamic registry for model identifiers that auto-initializes when used.
+    """
+
+    _registry = {}
+    _initialized = False
+
+    def __init__(self, identifier):
+        # Auto-initialize the first time this class is used
+        if not ModelConfigIdentifier._initialized:
+            ModelConfigIdentifier._initialize_identifiers()
+
+        if identifier not in ModelConfigIdentifier._registry:
+            raise ValueError(
+                f"'{identifier}' is not a valid model identifier. "
+                f"Available models: {', '.join(ModelConfigIdentifier._registry.keys())}"
+            )
+
+        self.value = identifier
+        self.name = identifier
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return f"ModelConfigIdentifier({self.value!r})"
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.value == other
+        elif isinstance(other, ModelConfigIdentifier):
+            return self.value == other.value
+        return False
 
     @classmethod
     def _get_model_methods(cls, target_class):
@@ -65,38 +97,37 @@ class ModelConfigIdentifier(Enum):
             and attr not in ["from_dict", "from_json", "from_model_identifier", "values", "keys"]
         ]
 
-    # Dynamically add model names from WrappedTransformerConfig
     @classmethod
-    def values(cls):
-        return [e.value for e in cls]
+    def _initialize_identifiers(cls):
+        """Initialize the model identifier registry with methods from TransformerConfig and WrappedTransformerConfig."""
+        # Add default models
+        cls._registry["default"] = "default"
+        cls._registry["olmo2_1B"] = "olmo2_1B"
+
+        # Add methods from WrappedTransformerConfig
+        for method_name in cls._get_model_methods(WrappedTransformerConfig):
+            cls._registry[method_name] = method_name
+
+        # Add methods from TransformerConfig
+        for method_name in cls._get_model_methods(TransformerConfig):
+            if method_name not in cls._registry:
+                cls._registry[method_name] = method_name
+
+        cls._initialized = True
 
     @classmethod
     def keys(cls):
-        return [e.name for e in cls]
-
-    def __str__(self):
-        return self.value
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}.{self.name}"
+        """Return all valid model identifier keys."""
+        if not cls._initialized:
+            cls._initialize_identifiers()
+        return list(cls._registry.keys())
 
     @classmethod
-    def __getitem__(cls, name):
-        return cls._member_map_[name]
-
-    def from_string(self, model_name: str):
-        """
-        Create a ModelConfigIdentifier from a string.
-
-        Args:
-            model_name: The name of the model as a string
-
-        Returns:
-            A ModelConfigIdentifier instance for the specified model
-        """
-        if model_name in self.keys():
-            return self[model_name]
-        raise ValueError(f"Model name '{model_name}' is not a valid ModelConfigIdentifier.")
+    def values(cls):
+        """Return all valid model identifier values."""
+        if not cls._initialized:
+            cls._initialize_identifiers()
+        return list(cls._registry.values())
 
 
 class WrappedTransformerConfig:
