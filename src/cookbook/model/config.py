@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
@@ -53,6 +52,8 @@ class DefaultTransformerProperties:
 
 
 class ModelConfigIdentifier(Enum):
+    default = "default"
+
     @classmethod
     def _get_model_methods(cls, target_class):
         """Get all classmethods of a class that might represent model configurations."""
