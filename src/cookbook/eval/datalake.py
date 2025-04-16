@@ -7,7 +7,7 @@ from dataclasses import field as dataclass_field
 from dataclasses import fields as dataclass_fields
 from functools import partial
 from threading import current_thread, main_thread
-from typing import Callable, ClassVar, Generic, List, TypeVar, TYPE_CHECKING
+from typing import Callable, ClassVar, Generic, List, TypeVar
 
 import requests
 from tqdm import tqdm
