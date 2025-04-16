@@ -18,10 +18,10 @@ from cookbook.constants import (
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
-from cookbook.eval.conversion import convert_checkpoint
+from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.results import make_dashboard_table
-from cookbook.eval.datalake import AddToDashboard, RemoveFromDashboard
+from cookbook.eval.datalake import FindExperiments, AddToDashboard, RemoveFromDashboard
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
     default="oe-conversion-venv",
     help="Name of the environment to use for conversion",
 )
-def convert(
+def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
     beaker_cluster: str,
@@ -88,7 +88,7 @@ def convert(
     env_name: str,
     beaker_preemptible: bool,
 ):
-    convert_checkpoint(
+    run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
         beaker_budget=beaker_budget,
         beaker_cluster=beaker_cluster,
@@ -254,7 +254,7 @@ def convert(
     type=bool,
     help="Whether to use v1 spec for vLLM models",
 )
-def evaluate(
+def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
     aws_access_key_id: str,
@@ -368,7 +368,7 @@ def evaluate(
     is_flag=True,
     help="Force re-fetch results from the datalake",
 )
-def results(
+def get_results(
     dashboard: str,
     models: list[str],
     tasks: list[str],
@@ -439,16 +439,61 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
+@click.option("-d", "--display-tasks", type=bool, default=False, help="List display tasks suites")
+@click.option("-t", "--tasks", type=str, default=None, help="List tasks for a given suite")
+def list_tasks(display_tasks: bool, tasks: str | None) -> None:
+    if display_tasks:
+        print("\n".join(ALL_DISPLAY_TASKS.keys()))
+    elif tasks:
+        print("\n".join(ALL_NAMED_GROUPS[tasks]))
+    else:
+        print("\n".join(ALL_NAMED_GROUPS))
+
+@click.option("-m", "--model", type=str, required=True, help="List models for a given suite")
+@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
+def list_all_experiments(model: str, task: list[str] | None) -> None:
+    experiments = FindExperiments.run(model_name=model)
+    valid_tasks = [re.compile(t) for t in task] if task else []
+
+    from rich.table import Table
+    from rich.console import Console
+
+    table = Table()
+    table.add_column("Experiment ID")
+    table.add_column("Model Name")
+    table.add_column("Task Name")
+    table.add_column("Tags")
+
+    for experiment in experiments:
+        tasks_in_experiment = experiment.task_name.split(",")
+        if valid_tasks:
+            tasks_in_experiment = [t for t in tasks_in_experiment if any(v.search(t) for v in valid_tasks)]
+
+        if len(tasks_in_experiment) == 0:
+            continue
+
+        table.add_row(
+            experiment.experiment_id,
+            experiment.model_name,
+            "\n".join(tasks_in_experiment),
+            "\n".join(map(str, experiment.tags)),
+        )
+
+    console = Console()
+    console.print(table)
+
 @click.group()
 def cli():
     pass
 
 
-cli.command()(convert)
-cli.command()(evaluate)
-cli.command()(results)
-cli.command()(add_to_dashboard)
-cli.command()(remove_from_dashboard)
+cli.command("convert")(convert_checkpoint)
+cli.command("evaluate")(evaluate_model)
+cli.command("results")(get_results)
+cli.command("list")(list_tasks)
+cli.command("experiments")(list_all_experiments)
+cli.command("add-dashboard")(add_to_dashboard)
+cli.command("remove-dashboard")(remove_from_dashboard)
 
 
 if __name__ == "__main__":

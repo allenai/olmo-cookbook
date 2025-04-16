@@ -14,7 +14,7 @@ from tqdm import tqdm
 from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
-from cookbook.cli.eval import convert, evaluate
+from cookbook.cli.eval import convert_checkpoint, evaluate_model
 from cookbook.utils.config import (
     build_train_config,
     config_from_path,
@@ -350,7 +350,7 @@ def prepare_user_workspace(
         if secret_value:
             beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
             print(f"Succesfully wrote '{secret_name}' to {target_workspace.full_name}")
-        
+
         # If a workspace secret doesn't exist at this point, then write in a blank value
         try:
             beaker.secret.get(secret_name, workspace=target_workspace)
@@ -360,8 +360,8 @@ def prepare_user_workspace(
                 print(f"Writing blank value for {secret_name}")
 
 
-cli.command()(evaluate)
-cli.command()(convert)
+cli.command()(evaluate_model)
+cli.command()(convert_checkpoint)
 
 
 if __name__ == "__main__":

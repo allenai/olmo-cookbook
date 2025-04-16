@@ -265,7 +265,7 @@ def convert_olmo2(
             shutil.rmtree(directory, ignore_errors=True)
 
 
-def convert_checkpoint(
+def run_checkpoint_conversion(
     beaker_allow_dirty: bool,
     beaker_budget: str,
     beaker_cluster: str,
