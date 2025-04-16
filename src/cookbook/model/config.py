@@ -73,6 +73,30 @@ class ModelConfigIdentifier(Enum):
     def keys(cls):
         return [e.name for e in cls]
 
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}.{self.name}"
+
+    @classmethod
+    def __getitem__(cls, name):
+        return cls._member_map_[name]
+
+    def from_string(self, model_name: str):
+        """
+        Create a ModelConfigIdentifier from a string.
+
+        Args:
+            model_name: The name of the model as a string
+
+        Returns:
+            A ModelConfigIdentifier instance for the specified model
+        """
+        if model_name in self.keys():
+            return self[model_name]
+        raise ValueError(f"Model name '{model_name}' is not a valid ModelConfigIdentifier.")
+
 
 class WrappedTransformerConfig:
     @classmethod

@@ -5,7 +5,7 @@ from typing import Any, Optional, Union
 
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from cookbook.model.evaluators import DownstreamEvaluator
 from cookbook.model.config import ModelConfigIdentifier
@@ -100,6 +100,14 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     save_interval: int = 1000
     warmup_steps: Optional[int] = None
     path: Path
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def validate_model(cls, value):
+        """Convert string to ModelConfigIdentifier if needed."""
+        if isinstance(value, str):
+            return ModelConfigIdentifier(value)
+        return value
 
 
 class ExperimentInstance(BaseModel):
