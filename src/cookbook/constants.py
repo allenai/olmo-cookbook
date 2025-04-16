@@ -364,16 +364,6 @@ HELMET_SUITES = {
   ]
 }
 
-
-for helmet_length in (int(2 ** i) for i in range(13, 18)):
-    HELMET_SUITES[f"helmet:{helmet_length // 2 ** 10}k"] = list(
-        set(
-            task for group_name, tasks in HELMET_SUITES.items() for task in tasks
-            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
-        )
-    )
-
-
 ALL_CORE_TASKS = [
     "arc_easy",
     "arc_challenge",
@@ -512,8 +502,16 @@ ALL_NAMED_GROUPS = {
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    **{suite: tasks for suite, tasks in HELMET_SUITES.items() if not suite.startswith("helmet_all")},
 }
+
+for helmet_length in (int(2 ** i) for i in range(13, 18)):
+    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
+        set(
+            task for group_name, tasks in HELMET_SUITES.items() for task in tasks
+            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
+        )
+    )
+
 
 ALL_DISPLAY_TASKS = {
     "olmo2:paper": [
@@ -546,6 +544,11 @@ ALL_DISPLAY_TASKS = {
         r"^mmlu:rc$",
         r"^core:rc$",
     ],
+    "helmet:8k": [r"^helmet:8k$"],
+    "helmet:16k": [r"^helmet:16k$"],
+    "helmet:32k": [r"^helmet:32k$"],
+    "helmet:64k": [r"^helmet:64k$"],
+    "helmet:128k": [r"^helmet:128k$"],
 }
 
 

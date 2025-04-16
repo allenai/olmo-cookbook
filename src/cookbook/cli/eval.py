@@ -3,6 +3,8 @@ import logging
 import re
 
 import click
+from rich.table import Table
+from rich.console import Console
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -439,24 +441,26 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
-@click.option("-d", "--display-tasks", type=bool, default=False, help="List display tasks suites")
-@click.option("-t", "--tasks", type=str, default=None, help="List tasks for a given suite")
-def list_tasks(display_tasks: bool, tasks: str | None) -> None:
-    if display_tasks:
-        print("\n".join(ALL_DISPLAY_TASKS.keys()))
-    elif tasks:
-        print("\n".join(ALL_NAMED_GROUPS[tasks]))
-    else:
-        print("\n".join(ALL_NAMED_GROUPS))
+@click.argument("tasks", type=str)
+def list_tasks(tasks: str):
+    table = Table(title=f"Listing {tasks.capitalize()} tasks")
+    table.add_column("Group")
+    table.add_column("Tasks")
+
+    assert tasks in ['display', 'named'], f"Invalid task type: {tasks}"
+
+    for task_group, task_names in (ALL_DISPLAY_TASKS if tasks == 'display' else ALL_NAMED_GROUPS).items():
+        table.add_row(task_group, "\n".join(task_names))
+
+    console = Console()
+    console.print(table)
+
 
 @click.option("-m", "--model", type=str, required=True, help="List models for a given suite")
 @click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
 def list_all_experiments(model: str, task: list[str] | None) -> None:
     experiments = FindExperiments.run(model_name=model)
     valid_tasks = [re.compile(t) for t in task] if task else []
-
-    from rich.table import Table
-    from rich.console import Console
 
     table = Table()
     table.add_column("Experiment ID")
