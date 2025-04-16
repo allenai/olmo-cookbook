@@ -34,11 +34,9 @@ def config_from_path(config: Path) -> ExperimentConfig:
 def mk_source_instances(
     sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
-    # If no user provided ratios, use the priors from the sources
     if priors:
         ratios_by_source, total_tokens = priors
     else:
-        # TODO(undfined): Clean this up and fail faster
         ratios_by_source = {}
 
     instances = []
@@ -105,9 +103,14 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     """
 
     base_config = config_from_path(config_path)
+    if dry_run:
+        source_paths = base_config.dataset.sources
+    else:
+        source_paths = normalize_source_paths(base_config.dataset.sources)
 
-    # Because this is happening on-box in Beaker we want paths normalized for usage there.
-    source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
+    print(source_paths)
+
+    source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
     config = TransformerConfigBuilder(

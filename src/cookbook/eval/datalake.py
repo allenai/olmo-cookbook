@@ -2,7 +2,9 @@ import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import ExitStack
-from dataclasses import dataclass, field as dataclass_field, fields as dataclass_fields
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from dataclasses import fields as dataclass_fields
 from functools import partial
 from threading import current_thread, main_thread
 from typing import Callable, ClassVar, Generic, List, Self, TypeVar

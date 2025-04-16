@@ -1,14 +1,14 @@
+from enum import Enum
 from os import PathLike
 from pathlib import Path
-from enum import Enum
 from typing import Any, Optional, Union
 
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from pydantic import BaseModel, field_validator
 
-from cookbook.model.evaluators import DownstreamEvaluator
 from cookbook.model.config import ModelConfigIdentifier
+from cookbook.model.evaluators import DownstreamEvaluator
 
 PathType = Union[Path, PathLike[Any], str]
 

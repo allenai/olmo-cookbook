@@ -1,12 +1,13 @@
-from dataclasses import dataclass, field as dataclass_field
-from typing import TypeVar, Generic
-from platformdirs import user_cache_dir
-import smart_open
-import os
-import json
 import hashlib
+import json
+import os
 import shutil
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from typing import Generic, TypeVar
 
+import smart_open
+from platformdirs import user_cache_dir
 
 T = TypeVar("T")
 V = TypeVar("V")

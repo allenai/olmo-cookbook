@@ -1,5 +1,7 @@
+import os
 from dataclasses import dataclass, field
 from typing import List
+from urllib.parse import urlparse
 
 import s3fs
 from olmo_core.data.source_mixture import (
@@ -20,17 +22,33 @@ class MixtureBuilder:
     seed: int
     dtype: NumpyDatasetDType
     processes: int = 1
-    fs: s3fs.S3FileSystem = field(default_factory=lambda: s3fs.S3FileSystem())
+    cached_fs: dict[str, s3fs.S3FileSystem] = field(
+        default_factory=lambda: dict(
+            s3=s3fs.S3FileSystem(),
+            weka=s3fs.S3FileSystem(
+                client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
+            ),
+        )
+    )
 
     def build(self) -> SourceMixtureDatasetConfig:
         source_configs: List[SourceMixtureConfig] = []
         for source in self.sources:
             globs = [path for path in source.paths if "*" in path]
             paths = [path for path in source.paths if path not in globs]
+
+            # Check if all paths have the same URL scheme
+            schemes = {urlparse(path).scheme for path in paths + globs}
+            if len(schemes) > 1:
+                raise ValueError(f"All paths for source {source.name} must have the same scheme. Found: {schemes}")
+
+            scheme = schemes.pop()
+
+            expanded = paths + expand_globs(self.cached_fs[scheme], globs)
             source_configs.append(
                 SourceMixtureConfig(
                     source_name=source.name,
-                    paths=paths + expand_globs(self.fs, globs),
+                    paths=expanded,
                     target_ratio=source.ratio,
                     max_repetition_ratio=source.repetition_factor,
                 )

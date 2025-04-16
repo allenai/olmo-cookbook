@@ -1,8 +1,10 @@
-import pytest
 import re
 from collections import OrderedDict
-from cookbook.eval.miniframe import MiniFrame
+
+import pytest
+
 from cookbook.constants import SHORT_NAMES
+from cookbook.eval.miniframe import MiniFrame
 
 
 @pytest.fixture

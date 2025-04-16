@@ -15,11 +15,11 @@ from urllib.parse import urlparse
 from cookbook.constants import (
     AI2_OLMO_CORE_GIT_URL,
     AI2_OLMO_GIT_URL,
+    BEAKER_GANTRY,
+    BEAKER_PY,
     OE_EVAL_GIT_URL,
     TRANSFORMERS_GIT_URL,
     WEKA_MOUNTS,
-    BEAKER_PY,
-    BEAKER_GANTRY,
 )
 
 

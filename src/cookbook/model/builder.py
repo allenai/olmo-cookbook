@@ -1,8 +1,10 @@
 import logging
+import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import olmo_core.train.train_module as train_module
+import s3fs
 from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
@@ -42,14 +44,13 @@ from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, Source
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
     DEFAULT_LR_MAP,
-    ModelTrainConfig,
     ModelConfigIdentifier,
+    ModelTrainConfig,
     Tokenizers,
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator
 from cookbook.model.schedulers import WSD
-from enum import Enum, auto
 
 logger = logging.getLogger(__name__)
 
@@ -354,6 +355,7 @@ class TransformerConfigBuilder:
             logger.info(
                 "Using fractional source_mixture dataset builder... This can take awhile for large token populations!"
             )
+
             mixture_config = MixtureBuilder(
                 sources=self.sources,
                 max_tokens=self.max_tokens,

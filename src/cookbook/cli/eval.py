@@ -21,9 +21,9 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
 )
 from cookbook.eval.conversion import convert_checkpoint
+from cookbook.eval.datalake import AddToDashboard, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.results import make_dashboard_table
-from cookbook.eval.datalake import AddToDashboard, RemoveFromDashboard
 
 logger = logging.getLogger(__name__)
 
