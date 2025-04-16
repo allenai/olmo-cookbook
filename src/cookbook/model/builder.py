@@ -27,6 +27,7 @@ from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
     CheckpointerCallback,
+    CometCallback,
     ConfigSaverCallback,
     DownstreamEvaluatorCallbackConfig,
     GarbageCollectorCallback,
@@ -37,16 +38,18 @@ from olmo_core.train.callbacks import (
 )
 from olmo_core.train.common import LoadStrategy
 
-from cookbook.aliases import SourceInstance, WandbConfig
+from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
-    MODEL_TO_LR_MAP,
+    DEFAULT_LR_MAP,
     ModelTrainConfig,
-    SupportedTokenizers,
+    ModelConfigIdentifier,
+    Tokenizers,
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator
 from cookbook.model.schedulers import WSD
+from enum import Enum, auto
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +65,7 @@ class TransformerConfigBuilder:
         sequence_length (int): The sequence length for the model.
         max_target_sequence_length (int): The maximum target sequence length for the model.
         max_tokens (int): The maximum number of tokens to train on.
-        model_identifier (str): The identifier for the model.
+        model_identifier (ModelConfigIdentifier): The identifier for the model.
         transformer_config (TransformerConfig): The transformer configuration.
         group_id (str): The group ID for the run.
         cluster (str): The cluster name.
@@ -72,19 +75,24 @@ class TransformerConfigBuilder:
         tokenizer (TokenizerConfig): The tokenizer configuration.
         dtype (str): The data type for the dataset.
         weka (bool): Whether to use Weka buckets.
-        wandb_config (Optional[WandbConfig]): The Weights and Biases configuration.
+        metrics_config (Optional[MetricsConfig]): The metrics configuration, if any.
         max_dp_world_size (int): The maximum data parallel world size.
         eval_interval (int): The evaluation interval.
         save_interval (int): The save interval.
         lm_evaluator (bool): Whether to enable language model evaluation.
-        downstream_evaluators (List[DownstreamEvaluators]): The downstream evaluators.
+        downstream_evaluators (List[DownstreamEvaluator]): The downstream evaluators.
+        load_path (Optional[str]): Path to load a model checkpoint from.
         learning_rate (Optional[float]): The learning rate for the optimizer.
+        global_batch_size (Optional[int]): The global batch size.
+        rank_microbatch_size (Optional[int]): The rank microbatch size.
+        warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         profile (bool): Whether to enable profiling.
 
     Methods:
         __init__(run_name, sources, sequence_length, max_tokens, group_id, cluster, beaker_user,
                  tokenizer, dtype, model_identifier, weka, max_dp_world_size, save_interval, eval_interval,
-                 lm_evaluator, downstream_evaluators, learning_rate=None, wandb_config=None,
+                 lm_evaluator, downstream_evaluators, load_path=None, global_batch_size=None,
+                 rank_microbatch_size=None, learning_rate=None, metrics_config=None,
                  max_target_sequence_length=8192, seed=42, s3=True, profile=False):
             Initializes the TransformerConfigBuilder.
 
@@ -94,25 +102,28 @@ class TransformerConfigBuilder:
         get_warmup_steps() -> int:
             Returns the number of warmup steps.
 
-        get_batch_size() -> int:
-            Returns the global batch size based on the sequence length.
+        get_global_batch_size() -> int:
+            Returns the global batch size based on the sequence length or user-defined value.
 
-        next_power_of_2(x: int) -> int:
-            Returns the next power of 2 greater than or equal to x.
+        get_rank_microbatch_size() -> int:
+            Returns the rank microbatch size for training.
 
         get_learning_rate() -> float:
             Returns the learning rate for the optimizer.
 
-        build_callbacks(model: TransformerConfig) -> Dict[str, Callback]:
+        next_power_of_2(x: int) -> int:
+            Returns the next power of 2 greater than or equal to x.
+
+        build_callbacks() -> Dict[str, Callback]:
             Builds and returns a dictionary of callbacks for the trainer.
 
         build_dataset_config() -> NumpyDatasetConfig:
             Builds and returns the dataset configuration.
 
-        get_scheduler_config(scheduler_type: str = "cosine") -> Scheduler:
+        get_scheduler_config(scheduler_type: SchedulerType) -> Scheduler:
             Returns the scheduler configuration based on the scheduler type.
 
-        get_optimizer_config() -> AdamWConfig:
+        get_optimizer_config() -> OptimConfig:
             Returns the optimizer configuration.
 
         build() -> ModelTrainConfig:
@@ -124,7 +135,7 @@ class TransformerConfigBuilder:
     sequence_length: int
     max_target_sequence_length: int
     max_tokens: int
-    model_identifier: str
+    model_identifier: ModelConfigIdentifier
     transformer_config: TransformerConfig
     group_id: str
     cluster: str
@@ -134,7 +145,7 @@ class TransformerConfigBuilder:
     tokenizer: TokenizerConfig
     dtype: str
     weka: bool
-    wandb_config: Optional[WandbConfig]
+    metrics_config: Optional[MetricsConfig]
     max_dp_world_size: int
     eval_interval: int
     save_interval: int
@@ -144,6 +155,7 @@ class TransformerConfigBuilder:
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
+    warmup_steps: Optional[int]
     profile: bool = False
 
     def __init__(
@@ -157,7 +169,7 @@ class TransformerConfigBuilder:
         beaker_user: str,
         tokenizer: str,
         dtype: str,
-        model_identifier: str,
+        model_identifier: ModelConfigIdentifier,
         weka: bool,
         max_dp_world_size: int,
         save_interval: int,
@@ -168,9 +180,10 @@ class TransformerConfigBuilder:
         global_batch_size: Optional[int] = None,
         rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
-        wandb_config: Optional[WandbConfig] = None,
+        metrics_config: Optional[MetricsConfig] = None,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
+        warmup_steps: Optional[int] = None,
         s3: bool = True,
         profile: bool = False,
     ):
@@ -189,7 +202,7 @@ class TransformerConfigBuilder:
         self.data_dir: str = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
-        self.wandb_config = wandb_config
+        self.metrics_config = metrics_config
         self.max_dp_world_size = max_dp_world_size
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
@@ -200,6 +213,7 @@ class TransformerConfigBuilder:
         self.global_batch_size = global_batch_size
         self.rank_microbatch_size = rank_microbatch_size
         self.downstream_evaluators = downstream_evaluators
+        self.warmup_steps = warmup_steps
         self.load_path = load_path
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
@@ -213,15 +227,16 @@ class TransformerConfigBuilder:
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
-            return SupportedTokenizers[tokenizer].value
+            return Tokenizers[tokenizer].value
         except ValueError as e:
             logger.info(f"Invalid tokenizer identifier: {tokenizer}")
             raise e
 
     def get_warmup_steps(self) -> int:
-        return 2000
+        return self.warmup_steps or 2000
 
-    def get_batch_sizes(self) -> tuple[int, int]:
+    def get_global_batch_size(self) -> int:
+        # TODO(undfined): Revisit this logic as it would be nice for this to be automated
         # assert self.sequence_length in {2048, 4096, 8192}
         # seq_len_divisor = self.sequence_length // 2048
 
@@ -232,37 +247,35 @@ class TransformerConfigBuilder:
         # global_batch_size *= self.max_dp_world_size
 
         # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
+
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
         else:
             global_batch_size = 1024 * self.sequence_length
 
-        if self.rank_microbatch_size:
-            rank_microbatch_size = self.rank_microbatch_size
-        else:
-            rank_microbatch_size = 16 * self.sequence_length
-
         print(f"Global batch size (in tokens) is: {global_batch_size}")
 
-        return global_batch_size, rank_microbatch_size
+        return global_batch_size
 
-    # def default_learning_rate(self) -> float:
-    #     learning_rate = 4.7e-3 * (self.transformer_config.num_params / self.tokenizer.padded_vocab_size()) ** (
-    #         -1 / 3
-    #     )
-    #     learning_rate = learning_rate / self.sequence_length
-    #     return learning_rate
+    def get_rank_microbatch_size(self) -> int:
+        if self.rank_microbatch_size is not None:
+            rbz = self.rank_microbatch_size
+        else:
+            rbz = 16 * self.sequence_length
+
+        logger.info(f"Rank microbatch size (in tokens) is: {rbz}")
+
+        return rbz
 
     def get_learning_rate(self) -> float:
-        if self.learning_rate:
-            return self.learning_rate
-
-        maybe_lr = MODEL_TO_LR_MAP.get(self.model_identifier)
-
-        if maybe_lr:
-            return maybe_lr
+        if self.learning_rate is not None:
+            lr = self.learning_rate
         else:
-            return 5e-4
+            lr = DEFAULT_LR_MAP.get(self.model_identifier.value, 5e-4)
+
+        logger.info(f"Learning rate is: {lr}")
+
+        return lr
 
     def next_power_of_2(self, x: int) -> int:
         return 1 if x == 0 else 2 ** (x - 1).bit_length()
@@ -278,15 +291,27 @@ class TransformerConfigBuilder:
                 ephemeral_save_interval=100,
                 save_async=True,
             ),
-            "wandb": WandBCallback(
-                name=self.run_name.strip(),
-                project=self.wandb_config.project.strip() if self.wandb_config else "olmo-cookbook",
-                group=self.group_id.strip(),
-                cancel_check_interval=10,
-                enabled=True,
-            ),
-            # TODO(undfined): Add Comet ML callback
         }
+
+        if self.metrics_config:
+            if MetricBackend.wandb in self.metrics_config.backends:
+                callbacks[MetricBackend.wandb.value] = (
+                    WandBCallback(
+                        name=self.run_name.strip(),
+                        project=self.metrics_config.project.strip(),
+                        group=self.group_id.strip(),
+                        cancel_check_interval=10,
+                        enabled=True,
+                    ),
+                )
+            if MetricBackend.comet in self.metrics_config.backends:
+                callbacks[MetricBackend.comet.value] = CometCallback(
+                    name=self.run_name.strip(),
+                    workspace=self.metrics_config.workspace.strip(),
+                    project=self.metrics_config.project.strip(),
+                    enabled=True,
+                    cancel_check_interval=10,
+                )
 
         if self.lm_evaluator:
             callbacks["lm_evaluator"] = LMEvaluatorCallbackConfig(
@@ -302,15 +327,24 @@ class TransformerConfigBuilder:
             )
 
         if self.downstream_evaluators:
-            callbacks["downstream_evaluator"] = DownstreamEvaluatorCallbackConfig(
-                tasks=[evaluator.value for evaluator in self.downstream_evaluators],
-                tokenizer=self.tokenizer,
-                eval_interval=self.eval_interval,
-            )
+            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:
+                evaluators = DownstreamEvaluatorCallbackConfig(
+                    tasks=[evaluator.value for evaluator in DownstreamEvaluator],
+                    tokenizer=self.tokenizer,
+                    eval_interval=self.eval_interval,
+                )
+            else:
+                evaluators = DownstreamEvaluatorCallbackConfig(
+                    tasks=[evaluator.value for evaluator in self.downstream_evaluators],
+                    tokenizer=self.tokenizer,
+                    eval_interval=self.eval_interval,
+                )
+
+            callbacks["downstream_evaluators"] = evaluators
 
         return callbacks
 
-    def build_dataset_config(self) -> NumpyDatasetConfig:
+    def build_dataset_config(self, loader_processes: int = 16) -> NumpyDatasetConfig:
         is_fractional = any(source.ratio is not None and source.ratio != 1 for source in self.sources)
 
         mixture_config = None
@@ -325,7 +359,7 @@ class TransformerConfigBuilder:
                 max_tokens=self.max_tokens,
                 sequence_length=self.sequence_length,
                 seed=self.seed,
-                processes=12,
+                processes=loader_processes,
                 dtype=self.dataset_dtype,
             ).build()
         else:
@@ -343,23 +377,24 @@ class TransformerConfigBuilder:
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
         )
+
         return dataset_config
 
-    def get_scheduler_config(self, scheduler_type: str = "cos_linear") -> Scheduler:
-        if scheduler_type == "cosine":
-            return CosWithWarmup(warmup_steps=self.get_warmup_steps())
-        elif scheduler_type == "cos_linear":
-            return CosWithWarmupAndLinearDecay(
+    def get_scheduler_config(self, scheduler_type: SchedulerType = SchedulerType.COS_LINEAR) -> Scheduler:
+        scheduler_map = {
+            SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
+            SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
                 warmup_steps=self.get_warmup_steps(),
-            )
-        elif scheduler_type == "wsd":
-            return WSD(
+            ),
+            SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
-            )
-        else:
-            raise ValueError(f"Unsupported scheduler type: {scheduler_type}")
+            ),
+        }
+
+        return scheduler_map[scheduler_type]()
 
     def get_optimizer_config(self) -> OptimConfig:
+        # TODO(undfined): Add support for other optimizers and allow user to specify optimizer type and properties
         return SkipStepAdamWConfig(
             lr=self.get_learning_rate(),
             weight_decay=0.033,
@@ -368,12 +403,8 @@ class TransformerConfigBuilder:
         )
 
     def build(self) -> ModelTrainConfig:
-        global_batch_size, rank_microbatch_size = self.get_batch_sizes()
-        learning_rate = self.get_learning_rate()
-
-        if self.sequence_length == 4096:
-            learning_rate /= 4
-
+        global_batch_size = self.get_global_batch_size()
+        rank_microbatch_size = self.get_rank_microbatch_size()
         dataset_config = self.build_dataset_config()
         optim_config = self.get_optimizer_config()
         data_loader_config = NumpyDataLoaderConfig(
@@ -388,12 +419,7 @@ class TransformerConfigBuilder:
         train_module_config = train_module.TransformerTrainModuleConfig(
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,
-            optim=SkipStepAdamWConfig(
-                lr=learning_rate,
-                weight_decay=0.033,
-                betas=(0.9, 0.95),
-                group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
-            ),
+            optim=self.get_optimizer_config(),
             compile_model=True,
             dp_config=train_module.TransformerDataParallelConfig(
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32

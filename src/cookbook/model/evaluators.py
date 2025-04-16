@@ -4,6 +4,7 @@ from enum import Enum
 class DownstreamEvaluator(Enum):
     """Enum class enumerating available in-loop evaluators."""
 
+    ALL = "all"
     PIQA = "piqa"
     HELLASWAG = "hellaswag"
     WINOGRANDE = "winogrande"

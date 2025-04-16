@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
@@ -10,6 +11,12 @@ from olmo_core.nn.transformer import (
 )
 from olmo_core.optim import OptimConfig
 from olmo_core.train import TrainerConfig
+
+
+class Tokenizers(Enum):
+    dolma2 = TokenizerConfig.dolma2()
+    gpt_neox = TokenizerConfig.gpt_neox_olmo_dolma_v1_5()
+    superbpe_experimental = TokenizerConfig.from_hf("allenai/superbpe-experimental_v0.1.0")
 
 
 @dataclass
@@ -39,6 +46,20 @@ class DefaultTransformerProperties:
     rope_theta: int = 500_000
 
 
+class ModelConfigIdentifier(Enum):
+    olmo_30m = "olmo_30m"
+    olmo2_190M = "olmo2_190M"
+    olmo2_1B = "olmo2_1B"
+
+    @classmethod
+    def values(cls):
+        return [e.value for e in cls]
+
+    @classmethod
+    def keys(cls):
+        return [e.name for e in cls]
+
+
 class WrappedTransformerConfig:
     @classmethod
     def olmo_30m(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
@@ -57,37 +78,38 @@ class WrappedTransformerConfig:
         )
 
     @classmethod
-    def olmo2_core_190M(cls) -> TransformerConfig:
+    def olmo2_core_190M(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         return getattr(TransformerConfig, "olmo2_190M")(
-            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            vocab_size=tokenizer.padded_vocab_size(),
         )
 
     @classmethod
-    def olmo2_core_1B(cls) -> TransformerConfig:
+    def olmo2_core_1B(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         OLMo2 1b (1_336_035_328 parameters)
         """
         return getattr(TransformerConfig, "olmo2_1B")(
-            vocab_size=TokenizerConfig.dolma2().padded_vocab_size(),
+            vocab_size=tokenizer.padded_vocab_size(),
         )
 
     @classmethod
-    def from_model_identifier(cls, model_identifier: str) -> TransformerConfig:
-        if model_identifier == "olmo_30m":
-            return cls.olmo_30m(TokenizerConfig.gpt_neox_olmo_dolma_v1_5())
-        elif model_identifier == "olmo2_190M":
-            return cls.olmo2_core_190M()
-        elif model_identifier == "olmo2_1B":
-            return cls.olmo2_core_1B()
-        else:
+    def from_model_identifier(
+        cls, model_identifier: ModelConfigIdentifier, tokenizer: TokenizerConfig = Tokenizers.dolma2.value
+    ) -> TransformerConfig:
+        model_mapping = {
+            ModelConfigIdentifier.olmo_30m: lambda: cls.olmo_30m(
+                tokenizer or TokenizerConfig.gpt_neox_olmo_dolma_v1_5()
+            ),
+            ModelConfigIdentifier.olmo2_190M: lambda: cls.olmo2_core_190M(tokenizer),
+            ModelConfigIdentifier.olmo2_1B: lambda: cls.olmo2_core_1B(tokenizer),
+        }
+
+        if model_identifier not in model_mapping:
             raise ValueError(f"Model identifier {model_identifier} is not supported.")
 
-
-class SupportedTokenizers(Enum):
-    dolma2 = TokenizerConfig.dolma2()
-    gpt_neox = TokenizerConfig.gpt_neox_olmo_dolma_v1_5()
+        return model_mapping[model_identifier]()
 
 
-MODEL_TO_LR_MAP = {
+DEFAULT_LR_MAP = {
     "olmo2_1B": 1.8e-3,
 }

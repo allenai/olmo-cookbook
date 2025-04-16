@@ -128,7 +128,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         sequence_length=base_config.sequence_length,
         sources=source_instances,
         tokenizer=base_config.tokenizer,
-        wandb_config=base_config.wandb,
+        metrics_config=base_config.metrics_config,
         weka=base_config.weka,
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,

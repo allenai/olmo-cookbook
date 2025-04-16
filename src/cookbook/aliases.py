@@ -1,5 +1,6 @@
 from os import PathLike
 from pathlib import Path
+from enum import Enum
 from typing import Any, Optional, Union
 
 from olmo_core.data.types import NumpyDatasetDType
@@ -7,6 +8,7 @@ from olmo_core.launch.beaker import BeakerLaunchConfig
 from pydantic import BaseModel
 
 from cookbook.model.evaluators import DownstreamEvaluator
+from cookbook.model.config import ModelConfigIdentifier
 
 PathType = Union[Path, PathLike[Any], str]
 
@@ -42,6 +44,31 @@ class WandbConfig(BaseModel):
     project: str
 
 
+class MetricBackend(Enum):
+    wandb = "wandb"
+    comet = "comet"
+
+
+class MetricsConfig(BaseModel):
+    project: str = "olmo-cookbook"
+    workspace: str = "ai2"
+    backends: list[MetricBackend] = [MetricBackend.wandb]
+
+
+class SchedulerType(Enum):
+    COSINE = "cosine"
+    COS_LINEAR = "cos_linear"
+    WSD = "wsd"
+
+    @classmethod
+    def values(cls):
+        return [e.value for e in cls]
+
+    @classmethod
+    def keys(cls):
+        return [e.name for e in cls]
+
+
 class ExperimentConfig(BaseModel, extra="forbid"):
     name: str
     description: str
@@ -56,7 +83,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     tokenizer: str
     priority: Priority  # pyright: ignore
     dataset: DatasetConfig
-    model: str
+    model: ModelConfigIdentifier
     load_path: Optional[str] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
@@ -65,11 +92,13 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     downstream_evaluators: list[DownstreamEvaluator] = []
     max_target_sequence_length: int = 8192
     wandb: Optional[WandbConfig] = None
+    metrics_config: Optional[MetricsConfig] = None
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
     eval_interval: int = 200
     save_interval: int = 1000
+    warmup_steps: Optional[int] = None
     path: Path
 
 
