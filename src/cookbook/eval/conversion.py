@@ -495,7 +495,6 @@ def convert_checkpoint(
             max_sequence_length=max_sequence_length,
             unsharded_output_dir=unsharded_output_dir,
             huggingface_output_dir=huggingface_output_dir,
-            huggingface_tokenizer=huggingface_tokenizer or DEFAULT_OLMO_CORE_TOKENIZER,
             unsharded_output_suffix=unsharded_output_suffix,
             huggingface_output_suffix=huggingface_output_suffix,
             olmo_commit_hash=olmo_core_v2_commit_hash,
