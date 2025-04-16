@@ -15,6 +15,7 @@ license = { file = "LICENSE" }
 dependencies = [
     "boto3",
     "click",
+    "requests",
     "pydantic",
     "s3fs",
     "yaspin",

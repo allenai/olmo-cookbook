@@ -26,6 +26,9 @@ BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
 BEAKER_DEFAULT_BUDGET = "ai2/oe-data"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
+BEAKER_PY = "beaker-py<1.34.2"
+BEAKER_GANTRY = "beaker-gantry<1.15.0"
+
 OLMO_TYPES = ["olmoe", "olmo2", "olmo-core"]
 
 WEKA_MOUNTS = [
@@ -136,6 +139,23 @@ MMLU_CATEGORIES = [
     "mmlu_world_religions",
 ]
 
+MMLU_PRO_CATEGORIES = [
+    "mmlu_pro_math",
+    "mmlu_pro_health",
+    "mmlu_pro_physics",
+    "mmlu_pro_business",
+    "mmlu_pro_biology",
+    "mmlu_pro_chemistry",
+    "mmlu_pro_computer science",
+    "mmlu_pro_economics",
+    "mmlu_pro_engineering",
+    "mmlu_pro_philosophy",
+    "mmlu_pro_other",
+    "mmlu_pro_history",
+    "mmlu_pro_psychology",
+    "mmlu_pro_law",
+]
+
 ALL_CORE_TASKS = [
     "arc_easy",
     "arc_challenge",
@@ -158,7 +178,7 @@ ALL_GEN_TASKS = [
     "gsm8k::olmo1",
 ]
 
-ALL_MATH_TASKS = [
+ALL_MINERVA_TASKS = [
     "minerva_math_algebra::olmes",
     "minerva_math_counting_and_probability::olmes",
     "minerva_math_geometry::olmes",
@@ -166,6 +186,25 @@ ALL_MATH_TASKS = [
     "minerva_math_number_theory::olmes",
     "minerva_math_prealgebra::olmes",
     "minerva_math_precalculus::olmes",
+]
+
+ALL_MATH_TASKS = [
+    *ALL_MINERVA_TASKS,
+    "gsm8k::olmo1",
+    "gsm8k::olmes"
+]
+
+
+ALL_AGI_EVAL_TASKS = [
+    "agi_eval_lsat-ar:1shot::olmes",
+    "agi_eval_lsat-lr:1shot::olmes",
+    "agi_eval_lsat-rc:1shot::olmes",
+    "agi_eval_logiqa-en:1shot::olmes",
+    "agi_eval_sat-math:1shot::olmes",
+    "agi_eval_sat-en:1shot::olmes",
+    "agi_eval_aqua-rat:1shot::olmes",
+    "agi_eval_sat-en-without-passage:1shot::olmes",
+    "agi_eval_gaokao-english:1shot::olmes",
 ]
 
 
@@ -237,20 +276,73 @@ FIM_TOKEN_TYPES = {
     "deepseek-coder": INFILLING_DEEPSEEK_CODER,
 }
 
+# TODO: clean up such that tasks kwargs are separate from task aliases.
+FIM_TASKS = {f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()}
+
+
+# named groups are things you should able to average; they
+# should just contain aliases
 ALL_NAMED_GROUPS = {
     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
+    "mmlu_pro:rc": [f"{category}:rc::olmes" for category in MMLU_PRO_CATEGORIES],
+    "mmlu_pro:mc": [f"{category}:mc::olmes" for category in MMLU_PRO_CATEGORIES],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+    "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
+    "agi_eval": ALL_AGI_EVAL_TASKS,
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    **{f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()},
 }
+
+ALL_DISPLAY_TASKS = {
+    "olmo2:paper": [
+        r"arc_challenge:mc.*",
+        r"hellaswag:mc.*",
+        r"winogrande:mc.*",
+        r"naturalqs.*",
+        r"drop.*",
+        r"agieval.*",
+        r"^gsm8k::olmes$",
+        r"^mmlu:mc$",
+        r"^mmlu_pro:mc$",
+        r"^agi_eval$",
+    ],
+    "olmo2:dev:7b": [
+        r"arc_challenge:mc.*",
+        r"arc_easy:mc.*",
+        r"hellaswag:mc.*",
+        r"naturalqs.*",
+        r"^gsm8k::olmo1$",
+        r"^mmlu:mc$",
+        r"^core:mc$",
+        r"^gen$",
+    ],
+    "olmo2:dev:1b": [
+        r"arc_challenge:rc.*",
+        r"arc_easy:rc.*",
+        r"hellaswag:rc.*",
+        r"^gsm8k::olmo1$",
+        r"^mmlu:rc$",
+        r"^core:rc$",
+    ],
+}
+
+
+SHORT_NAMES = {
+    r"::olmes$": "",
+    r"^gsm8k::olmo1$": "GSM*",
+    r"^naturalqs": "NQ",
+    r"^(arc\_\w)\w+": r"\1",
+    r"^hellaswag": "HSwag",
+    r"^winogrande": "WinoG",
+}
+
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None

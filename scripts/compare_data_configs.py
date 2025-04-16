@@ -16,7 +16,17 @@ Usage:
     python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino100.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-13B-stage2-seed*-100B.yaml
     python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino300.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-13B-stage2-seed*-300B.yaml
 
+    # Compare Wandb runs
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39 https://wandb.ai/ai2-llm/olmoe/runs/rzsn9tlc
+
+    # Compare a Wandb run on old OLMo configs with local files with new OLMo configs
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/yh8qbwif\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/79h5h3aa\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt
+
 Note that the counts are not file size; they are just number of `npy` files under each base path, which could be different sizes.
+
+@kylel
+
 """
 
 import glob
@@ -32,63 +42,109 @@ import yaml
 from tabulate import tabulate
 
 
+def parse_wandb_run_path(run_path: str) -> str:
+    """
+    Parse a Weights & Biases run path, either in the form "entity/project/run_id" 
+    or as a full wandb.ai URL.
+
+    Args:
+        run_path: Either a W&B run path like "ai2-llm/olmo-medium/cej4ya39" 
+                 or URL like "https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39"
+                 or URL with username like "https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39?nw=nwusersoldni"
+
+    Returns:
+        Standardized run path in the form "entity/project/run_id"
+        If input is not a W&B path/URL, returns the original string unchanged
+    """
+    run_path = run_path.strip("/")
+    run_path_re = re.compile(r"^[^/]+/[^/]+/[^/]+$")
+    run_path_url = re.compile(r"^https?://wandb.ai/([^/]+)/([^/]+)/runs/([^/?]+)")
+    
+    if run_path_re.match(run_path):
+        return run_path
+
+    m = run_path_url.match(run_path)
+    if m is not None:
+        entity, project, run_id = m.groups()
+        return f"{entity}/{project}/{run_id}"
+
+    return run_path  # Return original path if it's not a W&B path
+
+
 def read_config_files(path_patterns: List[str]) -> Dict[str, List[str]]:
     """
     Read paths from config files matching the provided patterns.
-    Handles both .txt files with direct paths and .yaml files with paths under data.paths.
+    Handles local files (.txt, .yaml) and Wandb URLs.
 
     Args:
-        path_patterns: List of glob patterns to match files
+        path_patterns: List of glob patterns or Wandb URLs
 
     Returns:
         Dictionary mapping filenames to lists of paths
     """
-    files = []
-    for pattern in path_patterns:
-        files.extend(glob.glob(pattern))
-    if not files:
-        print(f"No files found matching patterns: {path_patterns}")
-        return {}
-
     paths_by_file: Dict[str, List[str]] = {}
-    for file in files:
-        filename = Path(file).name
-        paths = []
-
-        if filename.endswith('.yaml'):
-            with open(file, 'r') as f:
-                config = yaml.safe_load(f)
-                # Get paths from data.paths in yaml
-                data_paths = config.get('data', {}).get('paths', [])
-                for line in data_paths:
-                    line = line.strip()
-                    if not line or line.startswith('#'):
-                        continue
-                    if ',' in line:
-                        path = line.split(',')[1]
-                    else:
-                        path = line
-                    if path.endswith('.npy'):
-                        paths.append(path)
+    
+    for pattern in path_patterns:
+        if pattern.startswith(('http://', 'https://')):
+            # Handle Wandb URLs
+            import wandb
+            api = wandb.Api()
+            run_path = parse_wandb_run_path(pattern)
+            try:
+                run = api.run(run_path)
+                config_raw = run._attrs["rawconfig"]
+                
+                # Extract paths from Wandb config
+                data_paths = config_raw.get('data', {}).get('paths', [])
+                paths = [path for path in data_paths if path.endswith('.npy')]
+                
+                # Use run ID as filename
+                filename = f"wandb_{run.id}"
+                paths_by_file[filename] = paths
+            except Exception as e:
+                print(f"Error reading Wandb config from {pattern}: {e}")
+                continue
         else:
-            # Handle txt files as before
-            with open(file, 'r') as f:
-                for line in f:
-                    line = line.strip()
-                    # Skip empty lines and comments
-                    if not line or line.startswith('#'):
-                        continue
+            # Handle local files as before
+            files = glob.glob(pattern)
+            for file in files:
+                filename = Path(file).name
+                paths = []
 
-                    # Handle comma-separated format
-                    if ',' in line:
-                        path = line.split(',')[1]
-                    else:
-                        path = line
+                if filename.endswith('.yaml'):
+                    with open(file, 'r') as f:
+                        config = yaml.safe_load(f)
+                        data_paths = config.get('data', {}).get('paths', [])
+                        for line in data_paths:
+                            line = line.strip()
+                            if not line or line.startswith('#'):
+                                continue
+                            if ',' in line:
+                                path = line.split(',')[1]
+                            else:
+                                path = line
+                            if path.endswith('.npy'):
+                                paths.append(path)
+                else:
+                    with open(file, 'r') as f:
+                        for line in f:
+                            line = line.strip()
+                            if not line or line.startswith('#'):
+                                continue
 
-                    if path.endswith('.npy'):
-                        paths.append(path)
+                            if ',' in line:
+                                path = line.split(',')[1]
+                            else:
+                                path = line
 
-        paths_by_file[filename] = paths
+                            if path.endswith('.npy'):
+                                paths.append(path)
+
+                paths_by_file[filename] = paths
+
+    if not paths_by_file:
+        print(f"No valid configs found in patterns: {path_patterns}")
+        return {}
 
     return paths_by_file
 
@@ -135,7 +191,7 @@ def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str
             norm_path = normalize_storage_path(path)
             
             # Special handling for dclm paths: extract the part up to the "tokenizer" folder.
-            if 'dclm/' in norm_path.lower():
+            if '/dclm/' in norm_path.lower():
                 match = re.match(r'(.*dclm/.+?tokenizer)(?:/.*)?$', norm_path, re.IGNORECASE)
                 base_path = match.group(1) if match else os.path.normpath(norm_path)
             else:
@@ -152,8 +208,6 @@ def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str
     file_totals = {filename: len(paths) for filename, paths in paths_by_file.items()}
     return base_path_counts, file_totals
 
-
-
 def format_results(base_path_counts: Dict[str, Dict[str, int]], 
                               file_totals: Dict[str, int]) -> None:
     """
@@ -166,16 +220,33 @@ def format_results(base_path_counts: Dict[str, Dict[str, int]],
     # Sort filenames by their totals in descending order.
     sorted_filenames = sorted(file_totals.keys(), key=lambda x: file_totals[x], reverse=True)
     
-    # Sort base paths by counts in the largest file (i.e. first sorted filename).
+    # Sort base paths by counts in the largest file, using second largest file as tiebreaker
     largest_file = sorted_filenames[0]
+    second_largest = sorted_filenames[1] if len(sorted_filenames) > 1 else largest_file
+    
+    def sort_key(base_path):
+        count1 = base_path_counts[base_path].get(largest_file, 0)
+        count2 = base_path_counts[base_path].get(second_largest, 0)
+        # Primary sort by first column, secondary sort by second column
+        return (count1, count2)
+        
     sorted_base_paths = sorted(
         base_path_counts.keys(),
-        key=lambda x: base_path_counts[x].get(largest_file, 0),
+        key=sort_key,
         reverse=True
     )
     
     # Prepare headers and table data.
-    headers = ['Base Path'] + sorted_filenames + ['Match']
+    # Truncate filenames that are too long (over 30 chars)
+    truncated_filenames = []
+    for filename in sorted_filenames:
+        if len(filename) > 30:
+            truncated = filename[:27] + "..."
+        else:
+            truncated = filename
+        truncated_filenames.append(truncated)
+    
+    headers = ['Base Path'] + truncated_filenames + ['Match']
     table_data = []
     
     for base_path in sorted_base_paths:
@@ -205,7 +276,6 @@ def format_results(base_path_counts: Dict[str, Dict[str, int]],
     
     # Print formatted table using tabulate.
     print("\n" + tabulate(table_data, headers, tablefmt='grid'))
-
 
 def compare_config_files(path_patterns: List[str]) -> None:
     """

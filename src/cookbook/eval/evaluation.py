@@ -44,13 +44,14 @@ def evaluate_checkpoint(
     dry_run: bool,
     beaker_image: str,
     use_gantry: bool,
-    gantry_args: str,
+    gantry_args: str | dict,
     python_venv_name: str,
     python_venv_force: bool,
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: Optional[dict],
+    use_vllm_v1_spec: bool
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -217,11 +218,22 @@ def evaluate_checkpoint(
             if beaker_image:
                 local_flags.append(f"--beaker-image {beaker_image}")
 
-            # set gantry args
+            # set gantry
             if use_gantry:
                 local_flags.append("--use-gantry")
-                if gantry_args:
-                    local_flags.append(f"--gantry-args '{gantry_args}'")
+
+
+            # processing gantry args
+            if isinstance(gantry_args, str):
+                # load gantry args using json
+                gantry_args = json.loads(gantry_args)
+            assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
+
+            # user might want to disable vllm v1 spec because its causing eval failures
+            gantry_args = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args}
+
+            # finally append gantry args
+            local_flags.append(f"--gantry-args '{json.dumps(gantry_args)}'")
 
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")

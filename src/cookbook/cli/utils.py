@@ -18,6 +18,8 @@ from cookbook.constants import (
     OE_EVAL_GIT_URL,
     TRANSFORMERS_GIT_URL,
     WEKA_MOUNTS,
+    BEAKER_PY,
+    BEAKER_GANTRY,
 )
 
 
@@ -147,7 +149,7 @@ def install_oe_eval(
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
-    subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
+    subprocess.run(shlex.split(f"{env.pip} install '{BEAKER_PY}' '{BEAKER_GANTRY}'"), check=True, env=env.path())
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
@@ -252,7 +254,7 @@ def get_beaker_user() -> str:
 
 
 def install_beaker_py(env: PythonEnv) -> None:
-    subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
+    subprocess.run(shlex.split(f"{env.pip} install '{BEAKER_PY}' '{BEAKER_GANTRY}'"), check=True, env=env.path())
 
 
 @run_func_in_venv

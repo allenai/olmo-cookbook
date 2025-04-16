@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from typing import Optional
@@ -10,6 +11,7 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
+    ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
@@ -19,6 +21,8 @@ from cookbook.constants import (
 )
 from cookbook.eval.conversion import convert_checkpoint
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.results import make_dashboard_table
+from cookbook.eval.datalake import AddToDashboard, RemoveFromDashboard
 
 logger = logging.getLogger(__name__)
 
@@ -253,6 +257,12 @@ def convert(
     default="",
     help="Extra arguments to pass to the model",
 )
+@click.option(
+    "--vllm-use-v1-spec/--no-vllm-use-v1-spec",
+    default=False,
+    type=bool,
+    help="Whether to use v1 spec for vLLM models",
+)
 def evaluate(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -282,6 +292,7 @@ def evaluate(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    vllm_use_v1_spec: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -327,7 +338,114 @@ def evaluate(
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
         model_args=parsed_model_args,
+        use_vllm_v1_spec=vllm_use_v1_spec,
     )
+
+
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    default=None,
+    help="Set specific models to show. Can be specified multiple times.",
+)
+@click.option(
+    "-t",
+    "--tasks",
+    type=str,
+    required=True,
+    multiple=True,
+)
+@click.option(
+    "-f", "--format",
+    type=click.Choice(["json", "table"]),
+    default="table",
+    help="Output results in JSON format",
+)
+@click.option(
+    "-s", "--sort-by",
+    type=str,
+    default="",
+    help="Sort results by a specific column",
+)
+@click.option(
+    "-f", "--force",
+    is_flag=True,
+    help="Force re-fetch results from the datalake",
+)
+def results(
+    dashboard: str,
+    models: list[str],
+    tasks: list[str],
+    format: str,
+    sort_by: str,
+    force: bool,
+) -> None:
+
+    all_metrics, all_averages = make_dashboard_table(
+        dashboard=dashboard,
+        show_rc=True,
+        show_mc=True,
+        show_generative=True,
+        show_partial=True,
+        average_mmlu=True,
+        average_core=True,
+        average_generative=True,
+        show_bpb=False,
+        force=force,
+    )
+
+    # if a task starts with *, it means it is a named group and we need to expand it
+    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+
+    # after that, we check for task patterns
+    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
+    results = (all_averages + all_metrics).keep_cols(*task_patterns)
+
+    if len(models) > 0:
+        results = results.keep_rows(*[re.compile(m) for m in models])
+
+    # sort by provided column, or first column if not provided
+    sort_by = sort_by or next(iter(results.columns))
+    results = results.sort(col=sort_by, reverse=True)
+
+    if format == "json":
+        print(json.dumps(results._data))
+    elif format == "table":
+        results.show()
+    else:
+        raise ValueError(f"Invalid format: {format}")
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    required=True,
+    help="Models to add to the dashboard",
+)
+def add_to_dashboard(dashboard: str, models: list[str]) -> None:
+    resp = AddToDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+    print(f"Added {len(resp)} models to the dashboard")
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    required=True,
+    multiple=True,
+)
+def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
+    resp = RemoveFromDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+    print(f"Removed {len(resp)} models from the dashboard")
 
 
 @click.group()
@@ -337,6 +455,10 @@ def cli():
 
 cli.command()(convert)
 cli.command()(evaluate)
+cli.command()(results)
+cli.command()(add_to_dashboard)
+cli.command()(remove_from_dashboard)
+
 
 if __name__ == "__main__":
     cli({})
