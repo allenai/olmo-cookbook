@@ -219,20 +219,6 @@ class WrappedTransformerConfig:
         )
 
 
-# NOTE: This function initializes the ModelConfigIdentifier enum with methods from
-# both WrappedTransformerConfig and TransformerConfig so that we can use any of them as identifiers.
-def _initialize_model_config_identifiers():
-    for method_name in ModelConfigIdentifier._get_model_methods(WrappedTransformerConfig):
-        setattr(ModelConfigIdentifier, method_name, method_name)
-
-    for method_name in ModelConfigIdentifier._get_model_methods(TransformerConfig):
-        if not hasattr(ModelConfigIdentifier, method_name):  # Avoid duplicates
-            setattr(ModelConfigIdentifier, method_name, method_name)
-
-
-_initialize_model_config_identifiers()
-
-
 DEFAULT_LR_MAP = {
     "olmo2_1B": 1.8e-3,
 }
