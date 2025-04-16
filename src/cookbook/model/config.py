@@ -47,10 +47,18 @@ class DefaultTransformerProperties:
 
 
 class ModelConfigIdentifier(Enum):
-    olmo_30m = "olmo_30m"
-    olmo2_190M = "olmo2_190M"
-    olmo2_1B = "olmo2_1B"
+    @classmethod
+    def _get_model_methods(cls, target_class):
+        """Get all classmethods of a class that might represent model configurations."""
+        return [
+            attr
+            for attr in dir(target_class)
+            if callable(getattr(target_class, attr))
+            and not attr.startswith("_")
+            and attr not in ["from_dict", "from_json", "from_model_identifier", "values", "keys"]
+        ]
 
+    # Dynamically add model names from WrappedTransformerConfig
     @classmethod
     def values(cls):
         return [e.value for e in cls]
@@ -78,36 +86,55 @@ class WrappedTransformerConfig:
         )
 
     @classmethod
-    def olmo2_core_190M(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
-        return getattr(TransformerConfig, "olmo2_190M")(
-            vocab_size=tokenizer.padded_vocab_size(),
-        )
-
-    @classmethod
-    def olmo2_core_1B(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
-        """
-        OLMo2 1b (1_336_035_328 parameters)
-        """
-        return getattr(TransformerConfig, "olmo2_1B")(
-            vocab_size=tokenizer.padded_vocab_size(),
-        )
-
-    @classmethod
     def from_model_identifier(
         cls, model_identifier: ModelConfigIdentifier, tokenizer: TokenizerConfig = Tokenizers.dolma2.value
     ) -> TransformerConfig:
-        model_mapping = {
-            ModelConfigIdentifier.olmo_30m: lambda: cls.olmo_30m(
-                tokenizer or TokenizerConfig.gpt_neox_olmo_dolma_v1_5()
-            ),
-            ModelConfigIdentifier.olmo2_190M: lambda: cls.olmo2_core_190M(tokenizer),
-            ModelConfigIdentifier.olmo2_1B: lambda: cls.olmo2_core_1B(tokenizer),
-        }
+        """
+        Create a TransformerConfig from a ModelConfigIdentifier.
 
-        if model_identifier not in model_mapping:
-            raise ValueError(f"Model identifier {model_identifier} is not supported.")
+        This method supports all models defined in the ModelConfigIdentifier enum by
+        mapping them to appropriate TransformerConfig class methods.
 
-        return model_mapping[model_identifier]()
+        Args:
+            model_identifier: The model identifier to create a config for
+            tokenizer: The tokenizer config to use
+
+        Returns:
+            A TransformerConfig instance for the specified model
+
+        Raises:
+            ValueError: If the model identifier isn't supported in either cookbook or olmo-core
+        """
+        model_name = model_identifier.value
+
+        # First, check if we have a custom config override for this model
+        if hasattr(cls, model_name):
+            return getattr(cls, model_name)(tokenizer)
+
+        # Then, check if the TransformerConfig class has a method for this model
+        if hasattr(TransformerConfig, model_name):
+            return getattr(TransformerConfig, model_name)(
+                vocab_size=tokenizer.padded_vocab_size(),
+            )
+
+        raise ValueError(
+            f"Model identifier '{model_identifier}' is not supported in either cookbook or olmo-core."
+            f" Available models: {', '.join(ModelConfigIdentifier.keys())}"
+        )
+
+
+# NOTE: This function initializes the ModelConfigIdentifier enum with methods from
+# both WrappedTransformerConfig and TransformerConfig so that we can use any of them as identifiers.
+def _initialize_model_config_identifiers():
+    for method_name in ModelConfigIdentifier._get_model_methods(WrappedTransformerConfig):
+        setattr(ModelConfigIdentifier, method_name, method_name)
+
+    for method_name in ModelConfigIdentifier._get_model_methods(TransformerConfig):
+        if not hasattr(ModelConfigIdentifier, method_name):  # Avoid duplicates
+            setattr(ModelConfigIdentifier, method_name, method_name)
+
+
+_initialize_model_config_identifiers()
 
 
 DEFAULT_LR_MAP = {
