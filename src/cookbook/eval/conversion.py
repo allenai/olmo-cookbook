@@ -37,7 +37,6 @@ from cookbook.constants import (
 def convert_olmo_core_v2(
     input_dir: str,
     max_sequence_length: int,
-    huggingface_tokenizer: str = DEFAULT_OLMO_CORE_TOKENIZER,
     unsharded_output_dir: Optional[str] = None,
     huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
@@ -85,7 +84,7 @@ def convert_olmo_core_v2(
             input_dir,
             "--max-sequence-length",
             str(max_sequence_length),
-            "--output-dir",
+            "--huggingface-output-dir",
             huggingface_output_dir,
         ]
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
