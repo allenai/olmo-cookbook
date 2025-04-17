@@ -21,6 +21,12 @@ class Tokenizers(Enum):
         eos_token_id=180000,
         pad_token_id=180001,
     )
+    superbpe_2 = TokenizerConfig(
+        vocab_size=200005,
+        identifier="UW/OLMo2-8B-SuperBPE-t180k",
+        eos_token_id=200004,
+        pad_token_id=200001,
+    )
 
 
 @dataclass
