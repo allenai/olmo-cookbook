@@ -381,7 +381,7 @@ def evaluate_model(
     help="Sort results by a specific column",
 )
 @click.option(
-    "-f",
+    "-F",
     "--force",
     is_flag=True,
     help="Force re-fetch results from the datalake",
