@@ -107,11 +107,20 @@ class Tag:
         assert "," not in self.key and "," not in self.value, "Key and value cannot contain ',' character"
 
     def __str__(self) -> str:
-        return f"{self.key}={self.value}"
+        return f"{self.key}={self.value}" if self.key != self.value else self.key
 
     @classmethod
-    def from_str(cls, s: str) -> list[Self]:
-        return [cls(*pair.split("=", 1)) for pair in s.split(",")] if (s := s.strip()) else []
+    def from_str(cls, s: str | list[Self]) -> list[Self]:
+        if isinstance(s, list):
+            # already parsed
+            return s
+
+        # make the tags
+        return [
+            cls(*elem.split("=", 1)) if "=" in elem else cls(elem, elem)
+            for elem in s.strip().split(",")
+        ]
+
 
 
 @dataclass
@@ -120,6 +129,8 @@ class FindExperiments(BaseDatalakeItem):
 
     experiment_id: str
     model_name: str
+    task_name: str
+
     # parser argument will make sure that nested dataclasses are initialized
     tags: list[Tag] = dataclass_field(default_factory=list, metadata=dict(parser=Tag.from_str))
 

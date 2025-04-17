@@ -4,6 +4,8 @@ import re
 from typing import Optional
 
 import click
+from rich.table import Table
+from rich.console import Console
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -20,10 +22,11 @@ from cookbook.constants import (
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
-from cookbook.eval.conversion import convert_checkpoint
-from cookbook.eval.datalake import AddToDashboard, RemoveFromDashboard
+
+from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.results import make_dashboard_table
+from cookbook.eval.datalake import FindExperiments, AddToDashboard, RemoveFromDashboard
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +76,7 @@ logger = logging.getLogger(__name__)
     default=None,
     help="Maximum sequence length of the model (olmo-core only)",
 )
-def convert(
+def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
     beaker_cluster: str,
@@ -101,7 +104,7 @@ def convert(
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
 ):
-    convert_checkpoint(
+    run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
         beaker_budget=beaker_budget,
         beaker_cluster=beaker_cluster,
@@ -269,7 +272,7 @@ def convert(
     type=bool,
     help="Whether to use v1 spec for vLLM models",
 )
-def evaluate(
+def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
     aws_access_key_id: str,
@@ -384,7 +387,7 @@ def evaluate(
     is_flag=True,
     help="Force re-fetch results from the datalake",
 )
-def results(
+def get_results(
     dashboard: str,
     models: list[str],
     tasks: list[str],
@@ -455,16 +458,73 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
+@click.argument("subset_type", type=str)
+@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
+def list_tasks(subset_type: str, task: list[str] | None):
+    valid_tasks = [re.compile(t) for t in task] if task else []
+
+    table = Table(title=f"Listing {subset_type.capitalize()} tasks")
+    table.add_column("Group")
+    table.add_column("Tasks")
+    table.add_column("Count")
+
+    assert subset_type in ['display', 'named'], f"Invalid task type: {subset_type}"
+
+    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == 'display' else ALL_NAMED_GROUPS).items():
+        if len(valid_tasks) > 0:
+            valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
+            valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
+            if not valid_task_in_key and not valid_task_in_names:
+                continue
+        table.add_row(task_group, "\n".join(task_names), f"{len(task_names):,}")
+
+    console = Console()
+    console.print(table)
+
+
+@click.option("-m", "--model", type=str, required=True, help="List models for a given suite")
+@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
+def list_all_experiments(model: str, task: list[str] | None) -> None:
+    experiments = FindExperiments.run(model_name=model)
+    valid_tasks = [re.compile(t) for t in task] if task else []
+
+    table = Table()
+    table.add_column("Experiment ID")
+    table.add_column("Model Name")
+    table.add_column("Task Name")
+    table.add_column("Tags")
+    table.add_column("Count")
+    for experiment in experiments:
+        tasks_in_experiment = experiment.task_name.split(",")
+        if valid_tasks:
+            tasks_in_experiment = [t for t in tasks_in_experiment if any(v.search(t) for v in valid_tasks)]
+
+        if len(tasks_in_experiment) == 0:
+            continue
+
+        table.add_row(
+            experiment.experiment_id,
+            experiment.model_name,
+            "\n".join(tasks_in_experiment),
+            "\n".join(map(str, experiment.tags)),
+            f"{len(tasks_in_experiment):,}",
+        )
+
+    console = Console()
+    console.print(table)
+
 @click.group()
 def cli():
     pass
 
 
-cli.command()(convert)
-cli.command()(evaluate)
-cli.command()(results)
-cli.command()(add_to_dashboard)
-cli.command()(remove_from_dashboard)
+cli.command("convert")(convert_checkpoint)
+cli.command("evaluate")(evaluate_model)
+cli.command("results")(get_results)
+cli.command("list")(list_tasks)
+cli.command("experiments")(list_all_experiments)
+cli.command("add-dashboard")(add_to_dashboard)
+cli.command("remove-dashboard")(remove_from_dashboard)
 
 
 if __name__ == "__main__":
