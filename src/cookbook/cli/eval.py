@@ -4,8 +4,8 @@ import re
 from typing import Optional
 
 import click
-from rich.table import Table
 from rich.console import Console
+from rich.table import Table
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -22,11 +22,10 @@ from cookbook.constants import (
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
-
 from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.results import make_dashboard_table
-from cookbook.eval.datalake import FindExperiments, AddToDashboard, RemoveFromDashboard
 
 logger = logging.getLogger(__name__)
 

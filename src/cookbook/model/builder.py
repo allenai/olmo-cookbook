@@ -195,11 +195,11 @@ class TransformerConfigBuilder:
         self.group_id = group_id
         self.seed = seed
         self.model_identifier = model_identifier
-        self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier)
+        self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
+        self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.s3 = s3
-        self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
         self.data_dir: str = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"

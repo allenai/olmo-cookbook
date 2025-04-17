@@ -17,8 +17,7 @@ class Tokenizers(Enum):
     gpt_neox = TokenizerConfig.gpt_neox_olmo_dolma_v1_5()
     superbpe_experimental = TokenizerConfig(
         vocab_size=180021,
-        identifier="superbpe-experimental_v0.1.0",
-        bos_token_id=180000,
+        identifier="allenai/superbpe-experimental_v0.1.0",
         eos_token_id=180000,
         pad_token_id=180001,
     )
