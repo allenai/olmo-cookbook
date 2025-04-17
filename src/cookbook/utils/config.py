@@ -108,8 +108,6 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     else:
         source_paths = normalize_source_paths(base_config.dataset.sources)
 
-    print(source_paths)
-
     source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
