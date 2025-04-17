@@ -5,7 +5,7 @@ workspace: "ai2/oe-data"
 nodes: 1
 gpus: 8
 preemptible: true
-max_tokens: 19_000_000_000
+max_tokens: 1_000_000
 sequence_length: 2048
 seed: 1337
 model: "olmo2_190M"
@@ -21,11 +21,15 @@ downstream_evaluators:
   - codex_mbpp_gold_bpb_0shot
 dataset:
   sources:
-  - name: the-stack-v2-top15-ai2v0-minhash-10pct-superbpe
-    target_ratio: 0.85
-    paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/learn2code/love2code-top15-minhash-plpartition-10pct/allenai/superbpe-olmo3-experimental/**/*.npy
-  - name: dclm-codeprose-v2-superbpe
-    target_ratio: 0.15
-    paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/learn2code/dclm-prose-v2/all/allenai/superbpe-olmo3-experimental/**/*.npy
+    - name: test-stack-source
+      target_ratio: 1.0
+      paths:
+      - weka://oe-training-default/ai2-llm/preprocessed/learn2code/dclm-prose-v2/all/allenai/superbpe-olmo3-experimental/0001/part-84-00000.npy
+  # - name: the-stack-v2-top15-ai2v0-minhash-10pct-superbpe
+  #   target_ratio: 0.85
+  #   paths:
+  #   - weka://oe-training-default/ai2-llm/preprocessed/learn2code/love2code-top15-minhash-plpartition-10pct/allenai/superbpe-olmo3-experimental/**/*.npy
+  # - name: dclm-codeprose-v2-superbpe
+  #   target_ratio: 0.15
+  #   paths:
+  #   - weka://oe-training-default/ai2-llm/preprocessed/learn2code/dclm-prose-v2/all/allenai/superbpe-olmo3-experimental/**/*.npy
