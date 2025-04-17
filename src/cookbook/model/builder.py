@@ -294,25 +294,25 @@ class TransformerConfigBuilder:
             ),
         }
 
-        if self.metrics_config:
-            if MetricBackend.wandb in self.metrics_config.backends:
-                callbacks[MetricBackend.wandb.value] = (
-                    WandBCallback(
-                        name=self.run_name.strip(),
-                        project=self.metrics_config.project.strip(),
-                        group=self.group_id.strip(),
-                        cancel_check_interval=10,
-                        enabled=True,
-                    ),
-                )
-            if MetricBackend.comet in self.metrics_config.backends:
-                callbacks[MetricBackend.comet.value] = CometCallback(
-                    name=self.run_name.strip(),
-                    workspace=self.metrics_config.workspace.strip(),
-                    project=self.metrics_config.project.strip(),
-                    enabled=True,
-                    cancel_check_interval=10,
-                )
+        # if self.metrics_config:
+        #     if MetricBackend.wandb in self.metrics_config.backends:
+        #         callbacks[MetricBackend.wandb.value] = (
+        #             WandBCallback(
+        #                 name=self.run_name.strip(),
+        #                 project=self.metrics_config.project.strip(),
+        #                 group=self.group_id.strip(),
+        #                 cancel_check_interval=10,
+        #                 enabled=True,
+        #             ),
+        #         )
+        #     if MetricBackend.comet in self.metrics_config.backends:
+        #         callbacks[MetricBackend.comet.value] = CometCallback(
+        #             name=self.run_name.strip(),
+        #             workspace=self.metrics_config.workspace.strip(),
+        #             project=self.metrics_config.project.strip(),
+        #             enabled=True,
+        #             cancel_check_interval=10,
+        #         )
 
         if self.lm_evaluator:
             callbacks["lm_evaluator"] = LMEvaluatorCallbackConfig(
