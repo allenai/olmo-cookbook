@@ -40,10 +40,6 @@ class DatasetConfig(BaseModel):
     seed: int = 42
 
 
-class WandbConfig(BaseModel):
-    project: str
-
-
 class MetricBackend(Enum):
     wandb = "wandb"
     comet = "comet"
@@ -91,8 +87,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     lm_evaluator: bool = False
     downstream_evaluators: list[DownstreamEvaluator] = []
     max_target_sequence_length: int = 8192
-    wandb: Optional[WandbConfig] = None
-    metrics_config: Optional[MetricsConfig] = None
+    metrics_config: Optional[MetricsConfig] = MetricsConfig()
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
