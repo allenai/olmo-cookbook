@@ -4,6 +4,7 @@ import shlex
 import subprocess
 from copy import deepcopy
 from hashlib import md5
+from typing import Optional
 from urllib.parse import urlparse
 
 from cookbook.cli.utils import (
@@ -49,7 +50,7 @@ def evaluate_checkpoint(
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
-    model_args: dict | None,
+    model_args: Optional[dict],
     use_vllm_v1_spec: bool
 ):
     # Create virtual environment

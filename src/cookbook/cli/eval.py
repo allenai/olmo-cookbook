@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from typing import Optional
 
 import click
 from rich.table import Table
@@ -16,10 +17,12 @@ from cookbook.constants import (
     ALL_NAMED_GROUPS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
+
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.results import make_dashboard_table
@@ -38,6 +41,9 @@ logger = logging.getLogger(__name__)
 @click.option("--olmoe-commit-hash", type=str, default=OLMOE_COMMIT_HASH, help="OLMoE commit hash")
 @click.option("--olmo2-commit-hash", type=str, default=OLMO2_COMMIT_HASH, help="OLMo2 commit hash")
 @click.option("--olmo-core-commit-hash", type=str, default=OLMO_CORE_COMMIT_HASH, help="OLMo core commit hash")
+@click.option(
+    "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
+)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -64,6 +70,12 @@ logger = logging.getLogger(__name__)
     default="oe-conversion-venv",
     help="Name of the environment to use for conversion",
 )
+@click.option(
+    "--max-sequence-length",
+    type=int,
+    default=None,
+    help="Maximum sequence length of the model (olmo-core only)",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -73,22 +85,24 @@ def convert_checkpoint(
     beaker_priority: str,
     beaker_workspace: str,
     force_venv: bool,
-    huggingface_output_dir: str | None,
+    huggingface_output_dir: Optional[str],
     huggingface_output_suffix: str,
-    huggingface_token: str | None,
-    huggingface_tokenizer: str | None,
+    huggingface_token: Optional[str],
+    huggingface_tokenizer: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
+    olmo_core_v2_commit_hash: str,
     huggingface_transformers_commit_hash: str,
-    unsharded_output_dir: str | None,
+    unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_system_python: bool,
     use_beaker: bool,
     env_name: str,
     beaker_preemptible: bool,
+    max_sequence_length: Optional[int] = None,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -106,6 +120,7 @@ def convert_checkpoint(
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
         olmo_core_commit_hash=olmo_core_commit_hash,
+        olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
         olmo_type=olmo_type,
         olmo2_commit_hash=olmo2_commit_hash,
         olmoe_commit_hash=olmoe_commit_hash,
@@ -115,6 +130,7 @@ def convert_checkpoint(
         unsharded_output_suffix=unsharded_output_suffix,
         use_beaker=use_beaker,
         use_system_python=use_system_python,
+        max_sequence_length=max_sequence_length,
     )
 
 
@@ -335,8 +351,6 @@ def evaluate_model(
     )
 
 
-
-
 @click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
 @click.option(
     "-m",
@@ -354,19 +368,22 @@ def evaluate_model(
     multiple=True,
 )
 @click.option(
-    "-f", "--format",
+    "-f",
+    "--format",
     type=click.Choice(["json", "table"]),
     default="table",
     help="Output results in JSON format",
 )
 @click.option(
-    "-s", "--sort-by",
+    "-s",
+    "--sort-by",
     type=str,
     default="",
     help="Sort results by a specific column",
 )
 @click.option(
-    "-f", "--force",
+    "-f",
+    "--force",
     is_flag=True,
     help="Force re-fetch results from the datalake",
 )

@@ -1,10 +1,12 @@
-from collections import OrderedDict
-from dataclasses import field, dataclass
-from functools import partial
 import re
-from typing import Generator, Callable, Iterable
-from rich.table import Table
+from collections import OrderedDict
+from dataclasses import dataclass, field
+from functools import partial
+from typing import Callable, Generator, Iterable
+
 from rich.console import Console
+from rich.table import Table
+
 from cookbook.constants import SHORT_NAMES
 
 

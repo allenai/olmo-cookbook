@@ -2,16 +2,19 @@ import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import ExitStack
-from dataclasses import dataclass, field as dataclass_field, fields as dataclass_fields
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from dataclasses import fields as dataclass_fields
 from functools import partial
 from threading import current_thread, main_thread
-from typing import Callable, ClassVar, Generic, List, Self, TypeVar
+from typing import Callable, ClassVar, Generic, List, TypeVar
 
 import requests
 from tqdm import tqdm
 
 from cookbook.eval.cache import DatalakeCache
 
+Self = TypeVar("Self", bound="BaseDatalakeItem")
 T = TypeVar("T")
 V = TypeVar("V")
 
@@ -37,12 +40,7 @@ class BaseDatalakeItem(Generic[T]):
         raise NotImplementedError("Subclasses must implement this method")
 
     @classmethod
-    def _prun(
-        cls,
-        fns: list[Callable[[], V]],
-        num_workers: int | None = None,
-        quiet: bool = False
-    ) -> list[V]:
+    def _prun(cls, fns: list[Callable[[], V]], num_workers: int | None = None, quiet: bool = False) -> list[V]:
         # Validate input arguments
         if len(fns) == 0:
             return []
@@ -95,12 +93,12 @@ class BaseDatalakeItem(Generic[T]):
         return [result for result_group in results for result in result_group]
 
 
-
 @dataclass
 class Tag:
     """
     A tag is a key-value pair; it is returned as a string like "key=value,key2=value2".
     """
+
     key: str
     value: str
 
@@ -124,6 +122,7 @@ class Tag:
         ]
 
 
+
 @dataclass
 class FindExperiments(BaseDatalakeItem):
     """Find all experiments for a given dashboard."""
@@ -138,12 +137,7 @@ class FindExperiments(BaseDatalakeItem):
     _endpoint: ClassVar[str] = "bluelake/find-experiments/"
 
     @classmethod
-    def run(
-        cls,
-        dashboard: str | None = None,
-        model_name: str | None = None,
-        limit: int = 10_000
-    ) -> list[Self]:
+    def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000) -> list[Self]:
 
         # make sure at least one of dashboard or model_name is provided
         assert dashboard or model_name, "Either dashboard or model_name must be provided"
@@ -167,6 +161,7 @@ class Metrics:
     """
     A collection of values for a given task and model.
     """
+
     primary_score: float
     logits_per_byte_corr: float | None = None
     bits_per_byte_corr: float | None = None

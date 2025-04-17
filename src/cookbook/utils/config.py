@@ -34,11 +34,9 @@ def config_from_path(config: Path) -> ExperimentConfig:
 def mk_source_instances(
     sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
-    # If no user provided ratios, use the priors from the sources
     if priors:
         ratios_by_source, total_tokens = priors
     else:
-        # TODO(undfined): Clean this up and fail faster
         ratios_by_source = {}
 
     instances = []
@@ -105,9 +103,12 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     """
 
     base_config = config_from_path(config_path)
+    if dry_run:
+        source_paths = base_config.dataset.sources
+    else:
+        source_paths = normalize_source_paths(base_config.dataset.sources)
 
-    # Because this is happening on-box in Beaker we want paths normalized for usage there.
-    source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
+    source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
     config = TransformerConfigBuilder(
@@ -128,32 +129,25 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         sequence_length=base_config.sequence_length,
         sources=source_instances,
         tokenizer=base_config.tokenizer,
-        wandb_config=base_config.wandb,
+        metrics_config=base_config.metrics_config,
         weka=base_config.weka,
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
+        warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
     ).build()
 
-    device = get_default_device()
-    world_mesh = config.model.build_mesh(device=device)
-
     seed_all(config.init_seed)
     config_dict = config.as_config_dict()
-
     trainer = None
+
     if not dry_run:
-        model = config.model.build(
-            init_device="meta",
-            device=device,
-            mesh=world_mesh,
-            max_seq_len=config.dataset.sequence_length,
-        )
         dataset = config.dataset.build()
-        optim = config.optim.build(model)
-        data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
-        trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
+        model = config.model.build(init_device="meta")
+        train_module = config.train_module.build(model)
+        data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
+        trainer = config.trainer.build(train_module, data_loader)
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
@@ -185,7 +179,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch260cu124",
+            beaker_image="petew/olmo-core-tch270cu128-v2.1",
             priority=group.config.priority,
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
@@ -202,6 +196,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install -e '.[all]'",
+                # Temporary until they release a fix for 2.7.0
+                "pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
