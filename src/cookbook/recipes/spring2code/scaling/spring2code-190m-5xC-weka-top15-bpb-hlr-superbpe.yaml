@@ -16,9 +16,9 @@ global_batch_size: 1_048_576 # Half of the 1B
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 weka: true
-downstream_evaluators:
-  - codex_humaneval_gold_bpb_0shot
-  - codex_mbpp_gold_bpb_0shot
+# downstream_evaluators:
+#   - codex_humaneval_gold_bpb_0shot
+#   - codex_mbpp_gold_bpb_0shot
 dataset:
   sources:
   - name: the-stack-v2-top15-ai2v0-minhash-10pct-superbpe
