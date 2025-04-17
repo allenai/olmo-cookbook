@@ -9,7 +9,7 @@ max_tokens: 10_000_000
 sequence_length: 2048
 seed: 1337
 model: "olmo2_190M"
-tokenizer: "superbpe_experimental"
+tokenizer: "superbpe_2"
 priority: high
 eval_interval: 100
 global_batch_size: 1_048_576 # Half of the 1B
