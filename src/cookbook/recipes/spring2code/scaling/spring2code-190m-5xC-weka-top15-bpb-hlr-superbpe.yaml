@@ -3,7 +3,7 @@ description: "learn2code 190M@5xC top15 langauges from the-stack-v2 + dclm prose
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 1
-gpus: 8
+gpus: 1
 preemptible: true
 max_tokens: 10_000_000
 sequence_length: 2048
