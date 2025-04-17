@@ -157,6 +157,214 @@ MMLU_PRO_CATEGORIES = [
     "mmlu_pro_law",
 ]
 
+HELMET_SUITES = {
+  "helmet_cite__131072::suite": [
+    "helmet_alce_asqa_700__131072::std",
+    "helmet_alce_qampari_700__131072::std"
+  ],
+  "helmet_cite__16384::suite": [
+    "helmet_alce_asqa_75__16384::std",
+    "helmet_alce_qampari_75__16384::std"
+  ],
+  "helmet_cite__32768::suite": [
+    "helmet_alce_asqa_165__32768::std",
+    "helmet_alce_qampari_165__32768::std"
+  ],
+  "helmet_cite__65536::suite": [
+    "helmet_alce_asqa_345__65536::std",
+    "helmet_alce_qampari_345__65536::std"
+  ],
+  "helmet_cite__8192::suite": [
+    "helmet_alce_asqa_30__8192::std",
+    "helmet_alce_qampari_30__8192::std"
+  ],
+  "helmet_icl__131072::suite": [
+    "helmet_icl_banking77_5900shot_balance__131072::std",
+    "helmet_icl_clinic150_7050shot_balance__131072::std",
+    "helmet_icl_nlu_8296shot_balance__131072::std",
+    "helmet_icl_trec_coarse_6600shot_balance__131072::std",
+    "helmet_icl_trec_fine_6400shot_balance__131072::std"
+  ],
+  "helmet_icl__16384::suite": [
+    "helmet_icl_banking77_720shot_balance__16384::std",
+    "helmet_icl_clinic150_880shot_balance__16384::std",
+    "helmet_icl_nlu_1020shot_balance__16384::std",
+    "helmet_icl_trec_coarse_800shot_balance__16384::std",
+    "helmet_icl_trec_fine_800shot_balance__16384::std"
+  ],
+  "helmet_icl__32768::suite": [
+    "helmet_icl_banking77_1450shot_balance__32768::std",
+    "helmet_icl_clinic150_1750shot_balance__32768::std",
+    "helmet_icl_nlu_2040shot_balance__32768::std",
+    "helmet_icl_trec_coarse_1600shot_balance__32768::std",
+    "helmet_icl_trec_fine_1600shot_balance__32768::std"
+  ],
+  "helmet_icl__65536::suite": [
+    "helmet_icl_banking77_2900shot_balance__65536::std",
+    "helmet_icl_clinic150_3525shot_balance__65536::std",
+    "helmet_icl_nlu_4080shot_balance__65536::std",
+    "helmet_icl_trec_coarse_3300shot_balance__65536::std",
+    "helmet_icl_trec_fine_3200shot_balance__65536::std"
+  ],
+  "helmet_icl__8192::suite": [
+    "helmet_icl_banking77_360shot_balance__8192::std",
+    "helmet_icl_clinic150_440shot_balance__8192::std",
+    "helmet_icl_nlu_510shot_balance__8192::std",
+    "helmet_icl_trec_coarse_400shot_balance__8192::std",
+    "helmet_icl_trec_fine_400shot_balance__8192::std"
+  ],
+  "helmet_longqa__131072::suite": [
+    "helmet_infbench_choice_eng_130862__131072::std",
+    "helmet_infbench_qa_eng_130862__131072::std",
+    "helmet_narrativeqa_130772__131072::std"
+  ],
+  "helmet_longqa__16384::suite": [
+    "helmet_infbench_choice_eng_16174__16384::std",
+    "helmet_infbench_qa_eng_16174__16384::std",
+    "helmet_narrativeqa_16084__16384::std"
+  ],
+  "helmet_longqa__32768::suite": [
+    "helmet_infbench_choice_eng_32558__32768::std",
+    "helmet_infbench_qa_eng_32558__32768::std",
+    "helmet_narrativeqa_32468__32768::std"
+  ],
+  "helmet_longqa__65536::suite": [
+    "helmet_infbench_choice_eng_65326__65536::std",
+    "helmet_infbench_qa_eng_65326__65536::std",
+    "helmet_narrativeqa_65236__65536::std"
+  ],
+  "helmet_longqa__8192::suite": [
+    "helmet_infbench_choice_eng_7982__8192::std",
+    "helmet_infbench_qa_eng_7982__8192::std",
+    "helmet_narrativeqa_7892__8192::std"
+  ],
+  "helmet_niah__131072::suite": [
+    "helmet_ruler_cwe__131072::std",
+    "helmet_ruler_fwe__131072::std",
+    "helmet_ruler_niah_mk_1__131072::std",
+    "helmet_ruler_niah_mk_2__131072::std",
+    "helmet_ruler_niah_mk_3__131072::std",
+    "helmet_ruler_niah_mq__131072::std",
+    "helmet_ruler_niah_mv__131072::std",
+    "helmet_ruler_niah_s_1__131072::std",
+    "helmet_ruler_niah_s_2__131072::std",
+    "helmet_ruler_niah_s_3__131072::std",
+    "helmet_ruler_qa_1__131072::std",
+    "helmet_ruler_qa_2__131072::std",
+    "helmet_ruler_vt__131072::std"
+  ],
+  "helmet_niah__65536::suite": [
+    "helmet_ruler_cwe__65536::std",
+    "helmet_ruler_fwe__65536::std",
+    "helmet_ruler_niah_mk_1__65536::std",
+    "helmet_ruler_niah_mk_2__65536::std",
+    "helmet_ruler_niah_mk_3__65536::std",
+    "helmet_ruler_niah_mq__65536::std",
+    "helmet_ruler_niah_mv__65536::std",
+    "helmet_ruler_niah_s_1__65536::std",
+    "helmet_ruler_niah_s_2__65536::std",
+    "helmet_ruler_niah_s_3__65536::std",
+    "helmet_ruler_qa_1__65536::std",
+    "helmet_ruler_qa_2__65536::std",
+    "helmet_ruler_vt__65536::std"
+  ],
+  "helmet_rag__131072::suite": [
+    "helmet_kilt_hotpotqa__131072::std",
+    "helmet_kilt_nq__131072::std",
+    "helmet_kilt_popqa_3__131072::std",
+    "helmet_kilt_triviaqa__131072::std"
+  ],
+  "helmet_rag__16384::suite": [
+    "helmet_kilt_hotpotqa__16384::std",
+    "helmet_kilt_nq__16384::std",
+    "helmet_kilt_popqa_3__16384::std",
+    "helmet_kilt_triviaqa__16384::std"
+  ],
+  "helmet_rag__32768::suite": [
+    "helmet_kilt_hotpotqa__32768::std",
+    "helmet_kilt_nq__32768::std",
+    "helmet_kilt_popqa_3__32768::std",
+    "helmet_kilt_triviaqa__32768::std"
+  ],
+  "helmet_rag__65536::suite": [
+    "helmet_kilt_hotpotqa__65536::std",
+    "helmet_kilt_nq__65536::std",
+    "helmet_kilt_popqa_3__65536::std",
+    "helmet_kilt_triviaqa__65536::std"
+  ],
+  "helmet_rag__8192::suite": [
+    "helmet_kilt_hotpotqa__8192::std",
+    "helmet_kilt_nq__8192::std",
+    "helmet_kilt_popqa_3__8192::std",
+    "helmet_kilt_triviaqa__8192::std"
+  ],
+  "helmet_recall__131072::suite": [
+    "helmet_json_kv__131072::std",
+    "helmet_recall_ruler_niah_mk_2__131072::std",
+    "helmet_recall_ruler_niah_mk_3__131072::std",
+    "helmet_recall_ruler_niah_mv__131072::std"
+  ],
+  "helmet_recall__16384::suite": [
+    "helmet_json_kv__16384::std",
+    "helmet_ruler_niah_mk_2__16384::std",
+    "helmet_ruler_niah_mk_3__16384::std",
+    "helmet_ruler_niah_mv__16384::std"
+  ],
+  "helmet_recall__32768::suite": [
+    "helmet_json_kv__32768::std",
+    "helmet_ruler_niah_mk_2__32768::std",
+    "helmet_ruler_niah_mk_3__32768::std",
+    "helmet_ruler_niah_mv__32768::std"
+  ],
+  "helmet_recall__65536::suite": [
+    "helmet_json_kv__65536::std",
+    "helmet_recall_ruler_niah_mk_2__65536::std",
+    "helmet_recall_ruler_niah_mk_3__65536::std",
+    "helmet_recall_ruler_niah_mv__65536::std"
+  ],
+  "helmet_recall__8192::suite": [
+    "helmet_json_kv__8192::std",
+    "helmet_ruler_niah_mk_2__8192::std",
+    "helmet_ruler_niah_mk_3__8192::std",
+    "helmet_ruler_niah_mv__8192::std"
+  ],
+  "helmet_rerank__131072::suite": [
+    "helmet_msmarco_rerank_psg__131072::std"
+  ],
+  "helmet_rerank__16384::suite": [
+    "helmet_msmarco_rerank_psg__16384::std"
+  ],
+  "helmet_rerank__32768::suite": [
+    "helmet_msmarco_rerank_psg__32768::std"
+  ],
+  "helmet_rerank__65536::suite": [
+    "helmet_msmarco_rerank_psg__65536::std"
+  ],
+  "helmet_rerank__8192::suite": [
+    "helmet_msmarco_rerank_psg__8192::std"
+  ],
+  "helmet_summ__131072::suite": [
+    "helmet_infbench_sum_eng_129672__131072::std",
+    "helmet_multi_lexsum_130372__131072::std"
+  ],
+  "helmet_summ__16384::suite": [
+    "helmet_infbench_sum_eng_14984__16384::std",
+    "helmet_multi_lexsum_15684__16384::std"
+  ],
+  "helmet_summ__32768::suite": [
+    "helmet_infbench_sum_eng_31368__32768::std",
+    "helmet_multi_lexsum_32068__32768::std"
+  ],
+  "helmet_summ__65536::suite": [
+    "helmet_infbench_sum_eng_64136__65536::std",
+    "helmet_multi_lexsum_64836__65536::std"
+  ],
+  "helmet_summ__8192::suite": [
+    "helmet_infbench_sum_eng_6792__8192::std",
+    "helmet_multi_lexsum_7492__8192::std"
+  ]
+}
+
 ALL_CORE_TASKS = [
     "arc_easy",
     "arc_challenge",
@@ -297,6 +505,15 @@ ALL_NAMED_GROUPS = {
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
 }
 
+for helmet_length in (int(2 ** i) for i in range(13, 18)):
+    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
+        set(
+            task for group_name, tasks in HELMET_SUITES.items() for task in tasks
+            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
+        )
+    )
+
+
 ALL_DISPLAY_TASKS = {
     "olmo2:paper": [
         r"arc_challenge:mc.*",
@@ -328,6 +545,11 @@ ALL_DISPLAY_TASKS = {
         r"^mmlu:rc$",
         r"^core:rc$",
     ],
+    "helmet:8k": [r"^helmet:8k$"],
+    "helmet:16k": [r"^helmet:16k$"],
+    "helmet:32k": [r"^helmet:32k$"],
+    "helmet:64k": [r"^helmet:64k$"],
+    "helmet:128k": [r"^helmet:128k$"],
 }
 
 
