@@ -14,7 +14,7 @@ priority: high
 eval_interval: 100
 global_batch_size: 1_048_576 # Half of the 1B
 learning_rate: 1.8e-3
-cluster: ai2/jupiter-cirrascale-2
+cluster: ai2/staurn-cirrascale
 weka: true
 downstream_evaluators:
   - codex_humaneval_gold_bpb_0shot
