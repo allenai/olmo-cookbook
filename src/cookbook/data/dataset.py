@@ -44,12 +44,7 @@ class MixtureBuilder:
 
             scheme = schemes.pop()
 
-            if globs and scheme not in self.cached_fs:
-                raise ValueError(
-                    f"Unsupported scheme {scheme} for glob expansion. Supported schemes are: {list(self.cached_fs.keys())}"
-                )
-
-            expanded = paths + expand_globs(self.cached_fs[scheme], globs)
+            expanded = paths + expand_globs(self.cached_fs.get(scheme, self.cached_fs["s3"]), globs)
             source_configs.append(
                 SourceMixtureConfig(
                     source_name=source.name,
