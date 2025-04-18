@@ -40,7 +40,7 @@ wandb = [
 ]
 all = [
     # Pinned to core v2.x and removal of t_max from scheduling
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@2f66fd95c17c9779be9930f8fb80803293c2dc30",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@d0ab790758c66a9f46747ed4aeb6be86555e7f04",
     "beaker-py",
     "GitPython>=3.0,<4.0",
     "wandb",
