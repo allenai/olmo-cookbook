@@ -3,6 +3,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
 
+from olmo_core.train.common import Duration
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from pydantic import BaseModel, field_validator
@@ -81,6 +82,8 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     dataset: DatasetConfig
     model: ModelConfigIdentifier
     load_path: Optional[str] = None
+    load_state: bool = True
+    hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
     global_batch_size: Optional[int] = None

@@ -1,10 +1,8 @@
 import logging
-import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import olmo_core.train.train_module as train_module
-import s3fs
 from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
@@ -83,6 +81,7 @@ class TransformerConfigBuilder:
         lm_evaluator (bool): Whether to enable language model evaluation.
         downstream_evaluators (List[DownstreamEvaluator]): The downstream evaluators.
         load_path (Optional[str]): Path to load a model checkpoint from.
+        hard_stop (Optional[Duration]): The hard stop duration.
         learning_rate (Optional[float]): The learning rate for the optimizer.
         global_batch_size (Optional[int]): The global batch size.
         rank_microbatch_size (Optional[int]): The rank microbatch size.
@@ -152,6 +151,7 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     downstream_evaluators: List[DownstreamEvaluator]
+    hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
@@ -177,6 +177,7 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],
+        hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
         rank_microbatch_size: Optional[int] = None,
@@ -216,6 +217,7 @@ class TransformerConfigBuilder:
         self.downstream_evaluators = downstream_evaluators
         self.warmup_steps = warmup_steps
         self.load_path = load_path
+        self.hard_stop = hard_stop
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
 
@@ -431,6 +433,7 @@ class TransformerConfigBuilder:
         )
 
         trainer_config = TrainerConfig(
+            hard_stop=self.hard_stop,
             load_path=load_path,
             load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
