@@ -199,7 +199,7 @@ def convert_checkpoint(
     default=get_aws_secret_access_key(),
     help="AWS secret access key to use for S3 access",
 )
-@click.option("-l", "--gantry-args", type=str, default="", help="Extra arguments to pass to Gantry")
+@click.option("-l", "--gantry-args", type=str, default="{}", help="Extra arguments to pass to Gantry")
 @click.option("-i", "--beaker-image", type=str, default=None, help="Beaker image to use for evaluation")
 @click.option(
     "-z",
