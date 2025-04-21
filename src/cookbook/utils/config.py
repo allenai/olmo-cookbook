@@ -203,10 +203,10 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install -e '.[all]'",
+                "pip install uv && uv pip install -e '.[all]' --system",
                 # Temporary until they release a fix for 2.7.0
-                "pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128",
-                "pip freeze",
+                "uv pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128 --system",
+                "uv pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
                 "printenv AWS_CONFIG > ~/.aws/config",
