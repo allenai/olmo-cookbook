@@ -7,6 +7,7 @@ gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
 rank_microbatch_size: 16_384
+global_batch_size: 2_097_152
 sequence_length: 4096
 seed: 1337
 model: "olmo2_1B"
