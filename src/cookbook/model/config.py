@@ -21,6 +21,12 @@ class Tokenizers(Enum):
         eos_token_id=180000,
         pad_token_id=180001,
     )
+    dolma2_180k = TokenizerConfig(
+        vocab_size=180021,
+        identifier="allenai/dolma2-180k-experimental-0.0.1",
+        eos_token_id=180000,
+        pad_token_id=180001,
+    )
 
 
 @dataclass
