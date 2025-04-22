@@ -7,6 +7,7 @@ gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
 rank_microbatch_size: 16_384 # Larger tokens require more memory, so we use a smaller micro batch size.
+load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/spring2code-1b-5xC-top15-hlr-superbpe-2e15a7da/step13900/
 sequence_length: 2048
 seed: 1337
 model: "olmo2_1B"
