@@ -127,7 +127,8 @@ def _expand_local(pattern: str) -> List[str]:
     from glob import glob
 
     logger.info(f"Expanding '{pattern}'...")
-    matches = sorted(glob(pattern))
+    matches = sorted(glob(pattern, recursive=True))
+
     if not matches:
         raise FileNotFoundError(pattern)
 
