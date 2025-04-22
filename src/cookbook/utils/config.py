@@ -9,7 +9,7 @@ from olmo_core.launch.beaker import (
     BeakerWekaBucket,
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
-from olmo_core.utils import get_default_device, seed_all
+from olmo_core.utils import seed_all
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -19,7 +19,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
-from cookbook.utils.data import normalize_source_paths
+from cookbook.utils.data import expand_globs, normalize_source_paths
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     if dry_run:
         source_paths = base_config.dataset.sources
     else:
-        source_paths = normalize_source_paths(base_config.dataset.sources)
+        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
 
     source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
