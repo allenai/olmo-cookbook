@@ -107,7 +107,7 @@ def get_token_counts_and_ratios(
     return (relative_sizes, total_tokens)
 
 
-def expand_globs(s3: s3fs.S3FileSystem, sources: List[str]) -> Any:
+def expand_globs(s3: s3fs.S3FileSystem = s3fs.S3FileSystem(), sources: List[str] = []) -> Any:
     results = []
 
     for source in sources:
@@ -127,7 +127,8 @@ def _expand_local(pattern: str) -> List[str]:
     from glob import glob
 
     logger.info(f"Expanding '{pattern}'...")
-    matches = sorted(glob(pattern))
+    matches = sorted(glob(pattern, recursive=True))
+
     if not matches:
         raise FileNotFoundError(pattern)
 
@@ -157,7 +158,7 @@ def _expand_remote(pattern: str, fs: s3fs.S3FileSystem) -> List[str]:
         raise NotImplementedError(f"Glob expansion is not currently supported for '{parsed.scheme}' files")
 
 
-def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
+def normalize_source_paths(sources: List[SourceConfig], expand: bool = False) -> List[SourceConfig]:
     """
     Normalize the paths in a SourceConfig object.
     """
@@ -186,7 +187,7 @@ def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
         normalized.append(
             SourceConfig(
                 name=source.name,
-                paths=source_paths,
+                paths=expand_globs(sources=source_paths) if expand else source_paths,
                 target_ratio=source.target_ratio,
                 repetition_factor=source.repetition_factor,
                 max_source_ratio=source.max_source_ratio,
