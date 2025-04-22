@@ -23,4 +23,6 @@ dataset:
   - name: dclm-baseline-20pct-superbpe
     target_ratio: 1.0
     paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_20pct/allenai/superbpe-olmo3-experimental/**/*.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-olmo3-experimental/**/**/part-0*-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-olmo3-experimental/**/**/part-2*-00000.npy
+
