@@ -21,6 +21,7 @@ from cookbook.constants import (
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
+    FIM_TOKENS,
 )
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
@@ -266,6 +267,12 @@ def convert_checkpoint(
     help="Extra arguments to pass to the model",
 )
 @click.option(
+    "--fim-tokens",
+    type=click.Choice(list(FIM_TOKENS.keys())),
+    default=None,
+    help="Model-specific tokens to use for infilling tasks",
+)
+@click.option(
     "--vllm-use-v1-spec/--no-vllm-use-v1-spec",
     default=False,
     type=bool,
@@ -306,6 +313,7 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
 ):
@@ -353,6 +361,7 @@ def evaluate_model(
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
         model_args=parsed_model_args,
+        fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
     )
