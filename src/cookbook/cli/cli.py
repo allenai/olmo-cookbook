@@ -74,15 +74,15 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     sequence_length = experiment_config.sequence_length
     max_tokens = experiment_config.max_tokens
 
-    suggested_batch_size = (
+    suggested_batch_size_tokens = (
         estimate_batch_size(sequence_length=sequence_length, total_tokens=max_tokens)
         * experiment_config.sequence_length
     )
 
     if experiment_config.global_batch_size:
-        if suggested_batch_size != experiment_config.global_batch_size:
+        if suggested_batch_size_tokens != experiment_config.global_batch_size:
             logger.warning(
-                f"Suggested global batch size {suggested_batch_size:,} is different from the configured global batch size {experiment_config.global_batch_size:,}. "
+                f"Suggested global batch size {suggested_batch_size_tokens:,} is different from the configured global batch size {experiment_config.global_batch_size:,}. "
                 "This may lead to suboptimal performance. Consider adjusting the batch size."
             )
 

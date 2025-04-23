@@ -255,8 +255,9 @@ class TransformerConfigBuilder:
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
         else:
-            global_batch_size = estimate_batch_size(
-                sequence_length=self.sequence_length, total_tokens=self.max_tokens
+            global_batch_size = (
+                estimate_batch_size(sequence_length=self.sequence_length, total_tokens=self.max_tokens)
+                * self.sequence_length
             )
 
         print(f"Global batch size (in tokens) is: {global_batch_size}")
