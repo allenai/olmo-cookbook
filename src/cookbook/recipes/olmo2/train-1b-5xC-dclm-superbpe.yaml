@@ -5,12 +5,10 @@ workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 113_184_153_600
-rank_microbatch_size: 16_384
-global_batch_size: 2_097_152
+max_tokens: 127_939_584_000
 sequence_length: 4096
 seed: 1337
-model: "olmo2_1B"
+model: "olmo2_1B_v2"
 tokenizer: "superbpe_experimental"
 priority: high
 eval_interval: 250

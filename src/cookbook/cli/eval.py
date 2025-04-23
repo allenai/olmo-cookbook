@@ -467,9 +467,9 @@ def list_tasks(subset_type: str, task: list[str] | None):
     table.add_column("Tasks")
     table.add_column("Count")
 
-    assert subset_type in ['display', 'named'], f"Invalid task type: {subset_type}"
+    assert subset_type in ["display", "named"], f"Invalid task type: {subset_type}"
 
-    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == 'display' else ALL_NAMED_GROUPS).items():
+    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == "display" else ALL_NAMED_GROUPS).items():
         if len(valid_tasks) > 0:
             valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
             valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
@@ -511,6 +511,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
 
     console = Console()
     console.print(table)
+
 
 @click.group()
 def cli():

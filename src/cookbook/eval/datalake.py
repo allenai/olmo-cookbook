@@ -116,11 +116,7 @@ class Tag:
             return s
 
         # make the tags
-        return [
-            cls(*elem.split("=", 1)) if "=" in elem else cls(elem, elem)
-            for elem in s.strip().split(",")
-        ]
-
+        return [cls(*elem.split("=", 1)) if "=" in elem else cls(elem, elem) for elem in s.strip().split(",")]
 
 
 @dataclass

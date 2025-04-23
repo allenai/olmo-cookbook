@@ -13,17 +13,21 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 
-
 @dataclass(frozen=True)
 class DatalakeCacheResult(Generic[T]):
     success: bool
     value: T | None
 
+
 @dataclass
 class DatalakeCache(Generic[T]):
     cache_dir: str = dataclass_field(default_factory=lambda: user_cache_dir("datalake", "olmo-cookbook"))
-    invalidate: bool = dataclass_field(default_factory=lambda: os.environ.get("DATALAKE_CACHE_INVALIDATE", "false").lower() == "true")
-    do_not_cache: bool = dataclass_field(default_factory=lambda: os.environ.get("DATALAKE_DO_NOT_CACHE", "false").lower() == "true")
+    invalidate: bool = dataclass_field(
+        default_factory=lambda: os.environ.get("DATALAKE_CACHE_INVALIDATE", "false").lower() == "true"
+    )
+    do_not_cache: bool = dataclass_field(
+        default_factory=lambda: os.environ.get("DATALAKE_DO_NOT_CACHE", "false").lower() == "true"
+    )
 
     def __post_init__(self):
         if self.invalidate:

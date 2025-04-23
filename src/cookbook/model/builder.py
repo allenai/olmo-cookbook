@@ -39,6 +39,7 @@ from olmo_core.train.callbacks import (
 from olmo_core.train.common import LoadStrategy
 
 from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
     DEFAULT_LR_MAP,
@@ -47,7 +48,7 @@ from cookbook.model.config import (
     Tokenizers,
     WrappedTransformerConfig,
 )
-from cookbook.model.evaluators import DownstreamEvaluator
+from cookbook.model.evaluators import DownstreamEvaluator, get_all_tasks
 from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
@@ -150,7 +151,7 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    downstream_evaluators: List[DownstreamEvaluator]
+    downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -176,7 +177,7 @@ class TransformerConfigBuilder:
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
-        downstream_evaluators: List[DownstreamEvaluator],
+        downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -254,7 +255,10 @@ class TransformerConfigBuilder:
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
         else:
-            global_batch_size = 1024 * self.sequence_length
+            global_batch_size = (
+                estimate_batch_size(sequence_length=self.sequence_length, total_tokens=self.max_tokens)
+                * self.sequence_length
+            )
 
         print(f"Global batch size (in tokens) is: {global_batch_size}")
 
@@ -328,13 +332,9 @@ class TransformerConfigBuilder:
             )
 
         if self.downstream_evaluators:
-            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:
+            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:  # type: ignore
                 evaluators = DownstreamEvaluatorCallbackConfig(
-                    tasks=[
-                        evaluator.value
-                        for evaluator in DownstreamEvaluator
-                        if evaluator != DownstreamEvaluator.ALL
-                    ],
+                    tasks=get_all_tasks(),
                     tokenizer=self.tokenizer,
                     eval_interval=self.eval_interval,
                 )
