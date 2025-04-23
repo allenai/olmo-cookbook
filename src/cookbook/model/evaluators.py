@@ -4,7 +4,9 @@ from typing import List, Union
 from olmo_eval import list_tasks
 
 
-DownstreamEvaluator = Enum("DownstreamEvaluator", {name: name for name in Union[list_tasks()] + ["all"]})
+DownstreamEvaluator = Enum(
+    "DownstreamEvaluator", {name.upper(): name for name in list_tasks() + ["all"]}, type=str
+)
 
 
 def get_all_tasks() -> List[str]:

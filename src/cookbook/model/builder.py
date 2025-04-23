@@ -332,7 +332,7 @@ class TransformerConfigBuilder:
             )
 
         if self.downstream_evaluators:
-            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:
+            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:  # type: ignore
                 evaluators = DownstreamEvaluatorCallbackConfig(
                     tasks=get_all_tasks(),
                     tokenizer=self.tokenizer,
