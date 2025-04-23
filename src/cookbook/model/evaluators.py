@@ -10,5 +10,5 @@ DownstreamEvaluator = Enum(
 
 
 def get_all_tasks() -> List[str]:
-    """Return all downstream evaluation task names except 'all'."""
-    return [task.value for task in DownstreamEvaluator if task.name != "all"]  # type: ignore
+    """Return all downstream evaluation tasks"""
+    return [task.value for task in DownstreamEvaluator if task != DownstreamEvaluator.ALL]  # type: ignore
