@@ -5,7 +5,7 @@ workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 113_184_153_600
+max_tokens: 127_939_584_000
 sequence_length: 4096
 seed: 1337
 model: "olmo2_1B_v2"
@@ -19,7 +19,7 @@ downstream_evaluators:
   - all
 dataset:
   sources:
-  - name: dclm-baseline-20pct-superbpe
+  - name: dclm-baseline-20pct-dolma2-180k
     target_ratio: 1.0
     paths:
     - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/dolma2-tokenizer-180k/**/**/part-0*-00000.npy
