@@ -1,15 +1,23 @@
-from enum import Enum
+from enum import Enum, auto
+from typing import List, Literal, Union, cast, get_args
 
 from olmo_eval import list_tasks
 
 
-class DownstreamEvaluator(Enum):
-    """Enum class enumerating available in-loop evaluators."""
+class DownstreamEvaluator(str, Enum):
+    """Enum for downstream evaluation tasks."""
 
     ALL = "all"
 
-    # Dynamically add tasks from olmo_eval.list_tasks()
-    for task in set(list_tasks()):
-        task_upper = task.upper()
-        if task_upper not in locals():
-            locals()[task_upper] = task
+
+for task_name in set(list_tasks()):
+    task_upper = task_name.upper()
+    if not hasattr(DownstreamEvaluator, task_upper):  # Avoid duplicates
+        setattr(DownstreamEvaluator, task_upper, task_name)
+
+EVALUATOR_NAMES = ("ALL",) + tuple(task.upper() for task in set(list_tasks()))
+DownstreamEvaluatorType = Union[DownstreamEvaluator, Literal["ALL"]]
+
+
+def get_all_evaluators() -> List[DownstreamEvaluator]:
+    return list(DownstreamEvaluator)
