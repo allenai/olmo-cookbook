@@ -6,7 +6,7 @@ nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000
-rank_microbatch_size: 32768
+rank_microbatch_size: 24000
 sequence_length: 3000 # Match SuperBPE paper
 seed: 1337
 model: "olmo2_1B_v2"
