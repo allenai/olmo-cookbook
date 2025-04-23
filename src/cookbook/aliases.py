@@ -3,9 +3,9 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
 
-from olmo_core.train.common import Duration
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
+from olmo_core.train.common import Duration
 from pydantic import BaseModel, field_validator
 
 from cookbook.model.config import ModelConfigIdentifier

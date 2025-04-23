@@ -51,7 +51,7 @@ def evaluate_checkpoint(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: Optional[dict],
-    use_vllm_v1_spec: bool
+    use_vllm_v1_spec: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -221,7 +221,6 @@ def evaluate_checkpoint(
             # set gantry
             if use_gantry:
                 local_flags.append("--use-gantry")
-
 
             # processing gantry args
             if isinstance(gantry_args, str):

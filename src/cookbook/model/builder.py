@@ -39,6 +39,7 @@ from olmo_core.train.callbacks import (
 from olmo_core.train.common import LoadStrategy
 
 from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
     DEFAULT_LR_MAP,
@@ -254,7 +255,9 @@ class TransformerConfigBuilder:
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
         else:
-            global_batch_size = 1024 * self.sequence_length
+            global_batch_size = estimate_batch_size(
+                sequence_length=self.sequence_length, total_tokens=self.max_tokens
+            )
 
         print(f"Global batch size (in tokens) is: {global_batch_size}")
 
