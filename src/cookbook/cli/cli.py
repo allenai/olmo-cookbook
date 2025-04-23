@@ -74,7 +74,10 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     sequence_length = experiment_config.sequence_length
     max_tokens = experiment_config.max_tokens
 
-    suggested_batch_size = estimate_batch_size(sequence_length=sequence_length, total_tokens=max_tokens)
+    suggested_batch_size = (
+        estimate_batch_size(sequence_length=sequence_length, total_tokens=max_tokens)
+        * experiment_config.sequence_length
+    )
 
     if experiment_config.global_batch_size:
         if suggested_batch_size != experiment_config.global_batch_size:
