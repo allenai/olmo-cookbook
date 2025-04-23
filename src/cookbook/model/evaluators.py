@@ -1,10 +1,10 @@
-from enum import Enum, auto
-from typing import List, Literal, Union, cast, get_args
+from enum import Enum
+from typing import List, Literal, Union
 
 from olmo_eval import list_tasks
 
 
-class DownstreamEvaluator(str, Enum):
+class DownstreamEvaluator(Enum):
     """Enum for downstream evaluation tasks."""
 
     ALL = "all"
