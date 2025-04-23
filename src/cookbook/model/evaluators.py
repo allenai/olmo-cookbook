@@ -19,5 +19,5 @@ EVALUATOR_NAMES = ("ALL",) + tuple(task.upper() for task in set(list_tasks()))
 DownstreamEvaluatorType = Union[DownstreamEvaluator, Literal["ALL"]]
 
 
-def get_all_evaluators() -> List[DownstreamEvaluator]:
-    return list(DownstreamEvaluator)
+def get_all_tasks() -> List[str]:
+    return [task for task in DownstreamEvaluator if task != DownstreamEvaluator.ALL]

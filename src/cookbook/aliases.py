@@ -9,7 +9,7 @@ from olmo_core.train.common import Duration
 from pydantic import BaseModel, field_validator
 
 from cookbook.model.config import ModelConfigIdentifier
-from cookbook.model.evaluators import DownstreamEvaluator
+from cookbook.model.evaluators import str
 
 PathType = Union[Path, PathLike[Any], str]
 
@@ -88,7 +88,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     learning_rate: Optional[float] = None
     global_batch_size: Optional[int] = None
     lm_evaluator: bool = False
-    downstream_evaluators: list[DownstreamEvaluator] = []
+    downstream_evaluators: list[str] = []
     max_target_sequence_length: int = 8192
     metrics_config: Optional[MetricsConfig] = MetricsConfig()
     preemptible: bool = True
