@@ -76,7 +76,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
 
     suggested_batch_size = estimate_batch_size(sequence_length=sequence_length, total_tokens=max_tokens)
 
-    if experiment_config.global_batch_size is None:
+    if experiment_config.global_batch_size:
         if suggested_batch_size != experiment_config.global_batch_size:
             logger.warning(
                 f"Suggested global batch size {suggested_batch_size:,} is different from the configured global batch size {experiment_config.global_batch_size:,}. "
