@@ -9,5 +9,5 @@ class DownstreamEvaluator(Enum):
     ALL = "all"
 
     # Dynamically add tasks from olmo_eval.list_tasks()
-    for task in list_tasks():
+    for task in set(list_tasks()):
         locals()[task.upper()] = task
