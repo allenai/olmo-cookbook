@@ -151,7 +151,7 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    downstream_evaluators: List[DownstreamEvaluator]
+    downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -177,7 +177,7 @@ class TransformerConfigBuilder:
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
-        downstream_evaluators: List[DownstreamEvaluator],
+        downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
