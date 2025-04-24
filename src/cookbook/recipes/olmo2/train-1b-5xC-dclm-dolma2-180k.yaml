@@ -17,7 +17,7 @@ learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 weka: true
 downstream_evaluators:
-  - all
+  - olmo2_dev_1b
 dataset:
   sources:
   - name: dclm-baseline-20pct-dolma2-180k

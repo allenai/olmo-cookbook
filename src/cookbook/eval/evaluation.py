@@ -218,21 +218,21 @@ def evaluate_checkpoint(
             if beaker_image:
                 local_flags.append(f"--beaker-image {beaker_image}")
 
-            # set gantry
-            if use_gantry:
-                local_flags.append("--use-gantry")
+            # # set gantry
+            # if use_gantry:
+            #     local_flags.append("--use-gantry")
 
-            # processing gantry args
-            if isinstance(gantry_args, str):
-                # load gantry args using json
-                gantry_args = json.loads(gantry_args)
-            assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
+            # # processing gantry args
+            # if isinstance(gantry_args, str):
+            #     # load gantry args using json
+            #     gantry_args = json.loads(gantry_args)
+            # assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
 
-            # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args}
+            # # user might want to disable vllm v1 spec because its causing eval failures
+            # gantry_args = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args}
 
-            # finally append gantry args
-            local_flags.append(f"--gantry-args '{json.dumps(gantry_args)}'")
+            # # finally append gantry args
+            # local_flags.append(f"--gantry-args '{json.dumps(gantry_args)}'")
 
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")

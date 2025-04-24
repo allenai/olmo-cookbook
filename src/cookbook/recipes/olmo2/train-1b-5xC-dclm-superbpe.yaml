@@ -6,7 +6,7 @@ nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000
-rank_microbatch_size: 16384
+rank_microbatch_size: 32_768
 sequence_length: 2048
 seed: 1337
 model: "olmo2_1B_v2"
@@ -14,7 +14,7 @@ tokenizer: "superbpe_experimental"
 priority: high
 eval_interval: 250
 learning_rate: 1.8e-3
-cluster: ai2/jupiter-cirrascale-2
+cluster: ai2/titan-cirrascale
 weka: true
 downstream_evaluators:
   - all
@@ -23,6 +23,5 @@ dataset:
   - name: dclm-baseline-20pct-superbpe
     target_ratio: 1.0
     paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-olmo3-experimental/**/**/part-0*-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-olmo3-experimental/**/**/part-2*-00000.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-experimental-0.1.0/**/**/part-0*-00000.npy
 

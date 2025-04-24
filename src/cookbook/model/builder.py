@@ -48,7 +48,7 @@ from cookbook.model.config import (
     Tokenizers,
     WrappedTransformerConfig,
 )
-from cookbook.model.evaluators import DownstreamEvaluator, get_all_tasks
+from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
 from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
@@ -332,18 +332,11 @@ class TransformerConfigBuilder:
             )
 
         if self.downstream_evaluators:
-            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:  # type: ignore
-                evaluators = DownstreamEvaluatorCallbackConfig(
-                    tasks=get_all_tasks(),
-                    tokenizer=self.tokenizer,
-                    eval_interval=self.eval_interval,
-                )
-            else:
-                evaluators = DownstreamEvaluatorCallbackConfig(
-                    tasks=[evaluator.value for evaluator in self.downstream_evaluators],
-                    tokenizer=self.tokenizer,
-                    eval_interval=self.eval_interval,
-                )
+            evaluators = DownstreamEvaluatorCallbackConfig(
+                tasks=get_tasks_for_groups(self.downstream_evaluators),  # type: ignore
+                tokenizer=self.tokenizer,
+                eval_interval=self.eval_interval,
+            )
 
             callbacks["downstream_evaluators"] = evaluators
 
