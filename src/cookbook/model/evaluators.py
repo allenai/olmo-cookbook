@@ -21,19 +21,19 @@ OLMO2_DEV_1B_TASKS = [
     "mmlu_humanities_test_rc_5shot",
     "mmlu_social_sciences_test_rc_5shot",
     "mmlu_other_test_rc_5shot",
-    # Gen tasks BPB
-    "gsm8k_gold_bpb_5shot",
-    "minerva_math_algebra_gold_bpb_0shot",
-    "minerva_math_counting_and_probability_gold_bpb_0shot",
-    "minerva_math_geometry_gold_bpb_0shot",
-    "minerva_math_intermediate_algebra_gold_bpb_0shot",
-    "minerva_math_number_theory_gold_bpb_0shot",
-    "minerva_math_prealgebra_gold_bpb_0shot",
-    "minerva_math_precalculus_gold_bpb_0shot",
-    "codex_humaneval_gold_bpb_0shot",
-    "codex_mbpp_gold_bpb_0shot",
-    # Sanity check for MCQA ability
-    "copycolors_10way",
+    # # Gen tasks BPB
+    # "gsm8k_gold_bpb_5shot",
+    # "minerva_math_algebra_gold_bpb_0shot",
+    # "minerva_math_counting_and_probability_gold_bpb_0shot",
+    # "minerva_math_geometry_gold_bpb_0shot",
+    # "minerva_math_intermediate_algebra_gold_bpb_0shot",
+    # "minerva_math_number_theory_gold_bpb_0shot",
+    # "minerva_math_prealgebra_gold_bpb_0shot",
+    # "minerva_math_precalculus_gold_bpb_0shot",
+    # "codex_humaneval_gold_bpb_0shot",
+    # "codex_mbpp_gold_bpb_0shot",
+    # # Sanity check for MCQA ability
+    # "copycolors_10way",
 ]
 
 TASK_GROUPS: Dict[str, List[str]] = {
