@@ -6,6 +6,7 @@ nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000
+global_batch_size: 2097152
 rank_microbatch_size: 16384
 sequence_length: 4096
 seed: 1337
