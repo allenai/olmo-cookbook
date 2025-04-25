@@ -17,8 +17,8 @@ learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 rank_microbatch_size: 32768
 weka: true
-downstream_evaluators:
-  - olmo2_dev_1b
+# downstream_evaluators:
+#   - olmo2_dev_1b
 dataset:
   sources:
   - name: dclm-baseline-20pct-dolma2
