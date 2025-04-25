@@ -187,7 +187,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu128-v2.1",
+            beaker_image="petew/olmo-core-tch270cu128-v2.1.0",
             priority=group.config.priority,
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
@@ -205,7 +205,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "git submodule update --init --recursive",
                 "pip install uv && uv pip install -e '.[all]' --system",
                 # Temporary until they release a fix for 2.7.0
-                "uv pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128 --system",
+                "uv pip install torch==2.7.0 torchaudio torchvision --system",
                 "uv pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",

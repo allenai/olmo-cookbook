@@ -333,7 +333,7 @@ class TransformerConfigBuilder:
 
         if self.downstream_evaluators:
             evaluators = DownstreamEvaluatorCallbackConfig(
-                tasks=get_tasks_for_groups(self.downstream_evaluators),  # type: ignore
+                tasks=get_tasks_for_groups(self.downstream_evaluators),
                 tokenizer=self.tokenizer,
                 eval_interval=self.eval_interval,
             )
