@@ -2,7 +2,7 @@ name: "olmo2-1b-5xC-dclm-hlr-dolma2-180k"
 description: "OLMo2 1b@5xC dclm-baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
-nodes: 2
+nodes: 1
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000
