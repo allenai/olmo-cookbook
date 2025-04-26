@@ -84,6 +84,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     model: ModelConfigIdentifier
     load_path: Optional[str] = None
     load_state: bool = True
+    scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
