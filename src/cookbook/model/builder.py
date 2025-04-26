@@ -87,6 +87,7 @@ class TransformerConfigBuilder:
         global_batch_size (Optional[int]): The global batch size.
         rank_microbatch_size (Optional[int]): The rank microbatch size.
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
+        scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -152,6 +153,7 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
+    scheduler_type: SchedulerType
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -178,6 +180,7 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
+        scheduler_type: SchedulerType,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -219,6 +222,7 @@ class TransformerConfigBuilder:
         self.warmup_steps = warmup_steps
         self.load_path = load_path
         self.hard_stop = hard_stop
+        self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
 
@@ -379,7 +383,7 @@ class TransformerConfigBuilder:
 
         return dataset_config
 
-    def get_scheduler_config(self, scheduler_type: SchedulerType = SchedulerType.COS_LINEAR) -> Scheduler:
+    def get_scheduler_config(self) -> Scheduler:
         scheduler_map = {
             SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
@@ -390,7 +394,7 @@ class TransformerConfigBuilder:
             ),
         }
 
-        return scheduler_map[scheduler_type]()
+        return scheduler_map[self.scheduler_type]()
 
     def get_optimizer_config(self) -> OptimConfig:
         # TODO(undfined): Add support for other optimizers and allow user to specify optimizer type and properties

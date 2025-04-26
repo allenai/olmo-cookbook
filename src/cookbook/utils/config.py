@@ -136,6 +136,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         load_path=base_config.load_path,
         warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
+        scheduler_type=base_config.scheduler_type,
     ).build()
 
     seed_all(config.init_seed)
