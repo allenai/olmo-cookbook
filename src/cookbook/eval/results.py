@@ -20,6 +20,7 @@ def make_dashboard_table(
     force: bool = False,
 ) -> tuple[MiniFrame, MiniFrame]:
     experiments = FindExperiments.run(dashboard=dashboard)
+
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
         force=[force for _ in experiments],
