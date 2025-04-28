@@ -1,5 +1,5 @@
-name: "olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-repeats-1"
-description: "Olmo-cookbook 1Bv2-5xC on dclm baseline, swarm 62e7dc06 run 117 (requires repetition)"
+name: "olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-repeats-1-8e-4"
+description: "Olmo-cookbook 1Bv2-5xC on dclm baseline, swarm 62e7dc06 run 117 (requires repetition), 8e-4"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data" #"ai2/dolma2"
 nodes: 4
