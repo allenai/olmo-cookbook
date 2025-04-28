@@ -340,7 +340,7 @@ class TransformerConfigBuilder:
                 )
             else:
                 evaluators = DownstreamEvaluatorCallbackConfig(
-                    tasks=[evaluator.value for evaluator in self.downstream_evaluators],
+                    tasks=[evaluator for evaluator in self.downstream_evaluators],
                     tokenizer=self.tokenizer,
                     eval_interval=self.eval_interval,
                 )
