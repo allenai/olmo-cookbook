@@ -10,13 +10,17 @@ description = ""
 authors = [
     { name = "Allen Institute for Artificial Intelligence", email = "oe-data-engineering@allenai.org" }
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
     "boto3",
     "click",
+    "requests",
+    "platformdirs",
     "pydantic",
     "s3fs",
+    "rich",
+    "smart_open",
     "yaspin",
     "PyYAML>=6.0,<7.0",
     "paramiko>=3.5,<3.6",

@@ -15,7 +15,8 @@ OLMOE_UNSHARD_SCRIPT = "scripts/unshard.py"
 OLMO2_COMMIT_HASH = "69362b95c66655191d513e9c1420d54aa8477d92"
 OLMO2_UNSHARD_SCRIPT = "scripts/unshard.py"
 
-OLMO_CORE_COMMIT_HASH = "c149b73b4b02675140af67e1e32bac9d9bf116f8"
+OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
+OLMO_CORE_V2_COMMIT_HASH = "30467c0795be2ae1b54cbd4562390e3da3f7f54b"
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
 
 DEFAULT_OLMOE_TOKENIZER = "allenai/eleuther-ai-gpt-neox-20b-pii-special"
@@ -26,7 +27,10 @@ BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
 BEAKER_DEFAULT_BUDGET = "ai2/oe-data"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
-OLMO_TYPES = ["olmoe", "olmo2", "olmo-core"]
+BEAKER_PY = "beaker-py<1.34.2"
+BEAKER_GANTRY = "beaker-gantry<1.15.0"
+
+OLMO_TYPES = ["olmoe", "olmo2", "olmo-core", "olmo-core-v2"]
 
 WEKA_MOUNTS = [
     "ai1-default",
@@ -136,6 +140,203 @@ MMLU_CATEGORIES = [
     "mmlu_world_religions",
 ]
 
+MMLU_PRO_CATEGORIES = [
+    "mmlu_pro_math",
+    "mmlu_pro_health",
+    "mmlu_pro_physics",
+    "mmlu_pro_business",
+    "mmlu_pro_biology",
+    "mmlu_pro_chemistry",
+    "mmlu_pro_computer science",
+    "mmlu_pro_economics",
+    "mmlu_pro_engineering",
+    "mmlu_pro_philosophy",
+    "mmlu_pro_other",
+    "mmlu_pro_history",
+    "mmlu_pro_psychology",
+    "mmlu_pro_law",
+]
+
+HELMET_SUITES = {
+    "helmet_cite__131072::suite": ["helmet_alce_asqa_700__131072::std", "helmet_alce_qampari_700__131072::std"],
+    "helmet_cite__16384::suite": ["helmet_alce_asqa_75__16384::std", "helmet_alce_qampari_75__16384::std"],
+    "helmet_cite__32768::suite": ["helmet_alce_asqa_165__32768::std", "helmet_alce_qampari_165__32768::std"],
+    "helmet_cite__65536::suite": ["helmet_alce_asqa_345__65536::std", "helmet_alce_qampari_345__65536::std"],
+    "helmet_cite__8192::suite": ["helmet_alce_asqa_30__8192::std", "helmet_alce_qampari_30__8192::std"],
+    "helmet_icl__131072::suite": [
+        "helmet_icl_banking77_5900shot_balance__131072::std",
+        "helmet_icl_clinic150_7050shot_balance__131072::std",
+        "helmet_icl_nlu_8296shot_balance__131072::std",
+        "helmet_icl_trec_coarse_6600shot_balance__131072::std",
+        "helmet_icl_trec_fine_6400shot_balance__131072::std",
+    ],
+    "helmet_icl__16384::suite": [
+        "helmet_icl_banking77_720shot_balance__16384::std",
+        "helmet_icl_clinic150_880shot_balance__16384::std",
+        "helmet_icl_nlu_1020shot_balance__16384::std",
+        "helmet_icl_trec_coarse_800shot_balance__16384::std",
+        "helmet_icl_trec_fine_800shot_balance__16384::std",
+    ],
+    "helmet_icl__32768::suite": [
+        "helmet_icl_banking77_1450shot_balance__32768::std",
+        "helmet_icl_clinic150_1750shot_balance__32768::std",
+        "helmet_icl_nlu_2040shot_balance__32768::std",
+        "helmet_icl_trec_coarse_1600shot_balance__32768::std",
+        "helmet_icl_trec_fine_1600shot_balance__32768::std",
+    ],
+    "helmet_icl__65536::suite": [
+        "helmet_icl_banking77_2900shot_balance__65536::std",
+        "helmet_icl_clinic150_3525shot_balance__65536::std",
+        "helmet_icl_nlu_4080shot_balance__65536::std",
+        "helmet_icl_trec_coarse_3300shot_balance__65536::std",
+        "helmet_icl_trec_fine_3200shot_balance__65536::std",
+    ],
+    "helmet_icl__8192::suite": [
+        "helmet_icl_banking77_360shot_balance__8192::std",
+        "helmet_icl_clinic150_440shot_balance__8192::std",
+        "helmet_icl_nlu_510shot_balance__8192::std",
+        "helmet_icl_trec_coarse_400shot_balance__8192::std",
+        "helmet_icl_trec_fine_400shot_balance__8192::std",
+    ],
+    "helmet_longqa__131072::suite": [
+        "helmet_infbench_choice_eng_130862__131072::std",
+        "helmet_infbench_qa_eng_130862__131072::std",
+        "helmet_narrativeqa_130772__131072::std",
+    ],
+    "helmet_longqa__16384::suite": [
+        "helmet_infbench_choice_eng_16174__16384::std",
+        "helmet_infbench_qa_eng_16174__16384::std",
+        "helmet_narrativeqa_16084__16384::std",
+    ],
+    "helmet_longqa__32768::suite": [
+        "helmet_infbench_choice_eng_32558__32768::std",
+        "helmet_infbench_qa_eng_32558__32768::std",
+        "helmet_narrativeqa_32468__32768::std",
+    ],
+    "helmet_longqa__65536::suite": [
+        "helmet_infbench_choice_eng_65326__65536::std",
+        "helmet_infbench_qa_eng_65326__65536::std",
+        "helmet_narrativeqa_65236__65536::std",
+    ],
+    "helmet_longqa__8192::suite": [
+        "helmet_infbench_choice_eng_7982__8192::std",
+        "helmet_infbench_qa_eng_7982__8192::std",
+        "helmet_narrativeqa_7892__8192::std",
+    ],
+    "helmet_niah__131072::suite": [
+        "helmet_ruler_cwe__131072::std",
+        "helmet_ruler_fwe__131072::std",
+        "helmet_ruler_niah_mk_1__131072::std",
+        "helmet_ruler_niah_mk_2__131072::std",
+        "helmet_ruler_niah_mk_3__131072::std",
+        "helmet_ruler_niah_mq__131072::std",
+        "helmet_ruler_niah_mv__131072::std",
+        "helmet_ruler_niah_s_1__131072::std",
+        "helmet_ruler_niah_s_2__131072::std",
+        "helmet_ruler_niah_s_3__131072::std",
+        "helmet_ruler_qa_1__131072::std",
+        "helmet_ruler_qa_2__131072::std",
+        "helmet_ruler_vt__131072::std",
+    ],
+    "helmet_niah__65536::suite": [
+        "helmet_ruler_cwe__65536::std",
+        "helmet_ruler_fwe__65536::std",
+        "helmet_ruler_niah_mk_1__65536::std",
+        "helmet_ruler_niah_mk_2__65536::std",
+        "helmet_ruler_niah_mk_3__65536::std",
+        "helmet_ruler_niah_mq__65536::std",
+        "helmet_ruler_niah_mv__65536::std",
+        "helmet_ruler_niah_s_1__65536::std",
+        "helmet_ruler_niah_s_2__65536::std",
+        "helmet_ruler_niah_s_3__65536::std",
+        "helmet_ruler_qa_1__65536::std",
+        "helmet_ruler_qa_2__65536::std",
+        "helmet_ruler_vt__65536::std",
+    ],
+    "helmet_rag__131072::suite": [
+        "helmet_kilt_hotpotqa__131072::std",
+        "helmet_kilt_nq__131072::std",
+        "helmet_kilt_popqa_3__131072::std",
+        "helmet_kilt_triviaqa__131072::std",
+    ],
+    "helmet_rag__16384::suite": [
+        "helmet_kilt_hotpotqa__16384::std",
+        "helmet_kilt_nq__16384::std",
+        "helmet_kilt_popqa_3__16384::std",
+        "helmet_kilt_triviaqa__16384::std",
+    ],
+    "helmet_rag__32768::suite": [
+        "helmet_kilt_hotpotqa__32768::std",
+        "helmet_kilt_nq__32768::std",
+        "helmet_kilt_popqa_3__32768::std",
+        "helmet_kilt_triviaqa__32768::std",
+    ],
+    "helmet_rag__65536::suite": [
+        "helmet_kilt_hotpotqa__65536::std",
+        "helmet_kilt_nq__65536::std",
+        "helmet_kilt_popqa_3__65536::std",
+        "helmet_kilt_triviaqa__65536::std",
+    ],
+    "helmet_rag__8192::suite": [
+        "helmet_kilt_hotpotqa__8192::std",
+        "helmet_kilt_nq__8192::std",
+        "helmet_kilt_popqa_3__8192::std",
+        "helmet_kilt_triviaqa__8192::std",
+    ],
+    "helmet_recall__131072::suite": [
+        "helmet_json_kv__131072::std",
+        "helmet_recall_ruler_niah_mk_2__131072::std",
+        "helmet_recall_ruler_niah_mk_3__131072::std",
+        "helmet_recall_ruler_niah_mv__131072::std",
+    ],
+    "helmet_recall__16384::suite": [
+        "helmet_json_kv__16384::std",
+        "helmet_ruler_niah_mk_2__16384::std",
+        "helmet_ruler_niah_mk_3__16384::std",
+        "helmet_ruler_niah_mv__16384::std",
+    ],
+    "helmet_recall__32768::suite": [
+        "helmet_json_kv__32768::std",
+        "helmet_ruler_niah_mk_2__32768::std",
+        "helmet_ruler_niah_mk_3__32768::std",
+        "helmet_ruler_niah_mv__32768::std",
+    ],
+    "helmet_recall__65536::suite": [
+        "helmet_json_kv__65536::std",
+        "helmet_recall_ruler_niah_mk_2__65536::std",
+        "helmet_recall_ruler_niah_mk_3__65536::std",
+        "helmet_recall_ruler_niah_mv__65536::std",
+    ],
+    "helmet_recall__8192::suite": [
+        "helmet_json_kv__8192::std",
+        "helmet_ruler_niah_mk_2__8192::std",
+        "helmet_ruler_niah_mk_3__8192::std",
+        "helmet_ruler_niah_mv__8192::std",
+    ],
+    "helmet_rerank__131072::suite": ["helmet_msmarco_rerank_psg__131072::std"],
+    "helmet_rerank__16384::suite": ["helmet_msmarco_rerank_psg__16384::std"],
+    "helmet_rerank__32768::suite": ["helmet_msmarco_rerank_psg__32768::std"],
+    "helmet_rerank__65536::suite": ["helmet_msmarco_rerank_psg__65536::std"],
+    "helmet_rerank__8192::suite": ["helmet_msmarco_rerank_psg__8192::std"],
+    "helmet_summ__131072::suite": [
+        "helmet_infbench_sum_eng_129672__131072::std",
+        "helmet_multi_lexsum_130372__131072::std",
+    ],
+    "helmet_summ__16384::suite": [
+        "helmet_infbench_sum_eng_14984__16384::std",
+        "helmet_multi_lexsum_15684__16384::std",
+    ],
+    "helmet_summ__32768::suite": [
+        "helmet_infbench_sum_eng_31368__32768::std",
+        "helmet_multi_lexsum_32068__32768::std",
+    ],
+    "helmet_summ__65536::suite": [
+        "helmet_infbench_sum_eng_64136__65536::std",
+        "helmet_multi_lexsum_64836__65536::std",
+    ],
+    "helmet_summ__8192::suite": ["helmet_infbench_sum_eng_6792__8192::std", "helmet_multi_lexsum_7492__8192::std"],
+}
+
 ALL_CORE_TASKS = [
     "arc_easy",
     "arc_challenge",
@@ -168,10 +369,19 @@ ALL_MINERVA_TASKS = [
     "minerva_math_precalculus::olmes",
 ]
 
-ALL_MATH_TASKS = [
-    *ALL_MINERVA_TASKS,
-    "gsm8k::olmo1",
-    "gsm8k::olmes"
+ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
+
+
+ALL_AGI_EVAL_TASKS = [
+    "agi_eval_lsat-ar:1shot::olmes",
+    "agi_eval_lsat-lr:1shot::olmes",
+    "agi_eval_lsat-rc:1shot::olmes",
+    "agi_eval_logiqa-en:1shot::olmes",
+    "agi_eval_sat-math:1shot::olmes",
+    "agi_eval_sat-en:1shot::olmes",
+    "agi_eval_aqua-rat:1shot::olmes",
+    "agi_eval_sat-en-without-passage:1shot::olmes",
+    "agi_eval_gaokao-english:1shot::olmes",
 ]
 
 
@@ -254,15 +464,78 @@ ALL_NAMED_GROUPS = {
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
+    "mmlu_pro:rc": [f"{category}:rc::olmes" for category in MMLU_PRO_CATEGORIES],
+    "mmlu_pro:mc": [f"{category}:mc::olmes" for category in MMLU_PRO_CATEGORIES],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
     "code": ALL_CODEX_TASKS,
+    "agi_eval": ALL_AGI_EVAL_TASKS,
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
 }
+
+for helmet_length in (int(2**i) for i in range(13, 18)):
+    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
+        set(
+            task
+            for group_name, tasks in HELMET_SUITES.items()
+            for task in tasks
+            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
+        )
+    )
+
+
+ALL_DISPLAY_TASKS = {
+    "olmo2:paper": [
+        r"arc_challenge:mc.*",
+        r"hellaswag:mc.*",
+        r"winogrande:mc.*",
+        r"naturalqs.*",
+        r"drop.*",
+        r"agieval.*",
+        r"^gsm8k::olmes$",
+        r"^mmlu:mc$",
+        r"^mmlu_pro:mc$",
+        r"^agi_eval$",
+    ],
+    "olmo2:dev:7b": [
+        r"arc_challenge:mc.*",
+        r"arc_easy:mc.*",
+        r"hellaswag:mc.*",
+        r"naturalqs.*",
+        r"^gsm8k::olmo1$",
+        r"^mmlu:mc$",
+        r"^core:mc$",
+        r"^gen$",
+    ],
+    "olmo2:dev:1b": [
+        r"arc_challenge:rc.*",
+        r"arc_easy:rc.*",
+        r"hellaswag:rc.*",
+        r"^gsm8k::olmo1$",
+        r"^mmlu:rc$",
+        r"^core:rc$",
+    ],
+    "helmet:8k": [r"^helmet:8k$"],
+    "helmet:16k": [r"^helmet:16k$"],
+    "helmet:32k": [r"^helmet:32k$"],
+    "helmet:64k": [r"^helmet:64k$"],
+    "helmet:128k": [r"^helmet:128k$"],
+}
+
+
+SHORT_NAMES = {
+    r"::olmes$": "",
+    r"^gsm8k::olmo1$": "GSM*",
+    r"^naturalqs": "NQ",
+    r"^(arc\_\w)\w+": r"\1",
+    r"^hellaswag": "HSwag",
+    r"^winogrande": "WinoG",
+}
+
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None

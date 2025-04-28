@@ -14,7 +14,8 @@ from tqdm import tqdm
 from yaspin import yaspin
 
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
-from cookbook.cli.eval import convert, evaluate
+from cookbook.cli.core import estimate_batch_size
+from cookbook.cli.eval import convert_checkpoint, evaluate_model
 from cookbook.utils.config import (
     build_train_config,
     config_from_path,
@@ -69,6 +70,21 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     token_universe = get_token_counts_and_ratios(
         experiment_config.dataset.sources, experiment_config.dataset.dtype, not no_cache
     )
+
+    sequence_length = experiment_config.sequence_length
+    max_tokens = experiment_config.max_tokens
+
+    suggested_batch_size_tokens = (
+        estimate_batch_size(sequence_length=sequence_length, total_tokens=max_tokens)
+        * experiment_config.sequence_length
+    )
+
+    if experiment_config.global_batch_size:
+        if suggested_batch_size_tokens != experiment_config.global_batch_size:
+            logger.warning(
+                f"Suggested global batch size {suggested_batch_size_tokens:,} is different from the configured global batch size {experiment_config.global_batch_size:,}. "
+                "This may lead to suboptimal performance. Consider adjusting the batch size."
+            )
 
     if group_id:
         group_uuid = group_id
@@ -360,8 +376,8 @@ def prepare_user_workspace(
                 print(f"Writing blank value for {secret_name}")
 
 
-cli.command()(evaluate)
-cli.command()(convert)
+cli.command()(evaluate_model)
+cli.command()(convert_checkpoint)
 
 
 if __name__ == "__main__":

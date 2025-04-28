@@ -1,4 +1,6 @@
 import concurrent.futures
+import hashlib
+import json
 import logging
 import os
 import pathlib
@@ -13,14 +15,10 @@ from olmo_core.io import get_file_size, is_url, normalize_path
 from olmo_core.utils import OLMoEnvironmentError
 from tqdm import tqdm
 
+from cookbook.aliases import SourceConfig
+
 logger = logging.getLogger(__name__)
 logging.getLogger("botocore").setLevel(logging.WARNING)
-
-
-import hashlib
-import json
-
-from cookbook.aliases import SourceConfig
 
 
 def _bytes_to_tokens(num_bytes: int, dtype: NumpyDatasetDType) -> int:
@@ -60,15 +58,17 @@ def get_token_counts_and_ratios(
     token_counts = defaultdict(int)
 
     client_kwargs = {}
+    profile_name = os.environ.get("AWS_PROFILE", None)
     for source in source_configs:
         for path in source.paths:
             parsed = urlparse(path)
             if parsed.scheme == "s3":
                 continue
             if parsed.scheme == "weka":
+                profile_name = "WEKA"
                 client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
 
-    fs = s3fs.S3FileSystem(client_kwargs={**client_kwargs})
+    fs = s3fs.S3FileSystem(client_kwargs={**client_kwargs}, profile=profile_name)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
         for source in source_configs:
@@ -107,18 +107,17 @@ def get_token_counts_and_ratios(
     return (relative_sizes, total_tokens)
 
 
-def expand_globs(s3: s3fs.S3FileSystem, sources: List[str]) -> Any:
+def expand_globs(s3: s3fs.S3FileSystem = s3fs.S3FileSystem(), sources: List[str] = []) -> Any:
     results = []
 
     for source in sources:
         if is_url(source):
-            logger.info(f"Expanding remote glob '{source}'...")
             results.extend(_expand_remote(source, s3))
         else:
-            logger.info(f"Expanding local glob '{source}'...")
             results.extend(_expand_local(source))
 
-    return results
+    # Filter the globs from the expanded list
+    return [r for r in results if "*" not in r]
 
 
 def _expand_local(pattern: str) -> List[str]:
@@ -128,7 +127,8 @@ def _expand_local(pattern: str) -> List[str]:
     from glob import glob
 
     logger.info(f"Expanding '{pattern}'...")
-    matches = sorted(glob(pattern))
+    matches = sorted(glob(pattern, recursive=True))
+
     if not matches:
         raise FileNotFoundError(pattern)
 
@@ -140,24 +140,25 @@ def _expand_remote(pattern: str, fs: s3fs.S3FileSystem) -> List[str]:
     Expand a remote glob pattern.
     """
     parsed = urlparse(pattern)
+    logger.info(f"Expanding remote glob '{pattern}'...")
 
     if parsed.scheme == "s3":
         return [f"s3://{obj}" for obj in fs.glob(pattern)]
+    elif parsed.scheme == "weka":
+        return [f"weka://{obj}" for obj in fs.glob(pattern.replace("weka://", "s3://"))]
     elif parsed.scheme == "r2":
         raise NotImplementedError("'r2' types are not currently supported")
-    elif parsed.scheme == "weka":
-        return [f"weka://{obj}" for obj in fs.glob(pattern)]
     elif parsed.scheme == "gs":
         raise NotImplementedError("'gs' types are not currently supported")
     elif parsed.scheme in ("http", "https"):
         raise NotImplementedError("'http' types are not currently supported")
     elif parsed.scheme == "file":
-        raise NotImplementedError("'file' types are not currently supported")
+        raise NotImplementedError("Remote 'file' types are not currently supported")
     else:
         raise NotImplementedError(f"Glob expansion is not currently supported for '{parsed.scheme}' files")
 
 
-def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
+def normalize_source_paths(sources: List[SourceConfig], expand: bool = False) -> List[SourceConfig]:
     """
     Normalize the paths in a SourceConfig object.
     """
@@ -186,7 +187,7 @@ def normalize_source_paths(sources: List[SourceConfig]) -> List[SourceConfig]:
         normalized.append(
             SourceConfig(
                 name=source.name,
-                paths=source_paths,
+                paths=expand_globs(sources=source_paths) if expand else source_paths,
                 target_ratio=source.target_ratio,
                 repetition_factor=source.repetition_factor,
                 max_source_ratio=source.max_source_ratio,

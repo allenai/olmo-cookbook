@@ -9,7 +9,7 @@ from olmo_core.launch.beaker import (
     BeakerWekaBucket,
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
-from olmo_core.utils import get_default_device, seed_all
+from olmo_core.utils import seed_all
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -19,7 +19,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
-from cookbook.utils.data import normalize_source_paths
+from cookbook.utils.data import expand_globs, normalize_source_paths
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +34,9 @@ def config_from_path(config: Path) -> ExperimentConfig:
 def mk_source_instances(
     sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
-    # If no user provided ratios, use the priors from the sources
     if priors:
         ratios_by_source, total_tokens = priors
     else:
-        # TODO(undfined): Clean this up and fail faster
         ratios_by_source = {}
 
     instances = []
@@ -105,9 +103,12 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     """
 
     base_config = config_from_path(config_path)
+    if dry_run:
+        source_paths = base_config.dataset.sources
+    else:
+        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
 
-    # Because this is happening on-box in Beaker we want paths normalized for usage there.
-    source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
+    source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
     config = TransformerConfigBuilder(
@@ -128,11 +129,12 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         sequence_length=base_config.sequence_length,
         sources=source_instances,
         tokenizer=base_config.tokenizer,
-        wandb_config=base_config.wandb,
+        metrics_config=base_config.metrics_config,
         weka=base_config.weka,
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
+        warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
     ).build()
 
@@ -146,6 +148,14 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         train_module = config.train_module.build(model)
         data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
         trainer = config.trainer.build(train_module, data_loader)
+
+        # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
+        if (
+            not trainer.maybe_load_checkpoint(trainer.save_folder, load_trainer_state=base_config.load_state)
+            and base_config.load_path
+        ):
+            trainer.load_checkpoint(base_config.load_path, load_trainer_state=base_config.load_state)
+
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
@@ -193,12 +203,10 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install -e '.[all]'",
+                "pip install uv && uv pip install -e '.[all]' --system",
                 # Temporary until they release a fix for 2.7.0
-                "pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128",
-                # filler comment
-                "ls",
-                "pip freeze",
+                "uv pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128 --system",
+                "uv pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
                 "printenv AWS_CONFIG > ~/.aws/config",
