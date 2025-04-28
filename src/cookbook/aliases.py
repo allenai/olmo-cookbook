@@ -1,13 +1,17 @@
+from enum import Enum
 from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
 
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
-from pydantic import BaseModel
+from olmo_core.train.common import Duration
+from pydantic import BaseModel, field_validator
 
+from cookbook.model.config import ModelConfigIdentifier
 from cookbook.model.evaluators import DownstreamEvaluator
 
+DownstreamEvaluatorType = Union[str, DownstreamEvaluator]
 PathType = Union[Path, PathLike[Any], str]
 
 try:
@@ -38,8 +42,29 @@ class DatasetConfig(BaseModel):
     seed: int = 42
 
 
-class WandbConfig(BaseModel):
-    project: str
+class MetricBackend(Enum):
+    wandb = "wandb"
+    comet = "comet"
+
+
+class MetricsConfig(BaseModel):
+    project: str = "olmo-cookbook"
+    workspace: str = "ai2"
+    backends: list[MetricBackend] = [MetricBackend.wandb]
+
+
+class SchedulerType(Enum):
+    COSINE = "cosine"
+    COS_LINEAR = "cos_linear"
+    WSD = "wsd"
+
+    @classmethod
+    def values(cls):
+        return [e.value for e in cls]
+
+    @classmethod
+    def keys(cls):
+        return [e.name for e in cls]
 
 
 class ExperimentConfig(BaseModel, extra="forbid"):
@@ -56,22 +81,32 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     tokenizer: str
     priority: Priority  # pyright: ignore
     dataset: DatasetConfig
-    tokenizer: str
-    model: str
+    model: ModelConfigIdentifier
     load_path: Optional[str] = None
+    load_state: bool = True
+    hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
     global_batch_size: Optional[int] = None
     lm_evaluator: bool = False
-    downstream_evaluators: list[DownstreamEvaluator] = []
+    downstream_evaluators: list[DownstreamEvaluatorType] = []  # type: ignore
     max_target_sequence_length: int = 8192
-    wandb: Optional[WandbConfig] = None
+    metrics_config: Optional[MetricsConfig] = MetricsConfig()
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
     eval_interval: int = 200
     save_interval: int = 1000
+    warmup_steps: Optional[int] = None
     path: Path
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def validate_model(cls, value):
+        """Convert string to ModelConfigIdentifier if needed."""
+        if isinstance(value, str):
+            return ModelConfigIdentifier(value)
+        return value
 
 
 class ExperimentInstance(BaseModel):
