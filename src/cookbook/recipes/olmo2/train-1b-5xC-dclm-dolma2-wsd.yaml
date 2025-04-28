@@ -1,4 +1,4 @@
-name: "olmo2-1b-5xC-dclm-hlr-dolma2"
+name: "olmo2-1b-5xC-dclm-hlr-dolma2-wsd"
 description: "OLMo2 1b@5xC dclm-baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"

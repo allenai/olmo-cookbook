@@ -1,4 +1,4 @@
-name: "olmo2-1b-5xC-dclm-hlr-superbpe"
+name: "olmo2-1b-5xC-dclm-hlr-superbpe-wsd"
 description: "OLMo2 1b@5xC dclm-baseline with superbpe tokens"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
