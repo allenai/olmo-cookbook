@@ -195,7 +195,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             and base_config.load_path
         ):
             logger.info(
-                f"Loading checkpoint from {base_config.load_path} and loading trainer state: {base_config.load_state}"
+                f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
             )
             trainer.load_checkpoint(base_config.load_path, load_trainer_state=base_config.load_state)
 
