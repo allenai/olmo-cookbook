@@ -18,7 +18,7 @@ cluster: ai2/jupiter-cirrascale-2
 rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
-anneal: true
+annealing: true
 load_state: false
 weka: true
 dataset:
