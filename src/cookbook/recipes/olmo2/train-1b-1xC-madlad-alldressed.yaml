@@ -9,7 +9,7 @@ max_tokens: 25_587_916_800 # 1279395840 nonembed params x 20
 sequence_length: 4096
 seed: 1337
 model: "olmo2_1B_v2"
-tokenizer: "dolma2-tokenizer"
+tokenizer: "dolma2"
 priority: high
 eval_interval: 250
 global_batch_size: 2097152
