@@ -17,8 +17,6 @@ rank_microbatch_size: 32768
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 weka: true
-downstream_evaluators:
-  - all
 dataset:
   sources:
   - name: all_dressed
