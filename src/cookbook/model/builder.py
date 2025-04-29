@@ -1,8 +1,10 @@
 import json
 import logging
+from pathlib import Path
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
+import s3fs
 import olmo_core.train.train_module as train_module
 from olmo_core.config import DType
 from olmo_core.data import (
@@ -178,6 +180,7 @@ class TransformerConfigBuilder:
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
     warmup_steps: Optional[int]
+    load_path_fs: Optional[s3fs.S3FileSystem]
     profile: bool = False
 
     def __init__(
@@ -199,6 +202,7 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        load_path_fs: Optional[s3fs.S3FileSystem] = None,
         annealing: bool = False,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
@@ -242,6 +246,7 @@ class TransformerConfigBuilder:
         self.load_path = load_path
         self.hard_stop = hard_stop
         self.annealing = annealing
+        self.load_path_fs = load_path_fs
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
@@ -435,8 +440,35 @@ class TransformerConfigBuilder:
             modules=["blocks.*.feed_forward"],
         )
 
+    def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
+        if not self.load_path:
+            raise ValueError(
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+            )
+
+        local_cache = f"/tmp/{self.run_name}/"
+
+        if self.load_path_fs:
+            train_config = "config.json"
+            train_state = "train/rank0.pt"
+            logger.info(f"Downloading train state and config from {self.load_path} to {local_cache}")
+
+            for item in [train_state, train_config]:
+                self.load_path_fs.download(rpath=f"{self.load_path}/{item}", lpath=local_cache, recursive=True)
+
+            return (
+                resource_path(folder=local_cache, fname="rank0.pt"),
+                resource_path(folder=local_cache, fname="config.json"),
+            )
+        else:
+            return (
+                resource_path(folder=f"{self.load_path}/train", fname="rank0.pt"),
+                resource_path(folder=self.load_path, fname="config.json"),
+            )
+
     def get_state_from_checkpoint(self) -> SchedulerState:
-        train_state = torch.load(resource_path(f"{self.load_path}/train", "rank0.pt"), weights_only=False)
+        state_path, config_path = self.load_state_and_config_from_path()
+        train_state = torch.load(state_path, weights_only=False)
 
         last_pretrain_step: int = train_state["global_step"]
         max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)
@@ -446,27 +478,42 @@ class TransformerConfigBuilder:
                 "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
             )
 
-        logger.info(
-            f"Will anneal checkpoint {self.load_path} at step {last_pretrain_step:,d} of {max_pretrain_steps:,d}"
-        )
+        logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d}")
 
         if not self.load_path:
             raise ValueError(
                 "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
             )
 
-        with resource_path(self.load_path, "config.json").open() as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
 
-        base_lr: int = config["optim"]["lr"]
-        scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+        del config["dataset"]
+        logger.info("Inferring scheduler config from:")
+        logger.info(config)
 
         try:
-            assert scheduler_config.pop("_CLASS_") == CosWithWarmup.__name__
+            # Try olmo_core v2 config format first
+            base_lr: int = config["optim"]["lr"]
+            scheduler_config = config["train_module"]["scheduler"]
+        except KeyError as e:
+            # Now try olmo_core v1 config format
+            try:
+                base_lr: int = config["optim"]["lr"]
+                scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+            except KeyError as e:
+                logger.error(
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                )
+                raise e
+
+        scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
+
+        try:
+            assert scheduler_class == CosWithWarmup.__name__
         except AssertionError as e:
-            class_name = scheduler_config.get("_CLASS_", "unknown")
             logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {class_name}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
             )
             raise e
 
@@ -487,6 +534,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size = self.get_rank_microbatch_size()
         dataset_config = self.build_dataset_config()
         optim_config = self.get_optimizer_config()
+
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
             work_dir=self.dataset_cache,
@@ -496,6 +544,7 @@ class TransformerConfigBuilder:
 
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
+
         train_module_config = train_module.TransformerTrainModuleConfig(
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,

@@ -1,8 +1,9 @@
 import logging
+import os
 from pathlib import Path
 from typing import List, Tuple, cast
+from urllib.parse import urlparse
 
-import yaml
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
     BeakerLaunchConfig,
@@ -10,6 +11,9 @@ from olmo_core.launch.beaker import (
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import seed_all
+from olmo_core.io import normalize_path
+import s3fs
+import yaml
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -19,7 +23,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
-from cookbook.utils.data import expand_globs, normalize_source_paths
+from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
 
@@ -97,16 +101,48 @@ def mk_instance_cmd(
     ]
 
 
+_REMOTE_FS_CACHE: dict[str, s3fs.S3FileSystem] | None = None
+
+
+def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
+    global _REMOTE_FS_CACHE
+    if _REMOTE_FS_CACHE is not None:
+        return _REMOTE_FS_CACHE
+
+    _REMOTE_FS_CACHE = dict(
+        s3=s3fs.S3FileSystem(),
+        weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+    )
+
+    return _REMOTE_FS_CACHE
+
+
 def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
     """
     Launch a training run with the given parameters.
     """
 
     base_config = config_from_path(config_path)
+    load_path_fs = None
+
     if dry_run:
         source_paths = base_config.dataset.sources
+        if base_config.load_path:
+            try:
+                load_path_fs = remote_fs_cache()[urlparse(base_config.load_path).scheme]
+            except KeyError:
+                raise ValueError(f"Unsupported load path scheme: {base_config.load_path}")
+
+            # When we have a weka path locally we need to treat it like a remote s3
+            # path and strip the special weka prefix and bucket name
+            base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "s3://"))
+
     else:
         source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
+
+        if base_config.load_path:
+            # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
+            base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
 
     source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
@@ -139,6 +175,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         scheduler_type=base_config.scheduler_type,
         annealing=base_config.annealing,
         hard_stop=base_config.hard_stop,
+        load_path_fs=load_path_fs,
     ).build()
 
     seed_all(config.init_seed)

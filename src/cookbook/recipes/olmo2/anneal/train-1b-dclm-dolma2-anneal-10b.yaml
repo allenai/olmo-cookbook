@@ -1,4 +1,4 @@
-name: "olmo2-1b-dclm-dolma2-linear-nowup-anneal-10B"
+name: "learn2code-linear-nowup-anneal-10B"
 description: "OLMo2 1b anneal to 10B Tokens"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
@@ -19,7 +19,7 @@ rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
 annealing: true
-load_path: weka://oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-1b-5xC-dclm-hlr-superbpe-f8f59121/step61007/
+load_path: weka://oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-no-prose-hlr-00203459/step53971/
 load_state: false
 weka: true
 dataset:
