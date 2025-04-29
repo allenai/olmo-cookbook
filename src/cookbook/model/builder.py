@@ -48,7 +48,7 @@ from cookbook.model.config import (
     Tokenizers,
     WrappedTransformerConfig,
 )
-from cookbook.model.evaluators import DownstreamEvaluator, get_all_tasks
+from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
 from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
@@ -87,6 +87,7 @@ class TransformerConfigBuilder:
         global_batch_size (Optional[int]): The global batch size.
         rank_microbatch_size (Optional[int]): The rank microbatch size.
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
+        scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -152,6 +153,7 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
+    scheduler_type: SchedulerType
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -178,6 +180,7 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
+        scheduler_type: SchedulerType,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -219,10 +222,11 @@ class TransformerConfigBuilder:
         self.warmup_steps = warmup_steps
         self.load_path = load_path
         self.hard_stop = hard_stop
+        self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
 
-        if any(substring in cluster for substring in ["jupiter", "saturn"]) and weka:
+        if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
             self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
@@ -267,10 +271,18 @@ class TransformerConfigBuilder:
     def get_rank_microbatch_size(self) -> int:
         if self.rank_microbatch_size is not None:
             rbz = self.rank_microbatch_size
+            logger.info(f"Rank microbatch size (in tokens) is: {rbz}")
         else:
-            rbz = 16 * self.sequence_length
+            if self.sequence_length == 2048:
+                rbz = 16 * self.sequence_length
+            elif self.sequence_length == 4096:
+                rbz = 8 * self.sequence_length
+            else:
+                rbz = 4 * self.sequence_length
 
-        logger.info(f"Rank microbatch size (in tokens) is: {rbz}")
+            logger.info(
+                f"Using default rank microbatch size: {rbz} for sequence length: {self.sequence_length}, if OOM errors occur try reducing rank microbatch size"
+            )
 
         return rbz
 
@@ -332,18 +344,11 @@ class TransformerConfigBuilder:
             )
 
         if self.downstream_evaluators:
-            if self.downstream_evaluators[0] == DownstreamEvaluator.ALL:  # type: ignore
-                evaluators = DownstreamEvaluatorCallbackConfig(
-                    tasks=get_all_tasks(),
-                    tokenizer=self.tokenizer,
-                    eval_interval=self.eval_interval,
-                )
-            else:
-                evaluators = DownstreamEvaluatorCallbackConfig(
-                    tasks=[evaluator for evaluator in self.downstream_evaluators],
-                    tokenizer=self.tokenizer,
-                    eval_interval=self.eval_interval,
-                )
+            evaluators = DownstreamEvaluatorCallbackConfig(
+                tasks=get_tasks_for_groups(self.downstream_evaluators),
+                tokenizer=self.tokenizer,
+                eval_interval=self.eval_interval,
+            )
 
             callbacks["downstream_evaluators"] = evaluators
 
@@ -386,7 +391,7 @@ class TransformerConfigBuilder:
 
         return dataset_config
 
-    def get_scheduler_config(self, scheduler_type: SchedulerType = SchedulerType.COS_LINEAR) -> Scheduler:
+    def get_scheduler_config(self) -> Scheduler:
         scheduler_map = {
             SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
@@ -397,7 +402,7 @@ class TransformerConfigBuilder:
             ),
         }
 
-        return scheduler_map[scheduler_type]()
+        return scheduler_map[self.scheduler_type]()
 
     def get_optimizer_config(self) -> OptimConfig:
         # TODO(undfined): Add support for other optimizers and allow user to specify optimizer type and properties

@@ -1,4 +1,4 @@
-name: "olmo2-1b-5xC-dclm-hlr-dolma2-180k"
+name: "olmo2-1b-5xC-dclm-hlr-dolma2-180k-wsd"
 description: "OLMo2 1b@5xC dclm-baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
@@ -15,6 +15,7 @@ tokenizer: "dolma2_180k"
 priority: high
 eval_interval: 250
 learning_rate: 1.8e-3
+scheduler_type: wsd
 cluster: ai2/jupiter-cirrascale-2
 weka: true
 # downstream_evaluators:

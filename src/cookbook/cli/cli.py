@@ -55,6 +55,7 @@ def cli():
 )
 @click.option(
     "--group-id",
+    "-g",
     default=None,
     help="Overrides the generated run group_id, allows for restarts with config changes or similar",
 )

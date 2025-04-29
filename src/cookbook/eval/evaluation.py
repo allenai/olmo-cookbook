@@ -226,6 +226,7 @@ def evaluate_checkpoint(
             if isinstance(gantry_args, str):
                 # load gantry args using json
                 gantry_args = json.loads(gantry_args)
+
             assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
 
             # user might want to disable vllm v1 spec because its causing eval failures
