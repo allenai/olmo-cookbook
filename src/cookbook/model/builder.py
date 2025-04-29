@@ -271,10 +271,18 @@ class TransformerConfigBuilder:
     def get_rank_microbatch_size(self) -> int:
         if self.rank_microbatch_size is not None:
             rbz = self.rank_microbatch_size
+            logger.info(f"Rank microbatch size (in tokens) is: {rbz}")
         else:
-            rbz = 16 * self.sequence_length
+            if self.sequence_length == 2048:
+                rbz = 16 * self.sequence_length
+            elif self.sequence_length == 4096:
+                rbz = 8 * self.sequence_length
+            else:
+                rbz = 4 * self.sequence_length
 
-        logger.info(f"Rank microbatch size (in tokens) is: {rbz}")
+            logger.info(
+                f"Using default rank microbatch size: {rbz} for sequence length: {self.sequence_length}, if OOM errors occur try reducing rank microbatch size"
+            )
 
         return rbz
 
