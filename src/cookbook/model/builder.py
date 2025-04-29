@@ -266,7 +266,11 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self) -> int:
-        return self.warmup_steps or 2000
+        if not self.warmup_steps == None:
+            logger.info(f"Using user-defined warmup steps: {self.warmup_steps}")
+            return self.warmup_steps
+
+        return 2000
 
     def get_global_batch_size(self) -> int:
         if self.global_batch_size:
@@ -304,8 +308,6 @@ class TransformerConfigBuilder:
             lr = self.learning_rate
         else:
             lr = DEFAULT_LR_MAP.get(self.model_identifier.value, 5e-4)
-
-        logger.info(f"Learning rate is: {lr}")
 
         return lr
 
@@ -478,7 +480,7 @@ class TransformerConfigBuilder:
                 "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
             )
 
-        logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d}")
+        logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
 
         if not self.load_path:
             raise ValueError(
