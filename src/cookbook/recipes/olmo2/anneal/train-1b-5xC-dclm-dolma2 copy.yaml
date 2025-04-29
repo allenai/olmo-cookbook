@@ -1,11 +1,11 @@
-name: "olmo2-1b-5xC-dclm-hlr-dolma2"
-description: "OLMo2 1b@5xC dclm-baseline"
+name: "olmo2-1b-dclm-dolma2-linear-nowup-anneal-10B"
+description: "OLMo2 1b anneal to 10B Tokens"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 127_939_584_000
+max_tokens: 10_000_000_000
 global_batch_size: 2097152
 sequence_length: 4096
 seed: 1337
@@ -16,9 +16,10 @@ eval_interval: 250
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 rank_microbatch_size: 32768
+scheduler_type: linear
+warmup_steps: 0
+anneal: true
 weka: true
-# downstream_evaluators:
-#   - olmo2_dev_1b
 dataset:
   sources:
   - name: dclm-baseline-20pct-dolma2
