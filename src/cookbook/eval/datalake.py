@@ -8,11 +8,12 @@ from dataclasses import fields as dataclass_fields
 from functools import partial
 from threading import current_thread, main_thread
 from typing import Callable, ClassVar, Generic, List, TypeVar
+from datetime import datetime
 
 import requests
 from tqdm import tqdm
 
-from cookbook.eval.cache import DatalakeCache
+from cookbook.eval.cache import DatalakeCache, get_datalake_cache  # Change import
 
 Self = TypeVar("Self", bound="BaseDatalakeItem")
 T = TypeVar("T")
@@ -126,6 +127,7 @@ class FindExperiments(BaseDatalakeItem):
     experiment_id: str
     model_name: str
     task_name: str
+    created: datetime = dataclass_field(metadata=dict(parser=lambda x: datetime.fromisoformat(x)))
 
     # parser argument will make sure that nested dataclasses are initialized
     tags: list[Tag] = dataclass_field(default_factory=list, metadata=dict(parser=Tag.from_str))
@@ -148,8 +150,23 @@ class FindExperiments(BaseDatalakeItem):
             },
             headers={"accept": "application/json"},
         )
+
         response.raise_for_status()
-        return [cls(**experiment) for experiment in response.json()]
+        all_records = [cls(**experiment) for experiment in response.json()]
+
+        # Sort records by created date (newest first)
+        all_records.sort(key=lambda x: x.created, reverse=True)
+
+        # Filter to keep only the newest experiment for each (model_name, task_name) pair
+        unique_records = {}
+        for record in all_records:
+            key = (record.model_name, record.task_name)
+            if key not in unique_records:
+                unique_records[key] = record
+
+        records = list(unique_records.values())
+
+        return records
 
 
 @dataclass
@@ -226,9 +243,8 @@ class MetricsAll(BaseDatalakeItem):
 
     @classmethod
     def run(cls, experiment_id: str, force: bool = False) -> List[Self]:
-        cache = DatalakeCache(invalidate=force)
-
-        if not (result := cache.get(experiment_id=experiment_id)).success:
+        cache = get_datalake_cache()
+        if not (result := cache.get(experiment_id=experiment_id)).success or force:
             response = requests.get(
                 f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
                 headers={"accept": "application/json"},
@@ -270,7 +286,7 @@ class RemoveFromDashboard(BaseDatalakeItem):
     @classmethod
     def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name, dashboard=dashboard)
-        cache = DatalakeCache()
+        cache = get_datalake_cache()
 
         fns = []
         for run in runs:
@@ -303,7 +319,7 @@ class AddToDashboard(RemoveFromDashboard):
     @classmethod
     def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name)
-        cache = DatalakeCache()
+        cache = get_datalake_cache()
         fns = []
         for run in runs:
             if not fuzzy and run.model_name != model_name:
