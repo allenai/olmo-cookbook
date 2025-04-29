@@ -1,3 +1,4 @@
+import json
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -22,7 +23,8 @@ from olmo_core.optim import (
     Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay
+from olmo_core.io import resource_path
+from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -36,7 +38,12 @@ from olmo_core.train.callbacks import (
     ProfilerCallback,
     WandBCallback,
 )
+from olmo_core.train.train_module import (
+    TransformerActivationCheckpointingConfig,
+    TransformerActivationCheckpointingMode,
+)
 from olmo_core.train.common import LoadStrategy
+import torch
 
 from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.cli.core import estimate_batch_size
@@ -52,6 +59,16 @@ from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
 from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SchedulerState:
+    global_step: int
+    max_steps: int
+    last_pretrain_step: int
+    max_pretrain_steps: int
+    base_lr: float
+    starting_lr: float
 
 
 @dataclass
@@ -152,6 +169,7 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
+    annealing: bool
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     hard_stop: Optional[Duration]
@@ -181,6 +199,7 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        annealing: bool = False,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -222,6 +241,7 @@ class TransformerConfigBuilder:
         self.warmup_steps = warmup_steps
         self.load_path = load_path
         self.hard_stop = hard_stop
+        self.annealing = annealing
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
@@ -244,18 +264,6 @@ class TransformerConfigBuilder:
         return self.warmup_steps or 2000
 
     def get_global_batch_size(self) -> int:
-        # TODO(undfined): Revisit this logic as it would be nice for this to be automated
-        # assert self.sequence_length in {2048, 4096, 8192}
-        # seq_len_divisor = self.sequence_length // 2048
-
-        # global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
-        # global_batch_size /= seq_len_divisor
-        # global_batch_size /= self.max_dp_world_size
-        # global_batch_size = round(global_batch_size)
-        # global_batch_size *= self.max_dp_world_size
-
-        # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
-
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
         else:
@@ -397,6 +405,9 @@ class TransformerConfigBuilder:
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
                 warmup_steps=self.get_warmup_steps(),
             ),
+            SchedulerType.LINEAR: lambda: LinearWithWarmup(
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+            ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
@@ -405,12 +416,70 @@ class TransformerConfigBuilder:
         return scheduler_map[self.scheduler_type]()
 
     def get_optimizer_config(self) -> OptimConfig:
-        # TODO(undfined): Add support for other optimizers and allow user to specify optimizer type and properties
+        lr = self.get_learning_rate()
+
+        if self.annealing:
+            scheduler_state = self.get_state_from_checkpoint()
+            lr = scheduler_state.starting_lr
+
         return SkipStepAdamWConfig(
-            lr=self.get_learning_rate(),
+            lr=lr,
             weight_decay=0.033,
             betas=(0.9, 0.95),
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+        )
+
+    def get_anneal_ac_config(self):
+        return TransformerActivationCheckpointingConfig(
+            mode=TransformerActivationCheckpointingMode.selected_modules,
+            modules=["blocks.*.feed_forward"],
+        )
+
+    def get_state_from_checkpoint(self) -> SchedulerState:
+        train_state = torch.load(resource_path(f"{self.load_path}/train", "rank0.pt"), weights_only=False)
+
+        last_pretrain_step: int = train_state["global_step"]
+        max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)
+
+        if max_pretrain_steps is None:
+            raise ValueError(
+                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+            )
+
+        logger.info(
+            f"Will anneal checkpoint {self.load_path} at step {last_pretrain_step:,d} of {max_pretrain_steps:,d}"
+        )
+
+        if not self.load_path:
+            raise ValueError(
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+            )
+
+        with resource_path(self.load_path, "config.json").open() as f:
+            config = json.load(f)
+
+        base_lr: int = config["optim"]["lr"]
+        scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+
+        try:
+            assert scheduler_config.pop("_CLASS_") == CosWithWarmup.__name__
+        except AssertionError as e:
+            class_name = scheduler_config.get("_CLASS_", "unknown")
+            logger.error(
+                f"Expected scheduler class {CosWithWarmup.__name__}, but got {class_name}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+            )
+            raise e
+
+        scheduler = CosWithWarmup(**scheduler_config)
+        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+
+        return SchedulerState(
+            global_step=last_pretrain_step,
+            max_steps=max_pretrain_steps,
+            last_pretrain_step=last_pretrain_step,
+            max_pretrain_steps=max_pretrain_steps,
+            base_lr=base_lr,
+            starting_lr=starting_lr,
         )
 
     def build(self) -> ModelTrainConfig:
@@ -435,6 +504,7 @@ class TransformerConfigBuilder:
             dp_config=train_module.TransformerDataParallelConfig(
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
             ),
+            ac_config=self.get_anneal_ac_config() if self.annealing else None,
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,

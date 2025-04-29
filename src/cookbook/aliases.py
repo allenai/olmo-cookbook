@@ -56,6 +56,7 @@ class MetricsConfig(BaseModel):
 class SchedulerType(Enum):
     COSINE = "cosine"
     COS_LINEAR = "cos_linear"
+    LINEAR = "linear"
     WSD = "wsd"
 
     @classmethod
@@ -84,6 +85,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     model: ModelConfigIdentifier
     load_path: Optional[str] = None
     load_state: bool = True
+    annealing: bool = False
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
