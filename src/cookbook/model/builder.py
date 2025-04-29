@@ -555,7 +555,7 @@ class TransformerConfigBuilder:
             dp_config=train_module.TransformerDataParallelConfig(
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
             ),
-            ac_config=self.get_anneal_ac_config() if self.annealing else None,
+            # ac_config=self.get_anneal_ac_config() if self.annealing else None,
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
