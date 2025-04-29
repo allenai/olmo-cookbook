@@ -111,6 +111,14 @@ class ExperimentConfig(BaseModel, extra="forbid"):
             return ModelConfigIdentifier(value)
         return value
 
+    @field_validator("annealing")
+    @classmethod
+    def validate_annealing(cls, value, info):
+        """Validate that if annealing is True, then load_path must not be None."""
+        if value is True and info.data.get("load_path") is None:
+            raise ValueError("If annealing is enabled, load_path must be specified.")
+        return value
+
 
 class ExperimentInstance(BaseModel):
     name: str

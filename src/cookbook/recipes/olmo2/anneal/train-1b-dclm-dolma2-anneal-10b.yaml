@@ -19,6 +19,7 @@ rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
 annealing: true
+load_path: weka://oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-1b-5xC-dclm-hlr-superbpe-f8f59121/step61007/
 load_state: false
 weka: true
 dataset:
