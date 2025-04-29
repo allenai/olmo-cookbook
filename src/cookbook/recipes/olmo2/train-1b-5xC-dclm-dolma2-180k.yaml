@@ -1,4 +1,4 @@
-name: "olmo2-1b-5xC-dclm-hlr-dolma2-180k-wsd"
+name: "olmo2-1b-5xC-dclm-hlr-dolma2-180k"
 description: "OLMo2 1b@5xC dclm-baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
@@ -16,7 +16,6 @@ priority: high
 eval_interval: 250
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
-load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-1b-5xC-dclm-hlr-dolma2-180k-2ce03c6b/
 weka: true
 # downstream_evaluators:
 #   - olmo2_dev_1b
