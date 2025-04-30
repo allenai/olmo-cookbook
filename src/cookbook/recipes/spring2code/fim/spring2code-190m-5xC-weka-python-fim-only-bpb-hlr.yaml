@@ -1,5 +1,5 @@
-name: "spring2code-190m-5xC-python-fim-hlr"
-description: "learn2code 190M@5xC python-only with fim transformation + dclm prose v2"
+name: "spring2code-190m-5xC-python-fim-only-hlr"
+description: "learn2code 190M@5xC python-only with fim transformation, no prose"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 2
@@ -19,12 +19,7 @@ weka: true
 dataset:
   sources:
   - name: the-stack-v2-fimv0
-    target_ratio: 0.85
+    target_ratio: 1
     paths:
     - weka://oe-training-default/ai2-llm/preprocessed/learn2code/spring2code-fim-test/allenai/dolma2-tokenizer/**/part-*-00000.npy
-    
-  - name: dclm-codeprose-v2
-    target_ratio: 0.15
-    paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/learn2code/dclm-prose-v2/20b-sample/allenai/dolma2-tokenizer/part-*-00000.npy
     
