@@ -1,12 +1,12 @@
 import json
 import logging
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Dict, List, Optional, Tuple
 
 import s3fs
 import olmo_core.train.train_module as train_module
-from olmo_core.config import DType
+from olmo_core.config import replace, DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -107,6 +107,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size (Optional[int]): The rank microbatch size.
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
+        model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -174,6 +175,7 @@ class TransformerConfigBuilder:
     annealing: bool
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
+    model_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -202,6 +204,7 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[s3fs.S3FileSystem] = None,
         annealing: bool = False,
         hard_stop: Optional[Duration] = None,
@@ -224,6 +227,7 @@ class TransformerConfigBuilder:
         self.seed = seed
         self.model_identifier = model_identifier
         self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
+        self.model_overrides = model_overrides
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
@@ -555,7 +559,7 @@ class TransformerConfigBuilder:
             dp_config=train_module.TransformerDataParallelConfig(
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
             ),
-            # ac_config=self.get_anneal_ac_config() if self.annealing else None,
+            ac_config=self.get_anneal_ac_config() if self.annealing else None,
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
@@ -576,6 +580,13 @@ class TransformerConfigBuilder:
 
         for callback_name, callback in self.build_callbacks().items():
             trainer_config.callbacks[callback_name] = callback
+
+        # Merge any custom dotlist style overrides to the transformer config
+        if self.model_overrides:
+            logger.info("Applying model overrides:")
+            logger.info(self.model_overrides)
+
+            self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
 
         return ModelTrainConfig(
             init_seed=self.seed,

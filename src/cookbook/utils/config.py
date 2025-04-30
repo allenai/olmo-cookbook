@@ -175,6 +175,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         scheduler_type=base_config.scheduler_type,
         annealing=base_config.annealing,
         hard_stop=base_config.hard_stop,
+        model_overrides=base_config.model_overrides,
         load_path_fs=load_path_fs,
     ).build()
 

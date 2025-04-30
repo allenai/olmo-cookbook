@@ -1,7 +1,7 @@
 from enum import Enum
 from os import PathLike
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
@@ -86,6 +86,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     load_path: Optional[str] = None
     load_state: bool = True
     annealing: bool = False
+    model_overrides: Optional[List[str]] = None
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
