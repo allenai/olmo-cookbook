@@ -19,6 +19,7 @@ dependencies = [
     "platformdirs",
     "pydantic",
     "s3fs",
+    "gcsfs",
     "rich",
     "smart_open",
     "yaspin",

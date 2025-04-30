@@ -168,10 +168,13 @@ def _expand_local(pattern: str) -> List[str]:
     return [normalize_path(match) for match in matches]
 
 
-def _expand_remote(pattern: str, fs: Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]) -> List[str]:
+def _expand_remote(pattern: str, fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]) -> List[str]:
     """
     Expand a remote glob pattern.
     """
+    if not fs:
+        fs = s3fs.S3FileSystem()
+
     parsed = urlparse(pattern)
     logger.info(f"Expanding remote glob '{pattern}'...")
 
