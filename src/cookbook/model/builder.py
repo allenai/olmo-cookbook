@@ -108,6 +108,7 @@ class TransformerConfigBuilder:
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
+        activation_checkpointing (bool): Whether to enable activation checkpointing.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -183,6 +184,7 @@ class TransformerConfigBuilder:
     rank_microbatch_size: Optional[int]
     warmup_steps: Optional[int]
     load_path_fs: Optional[s3fs.S3FileSystem]
+    activation_checkpointing: bool
     profile: bool = False
 
     def __init__(
@@ -204,6 +206,7 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[s3fs.S3FileSystem] = None,
         annealing: bool = False,
@@ -232,6 +235,7 @@ class TransformerConfigBuilder:
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.s3 = s3
+        self.activation_checkpointing = activation_checkpointing
         self.data_dir: str = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
@@ -440,7 +444,8 @@ class TransformerConfigBuilder:
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
         )
 
-    def get_anneal_ac_config(self):
+    def get_ac_config(self):
+        # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
             modules=["blocks.*.feed_forward"],
@@ -559,7 +564,7 @@ class TransformerConfigBuilder:
             dp_config=train_module.TransformerDataParallelConfig(
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
             ),
-            ac_config=self.get_anneal_ac_config() if self.annealing else None,
+            ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
