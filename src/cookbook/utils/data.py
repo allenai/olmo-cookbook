@@ -74,28 +74,7 @@ def get_token_counts_and_ratios(
         scheme = next(iter(schemes)) if schemes and next(iter(schemes)) else "local"
 
         if scheme not in filesystems:
-            # Create appropriate filesystem based on scheme
-            if scheme in ("s3", "weka"):
-                client_kwargs = {}
-                profile_name = os.environ.get("AWS_PROFILE", None)
-
-                if scheme == "weka":
-                    profile_name = "WEKA"
-                    client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
-
-                filesystems[scheme] = s3fs.S3FileSystem(client_kwargs={**client_kwargs}, profile=profile_name)
-
-            elif scheme == "gs":
-                try:
-                    filesystems[scheme] = gcsfs.GCSFileSystem(project_id="oe-data-415018", token="google_default")
-                except Exception as e:
-                    raise OLMoEnvironmentError("GCS is not configured correctly!") from e
-
-            elif scheme in ("r2", "http", "https"):
-                raise NotImplementedError(f"'{scheme}' scheme is not currently supported")
-
-            elif scheme == "local":
-                filesystems[scheme] = None  # No filesystem needed for local paths
+            filesystems[scheme] = get_filesystem_for_scheme(scheme)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
         for source in source_configs:
@@ -202,9 +181,12 @@ def normalize_source_paths(sources: List[SourceConfig], expand: bool = False) ->
 
     for source in sources:
         source_paths = []
+        schemes = set()
+
         for path in source.paths:
             if is_url(path):
                 parsed = urlparse(path)
+                schemes.add(parsed.scheme)
                 if parsed.scheme == "s3":
                     source_paths.append(path)
                 elif parsed.scheme == "weka":
@@ -219,11 +201,18 @@ def normalize_source_paths(sources: List[SourceConfig], expand: bool = False) ->
                     raise OLMoEnvironmentError(f"Unsupported URL scheme: {parsed.scheme}")
             else:
                 source_paths.append(normalize_path(path))
+                schemes.add("local")
+
+        # Get filesystem if we're expanding globs and paths exist
+        fs = None
+        if expand and source_paths:
+            scheme = next(iter(schemes)) if schemes else "local"
+            fs = get_filesystem_for_scheme(scheme)
 
         normalized.append(
             SourceConfig(
                 name=source.name,
-                paths=expand_globs(sources=source_paths) if expand else source_paths,
+                paths=expand_globs(fs=fs, sources=source_paths) if expand else source_paths,
                 target_ratio=source.target_ratio,
                 repetition_factor=source.repetition_factor,
                 max_source_ratio=source.max_source_ratio,
@@ -231,3 +220,43 @@ def normalize_source_paths(sources: List[SourceConfig], expand: bool = False) ->
         )
 
     return normalized
+
+
+def get_filesystem_for_scheme(scheme: str):
+    """
+    Get the appropriate filesystem for a given URL scheme.
+
+    Args:
+        scheme: The URL scheme (e.g., 's3', 'gs', 'local', 'weka')
+
+    Returns:
+        The appropriate filesystem object for the scheme or None for local paths
+
+    Raises:
+        OLMoEnvironmentError: If the scheme is not supported or not configured correctly
+        NotImplementedError: If the scheme is recognized but not currently supported
+    """
+    if scheme in ("s3", "weka"):
+        client_kwargs = {}
+        profile_name = os.environ.get("AWS_PROFILE", None)
+
+        if scheme == "weka":
+            profile_name = "WEKA"
+            client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
+
+        return s3fs.S3FileSystem(client_kwargs={**client_kwargs}, profile=profile_name)
+
+    elif scheme == "gs":
+        try:
+            return gcsfs.GCSFileSystem(project_id=os.environ["GOOGLE_CLOUD_PROJECT"], token="google_default")
+        except Exception as e:
+            raise OLMoEnvironmentError("GCS is not configured correctly!") from e
+
+    elif scheme in ("r2", "http", "https"):
+        raise NotImplementedError(f"'{scheme}' scheme is not currently supported")
+
+    elif scheme == "local":
+        return None  # No filesystem needed for local paths
+
+    else:
+        raise OLMoEnvironmentError(f"Unsupported URL scheme: {scheme}")
