@@ -5,9 +5,10 @@ import logging
 import os
 import pathlib
 from collections import defaultdict
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
+import gcsfs
 import s3fs
 from olmo_core.aliases import PathOrStr
 from olmo_core.data.types import NumpyDatasetDType
@@ -57,24 +58,54 @@ def get_token_counts_and_ratios(
 
     token_counts = defaultdict(int)
 
-    client_kwargs = {}
-    profile_name = os.environ.get("AWS_PROFILE", None)
-    for source in source_configs:
-        for path in source.paths:
-            parsed = urlparse(path)
-            if parsed.scheme == "s3":
-                continue
-            if parsed.scheme == "weka":
-                profile_name = "WEKA"
-                client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
+    filesystems = {}
 
-    fs = s3fs.S3FileSystem(client_kwargs={**client_kwargs}, profile=profile_name)
+    # Pre-check each source for mixed schemes and create appropriate filesystem clients
+    for source in source_configs:
+        schemes = {urlparse(path).scheme for path in source.paths}
+
+        # Check for mixed schemes within a source
+        if len(schemes) > 1 and any(scheme for scheme in schemes):
+            raise OLMoEnvironmentError(
+                f"Mixed URL schemes in source '{source.name}': {schemes}. Each source must use a consistent scheme."
+            )
+
+        # Get the scheme (or None for local paths)
+        scheme = next(iter(schemes)) if schemes and next(iter(schemes)) else "local"
+
+        if scheme not in filesystems:
+            # Create appropriate filesystem based on scheme
+            if scheme in ("s3", "weka"):
+                client_kwargs = {}
+                profile_name = os.environ.get("AWS_PROFILE", None)
+
+                if scheme == "weka":
+                    profile_name = "WEKA"
+                    client_kwargs["endpoint_url"] = os.environ.get("WEKA_ENDPOINT_URL")
+
+                filesystems[scheme] = s3fs.S3FileSystem(client_kwargs={**client_kwargs}, profile=profile_name)
+
+            elif scheme == "gs":
+                try:
+                    filesystems[scheme] = gcsfs.GCSFileSystem(project_id="oe-data-415018", token="google_default")
+                except Exception as e:
+                    raise OLMoEnvironmentError("GCS is not configured correctly!") from e
+
+            elif scheme in ("r2", "http", "https"):
+                raise NotImplementedError(f"'{scheme}' scheme is not currently supported")
+
+            elif scheme == "local":
+                filesystems[scheme] = None  # No filesystem needed for local paths
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
         for source in source_configs:
+            # Get the appropriate filesystem for this source
+            scheme = next(iter({urlparse(path).scheme for path in source.paths}), "local")
+            fs = filesystems.get(scheme)
+
             globs = [path for path in source.paths if "*" in path]
             paths = [path for path in source.paths if path not in globs]
-            source.paths = paths + expand_globs(fs, globs)
+            source.paths = paths + expand_globs(fs, globs) if globs else paths
 
         futures = {
             executor.submit(_count_tokens_for_file, path, dtype): source
@@ -107,12 +138,14 @@ def get_token_counts_and_ratios(
     return (relative_sizes, total_tokens)
 
 
-def expand_globs(s3: s3fs.S3FileSystem = s3fs.S3FileSystem(), sources: List[str] = []) -> Any:
+def expand_globs(
+    fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = s3fs.S3FileSystem(), sources: List[str] = []
+) -> Any:
     results = []
 
     for source in sources:
         if is_url(source):
-            results.extend(_expand_remote(source, s3))
+            results.extend(_expand_remote(source, fs))
         else:
             results.extend(_expand_local(source))
 
@@ -135,7 +168,7 @@ def _expand_local(pattern: str) -> List[str]:
     return [normalize_path(match) for match in matches]
 
 
-def _expand_remote(pattern: str, fs: s3fs.S3FileSystem) -> List[str]:
+def _expand_remote(pattern: str, fs: Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]) -> List[str]:
     """
     Expand a remote glob pattern.
     """
@@ -146,10 +179,10 @@ def _expand_remote(pattern: str, fs: s3fs.S3FileSystem) -> List[str]:
         return [f"s3://{obj}" for obj in fs.glob(pattern)]
     elif parsed.scheme == "weka":
         return [f"weka://{obj}" for obj in fs.glob(pattern.replace("weka://", "s3://"))]
+    elif parsed.scheme == "gs":
+        return [f"gs://{obj}" for obj in fs.glob(pattern)]
     elif parsed.scheme == "r2":
         raise NotImplementedError("'r2' types are not currently supported")
-    elif parsed.scheme == "gs":
-        raise NotImplementedError("'gs' types are not currently supported")
     elif parsed.scheme in ("http", "https"):
         raise NotImplementedError("'http' types are not currently supported")
     elif parsed.scheme == "file":
