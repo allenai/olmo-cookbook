@@ -1,7 +1,7 @@
 from enum import Enum
 from os import PathLike
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
@@ -56,6 +56,7 @@ class MetricsConfig(BaseModel):
 class SchedulerType(Enum):
     COSINE = "cosine"
     COS_LINEAR = "cos_linear"
+    LINEAR = "linear"
     WSD = "wsd"
 
     @classmethod
@@ -84,6 +85,9 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     model: ModelConfigIdentifier
     load_path: Optional[str] = None
     load_state: bool = True
+    annealing: bool = False
+    activation_checkpointing: bool = False
+    model_overrides: Optional[List[str]] = None
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
@@ -107,6 +111,14 @@ class ExperimentConfig(BaseModel, extra="forbid"):
         """Convert string to ModelConfigIdentifier if needed."""
         if isinstance(value, str):
             return ModelConfigIdentifier(value)
+        return value
+
+    @field_validator("annealing")
+    @classmethod
+    def validate_annealing(cls, value, info):
+        """Validate that if annealing is True, then load_path must not be None."""
+        if value is True and info.data.get("load_path") is None:
+            raise ValueError("If annealing is enabled, load_path must be specified.")
         return value
 
 

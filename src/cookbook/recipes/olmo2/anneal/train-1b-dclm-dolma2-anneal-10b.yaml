@@ -1,20 +1,28 @@
-name: "olmo2-1b-dclm-dolma2-anneal-10b"
-description: "OLMo2 1b@5xC dclm-baseline"
+name: "learn2code-linear-nowup-anneal-10B"
+description: "OLMo2 1b anneal to 10B Tokens"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 127_939_584_000
+max_tokens: 10_000_000_000
 global_batch_size: 2097152
-sequence_length: 4096
+sequence_length: 2048
 seed: 1337
-model: "olmo2_1B_v2"
+model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
 eval_interval: 250
+learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 rank_microbatch_size: 32768
+scheduler_type: linear
+warmup_steps: 0
+annealing: true
+model_overrides:
+  - block.feed_forward.hidden_size=5632
+load_path: weka://oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-no-prose-hlr-00203459/step53971/
+load_state: false
 weka: true
 dataset:
   sources:

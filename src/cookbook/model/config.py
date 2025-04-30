@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
@@ -188,7 +189,9 @@ class WrappedTransformerConfig:
 
     @classmethod
     def from_model_identifier(
-        cls, model_identifier: ModelConfigIdentifier, tokenizer: TokenizerConfig = Tokenizers.dolma2.value
+        cls,
+        model_identifier: ModelConfigIdentifier,
+        tokenizer: TokenizerConfig = Tokenizers.dolma2.value,
     ) -> TransformerConfig:
         """
         Create a TransformerConfig from a ModelConfigIdentifier.
@@ -199,6 +202,7 @@ class WrappedTransformerConfig:
         Args:
             model_identifier: The model identifier to create a config for
             tokenizer: The tokenizer config to use
+            model_overrides: Optional overrides for the model config
 
         Returns:
             A TransformerConfig instance for the specified model

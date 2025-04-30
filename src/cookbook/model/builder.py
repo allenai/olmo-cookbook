@@ -1,9 +1,12 @@
+import json
 import logging
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+from pathlib import Path
+from dataclasses import dataclass, replace
+from typing import Dict, List, Optional, Tuple
 
+import s3fs
 import olmo_core.train.train_module as train_module
-from olmo_core.config import DType
+from olmo_core.config import replace, DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -22,7 +25,8 @@ from olmo_core.optim import (
     Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay
+from olmo_core.io import resource_path
+from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -36,7 +40,12 @@ from olmo_core.train.callbacks import (
     ProfilerCallback,
     WandBCallback,
 )
+from olmo_core.train.train_module import (
+    TransformerActivationCheckpointingConfig,
+    TransformerActivationCheckpointingMode,
+)
 from olmo_core.train.common import LoadStrategy
+import torch
 
 from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.cli.core import estimate_batch_size
@@ -52,6 +61,16 @@ from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
 from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SchedulerState:
+    global_step: int
+    max_steps: int
+    last_pretrain_step: int
+    max_pretrain_steps: int
+    base_lr: float
+    starting_lr: float
 
 
 @dataclass
@@ -88,6 +107,8 @@ class TransformerConfigBuilder:
         rank_microbatch_size (Optional[int]): The rank microbatch size.
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
+        model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
+        activation_checkpointing (bool): Whether to enable activation checkpointing.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -152,14 +173,18 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
+    annealing: bool
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
+    model_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
     warmup_steps: Optional[int]
+    load_path_fs: Optional[s3fs.S3FileSystem]
+    activation_checkpointing: bool
     profile: bool = False
 
     def __init__(
@@ -181,6 +206,10 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        activation_checkpointing: bool = False,
+        model_overrides: Optional[List[str]] = None,
+        load_path_fs: Optional[s3fs.S3FileSystem] = None,
+        annealing: bool = False,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -201,10 +230,12 @@ class TransformerConfigBuilder:
         self.seed = seed
         self.model_identifier = model_identifier
         self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
+        self.model_overrides = model_overrides
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.s3 = s3
+        self.activation_checkpointing = activation_checkpointing
         self.data_dir: str = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
@@ -222,6 +253,8 @@ class TransformerConfigBuilder:
         self.warmup_steps = warmup_steps
         self.load_path = load_path
         self.hard_stop = hard_stop
+        self.annealing = annealing
+        self.load_path_fs = load_path_fs
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
@@ -241,21 +274,13 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self) -> int:
-        return self.warmup_steps or 2000
+        if not self.warmup_steps == None:
+            logger.info(f"Using user-defined warmup steps: {self.warmup_steps}")
+            return self.warmup_steps
+
+        return 2000
 
     def get_global_batch_size(self) -> int:
-        # TODO(undfined): Revisit this logic as it would be nice for this to be automated
-        # assert self.sequence_length in {2048, 4096, 8192}
-        # seq_len_divisor = self.sequence_length // 2048
-
-        # global_batch_size = 160 * (parameters / 108000000) ** (2 / 3)
-        # global_batch_size /= seq_len_divisor
-        # global_batch_size /= self.max_dp_world_size
-        # global_batch_size = round(global_batch_size)
-        # global_batch_size *= self.max_dp_world_size
-
-        # global_batch_size = self.next_power_of_2(self.sequence_length * global_batch_size)
-
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
         else:
@@ -291,8 +316,6 @@ class TransformerConfigBuilder:
             lr = self.learning_rate
         else:
             lr = DEFAULT_LR_MAP.get(self.model_identifier.value, 5e-4)
-
-        logger.info(f"Learning rate is: {lr}")
 
         return lr
 
@@ -397,6 +420,9 @@ class TransformerConfigBuilder:
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
                 warmup_steps=self.get_warmup_steps(),
             ),
+            SchedulerType.LINEAR: lambda: LinearWithWarmup(
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+            ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
@@ -405,12 +431,113 @@ class TransformerConfigBuilder:
         return scheduler_map[self.scheduler_type]()
 
     def get_optimizer_config(self) -> OptimConfig:
-        # TODO(undfined): Add support for other optimizers and allow user to specify optimizer type and properties
+        lr = self.get_learning_rate()
+
+        if self.annealing:
+            scheduler_state = self.get_state_from_checkpoint()
+            lr = scheduler_state.starting_lr
+
         return SkipStepAdamWConfig(
-            lr=self.get_learning_rate(),
+            lr=lr,
             weight_decay=0.033,
             betas=(0.9, 0.95),
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+        )
+
+    def get_ac_config(self):
+        # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
+        return TransformerActivationCheckpointingConfig(
+            mode=TransformerActivationCheckpointingMode.selected_modules,
+            modules=["blocks.*.feed_forward"],
+        )
+
+    def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
+        if not self.load_path:
+            raise ValueError(
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+            )
+
+        local_cache = f"/tmp/{self.run_name}/"
+
+        if self.load_path_fs:
+            train_config = "config.json"
+            train_state = "train/rank0.pt"
+            logger.info(f"Downloading train state and config from {self.load_path} to {local_cache}")
+
+            for item in [train_state, train_config]:
+                self.load_path_fs.download(rpath=f"{self.load_path}/{item}", lpath=local_cache, recursive=True)
+
+            return (
+                resource_path(folder=local_cache, fname="rank0.pt"),
+                resource_path(folder=local_cache, fname="config.json"),
+            )
+        else:
+            return (
+                resource_path(folder=f"{self.load_path}/train", fname="rank0.pt"),
+                resource_path(folder=self.load_path, fname="config.json"),
+            )
+
+    def get_state_from_checkpoint(self) -> SchedulerState:
+        state_path, config_path = self.load_state_and_config_from_path()
+        train_state = torch.load(state_path, weights_only=False)
+
+        last_pretrain_step: int = train_state["global_step"]
+        max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)
+
+        if max_pretrain_steps is None:
+            raise ValueError(
+                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+            )
+
+        logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
+
+        if not self.load_path:
+            raise ValueError(
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+            )
+
+        with open(config_path, "r") as f:
+            config = json.load(f)
+
+        del config["dataset"]
+        logger.info("Inferring scheduler config from:")
+        logger.info(config)
+
+        try:
+            # Try olmo_core v2 config format first
+            base_lr: int = config["optim"]["lr"]
+            scheduler_config = config["train_module"]["scheduler"]
+        except KeyError as e:
+            # Now try olmo_core v1 config format
+            try:
+                base_lr: int = config["optim"]["lr"]
+                scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+            except KeyError as e:
+                logger.error(
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                )
+                raise e
+
+        scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
+
+        try:
+            assert scheduler_class == CosWithWarmup.__name__
+        except AssertionError as e:
+            logger.error(
+                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+            )
+            raise e
+
+        scheduler = CosWithWarmup(**scheduler_config)
+        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+
+        return SchedulerState(
+            global_step=last_pretrain_step,
+            max_steps=max_pretrain_steps,
+            last_pretrain_step=last_pretrain_step,
+            max_pretrain_steps=max_pretrain_steps,
+            base_lr=base_lr,
+            starting_lr=starting_lr,
         )
 
     def build(self) -> ModelTrainConfig:
@@ -418,6 +545,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size = self.get_rank_microbatch_size()
         dataset_config = self.build_dataset_config()
         optim_config = self.get_optimizer_config()
+
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
             work_dir=self.dataset_cache,
@@ -427,6 +555,7 @@ class TransformerConfigBuilder:
 
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
+
         train_module_config = train_module.TransformerTrainModuleConfig(
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,
@@ -435,6 +564,7 @@ class TransformerConfigBuilder:
             dp_config=train_module.TransformerDataParallelConfig(
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
             ),
+            ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
@@ -455,6 +585,13 @@ class TransformerConfigBuilder:
 
         for callback_name, callback in self.build_callbacks().items():
             trainer_config.callbacks[callback_name] = callback
+
+        # Merge any custom dotlist style overrides to the transformer config
+        if self.model_overrides:
+            logger.info("Applying model overrides:")
+            logger.info(self.model_overrides)
+
+            self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
 
         return ModelTrainConfig(
             init_seed=self.seed,
