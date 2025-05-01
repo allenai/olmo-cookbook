@@ -36,7 +36,8 @@ from cookbook.constants import (
 
 def convert_olmo_core_v2(
     input_dir: str,
-    max_sequence_length: int,
+    huggingface_tokenizer: str = DEFAULT_OLMO_CORE_TOKENIZER,
+    max_sequence_length: Optional[int] = None,
     unsharded_output_dir: Optional[str] = None,
     huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
@@ -50,6 +51,21 @@ def convert_olmo_core_v2(
     current_directory = os.getcwd()
     directories_to_clean_up = []
 
+    if max_sequence_length is None:
+        # we load config.json from the input_dir and get the max_sequence_length from the config
+        config_file = os.path.join(input_dir, "config.json")
+        assert os.path.exists(config_file), f"Could not find config.json in {input_dir}"
+
+        with open(config_file, "r") as f:
+            config = json.load(f)
+        max_sequence_length = config.get("dataset", {}).get("max_sequence_length", None)
+
+        if max_sequence_length is None:
+            raise ValueError(
+                f"Could not find max_sequence_length in config.json for {input_dir}; "
+                "please provide it as a command line argument."
+            )
+
     unsharded_output_dir = make_destination_dir(input_dir, unsharded_output_suffix, unsharded_output_dir)
     huggingface_output_dir = make_destination_dir(input_dir, huggingface_output_suffix, huggingface_output_dir)
 
@@ -61,6 +77,9 @@ def convert_olmo_core_v2(
 
         huggingface_code_dir = install_transformers(transformers_commit_hash, env)
         directories_to_clean_up.append(huggingface_code_dir)
+
+        tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
+        directories_to_clean_up.append(tokenizer_dir)
 
         # check if input_dir contains a "config.yaml" file. if it does not, check if it contains a
         # "config.json" file. if it does, re-save it as a "config.yaml" file.
@@ -88,9 +107,12 @@ def convert_olmo_core_v2(
             huggingface_output_dir,
         ]
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
-        print(
-            f"Conversion of OLMo core V2 checkpoint complete. Huggingface model saved to {huggingface_output_dir}."
-        )
+        print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
+
+        # copy all tokenizer files to the huggingface output dir
+        for file in os.listdir(tokenizer_dir):
+            shutil.copy(os.path.join(tokenizer_dir, file), os.path.join(huggingface_output_dir, file))
+        print(f"Copied tokenizer files to {huggingface_output_dir}.")
 
     except Exception as e:
         print(f"Error cloning repositories: {e}")
