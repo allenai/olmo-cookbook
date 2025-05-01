@@ -1,8 +1,9 @@
 import logging
+import os
 from pathlib import Path
 from typing import List, Tuple, cast
+from urllib.parse import urlparse
 
-import yaml
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
     BeakerLaunchConfig,
@@ -10,6 +11,9 @@ from olmo_core.launch.beaker import (
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import seed_all
+from olmo_core.io import normalize_path
+import s3fs
+import yaml
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -19,7 +23,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
-from cookbook.utils.data import expand_globs, normalize_source_paths
+from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
 
@@ -97,16 +101,48 @@ def mk_instance_cmd(
     ]
 
 
+_REMOTE_FS_CACHE: dict[str, s3fs.S3FileSystem] | None = None
+
+
+def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
+    global _REMOTE_FS_CACHE
+    if _REMOTE_FS_CACHE is not None:
+        return _REMOTE_FS_CACHE
+
+    _REMOTE_FS_CACHE = dict(
+        s3=s3fs.S3FileSystem(),
+        weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+    )
+
+    return _REMOTE_FS_CACHE
+
+
 def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
     """
     Launch a training run with the given parameters.
     """
 
     base_config = config_from_path(config_path)
+    load_path_fs = None
+
     if dry_run:
         source_paths = base_config.dataset.sources
+        if base_config.load_path:
+            try:
+                load_path_fs = remote_fs_cache()[urlparse(base_config.load_path).scheme]
+            except KeyError:
+                raise ValueError(f"Unsupported load path scheme: {base_config.load_path}")
+
+            # When we have a weka path locally we need to treat it like a remote s3
+            # path and strip the special weka prefix and bucket name
+            base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "s3://"))
+
     else:
         source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
+
+        if base_config.load_path:
+            # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
+            base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
 
     source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
@@ -136,6 +172,12 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         load_path=base_config.load_path,
         warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
+        scheduler_type=base_config.scheduler_type,
+        annealing=base_config.annealing,
+        hard_stop=base_config.hard_stop,
+        model_overrides=base_config.model_overrides,
+        activation_checkpointing=base_config.activation_checkpointing,
+        load_path_fs=load_path_fs,
     ).build()
 
     seed_all(config.init_seed)
@@ -154,6 +196,9 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             not trainer.maybe_load_checkpoint(trainer.save_folder, load_trainer_state=base_config.load_state)
             and base_config.load_path
         ):
+            logger.info(
+                f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
+            )
             trainer.load_checkpoint(base_config.load_path, load_trainer_state=base_config.load_state)
 
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
@@ -187,7 +232,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu128-v2.1",
+            beaker_image="petew/olmo-core-tch270cu128-v2.1.0",
             priority=group.config.priority,
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
@@ -204,8 +249,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install uv && uv pip install -e '.[all]' --system",
-                # Temporary until they release a fix for 2.7.0
-                "uv pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128 --system",
+                "uv pip install torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cu128 --system",
                 "uv pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",

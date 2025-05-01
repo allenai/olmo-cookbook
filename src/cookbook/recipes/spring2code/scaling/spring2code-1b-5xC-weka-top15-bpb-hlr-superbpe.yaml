@@ -10,7 +10,7 @@ rank_microbatch_size: 16_384 # Larger tokens require more memory, so we use a sm
 load_path: /weka/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/spring2code-1b-5xC-top15-hlr-superbpe-2e15a7da/step13900/
 sequence_length: 2048
 seed: 1337
-model: "olmo2_1B"
+model: "olmo2_1B_v2"
 tokenizer: "superbpe_experimental"
 priority: high
 eval_interval: 250
