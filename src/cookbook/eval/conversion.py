@@ -386,15 +386,8 @@ def run_checkpoint_conversion(
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
-        if not use_system_python
-        else PythonEnv.null()
+        if not use_system_python else PythonEnv.null()
     )
-
-    if max_sequence_length is None:
-        max_sequence_length = 4096
-
-        if olmo_type == "olmo-core":
-            print("max_sequence_length is required for olmo-core conversion. Defaulting to 4096.")
 
     if use_beaker:
         print("Installing beaker and gantry clients...")
@@ -524,4 +517,6 @@ def run_checkpoint_conversion(
             env=env,
         )
     else:
-        raise ValueError(f"Invalid olmo type: {olmo_type}; must be one of 'olmo2', 'olmoe', 'olmo-core'")
+        raise ValueError(
+            f"Invalid olmo type: {olmo_type}; must be one of 'olmo2', 'olmoe', 'olmo-core', or 'olmo-core-v2'"
+        )
