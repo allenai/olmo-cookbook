@@ -110,15 +110,9 @@ def convert_olmo_core_v2(
             huggingface_output_dir,
         ]
 
-        olmo_core_version = subprocess.run(
-            shlex.split(f"{env.pip} show ai2-olmo-core"), check=True, cwd=olmo_code_dir, env=env.path()
-        ).stdout.decode()
+        subprocess.call(shlex.split(f"{env.pip} show ai2-olmo-core"), env=env.path())
 
-        print(
-            f"Running command: '{' '.join(cmd)}' "
-            f"from commit hash: {olmo_core_v2_commit_hash} "
-            f"with olmo-core version: {olmo_core_version}"
-        )
+        print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
 
@@ -134,7 +128,7 @@ def convert_olmo_core_v2(
         print(f"Copied tokenizer files to {huggingface_output_dir}.")
 
     except Exception as e:
-        print(f"Error cloning repositories: {e}")
+        print(f"Error running conversion: {e}; cleaning up before raising error...")
         os.chdir(current_directory)
         raise e
     finally:
