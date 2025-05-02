@@ -25,6 +25,7 @@ dependencies = [
     "PyYAML>=6.0,<7.0",
     "paramiko>=3.5,<3.6",
     "tabulate",
+    "packaging>=24.2",
 ]
 
 [project.optional-dependencies]
