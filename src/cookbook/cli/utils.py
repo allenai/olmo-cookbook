@@ -148,14 +148,21 @@ def install_beaker_py(
 ) -> None:
     env = env or PythonEnv.null()
 
-    cmd = [
-        env.pip,
-        "install",
-        f"beaker-py<={beaker_py_max_version}",
-        f"beaker-gantry<={beaker_gantry_max_version}",
-    ]
+    try:
+        return check_beaker_dependencies(
+            env=env,
+            beaker_py_max_version=beaker_py_max_version,
+            beaker_gantry_max_version=beaker_gantry_max_version,
+        )
+    except Exception:
+        cmd = [
+            env.pip,
+            "install",
+            f"beaker-py<={beaker_py_max_version}",
+            f"beaker-gantry<={beaker_gantry_max_version}",
+        ]
 
-    subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
+        subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
 
 
 
@@ -168,7 +175,7 @@ def install_oe_eval(
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
-    install_beaker(env)
+    install_beaker_py(env)
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
