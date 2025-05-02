@@ -443,7 +443,7 @@ def run_checkpoint_conversion(
             f"--olmo2-commit-hash {olmo2_commit_hash}",
             f"--olmo-core-commit-hash {olmo_core_commit_hash}",
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
-            f"--max-sequence-length {max_sequence_length}",
+            (f"--max-sequence-length {max_sequence_length}" if max_sequence_length is not None else ""),
             "--use-system-python",
         ]
         remote_command_str = " ".join(remote_command)
