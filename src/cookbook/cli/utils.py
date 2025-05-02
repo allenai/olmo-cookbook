@@ -456,7 +456,7 @@ def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = No
             "download",
             huggingface_tokenizer,
             f"--local-dir {tokenizer_dir}",
-            "--exclude '*.safetensors'",
+            "--exclude '*safetensors*'",
         ]
         subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
     except Exception as e:

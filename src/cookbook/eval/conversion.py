@@ -50,6 +50,10 @@ def convert_olmo_core_v2(
 ):
     env = env or PythonEnv.null()
 
+    tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
+    print(tokenizer_dir)
+    breakpoint()
+
     current_directory = os.getcwd()
     directories_to_clean_up = []
 
@@ -113,7 +117,9 @@ def convert_olmo_core_v2(
 
         # copy all tokenizer files to the huggingface output dir
         for file in os.listdir(tokenizer_dir):
-            shutil.copy(os.path.join(tokenizer_dir, file), os.path.join(huggingface_output_dir, file))
+            if not os.path.isfile(src := os.path.join(tokenizer_dir, file)):
+                continue
+            shutil.copy(src, os.path.join(huggingface_output_dir, file))
         print(f"Copied tokenizer files to {huggingface_output_dir}.")
 
     except Exception as e:
