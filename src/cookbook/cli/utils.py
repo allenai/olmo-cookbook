@@ -523,7 +523,9 @@ def check_beaker_dependencies(
     )
     beaker_py_version = Version(beaker_py_version_string.split(":")[1].strip())
     if beaker_py_max_version is not None and beaker_py_version > Version(beaker_py_max_version):
-        raise RuntimeError(f"beaker-py version {beaker_py_version} is not supported; please upgrade to {beaker_py_max_version}")
+        raise RuntimeError(
+            f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}"
+        )
 
     gantry_output = subprocess.run(shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path())
     if not gantry_output.returncode == 0:
@@ -533,8 +535,9 @@ def check_beaker_dependencies(
     )
     gantry_version = Version(gantry_version_string.split(":")[1].strip())
     if beaker_gantry_max_version is not None and gantry_version > Version(beaker_gantry_max_version):
-        raise RuntimeError(f"beaker-gantry version {gantry_version} is not supported; please upgrade to {beaker_gantry_max_version}")
-
+        raise RuntimeError(
+            f"beaker-gantry version {gantry_version} not supported; use {beaker_gantry_max_version}"
+        )
 
 
 def find_repository_root(current: Union[str, Path] = __file__) -> Path:
