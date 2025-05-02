@@ -60,7 +60,7 @@ def convert_olmo_core_v2(
 
         with open(config_file, "r") as f:
             config = json.load(f)
-        max_sequence_length = config.get("dataset", {}).get("max_sequence_length", None)
+        max_sequence_length = config.get("dataset", {}).get("sequence_length", None)
 
         if max_sequence_length is None:
             raise ValueError(
