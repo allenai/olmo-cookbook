@@ -30,6 +30,7 @@ from cookbook.constants import (
     OLMO2_UNSHARD_SCRIPT,
     OLMO_CORE_COMMIT_HASH,
     OLMO_CORE_UNSHARD_CONVERT_SCRIPT,
+    OLMO_CORE_V2_COMMIT_HASH,
     OLMOE_CONVERSION_SCRIPT,
     OLMOE_UNSHARD_SCRIPT,
     TRANSFORMERS_COMMIT_HASH,
@@ -44,7 +45,7 @@ def convert_olmo_core_v2(
     huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
-    olmo_commit_hash: str = OLMO_CORE_COMMIT_HASH,
+    olmo_core_v2_commit_hash: str = OLMO_CORE_V2_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
     env: Optional[PythonEnv] = None,
 ):
@@ -74,7 +75,7 @@ def convert_olmo_core_v2(
     try:
         print("Starting conversion of OLMo core model...")
 
-        olmo_code_dir = install_olmo_core(env=env, commit_hash=olmo_commit_hash)
+        olmo_code_dir = install_olmo_core(env=env, commit_hash=olmo_core_v2_commit_hash)
         directories_to_clean_up.append(olmo_code_dir)
 
         huggingface_code_dir = install_transformers(transformers_commit_hash, env)
@@ -516,7 +517,7 @@ def run_checkpoint_conversion(
             huggingface_output_dir=huggingface_output_dir,
             unsharded_output_suffix=unsharded_output_suffix,
             huggingface_output_suffix=huggingface_output_suffix,
-            olmo_commit_hash=olmo_core_v2_commit_hash,
+            olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
             transformers_commit_hash=huggingface_transformers_commit_hash,
             env=env,
         )
