@@ -10,6 +10,7 @@ import yaml
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
+    check_beaker_dependencies,
     discover_weka_mount,
     download_tokenizer,
     install_olmo,
@@ -17,6 +18,7 @@ from cookbook.cli.utils import (
     install_transformers,
     make_destination_dir,
     remove_conflicting_packages,
+    install_beaker_py,
 )
 from cookbook.constants import (
     BEAKER_KNOWN_CLUSTERS,
@@ -391,7 +393,8 @@ def run_checkpoint_conversion(
 
     if use_beaker:
         print("Installing beaker and gantry clients...")
-        subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
+        check_beaker_dependencies(env=env)
+        install_beaker_py(env=env)
 
         assert input_dir.startswith("/"), "Input directory must be fully specified"
         if unsharded_output_dir:
