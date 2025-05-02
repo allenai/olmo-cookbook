@@ -84,6 +84,21 @@ def convert_olmo_core_v2(
         tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
         directories_to_clean_up.append(tokenizer_dir)
 
+        # copy all tokenizer files to the huggingface output dir
+        #     we copy the tokenizer first because it might carry over config.json from the model we are
+        #     grabbing tokenizer from (e.g. allenai/OLMo-2-1124-7B), which might be incorrect for the model
+        #     we are converting. but that's okay if we copy the tokenizer first, cuz we will override it
+        #     after. This was an awful bug, and took me (@soldni) forever to figure out. Embarrassing.
+        for file in os.listdir(tokenizer_dir):
+            if not os.path.isfile(src := os.path.join(tokenizer_dir, file)):
+                # do not copy directories
+                continue
+            if file.startswith("."):
+                # do not copy hidden files
+                continue
+            shutil.copy(src, os.path.join(huggingface_output_dir, file))
+        print(f"Copied tokenizer files to {huggingface_output_dir}.")
+
         # check if input_dir contains a "config.yaml" file. if it does not, check if it contains a
         # "config.json" file. if it does, re-save it as a "config.yaml" file.
         config_file = os.path.join(input_dir, "config.yaml")
@@ -109,23 +124,10 @@ def convert_olmo_core_v2(
             "--huggingface-output-dir",
             huggingface_output_dir,
         ]
-
-        subprocess.call(shlex.split(f"{env.pip} show ai2-olmo-core"), env=env.path())
-
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
+
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
-
-        # copy all tokenizer files to the huggingface output dir
-        for file in os.listdir(tokenizer_dir):
-            if not os.path.isfile(src := os.path.join(tokenizer_dir, file)):
-                # do not copy directories
-                continue
-            if file.startswith("."):
-                # do not copy hidden files
-                continue
-            shutil.copy(src, os.path.join(huggingface_output_dir, file))
-        print(f"Copied tokenizer files to {huggingface_output_dir}.")
 
     except Exception as e:
         print(f"Error running conversion: {e}; cleaning up before raising error...")
