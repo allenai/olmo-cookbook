@@ -111,7 +111,7 @@ def convert_olmo_core_v2(
         ]
 
         olmo_core_version = subprocess.run(
-            shlex.split(f"{env.pip} list | grep olmo-core"), check=True, cwd=olmo_code_dir, env=env.path()
+            shlex.split(f"{env.pip} show ai2-olmo-core"), check=True, cwd=olmo_code_dir, env=env.path()
         ).stdout.decode()
 
         print(
