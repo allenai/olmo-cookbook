@@ -393,7 +393,6 @@ def run_checkpoint_conversion(
 
     if use_beaker:
         print("Installing beaker and gantry clients...")
-        check_beaker_dependencies(env=env)
         install_beaker_py(env=env)
 
         assert input_dir.startswith("/"), "Input directory must be fully specified"
