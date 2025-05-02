@@ -27,8 +27,8 @@ BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
 BEAKER_DEFAULT_BUDGET = "ai2/oe-data"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
-BEAKER_PY = "beaker-py<1.34.2"
-BEAKER_GANTRY = "beaker-gantry<1.15.0"
+BEAKER_PY_MAX_VERSION = "1.34.1"
+BEAKER_GANTRY_MAX_VERSION = "1.14.1"
 
 OLMO_TYPES = ["olmoe", "olmo2", "olmo-core", "olmo-core-v2"]
 

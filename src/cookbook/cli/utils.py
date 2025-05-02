@@ -8,6 +8,7 @@ import subprocess
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
+from packaging.version import Version
 from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
 from typing import List, Optional, Union
 from urllib.parse import urlparse
@@ -15,8 +16,8 @@ from urllib.parse import urlparse
 from cookbook.constants import (
     AI2_OLMO_CORE_GIT_URL,
     AI2_OLMO_GIT_URL,
-    BEAKER_GANTRY,
-    BEAKER_PY,
+    BEAKER_GANTRY_MAX_VERSION,
+    BEAKER_PY_MAX_VERSION,
     OE_EVAL_GIT_URL,
     TRANSFORMERS_GIT_URL,
     WEKA_MOUNTS,
@@ -140,6 +141,24 @@ def get_aws_secret_access_key() -> Optional[str]:
     return None
 
 
+def install_beaker_py(
+    env: Optional[PythonEnv] = None,
+    beaker_py_max_version: Optional[str] = BEAKER_PY_MAX_VERSION,
+    beaker_gantry_max_version: Optional[str] = BEAKER_GANTRY_MAX_VERSION,
+) -> None:
+    env = env or PythonEnv.null()
+
+    cmd = [
+        env.pip,
+        "install",
+        f"beaker-py<={beaker_py_max_version}",
+        f"beaker-gantry<={beaker_gantry_max_version}",
+    ]
+
+    subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
+
+
+
 def install_oe_eval(
     commit_hash: Optional[str],
     env: Optional[PythonEnv] = None,
@@ -149,7 +168,7 @@ def install_oe_eval(
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
-    subprocess.run(shlex.split(f"{env.pip} install '{BEAKER_PY}' '{BEAKER_GANTRY}'"), check=True, env=env.path())
+    install_beaker(env)
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
@@ -251,10 +270,6 @@ def get_beaker_user() -> str:
 
     client = beaker.Beaker.from_env()
     return client.account.name
-
-
-def install_beaker_py(env: PythonEnv) -> None:
-    subprocess.run(shlex.split(f"{env.pip} install '{BEAKER_PY}' '{BEAKER_GANTRY}'"), check=True, env=env.path())
 
 
 @run_func_in_venv
@@ -441,7 +456,7 @@ def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = No
             "download",
             huggingface_tokenizer,
             f"--local-dir {tokenizer_dir}",
-            "--exclude '*.safetensors'",
+            "--exclude '*safetensors*'",
         ]
         subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
     except Exception as e:
@@ -494,21 +509,35 @@ def remove_conflicting_packages(env: Optional[PythonEnv] = None):
         subprocess.run(shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"), env=env.path())
 
 
-def check_beaker_dependencies(env: Optional[PythonEnv] = None):
+def check_beaker_dependencies(
+    env: Optional[PythonEnv] = None,
+    beaker_py_max_version: Optional[str] = BEAKER_PY_MAX_VERSION,
+    beaker_gantry_max_version: Optional[str] = BEAKER_GANTRY_MAX_VERSION,
+):
     env = env or PythonEnv.null()
-    is_beaker_py_installed = (
-        subprocess.run(shlex.split(f"{env.pip} show beaker-py"), capture_output=True, env=env.path()).returncode
-        == 0
+    output = subprocess.run(shlex.split(f"{env.pip} show beaker-py"), capture_output=True, env=env.path())
+    if not output.returncode == 0:
+        raise RuntimeError("beaker-py must be installed to use this function")
+    beaker_py_version_string = next(
+        iter([r for r in output.stdout.decode('utf-8').split('\n') if "Version:" in r])
     )
-    is_beaker_gantry_installed = (
-        subprocess.run(
-            shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path()
-        ).returncode
-        == 0
-    )
+    beaker_py_version = Version(beaker_py_version_string.split(":")[1].strip())
+    if beaker_py_max_version is not None and beaker_py_version > Version(beaker_py_max_version):
+        raise RuntimeError(
+            f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}"
+        )
 
-    if not is_beaker_py_installed or not is_beaker_gantry_installed:
-        raise RuntimeError("When using --beaker, both beaker-py and beaker-gantry must be installed")
+    gantry_output = subprocess.run(shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path())
+    if not gantry_output.returncode == 0:
+        raise RuntimeError("beaker-gantry must be installed to use this function")
+    gantry_version_string = next(
+        iter([r for r in gantry_output.stdout.decode('utf-8').split('\n') if "Version:" in r])
+    )
+    gantry_version = Version(gantry_version_string.split(":")[1].strip())
+    if beaker_gantry_max_version is not None and gantry_version > Version(beaker_gantry_max_version):
+        raise RuntimeError(
+            f"beaker-gantry version {gantry_version} not supported; use {beaker_gantry_max_version}"
+        )
 
 
 def find_repository_root(current: Union[str, Path] = __file__) -> Path:
