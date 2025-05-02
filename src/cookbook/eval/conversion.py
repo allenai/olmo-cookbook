@@ -109,6 +109,7 @@ def convert_olmo_core_v2(
             "--huggingface-output-dir",
             huggingface_output_dir,
         ]
+        print(f"Running command: '{' '.join(cmd)}' from checkpoint directory: '{input_dir}'")
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
 

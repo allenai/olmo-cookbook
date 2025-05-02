@@ -407,6 +407,10 @@ def install_olmo_core(commit_hash: Optional[str], env: Optional[PythonEnv] = Non
     # Clone the repository
     olmo_dir = clone_repository(AI2_OLMO_CORE_GIT_URL, commit_hash)
 
+    # Removing previous installation
+    print("Removing previous installation of ai2-olmo-core...")
+    subprocess.run(shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"), cwd=olmo_dir, env=env.path())
+
     # Install the package
     print(f"Installing OLMo dependencies from {olmo_dir}...")
     subprocess.run(shlex.split(f"{env.pip} install ."), check=True, cwd=olmo_dir, env=env.path())
