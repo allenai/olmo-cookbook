@@ -67,10 +67,15 @@ class PythonEnv:
     def create(cls, name: Optional[str], force: bool = False, root: Optional[Path] = None) -> "PythonEnv":
         name = name or f"oe-py-env-{cls._generate_hash()}"
         path = (root or cls._find_root_dir()) / ".venv" / name
+
+        print(f"Using virtual environment: {path}...")
+
         if path.exists() and force:
+            print(f"Removing existing virtual environment in {path}...")
             shutil.rmtree(path)
 
         if not path.exists():
+            print(f"Creating virtual environment in {path}...")
             subprocess.run(shlex.split(f"python -m venv {path}"), check=True)
 
         return cls(name=name, python=str(path / "bin" / "python"), pip=str(path / "bin" / "pip"))
@@ -359,6 +364,8 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
     try:
         tmp_dir = mkdtemp()
 
+        print(f"Cloning repository from {git_url} to {tmp_dir}...")
+
         # Base clone command with minimal history
         cmd = shlex.split(f"git clone --depth 1 {git_url}")
 
@@ -406,6 +413,10 @@ def install_olmo_core(commit_hash: Optional[str], env: Optional[PythonEnv] = Non
 
     # Clone the repository
     olmo_dir = clone_repository(AI2_OLMO_CORE_GIT_URL, commit_hash)
+
+    # Removing previous installation
+    print("Removing previous installation of ai2-olmo-core...")
+    subprocess.run(shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"), cwd=olmo_dir, env=env.path())
 
     # Install the package
     print(f"Installing OLMo dependencies from {olmo_dir}...")
