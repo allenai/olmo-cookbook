@@ -115,6 +115,10 @@ def convert_olmo_core_v2(
         # copy all tokenizer files to the huggingface output dir
         for file in os.listdir(tokenizer_dir):
             if not os.path.isfile(src := os.path.join(tokenizer_dir, file)):
+                # do not copy directories
+                continue
+            if file.startswith("."):
+                # do not copy hidden files
                 continue
             shutil.copy(src, os.path.join(huggingface_output_dir, file))
         print(f"Copied tokenizer files to {huggingface_output_dir}.")
