@@ -50,10 +50,6 @@ def convert_olmo_core_v2(
 ):
     env = env or PythonEnv.null()
 
-    tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
-    print(tokenizer_dir)
-    breakpoint()
-
     current_directory = os.getcwd()
     directories_to_clean_up = []
 
