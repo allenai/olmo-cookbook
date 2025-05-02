@@ -6,9 +6,8 @@ from typing import Optional
 
 import click
 import yaml
-from beaker import Beaker
-from beaker.exceptions import SecretNotFound
-from beaker.services.job import JobClient
+from beaker import Beaker, BeakerWorkloadStatus, BeakerWorkloadType
+from beaker.exceptions import BeakerSecretNotFound
 from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
@@ -92,7 +91,9 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     else:
         group_uuid = generate_uuid()[:8]
 
-    beaker_user = (Beaker.from_env().account.whoami().name).upper()  # pyright: ignore
+    with Beaker.from_env() as beaker:
+        beaker_user = beaker.user_name.upper()
+
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
 
     logger.info(experiment_config)
@@ -151,44 +152,61 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
 
 
 def _status_for_group(path: Path, group_id: str):
-    beaker = Beaker.from_env()  # pyright: ignore
-    client = JobClient(beaker=beaker)  # pyright: ignore
     config = config_from_path(path)
-    cluster = beaker.cluster.get(config.cluster)
-    jobs = client.list(cluster=cluster)
 
-    statuses = [
-        {"status": job.status, "display_name": job.display_name}
-        for job in jobs
-        if job.display_name.startswith(f"{config.name}-{group_id}")
-    ]
-    statuses.sort(key=lambda x: x["display_name"])
-    logger.info(statuses)
+    with Beaker.from_env() as beaker:
+        statuses = []
+        for workload in beaker.workload.list(
+            workspace=beaker.workspace.get(config.workspace),
+            workload_type=BeakerWorkloadType.experiment,
+            author=beaker.user.get(),
+            name_or_description=f"{config.name}-{group_id}",
+        ):
+            for task in workload.experiment.tasks:
+                for job in beaker.job.list(task=task):
+                    statuses.append(
+                        {
+                            "status": BeakerWorkloadStatus.from_any(
+                                job.status.status
+                            ).name,  # coerce from int->str
+                            "id": job.id,
+                            "workload": workload.experiment.name,
+                            "task": task.name,
+                        }
+                    )
+
+        statuses.sort(key=lambda x: (x["workload"], x["task"]))
+        logger.info(statuses)
 
 
 def _stop_for_group(path: Path, group_id: str):
-    beaker = Beaker.from_env()  # pyright: ignore
-    client = JobClient(beaker=beaker)  # pyright: ignore
     config = config_from_path(path)
-    cluster = beaker.cluster.get(config.cluster)
-    jobs = [
-        {"id": job.id, "display_name": job.display_name, "status": job.status}
-        for job in client.list(cluster=cluster)
-        if job.display_name.startswith(f"{config.name}-{group_id}")
-    ]
+    with Beaker.from_env() as beaker:
+        workloads = list(
+            beaker.workload.list(
+                workspace=beaker.workspace.get(config.workspace),
+                workload_type=BeakerWorkloadType.experiment,
+                author=beaker.user.get(),
+                name_or_description=f"{config.name}-{group_id}",
+            )
+        )
 
-    if len(jobs) == 0:
-        logger.info(f"No jobs found for group {group_id}")
-        return
+        if len(workloads) == 0:
+            logger.info(f"No jobs found for group {group_id}")
+            return
 
-    jobs.sort(key=lambda x: x["display_name"])
-    logger.info("Jobs to cancel:")
-    logger.info(jobs)
+        workloads_display = [
+            {"name": workload.experiment.name, "url": beaker.workload.url(workload)} for workload in workloads
+        ]
+        workloads_display.sort(key=lambda x: x["name"])
 
-    if click.confirm("Cancel these jobs?", default=False):
-        for job in jobs:
-            logger.info(f"Stopping job {job['display_name']}...")
-            client.stop(job["id"])
+        logger.info("Workloads to cancel:")
+        logger.info(workloads_display)
+
+        if click.confirm("Cancel these workloads?", default=False):
+            for workload in workloads:
+                logger.info(f"Stopping workload {workload.experiment.name} ({beaker.workload.url(workload)})...")
+                beaker.workload.cancel(workload)
 
 
 @cli.command()
@@ -247,32 +265,32 @@ def cancel(config: Path, group_id: str):
     default="ai2/dolma2",
 )
 def prepare_user_workspace_from(source: str, dest: str):
-    beaker = Beaker.from_env()
+    with Beaker.from_env() as beaker:
+        if source == dest:
+            raise ValueError("Dest workspace cannot be source workspace")
 
-    if source == dest:
-        raise ValueError("Dest workspace cannot be source workspace")
+        if not source.startswith("ai2/"):
+            raise ValueError("source workspace must be in the ai2 organization")
 
-    if not source.startswith("ai2/"):
-        raise ValueError("source workspace must be in the ai2 organization")
+        user = beaker.user_name.upper()
+        source_workspace = beaker.workspace.get(source)
+        target_workspace = beaker.workspace.get(dest)
 
-    user = beaker.account.whoami().name.upper()
-    source_workspace = beaker.workspace.get(source)
-    target_workspace = beaker.workspace.get(dest)
+        required = (
+            f"{user}_BEAKER_TOKEN",
+            f"{user}_WANDB_API_KEY",
+            f"{user}_AWS_CONFIG",
+            f"{user}_AWS_CREDENTIALS",
+            "R2_ENDPOINT_URL",
+            "WEKA_ENDPOINT_URL",
+        )
 
-    required = (
-        f"{user}_BEAKER_TOKEN",
-        f"{user}_WANDB_API_KEY",
-        f"{user}_AWS_CONFIG",
-        f"{user}_AWS_CREDENTIALS",
-        "R2_ENDPOINT_URL",
-        "WEKA_ENDPOINT_URL",
-    )
+        for secret_name in required:
+            secret = beaker.secret.get(secret_name, workspace=source_workspace)
+            secret_value = beaker.secret.read(secret, workspace=source_workspace)
+            beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
 
-    for secret_name in required:
-        secret_value = beaker.secret.read(secret_name, workspace=source_workspace)
-        beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
-
-        print(f"copied '{secret_name}' to {target_workspace.full_name}")
+            print(f"copied '{secret_name}' to {target_workspace.name}")
 
 
 @cli.command()
@@ -340,41 +358,41 @@ def prepare_user_workspace(
 ):
     """Prepare the workspace environment for use with OLMo-cookbook."""
 
-    beaker = Beaker.from_env()
-    user = beaker.account.whoami().name.upper()
-    target_workspace = beaker.workspace.get(workspace)
+    with Beaker.from_env() as beaker:
+        user = beaker.user_name.upper()
+        target_workspace = beaker.workspace.get(workspace)
 
-    def read_file(file_path) -> str:
-        """Read a file and return its contents."""
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
-        with open(file_path, "r") as file:
-            return file.read()
+        def read_file(file_path) -> str:
+            """Read a file and return its contents."""
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"File not found: {file_path}")
+            with open(file_path, "r") as file:
+                return file.read()
 
-    aws_config = read_file(aws_config)
-    aws_credentials = read_file(aws_credentials)
+        aws_config = read_file(aws_config)
+        aws_credentials = read_file(aws_credentials)
 
-    secrets: dict[str, Optional[str]] = {
-        f"{user}_BEAKER_TOKEN": beaker_token,
-        f"{user}_WANDB_API_KEY": wandb_api_key,
-        f"{user}_AWS_CONFIG": aws_config,
-        f"{user}_AWS_CREDENTIALS": aws_credentials,
-        "R2_ENDPOINT_URL": r2_endpoint_url,
-        "WEKA_ENDPOINT_URL": weka_endpoint_url,
-    }
+        secrets: dict[str, Optional[str]] = {
+            f"{user}_BEAKER_TOKEN": beaker_token,
+            f"{user}_WANDB_API_KEY": wandb_api_key,
+            f"{user}_AWS_CONFIG": aws_config,
+            f"{user}_AWS_CREDENTIALS": aws_credentials,
+            "R2_ENDPOINT_URL": r2_endpoint_url,
+            "WEKA_ENDPOINT_URL": weka_endpoint_url,
+        }
 
-    for secret_name, secret_value in secrets.items():
-        if secret_value:
-            beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
-            print(f"Succesfully wrote '{secret_name}' to {target_workspace.full_name}")
+        for secret_name, secret_value in secrets.items():
+            if secret_value:
+                beaker.secret.write(secret_name, secret_value, workspace=target_workspace)
+                print(f"Succesfully wrote '{secret_name}' to {target_workspace.name}")
 
-        # If a workspace secret doesn't exist at this point, then write in a blank value
-        try:
-            beaker.secret.get(secret_name, workspace=target_workspace)
-        except SecretNotFound:
-            if user not in secret_name:
-                beaker.secret.write(secret_name, "[blank]", workspace=target_workspace)
-                print(f"Writing blank value for {secret_name}")
+            # If a workspace secret doesn't exist at this point, then write in a blank value
+            try:
+                beaker.secret.get(secret_name, workspace=target_workspace)
+            except BeakerSecretNotFound:
+                if user not in secret_name:
+                    beaker.secret.write(secret_name, "[blank]", workspace=target_workspace)
+                    print(f"Writing blank value for {secret_name}")
 
 
 cli.command()(evaluate_model)

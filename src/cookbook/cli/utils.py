@@ -8,10 +8,11 @@ import subprocess
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
-from packaging.version import Version
 from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
 from typing import List, Optional, Union
 from urllib.parse import urlparse
+
+from packaging.version import Version
 
 from cookbook.constants import (
     AI2_OLMO_CORE_GIT_URL,
@@ -158,7 +159,6 @@ def install_beaker_py(
     subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
 
 
-
 def install_oe_eval(
     commit_hash: Optional[str],
     env: Optional[PythonEnv] = None,
@@ -168,7 +168,7 @@ def install_oe_eval(
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
-    install_beaker(env)
+    install_beaker_py(env)
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
@@ -236,40 +236,41 @@ def add_secret_to_beaker_workspace(
     workspace: str,
 ) -> str:
     try:
-        import beaker  # pyright: ignore
+        from beaker import Beaker  # pyright: ignore
+        from beaker.exceptions import BeakerSecretNotFound
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
-    client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.account.name}_{secret_name}"
-    try:
-        client.secret.get(full_secret_name)
-    except beaker.exceptions.SecretNotFound:
-        client.secret.write(full_secret_name, secret_value)
+    with Beaker.from_env(default_workspace=workspace) as beaker:
+        full_secret_name = f"{beaker.user_name}_{secret_name}"
+        try:
+            beaker.secret.get(full_secret_name)
+        except BeakerSecretNotFound:
+            beaker.secret.write(full_secret_name, secret_value)
 
-    return full_secret_name
+        return full_secret_name
 
 
 @run_func_in_venv
 def get_beaker_token() -> str:
     try:
-        import beaker  # pyright: ignore
+        from beaker import Beaker  # pyright: ignore
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
-    client = beaker.Beaker.from_env()
-    return client.account.config.user_token
+    with Beaker.from_env() as beaker:
+        return beaker.config.user_token
 
 
 @run_func_in_venv
 def get_beaker_user() -> str:
     try:
-        import beaker  # pyright: ignore
+        from beaker import Beaker  # pyright: ignore
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
-    client = beaker.Beaker.from_env()
-    return client.account.name
+    with Beaker.from_env() as beaker:
+        return beaker.user_name
 
 
 @run_func_in_venv
@@ -278,17 +279,18 @@ def check_if_secret_exists_in_beaker_workspace(
     workspace: str,
 ) -> bool:
     try:
-        import beaker  # pyright: ignore
+        from beaker import Beaker  # pyright: ignore
+        from beaker.exceptions import BeakerSecretNotFound
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
-    client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.account.name}_{secret_name}"
-    try:
-        client.secret.get(full_secret_name)
-        return True
-    except beaker.exceptions.SecretNotFound:
-        return False
+    with Beaker.from_env(default_workspace=workspace) as beaker:
+        full_secret_name = f"{beaker.user_name}_{secret_name}"
+        try:
+            beaker.secret.get(full_secret_name)
+            return True
+        except BeakerSecretNotFound:
+            return False
 
 
 def add_aws_flags(
@@ -519,19 +521,19 @@ def check_beaker_dependencies(
     if not output.returncode == 0:
         raise RuntimeError("beaker-py must be installed to use this function")
     beaker_py_version_string = next(
-        iter([r for r in output.stdout.decode('utf-8').split('\n') if "Version:" in r])
+        iter([r for r in output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     beaker_py_version = Version(beaker_py_version_string.split(":")[1].strip())
     if beaker_py_max_version is not None and beaker_py_version > Version(beaker_py_max_version):
-        raise RuntimeError(
-            f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}"
-        )
+        raise RuntimeError(f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}")
 
-    gantry_output = subprocess.run(shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path())
+    gantry_output = subprocess.run(
+        shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path()
+    )
     if not gantry_output.returncode == 0:
         raise RuntimeError("beaker-gantry must be installed to use this function")
     gantry_version_string = next(
-        iter([r for r in gantry_output.stdout.decode('utf-8').split('\n') if "Version:" in r])
+        iter([r for r in gantry_output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     gantry_version = Version(gantry_version_string.split(":")[1].strip())
     if beaker_gantry_max_version is not None and gantry_version > Version(beaker_gantry_max_version):

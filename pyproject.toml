@@ -37,15 +37,15 @@ dev = [
     "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 beaker = [
-    "beaker-py",
+    "beaker-py>=2.0.2,<3.0",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@6599c2f7b85ee584e18febdc93ee1833480348e9",
-    "beaker-py",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@6599c2f7b85ee584e18febdc93ee1833480348e9",  # TODO: need to update this
+    "beaker-py>2.0.2,<3.0",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]
