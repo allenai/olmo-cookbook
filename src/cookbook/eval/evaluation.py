@@ -225,7 +225,10 @@ def evaluate_checkpoint(
             # processing gantry args
             if isinstance(gantry_args, str):
                 # load gantry args using json
-                gantry_args = json.loads(gantry_args)
+                if gantry_args != "":
+                    gantry_args = json.loads(gantry_args)
+                else:
+                    gantry_args = {}
 
             assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
 
