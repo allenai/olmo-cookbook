@@ -284,14 +284,6 @@ def get_beaker_user() -> str:
     return client.account.name
 
 
-<<<<<<< HEAD
-def install_beaker_py(env: PythonEnv) -> None:
-    subprocess.run(shlex.split(f"{env.pip} install '{BEAKER_PY}' '{BEAKER_GANTRY}'"), check=True, env=env.path())
-
-
-
-=======
->>>>>>> origin
 @run_func_in_venv
 def check_if_secret_exists_in_beaker_workspace(
     secret_name: str,
