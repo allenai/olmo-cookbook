@@ -118,6 +118,7 @@ def convert_checkpoint(
         huggingface_tokenizer=huggingface_tokenizer,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
+        max_sequence_length=max_sequence_length,
         olmo_core_commit_hash=olmo_core_commit_hash,
         olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
         olmo_type=olmo_type,
@@ -129,7 +130,6 @@ def convert_checkpoint(
         unsharded_output_suffix=unsharded_output_suffix,
         use_beaker=use_beaker,
         use_system_python=use_system_python,
-        max_sequence_length=max_sequence_length,
     )
 
 
