@@ -248,18 +248,19 @@ def get_filesystem_for_scheme(scheme: str):
 
     elif scheme == "gs":
         try:
-            gs_creds = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON", None)
             gs_project = os.environ.get("GOOGLE_CLOUD_PROJECT", None)
-            if not gs_creds:
-                raise OLMoEnvironmentError("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set!")
+            token = None
+
             if not gs_project:
                 raise OLMoEnvironmentError("GOOGLE_CLOUD_PROJECT environment variable is not set!")
+
             return gcsfs.GCSFileSystem(
                 project_id=gs_project,
-                token=json.loads(gs_creds),
             )
         except Exception as e:
-            raise OLMoEnvironmentError("GCS is not configured correctly!") from e
+            raise OLMoEnvironmentError(
+                f"Failed to create GCS filesystem: {str(e)}. Ensure GOOGLE_APPLICATION_CREDENTIALS_JSON and GOOGLE_CLOUD_PROJECT are set correctly."
+            )
 
     elif scheme in ("r2", "http", "https"):
         raise NotImplementedError(f"'{scheme}' scheme is not currently supported")
