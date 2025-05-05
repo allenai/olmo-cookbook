@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
+    BeakerEnvVar,
     BeakerLaunchConfig,
     BeakerWekaBucket,
 )
@@ -232,8 +233,9 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu128-v2.1.0",
+            beaker_image="petew/olmo-core-tch270cu126",
             priority=group.config.priority,
+            env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
                 BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
@@ -241,6 +243,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="AWS_CREDENTIALS", secret=f"{beaker_user}_AWS_CREDENTIALS"),
                 BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
+                BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
             setup_steps=[
                 'git clone "$REPO_URL"',
@@ -248,9 +251,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install uv && uv pip install -e '.[all]' --system",
-                "uv pip install torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cu128 --system",
-                "uv pip freeze",
+                "pip install -e '.[all]'",
+                "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
                 "printenv AWS_CONFIG > ~/.aws/config",

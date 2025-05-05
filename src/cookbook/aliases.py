@@ -86,6 +86,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     load_path: Optional[str] = None
     load_state: bool = True
     annealing: bool = False
+    nccl_debug: bool = False
     activation_checkpointing: bool = False
     model_overrides: Optional[List[str]] = None
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR

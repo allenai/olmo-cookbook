@@ -1,12 +1,12 @@
 import json
 import logging
 from pathlib import Path
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import s3fs
 import olmo_core.train.train_module as train_module
-from olmo_core.config import replace, DType
+from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -26,9 +26,11 @@ from olmo_core.optim import (
     SkipStepAdamWConfig,
 )
 from olmo_core.io import resource_path
+
 from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
+    BeakerCallback,
     Callback,
     CheckpointerCallback,
     CometCallback,
@@ -174,6 +176,7 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     annealing: bool
+    cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     model_overrides: Optional[List[str]]
@@ -219,7 +222,6 @@ class TransformerConfigBuilder:
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
-        s3: bool = True,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -234,9 +236,8 @@ class TransformerConfigBuilder:
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
-        self.s3 = s3
         self.activation_checkpointing = activation_checkpointing
-        self.data_dir: str = "s3://ai2-llm"
+        self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
@@ -258,6 +259,11 @@ class TransformerConfigBuilder:
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
+        self.cluster = cluster
+
+        if any(substring in cluster for substring in ["augusta"]):
+            self.root_dir = f"gs://ai2-llm"
+            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
 
         if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
@@ -324,16 +330,21 @@ class TransformerConfigBuilder:
 
     def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
-            "gpu_monitor": GPUMemoryMonitorCallback(),
-            "garbage_collector": GarbageCollectorCallback(),
-            "config_saver": ConfigSaverCallback(),
-            "profiler": ProfilerCallback(enabled=self.profile),
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
                 save_async=True,
             ),
+            "config_saver": ConfigSaverCallback(),
+            "profiler": ProfilerCallback(enabled=self.profile),
+            "garbage_collector": GarbageCollectorCallback(),
         }
+
+        if self.beaker_user is not None:
+            callbacks["beaker"] = BeakerCallback()
+
+        if torch.cuda.is_available():
+            callbacks["gpu_monitor"] = GPUMemoryMonitorCallback()
 
         if self.metrics_config:
             if MetricBackend.wandb in self.metrics_config.backends:
