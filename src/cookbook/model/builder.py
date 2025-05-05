@@ -221,7 +221,6 @@ class TransformerConfigBuilder:
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
-        s3: bool = True,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -236,9 +235,8 @@ class TransformerConfigBuilder:
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
-        self.s3 = s3
         self.activation_checkpointing = activation_checkpointing
-        self.data_dir: str = "s3://ai2-llm"
+        self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
@@ -260,6 +258,10 @@ class TransformerConfigBuilder:
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
+
+        if any(substring in cluster for substring in ["augusta"]):
+            self.root_dir = f"gs://ai2-llm"
+            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
 
         if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
