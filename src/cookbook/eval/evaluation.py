@@ -245,12 +245,15 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            if compute_gold_bpb:
-                local_flags.append("--task-args compute_gold_bpb=true")
-            
+            special_task_args = {}
             if fim_tokens:
-                special_tokens_dict = FIM_TOKENS[fim_tokens]
-                local_flags.append(f"--task-args '{json.dumps(special_tokens_dict)}'")
+                special_task_args = FIM_TOKENS[fim_tokens]
+
+            if compute_gold_bpb:
+                special_task_args["compute_gold_bpb"] = True
+            
+            if special_task_args:
+                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
