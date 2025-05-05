@@ -27,9 +27,10 @@ from olmo_core.optim import (
 )
 from olmo_core.io import resource_path
 
-# from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
+    BeakerCallback,
     Callback,
     CheckpointerCallback,
     CometCallback,
@@ -325,16 +326,21 @@ class TransformerConfigBuilder:
 
     def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
-            "gpu_monitor": GPUMemoryMonitorCallback(),
-            "garbage_collector": GarbageCollectorCallback(),
-            "config_saver": ConfigSaverCallback(),
-            "profiler": ProfilerCallback(enabled=self.profile),
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
                 save_async=True,
             ),
+            "config_saver": ConfigSaverCallback(),
+            "profiler": ProfilerCallback(enabled=self.profile),
+            "garbage_collector": GarbageCollectorCallback(),
         }
+
+        if self.beaker_user is not None:
+            callbacks["beaker"] = BeakerCallback()
+
+        if torch.cuda.is_available():
+            callbacks["gpu_monitor"] = GPUMemoryMonitorCallback()
 
         if self.metrics_config:
             if MetricBackend.wandb in self.metrics_config.backends:
@@ -418,12 +424,12 @@ class TransformerConfigBuilder:
     def get_scheduler_config(self) -> Scheduler:
         scheduler_map = {
             SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
-            # SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
-            #     warmup_steps=self.get_warmup_steps(),
-            # ),
-            # SchedulerType.LINEAR: lambda: LinearWithWarmup(
-            #     warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
-            # ),
+            SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
+                warmup_steps=self.get_warmup_steps(),
+            ),
+            SchedulerType.LINEAR: lambda: LinearWithWarmup(
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+            ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
