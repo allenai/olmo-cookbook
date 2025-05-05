@@ -406,8 +406,6 @@ STARCODER_PASS_AT_1_TASKS = [
     "mbpp::starcoder_pass@1",
 ]
 
-
-
 STARCODER_INFILLING = {
     "context_kwargs": {"lead_token": "<fim_prefix>", "center_token": "<fim_suffix>", "end_token": "<fim_middle>"},
     "generation_kwargs": {
@@ -440,14 +438,10 @@ L2C_INFILLING = {
 
 FIM_TOKENS = {"santacoder": SANTACODER_INFILLING, "starcoder": STARCODER_INFILLING, "deepseek": DEEPSEEK_CODER_INFILLING, "l2c": L2C_INFILLING}
 
-# FIM_TASKS = [
-#     "codex_humanevalfim_single:temp0.2",
-#     "codex_humanevalfim_multi:temp0.2",
-#     "codex_humanevalfim_random:temp0.2"
-# ]
-
 FIM_TASKS = [
     "codex_humanevalfim_single:temp0.2",
+    "codex_humanevalfim_multi:temp0.2",
+    "codex_humanevalfim_random:temp0.2"
 ]
 
 
