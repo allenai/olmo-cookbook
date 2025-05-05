@@ -377,14 +377,14 @@ class TransformerConfigBuilder:
                 eval_interval=self.eval_interval,
             )
 
-        # if self.downstream_evaluators:
-        #     evaluators = DownstreamEvaluatorCallbackConfig(
-        #         tasks=get_tasks_for_groups(self.downstream_evaluators),
-        #         tokenizer=self.tokenizer,
-        #         eval_interval=self.eval_interval,
-        #     )
+        if self.downstream_evaluators:
+            evaluators = DownstreamEvaluatorCallbackConfig(
+                tasks=get_tasks_for_groups(self.downstream_evaluators),
+                tokenizer=self.tokenizer,
+                eval_interval=self.eval_interval,
+            )
 
-        #     callbacks["downstream_evaluators"] = evaluators
+            callbacks["downstream_evaluators"] = evaluators
 
         return callbacks
 
@@ -592,7 +592,7 @@ class TransformerConfigBuilder:
             metrics_collect_interval=10,
             cancel_check_interval=5,
             max_duration=Duration.tokens(self.max_tokens),
-        ).with_recommended_evals(self.tokenizer, self.sequence_length, self.cluster)
+        )
 
         for callback_name, callback in self.build_callbacks().items():
             trainer_config.callbacks[callback_name] = callback
