@@ -176,6 +176,7 @@ class TransformerConfigBuilder:
     save_interval: int
     lm_evaluator: bool
     annealing: bool
+    cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     model_overrides: Optional[List[str]]
@@ -258,6 +259,7 @@ class TransformerConfigBuilder:
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
+        self.cluster = cluster
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = f"gs://ai2-llm"
