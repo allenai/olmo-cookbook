@@ -14,6 +14,8 @@ model: "olmo2_1B_v2"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/augusta-google-1
+downstream_evaluators:
+  - olmo2_dev_1b
 dataset:
   sources:
   - name: gs-test
