@@ -242,7 +242,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
                 BeakerEnvSecret(
-                    name="GOOGLE_APPLICATION_CREDENTIALS", secret=f"{beaker_user}_GOOGLE_APPLICATION_CREDENTIALS"
+                    name="GOOGLE_APPLICATION_CREDENTIALS_JSON",
+                    secret=f"{beaker_user}_GOOGLE_APPLICATION_CREDENTIALS",
                 ),
                 BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
