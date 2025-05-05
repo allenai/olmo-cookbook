@@ -16,6 +16,7 @@ priority: high
 cluster: ai2/augusta-google-1
 downstream_evaluators:
   - olmo2_dev_1b
+eval_interval: 10
 dataset:
   sources:
   - name: gs-test
