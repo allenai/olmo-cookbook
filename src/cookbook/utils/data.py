@@ -249,14 +249,18 @@ def get_filesystem_for_scheme(scheme: str):
     elif scheme == "gs":
         try:
             gs_project = os.environ.get("GOOGLE_CLOUD_PROJECT", None)
-            token = None
 
             if not gs_project:
                 raise OLMoEnvironmentError("GOOGLE_CLOUD_PROJECT environment variable is not set!")
 
-            return gcsfs.GCSFileSystem(
-                project_id=gs_project,
-            )
+            try:
+                return gcsfs.GCSFileSystem(token="google_default")
+            except Exception as e:
+                logger.warning(
+                    f"Failed to create GCS filesystem with default credentials: {str(e)}. Retrying with metadata server..."
+                )
+                return gcsfs.GCSFileSystem()
+
         except Exception as e:
             raise OLMoEnvironmentError(
                 f"Failed to create GCS filesystem: {str(e)}. Ensure GOOGLE_APPLICATION_CREDENTIALS_JSON and GOOGLE_CLOUD_PROJECT are set correctly."
