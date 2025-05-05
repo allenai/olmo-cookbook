@@ -15,8 +15,6 @@ tokenizer: "dolma2"
 priority: high
 cluster: ai2/augusta-google-1
 activation_checkpointing: true
-downstream_evaluators:
-  - olmo2_dev_1b
 eval_interval: 10
 dataset:
   sources:
@@ -24,7 +22,3 @@ dataset:
     target_ratio: 1.0
     paths:
     - gs://ai2-llm/preprocessed/dclm/love2code_codeprose/codeprose/*.npy
-  # - name: s3-test
-  #   target_ratio: 0.50
-  #   paths:
-  #   - s3://ai2-llm/preprocessed/learn2code/dclm-prose-v2/20b-sample/allenai/dolma2-tokenizer/*.npy
