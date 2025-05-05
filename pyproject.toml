@@ -37,7 +37,7 @@ dev = [
     "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 beaker = [
-    "beaker-py",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
