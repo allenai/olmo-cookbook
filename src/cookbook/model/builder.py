@@ -1,12 +1,12 @@
 import json
 import logging
 from pathlib import Path
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import s3fs
 import olmo_core.train.train_module as train_module
-from olmo_core.config import replace, DType
+from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -26,7 +26,8 @@ from olmo_core.optim import (
     SkipStepAdamWConfig,
 )
 from olmo_core.io import resource_path
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+
+# from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     Callback,
@@ -417,12 +418,12 @@ class TransformerConfigBuilder:
     def get_scheduler_config(self) -> Scheduler:
         scheduler_map = {
             SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
-            SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
-                warmup_steps=self.get_warmup_steps(),
-            ),
-            SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
-            ),
+            # SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
+            #     warmup_steps=self.get_warmup_steps(),
+            # ),
+            # SchedulerType.LINEAR: lambda: LinearWithWarmup(
+            #     warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+            # ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
