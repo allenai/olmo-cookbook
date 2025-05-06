@@ -150,35 +150,18 @@ def main(
     elif "dataset.paths" in right_config:
         del right_config["dataset.paths"]
 
-    # next, evaluators can be added to the flat dict with unique key per evaluator
-    # also, each evaluator can also have a 'data.paths' field which needs collapsing
-    def _simplify_evaluator(evaluator):
-        evaluator = flatten_dict(evaluator)
-        if evaluator["data.paths"]:
-            evaluator["data.paths"] = Counter([os.path.dirname(path) for path in evaluator["data.paths"]])
-        return evaluator
-
-    def _simplify_evaluators(evaluators):
-        simplified_evaluators = {}
-        for evaluator in evaluators:
-            new_key = (".".join(["evaluators" + "." + evaluator["type"] + "." + evaluator["label"]])).upper()
-            simplified_evaluators[new_key] = _simplify_evaluator(evaluator)
-        return simplified_evaluators
-
     try:
-        left_evaluators = flatten_dict(
-            _simplify_evaluators(left_config["trainer.callbacks.downstream_evaluators"])
-        )
+        left_evaluators = dict(evaluators=left_config["trainer.callbacks.downstream_evaluators.tasks"])
         del left_config["trainer.callbacks.downstream_evaluators"]
     except KeyError:
+        log.warning("No downstream evaluators found in left config")
         left_evaluators = {}
 
     try:
-        right_evaluators = flatten_dict(
-            _simplify_evaluators(right_config["trainer.callbacks.downstream_evaluators"])
-        )
+        right_evaluators = dict(evaluators=right_config["trainer.callbacks.downstream_evaluators.tasks"])
         del right_config["trainer.callbacks.downstream_evaluators"]
     except KeyError:
+        log.warning("No downstream evaluators found in right config")
         right_evaluators = {}
 
     # Display header with run information
@@ -198,11 +181,6 @@ def main(
         console.rule("[bold]Data Differences[/bold]")
         display_data_differences(left_data_paths, right_data_paths)
         console.print()
-
-    # Display evaluator differences
-    console.rule("[bold]Evaluator Differences[/bold]")
-    display_differences_table(left_evaluators, right_evaluators, "evaluators")
-    console.print()
 
 
 if __name__ == "__main__":
