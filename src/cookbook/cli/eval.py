@@ -271,6 +271,12 @@ def convert_checkpoint(
     type=bool,
     help="Whether to use v1 spec for vLLM models",
 )
+@click.option(
+    "--use-backend-in-run-name/--no-use-backend-in-run-name",
+    default=False,
+    type=bool,
+    help="Whether to use the backend in the run name",
+)
 def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -301,6 +307,7 @@ def evaluate_model(
     compute_gold_bpb: bool,
     model_args: str,
     vllm_use_v1_spec: bool,
+    use_backend_in_run_name: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -347,6 +354,7 @@ def evaluate_model(
         compute_gold_bpb=compute_gold_bpb,
         model_args=parsed_model_args,
         use_vllm_v1_spec=vllm_use_v1_spec,
+        use_backend_in_run_name=use_backend_in_run_name,
     )
 
 
@@ -418,9 +426,13 @@ def get_results(
     if len(models) > 0:
         results = results.keep_rows(*[re.compile(m) for m in models])
 
-    # sort by provided column, or first column if not provided
-    sort_by = sort_by or next(iter(results.columns))
-    results = results.sort(col=sort_by, reverse=True)
+    try:
+        # sort by provided column, or first column if not provided
+        sort_by = sort_by or next(iter(results.columns))
+        results = results.sort(col=sort_by, reverse=True)
+    except StopIteration:
+        # if no columns are left, we don't need to sort
+        pass
 
     if format == "json":
         print(json.dumps(results._data))
