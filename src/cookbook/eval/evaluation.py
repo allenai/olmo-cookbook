@@ -52,6 +52,7 @@ def evaluate_checkpoint(
     compute_gold_bpb: bool,
     model_args: Optional[dict],
     use_vllm_v1_spec: bool,
+    use_backend_in_run_name: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -117,7 +118,11 @@ def evaluate_checkpoint(
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
     # we use this run name when storing store all the output files
-    run_name = make_eval_run_name(checkpoint_path=checkpoint_path, add_bos_token=add_bos_token)
+    run_name = make_eval_run_name(
+        checkpoint_path=checkpoint_path,
+        add_bos_token=add_bos_token,
+        backend=(model_backend if use_backend_in_run_name else None),
+    )
 
     # replace nicknames for actual cluster names, joined with commas
     beaker_clusters = ",".join(set(BEAKER_KNOWN_CLUSTERS.get(cluster, [cluster])).difference(clusters_to_exclude))

@@ -93,7 +93,7 @@ class MiniFrame:
 
     def show(self):
         console = Console()
-        table = Table(title=self.title)
+        table = Table(title=self.title, min_width=len(self.title) + 4)
 
         table.add_column("")  # this is the column for the row name
         for col in self.columns:

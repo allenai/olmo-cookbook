@@ -340,7 +340,7 @@ def add_aws_flags(
     return True
 
 
-def make_eval_run_name(checkpoint_path: str, add_bos_token: bool) -> str:
+def make_eval_run_name(checkpoint_path: str, add_bos_token: bool, backend: str | None = None) -> str:
     path_no_scheme = (p := urlparse(checkpoint_path)).netloc + p.path
 
     step_suffix = None
@@ -353,6 +353,7 @@ def make_eval_run_name(checkpoint_path: str, add_bos_token: bool) -> str:
         os.path.basename(path_no_scheme)
         + (f"_{step_suffix}" if step_suffix else "")
         + ("_bos" if add_bos_token else "")
+        + (f"_{backend}" if backend else "")
     )
 
 
