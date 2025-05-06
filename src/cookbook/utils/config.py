@@ -206,7 +206,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
     logger.info("Configuration:")
-    logger.info(config_dict)
+    logger.info(config)
 
     return trainer
 

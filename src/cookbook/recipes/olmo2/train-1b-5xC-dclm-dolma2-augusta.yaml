@@ -16,6 +16,8 @@ priority: high
 cluster: ai2/augusta-google-1
 activation_checkpointing: true
 eval_interval: 10
+downstream_evaluators:
+  - olmo2_dev_1b
 dataset:
   sources:
   - name: gs-test
