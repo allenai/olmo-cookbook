@@ -137,7 +137,6 @@ def main(
     # Handle dataset paths conditionally based on diff_datasets flag
     left_data_paths = Counter()
     right_data_paths = Counter()
-
     if diff_datasets and "dataset.paths" in left_config:
         left_data_paths = Counter([os.path.dirname(path) for path in left_config["dataset.paths"]])
         del left_config["dataset.paths"]
@@ -150,19 +149,36 @@ def main(
     elif "dataset.paths" in right_config:
         del right_config["dataset.paths"]
 
-    try:
-        left_evaluators = dict(evaluators=left_config["trainer.callbacks.downstream_evaluators.tasks"])
-        del left_config["trainer.callbacks.downstream_evaluators"]
-    except KeyError:
-        log.warning("No downstream evaluators found in left config")
-        left_evaluators = {}
+    # Handle source_mixture_config in the same way
+    if "dataset.source_mixture_config.source_configs" in left_config:
+        source_configs = left_config["dataset.source_mixture_config.source_configs"]
+        if diff_datasets:
+            for config in source_configs:
+                if isinstance(config, dict) and "paths" in config:
+                    paths = config["paths"]
+                    for path in paths:
+                        left_data_paths[os.path.dirname(path)] += 1
 
-    try:
-        right_evaluators = dict(evaluators=right_config["trainer.callbacks.downstream_evaluators.tasks"])
-        del right_config["trainer.callbacks.downstream_evaluators"]
-    except KeyError:
-        log.warning("No downstream evaluators found in right config")
-        right_evaluators = {}
+        for config in source_configs:
+            if isinstance(config, dict) and "paths" in config:
+                del config["paths"]
+
+        left_config["dataset.source_mixture_config.source_configs"] = source_configs
+
+    if "dataset.source_mixture_config.source_configs" in right_config:
+        source_configs = right_config["dataset.source_mixture_config.source_configs"]
+        if diff_datasets:
+            for config in source_configs:
+                if isinstance(config, dict) and "paths" in config:
+                    paths = config["paths"]
+                    for path in paths:
+                        right_data_paths[os.path.dirname(path)] += 1
+
+        for config in source_configs:
+            if isinstance(config, dict) and "paths" in config:
+                del config["paths"]
+
+        del right_config["dataset.source_mixture_config.source_configs"]
 
     # Display header with run information
     console.print()
