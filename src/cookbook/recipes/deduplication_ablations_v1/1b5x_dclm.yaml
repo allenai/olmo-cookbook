@@ -1,6 +1,6 @@
 name: "olmo2-1b-5xC-dedupablate-dclm"
 description: "OLMo2 1b@5xC, deduplication ablation | dclm "
-Budget: "ai2/oe-training"
+budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
