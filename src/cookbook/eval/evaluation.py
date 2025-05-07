@@ -19,6 +19,7 @@ from cookbook.constants import (
     BEAKER_KNOWN_CLUSTERS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
+    FIM_TOKENS,
 )
 
 
@@ -51,6 +52,7 @@ def evaluate_checkpoint(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: Optional[dict],
+    fim_tokens: str,
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
 ):
@@ -243,8 +245,15 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
+            special_task_args = {}
+            if fim_tokens:
+                special_task_args = FIM_TOKENS[fim_tokens]
+
             if compute_gold_bpb:
-                local_flags.append("--task-args compute_gold_bpb=true")
+                special_task_args["compute_gold_bpb"] = True
+            
+            if special_task_args:
+                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
