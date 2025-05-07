@@ -129,10 +129,18 @@ def convert_olmo_core_v2(
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
 
-    except Exception as e:
-        print(f"Error running conversion: {e}; cleaning up before raising error...")
-        os.chdir(current_directory)
-        raise e
+        # change type of model to bfloat16 if it is float32
+        config_file = os.path.join(huggingface_output_dir, "config.json")
+        with open(config_file, "r") as f:
+            config = json.load(f)
+
+        if config.get("torch_dtype", "") == "float32":
+            print(f"Changing type of model to bfloat16...")
+            config["torch_dtype"] = "bfloat16"
+
+            with open(config_file, "w") as f:
+                json.dump(config, f)
+
     finally:
         for directory in directories_to_clean_up:
             print(f"Cleaning up {directory}...")

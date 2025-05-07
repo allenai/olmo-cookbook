@@ -284,6 +284,12 @@ def convert_checkpoint(
     type=bool,
     help="Whether to use the backend in the run name",
 )
+@click.option(
+    "--name-suffix",
+    type=str,
+    default="",
+    help="Suffix to add to the run name",
+)
 def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -316,6 +322,7 @@ def evaluate_model(
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
+    name_suffix: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -364,6 +371,7 @@ def evaluate_model(
         fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
+        name_suffix=name_suffix,
     )
 
 

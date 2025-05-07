@@ -55,6 +55,7 @@ def evaluate_checkpoint(
     fim_tokens: str,
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
+    name_suffix: str,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -119,11 +120,19 @@ def evaluate_checkpoint(
         else:
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
+
+    if use_backend_in_run_name:
+        if name_suffix.strip():
+            raise ValueError("name_suffix and use_backend_in_run_name cannot both be provided")
+
+        print("[WARNING] `--use-backend-in-run-name` is deprecated; use `--name-suffix <backend name>` instead.")
+        name_suffix = model_backend
+
     # we use this run name when storing store all the output files
     run_name = make_eval_run_name(
         checkpoint_path=checkpoint_path,
         add_bos_token=add_bos_token,
-        backend=(model_backend if use_backend_in_run_name else None),
+        name_suffix=name_suffix.strip(),
     )
 
     # replace nicknames for actual cluster names, joined with commas
