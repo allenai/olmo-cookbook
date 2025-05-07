@@ -768,33 +768,35 @@ class Session:
             buffer = ""
             start_time = time.time()
 
-            while not detach:
-                # Check if we have data to receive
-                if channel.recv_ready():
-                    chunk = channel.recv(4096).decode("utf-8")
-                    buffer += chunk
-
-                    # Print to stdout in real-time
-                    sys.stdout.write(chunk)
-                    sys.stdout.flush()
-
-                    # Check if our completion marker is in the output
-                    if re.search(r"\r?\n" + completion_marker + r"\r?\n", buffer):
-                        break
-
-                # Check for timeout
-                if timeout and time.time() - start_time > timeout:
-                    logger.warning(f"\nTimeout waiting for command: {command}")
-                    break
-
-                # Small delay to prevent CPU spinning
-                time.sleep(0.1)
-
-            if not terminate:
+            if detach:
+                # sleep 1 second to ensure the command has time to communicate with the server
+                time.sleep(1)
                 # Detach from screen (Ctrl+A, then d)
                 channel.send(b"\x01d")
-                time.sleep(0.5)
+            else:
+                while True:
+                    # Check if we have data to receive
+                    if channel.recv_ready():
+                        chunk = channel.recv(4096).decode("utf-8")
+                        buffer += chunk
 
+                        # Print to stdout in real-time
+                        sys.stdout.write(chunk)
+                        sys.stdout.flush()
+
+                        # Check if our completion marker is in the output
+                        if re.search(r"\r?\n" + completion_marker + r"\r?\n", buffer):
+                            break
+
+                    # Check for timeout
+                    if timeout and time.time() - start_time > timeout:
+                        logger.warning(f"\nTimeout waiting for command: {command}")
+                        break
+
+                    # Small delay to prevent CPU spinning
+                    time.sleep(0.1)
+
+            # we close the connection here to avoid the screen session from hanging
             client.close()
             return SessionContent(stdout=buffer, stderr=buffer)
 
