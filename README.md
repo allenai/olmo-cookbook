@@ -91,6 +91,13 @@ olmo-cookbook-eval convert \
 
 ### Run Evaluation
 
+🛑 🛑 🛑 🛑 🛑 🛑
+**WARNING**
+
+If using models trained with OLMo Core v2 converted before  **May 7, 2025**,
+make sure to use `--model-args dtype=bfloat16` to avoid NaN with vLLM.
+🛑 🛑 🛑 🛑 🛑 🛑
+
 ```shell
 olmo-cookbook-eval evaluate \
   "/oe-training-default/ai2-llm/checkpoints/OLMoE/a0125/olmoe-8x1b-newhp-newds-dolmino-seed-42/step23842-hf" \
