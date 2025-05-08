@@ -49,7 +49,7 @@ from olmo_core.train.train_module import (
     TransformerActivationCheckpointingMode,
 )
 
-from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.aliases import AnnealConfig, MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
@@ -175,7 +175,6 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    annealing: bool
     cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
@@ -188,6 +187,9 @@ class TransformerConfigBuilder:
     warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    annealing: Optional[AnnealConfig] = None
+    global_step: Optional[int] = None
+    last_pretrain_step: Optional[int] = None
     profile: bool = False
 
     def __init__(
@@ -212,7 +214,7 @@ class TransformerConfigBuilder:
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
-        annealing: bool = False,
+        annealing: Optional[AnnealConfig] = None,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -222,6 +224,8 @@ class TransformerConfigBuilder:
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
+        global_step: Optional[int] = None,
+        max_pretrain_steps: Optional[int] = None,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -260,6 +264,8 @@ class TransformerConfigBuilder:
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
+        self.max_pretrain_steps = max_pretrain_steps
+        self.global_step = global_step
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = f"gs://ai2-llm"
@@ -432,7 +438,7 @@ class TransformerConfigBuilder:
                 warmup_steps=self.get_warmup_steps(),
             ),
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
             ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
@@ -444,9 +450,8 @@ class TransformerConfigBuilder:
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
-        if self.annealing:
-            scheduler_state = self.get_state_from_checkpoint()
-            lr = scheduler_state.starting_lr
+        if self.annealing is not None:
+            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
 
         return SkipStepAdamWConfig(
             lr=lr,
@@ -492,12 +497,16 @@ class TransformerConfigBuilder:
         state_path, config_path = self.load_state_and_config_from_path()
         train_state = torch.load(state_path, weights_only=False)
 
+        if self.global_step and self.max_pretrain_steps:
+            logger.info(f"Using user defined global_step {self.global_step}")
+            last_pretrain_step = self.global_step
+
         last_pretrain_step: int = train_state["global_step"]
         max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)
 
         if max_pretrain_steps is None:
             raise ValueError(
-                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                "Could not find max_steps. Please ensure the checkpoint is valid or set max_pretrain_steps in config. Unable to load scheduler state."
             )
 
         logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
