@@ -5,23 +5,34 @@ It counts the number of .npy files under each base path and displays the results
 
 Usage:
     # Compare mid-training annealing configs
-    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino*.txt
-    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino100.txt
+    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino*.txt --data-only
+    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino100.txt --data-only
 
     # Compare pre-training data mixes
-    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/olmo_core/data/mixes/OLMoE-mix-0824.txt /Users/kylel/ai2/OLMo-core/src/olmo_core/data/mixes/dolma17.txt
+    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/olmo_core/data/mixes/OLMoE-mix-0824.txt /Users/kylel/ai2/OLMo-core/src/olmo_core/data/mixes/dolma17.txt --data-only
 
     # Even compare old OLMo configs (YAML) with new ones (TXT)
-    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-7B-stage2-seed*.yaml
-    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino100.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-13B-stage2-seed*-100B.yaml
-    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino300.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-13B-stage2-seed*-300B.yaml
+    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-7B-stage2-seed*.yaml --data-only
+    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino100.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-13B-stage2-seed*-100B.yaml --data-only
+    python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino300.txt /Users/kylel/ai2/OLMo/configs/official-1124/OLMo2-13B-stage2-seed*-300B.yaml --data-only
 
     # Compare Wandb runs
     python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39 https://wandb.ai/ai2-llm/olmoe/runs/rzsn9tlc
 
     # Compare a Wandb run on old OLMo configs with local files with new OLMo configs
-    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/yh8qbwif\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt
-    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/79h5h3aa\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/yh8qbwif\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt --data-only
+    python compare_data_configs.py https://wandb.ai/ai2-llm/olmo-medium/runs/79h5h3aa\?nw\=nwusersoldni /Users/kylel/ai2/olmo-cookbook/peteish7-anneal-from-928646-50B-no-opt-repro__data_paths.txt  /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino50.txt --data-only
+
+    # Let's say we want to do a large scale comparison of all the configs of a single type of model (e.g. OLMo 1b)
+    python scripts/compare_data_configs.py \
+        https://wandb.ai/ai2-llm/olmo-cookbook/runs/fa12nu26 \
+        https://wandb.ai/ai2-llm/olmo-cookbook/runs/qmfgv9bg \
+        https://wandb.ai/ai2-llm/olmo-cookbook/runs/ezyubhfe/overview \
+        https://wandb.ai/ai2-llm/olmo-cookbook/runs/w36osax9/overview \
+        https://wandb.ai/ai2-llm/olmo-cookbook/runs/5v2r3oma \
+        https://wandb.ai/ai2-llm/olmo-cookbook/runs/dqp8dbpp \
+        --full-config
+
 
 Note that the counts are not file size; they are just number of `npy` files under each base path, which could be different sizes.
 
@@ -71,19 +82,20 @@ def parse_wandb_run_path(run_path: str) -> str:
     return run_path  # Return original path if it's not a W&B path
 
 
-def read_config_files(path_patterns: List[str]) -> Dict[str, List[str]]:
+def read_config_files(path_patterns: List[str], data_only: bool = True) -> Dict[str, Dict]:
     """
     Read paths from config files matching the provided patterns.
     Handles local files (.txt, .yaml) and Wandb URLs.
 
     Args:
         path_patterns: List of glob patterns or Wandb URLs
+        data_only: If True, only extract data paths. If False, extract all config keys.
 
     Returns:
-        Dictionary mapping filenames to lists of paths
+        Dictionary mapping filenames to either lists of paths or full config dicts
     """
-    paths_by_file: Dict[str, List[str]] = {}
-
+    configs_by_file: Dict[str, Dict] = {}
+    
     for pattern in path_patterns:
         if pattern.startswith(("http://", "https://")):
             # Handle Wandb URLs
@@ -94,60 +106,64 @@ def read_config_files(path_patterns: List[str]) -> Dict[str, List[str]]:
             try:
                 run = api.run(run_path)
                 config_raw = run._attrs["rawconfig"]
-
-                # Extract paths from Wandb config
-                data_paths = config_raw.get("data", {}).get("paths", [])
-                paths = [path for path in data_paths if path.endswith(".npy")]
-
-                # Use run ID as filename
+                
                 filename = f"wandb_{run.id}"
-                paths_by_file[filename] = paths
+                if data_only:
+                    # Extract just the data paths
+                    data_paths = config_raw.get('data', {}).get('paths', [])
+                    paths = [path for path in data_paths if path.endswith('.npy')]
+                    configs_by_file[filename] = {'paths': paths}
+                else:
+                    # Include full config
+                    configs_by_file[filename] = config_raw
             except Exception as e:
                 print(f"Error reading Wandb config from {pattern}: {e}")
                 continue
         else:
-            # Handle local files as before
+            # Handle local files
             files = glob.glob(pattern)
             for file in files:
                 filename = Path(file).name
-                paths = []
-
-                if filename.endswith(".yaml"):
-                    with open(file, "r") as f:
+                
+                if filename.endswith('.yaml'):
+                    with open(file, 'r') as f:
                         config = yaml.safe_load(f)
-                        data_paths = config.get("data", {}).get("paths", [])
-                        for line in data_paths:
-                            line = line.strip()
-                            if not line or line.startswith("#"):
-                                continue
-                            if "," in line:
-                                path = line.split(",")[1]
-                            else:
-                                path = line
-                            if path.endswith(".npy"):
-                                paths.append(path)
+                        if data_only:
+                            data_paths = config.get('data', {}).get('paths', [])
+                            paths = []
+                            for line in data_paths:
+                                line = line.strip()
+                                if not line or line.startswith('#'):
+                                    continue
+                                if ',' in line:
+                                    path = line.split(',')[1]
+                                else:
+                                    path = line
+                                if path.endswith('.npy'):
+                                    paths.append(path)
+                            configs_by_file[filename] = {'paths': paths}
+                        else:
+                            configs_by_file[filename] = config
                 else:
-                    with open(file, "r") as f:
+                    paths = []
+                    with open(file, 'r') as f:
                         for line in f:
                             line = line.strip()
                             if not line or line.startswith("#"):
                                 continue
-
-                            if "," in line:
-                                path = line.split(",")[1]
+                            if ',' in line:
+                                path = line.split(',')[1]
                             else:
                                 path = line
-
-                            if path.endswith(".npy"):
+                            if path.endswith('.npy'):
                                 paths.append(path)
+                    configs_by_file[filename] = {'paths': paths}
 
-                paths_by_file[filename] = paths
-
-    if not paths_by_file:
+    if not configs_by_file:
         print(f"No valid configs found in patterns: {path_patterns}")
         return {}
 
-    return paths_by_file
+    return configs_by_file
 
 
 def normalize_storage_path(path: str) -> str:
@@ -174,20 +190,21 @@ def normalize_storage_path(path: str) -> str:
     return path.lstrip("/")
 
 
-def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
+def count_paths(configs_by_file: Dict[str, Dict]) -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
     """
     Count files under each base path for each config file after normalizing paths to treat variations
     (e.g. different prefixes) as the same base path.
 
     Args:
-        paths_by_file: Dictionary mapping filenames to lists of paths
+        configs_by_file: Dictionary mapping filenames to config dicts containing paths
 
     Returns:
         Tuple of (base path counts dict, file totals dict)
     """
     base_path_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-
-    for filename, paths in paths_by_file.items():
+    
+    for filename, config in configs_by_file.items():
+        paths = config.get('paths', [])
         for path in paths:
             # Normalize the incoming path to remove extraneous prefixes
             norm_path = normalize_storage_path(path)
@@ -206,15 +223,15 @@ def count_paths(paths_by_file: Dict[str, List[str]]) -> Tuple[Dict[str, Dict[str
 
             base_path_counts[base_path][filename] += 1
 
-    # Optionally, compute the total number of paths for each file.
-    file_totals = {filename: len(paths) for filename, paths in paths_by_file.items()}
+    # Compute the total number of paths for each file.
+    file_totals = {filename: len(config.get('paths', [])) for filename, config in configs_by_file.items()}
     return base_path_counts, file_totals
 
-
-def format_results(base_path_counts: Dict[str, Dict[str, int]], file_totals: Dict[str, int]) -> None:
+def format_data_results(base_path_counts: Dict[str, Dict[str, int]], 
+                       file_totals: Dict[str, int]) -> None:
     """
-    Format and print results using tabulate.
-
+    Format and print results for data paths using tabulate.
+    
     Args:
         base_path_counts: Dictionary mapping base paths to counts per file.
         file_totals: Dictionary mapping filenames to total counts.
@@ -229,73 +246,128 @@ def format_results(base_path_counts: Dict[str, Dict[str, int]], file_totals: Dic
     def sort_key(base_path):
         count1 = base_path_counts[base_path].get(largest_file, 0)
         count2 = base_path_counts[base_path].get(second_largest, 0)
-        # Primary sort by first column, secondary sort by second column
         return (count1, count2)
-
+        
     sorted_base_paths = sorted(base_path_counts.keys(), key=sort_key, reverse=True)
-
+    
     # Prepare headers and table data.
-    # Truncate filenames that are too long (over 30 chars)
     truncated_filenames = []
     for filename in sorted_filenames:
-        if len(filename) > 30:
-            truncated = filename[:27] + "..."
-        else:
-            truncated = filename
+        truncated = filename[:27] + "..." if len(filename) > 30 else filename
         truncated_filenames.append(truncated)
 
     headers = ["Base Path"] + truncated_filenames + ["Match"]
     table_data = []
 
     for base_path in sorted_base_paths:
-        # Build a row for each base_path.
         row = [base_path]
         counts = [base_path_counts[base_path].get(filename, 0) for filename in sorted_filenames]
-        # Use the count if greater than 0, else '-'
-        row.extend([count if count > 0 else "-" for count in counts])
-
-        # Add a checkmark if all counts are the same.
-        all_same = True
-        if counts:
-            first_val = counts[0]
-            for count in counts:
-                if count != first_val:
-                    all_same = False
-                    break
-        else:
-            all_same = False
-        row.append("✓" if all_same else "")
-
+        row.extend([count if count > 0 else '-' for count in counts])
+        
+        all_same = len(set(c for c in counts if c > 0)) <= 1
+        row.append('✓' if all_same else '')
+        
         table_data.append(row)
 
     # Build totals row.
     totals_row = ["Total"] + [file_totals[filename] for filename in sorted_filenames] + [""]
+    
+    totals_row = ['Total'] + [file_totals[filename] for filename in sorted_filenames] + ['']
     table_data.append(totals_row)
-
-    # Print formatted table using tabulate.
-    print("\n" + tabulate(table_data, headers, tablefmt="grid"))
-
-
-def compare_config_files(path_patterns: List[str]) -> None:
+    
+    print("\n" + tabulate(table_data, headers, tablefmt='grid'))
+    
+def format_config_results(configs_by_file: Dict[str, Dict]) -> None:
     """
-    Compare text files containing paths and print counts of .npy files under each base path.
+    Format and print results for non-data config keys, showing only keys with different values
+    or keys that only exist in some configs.
+    
+    Args:
+        configs_by_file: Dictionary mapping filenames to full config dicts
+    """
+    # Get all unique config keys across all files
+    all_keys = set()
+    for config in configs_by_file.values():
+        all_keys.update(flatten_dict(config).keys())
+    
+    # Sort keys alphabetically
+    sorted_keys = sorted(all_keys)
+    filenames = list(configs_by_file.keys())
+    
+    # Print header
+    print("\nConfig differences:")
+    print("-" * 80)
+    
+    # Check each key for differences
+    found_diffs = False
+    for key in sorted_keys:
+        # Skip data paths and dataset source mixture configs
+        if ('data.paths' in key or 
+            key == 'data' or 
+            'dataset.source_mixture_config.source_configs' in key):
+            continue
+            
+        values = []
+        for filename in filenames:
+            flat_config = flatten_dict(configs_by_file[filename])
+            value = flat_config.get(key, '-')
+            values.append(str(value))
+        
+        # Check if key exists in all configs
+        exists_in_all = all(v != '-' for v in values)
+        
+        # Print if values are different or key doesn't exist in all configs
+        unique_values = set(str(v) for v in values if v != '-')
+        if len(unique_values) > 1 or not exists_in_all:
+            found_diffs = True
+            print(f"\n{key}:")
+            for filename, value in zip(filenames, values):
+                print(f"  {filename}: {value}")
+    
+    if not found_diffs:
+        print("No differences found in config values.")
+
+def flatten_dict(d: Dict, parent_key: str = '', sep: str = '.') -> Dict:
+    """Flatten a nested dictionary into a single level dictionary with dot-separated keys."""
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+def compare_config_files(path_patterns: List[str], data_only: bool = True) -> None:
+    """
+    Compare config files and print either data path counts or full config comparisons.
 
     Args:
         path_patterns: List of glob patterns to match files
+        data_only: If True, only compare data paths. If False, compare all config keys.
     """
-    paths_by_file = read_config_files(path_patterns)
-    if not paths_by_file:
+    configs_by_file = read_config_files(path_patterns, data_only)
+    if not configs_by_file:
         return
 
-    base_path_counts, file_totals = count_paths(paths_by_file)
-    format_results(base_path_counts, file_totals)
+    if data_only:
+        base_path_counts, file_totals = count_paths(configs_by_file)
+        format_data_results(base_path_counts, file_totals)
+    else:
+        format_config_results(configs_by_file)
 
 
 @click.command()
-@click.argument("path_patterns", nargs=-1, required=True)
-def main(path_patterns: Tuple[str, ...]) -> None:
-    """Compare text files containing paths and print counts of .npy files under each base path."""
-    compare_config_files(list(path_patterns))
+@click.argument('path_patterns', nargs=-1, required=True)
+@click.option('--data-only/--full-config', default=True, 
+              help='Compare only data paths (default) or all config keys')
+def main(path_patterns: Tuple[str, ...], data_only: bool) -> None:
+    """Compare config files and print either data path counts or full config comparisons.
+    
+    Example with flags:
+        python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino*.txt --data-only
+    """
+    compare_config_files(list(path_patterns), data_only)
 
 
 if __name__ == "__main__":
