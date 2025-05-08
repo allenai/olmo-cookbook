@@ -18,6 +18,7 @@ def make_dashboard_table(
     show_generative: bool = True,
     show_partial: bool = True,
     force: bool = False,
+    skip_on_fail: bool = False,
 ) -> tuple[MiniFrame, MiniFrame]:
     experiments = FindExperiments.run(dashboard=dashboard)
 
@@ -29,10 +30,10 @@ def make_dashboard_table(
         # return empty tables if no experiments are found
         return all_metrics_table, avg_metrics_table
 
-
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
         force=[force for _ in experiments],
+        skip_on_fail=[skip_on_fail for _ in experiments],
     )
 
     for metric in metrics:

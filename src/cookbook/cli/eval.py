@@ -411,6 +411,11 @@ def evaluate_model(
     is_flag=True,
     help="Force re-fetch results from the datalake",
 )
+@click.option(
+    "--skip-on-fail",
+    is_flag=True,
+    help="Skip experiments that fail to fetch results from the datalake",
+)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -418,6 +423,7 @@ def get_results(
     format: str,
     sort_by: str,
     force: bool,
+    skip_on_fail: bool,
 ) -> None:
 
     all_metrics, all_averages = make_dashboard_table(
@@ -431,6 +437,7 @@ def get_results(
         average_generative=True,
         show_bpb=False,
         force=force,
+        skip_on_fail=skip_on_fail,
     )
 
     # if a task starts with *, it means it is a named group and we need to expand it

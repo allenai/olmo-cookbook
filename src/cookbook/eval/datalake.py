@@ -242,14 +242,21 @@ class MetricsAll(BaseDatalakeItem):
         return self.task_config.get("metadata", {}).get("num_tasks", 0) > 0
 
     @classmethod
-    def run(cls, experiment_id: str, force: bool = False) -> List[Self]:
+    def run(cls, experiment_id: str, force: bool = False, skip_on_fail: bool = False) -> List[Self]:
         cache = get_datalake_cache()
         if not (result := cache.get(experiment_id=experiment_id)).success or force:
             response = requests.get(
                 f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
                 headers={"accept": "application/json"},
             )
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except Exception as e:
+                if skip_on_fail:
+                    return []
+                else:
+                    raise e
+
             result = cache.set(response.json(), experiment_id=experiment_id)
 
         result = [cls(**metric) for metric in (result.value or [])]
