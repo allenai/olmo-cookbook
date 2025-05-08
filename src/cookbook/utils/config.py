@@ -1,9 +1,13 @@
 import logging
 import os
 from pathlib import Path
-from typing import List, Tuple, cast
+from typing import List, Tuple, Union, cast
 from urllib.parse import urlparse
 
+import gcsfs
+import s3fs
+import yaml
+from olmo_core.io import normalize_path
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
     BeakerEnvVar,
@@ -12,9 +16,6 @@ from olmo_core.launch.beaker import (
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import seed_all
-from olmo_core.io import normalize_path
-import s3fs
-import yaml
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -102,10 +103,10 @@ def mk_instance_cmd(
     ]
 
 
-_REMOTE_FS_CACHE: dict[str, s3fs.S3FileSystem] | None = None
+_REMOTE_FS_CACHE: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] | None = None
 
 
-def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
+def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]:
     global _REMOTE_FS_CACHE
     if _REMOTE_FS_CACHE is not None:
         return _REMOTE_FS_CACHE
@@ -113,6 +114,7 @@ def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
     _REMOTE_FS_CACHE = dict(
         s3=s3fs.S3FileSystem(),
         weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+        gs=gcsfs.GCSFileSystem(),
     )
 
     return _REMOTE_FS_CACHE

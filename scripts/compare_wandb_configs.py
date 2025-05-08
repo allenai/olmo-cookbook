@@ -17,12 +17,11 @@ from collections import Counter
 
 import click
 import wandb
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.text import Text
-
 from olmo_core.utils import flatten_dict, prepare_cli_environment
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 log = logging.getLogger(__name__)
 run_path_re = re.compile(r"^[^/]+/[^/]+/[^/]+$")

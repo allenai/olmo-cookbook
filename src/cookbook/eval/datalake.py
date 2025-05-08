@@ -5,10 +5,10 @@ from contextlib import ExitStack
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from dataclasses import fields as dataclass_fields
+from datetime import datetime
 from functools import partial
 from threading import current_thread, main_thread
 from typing import Callable, ClassVar, Generic, List, TypeVar
-from datetime import datetime
 
 import requests
 from tqdm import tqdm

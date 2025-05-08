@@ -430,18 +430,27 @@ DEEPSEEK_CODER_INFILLING = {
 }
 
 L2C_INFILLING = {
-    "context_kwargs": {"lead_token": "<|fim_prefix|>", "center_token": "<|fim_suffix|>", "end_token": "<|fim_middle|>"},
+    "context_kwargs": {
+        "lead_token": "<|fim_prefix|>",
+        "center_token": "<|fim_suffix|>",
+        "end_token": "<|fim_middle|>",
+    },
     "generation_kwargs": {
         "stop_sequences": ["<|endoftext|>", "<|filename|>", "<|file_sep|>"],
     },
 }
 
-FIM_TOKENS = {"santacoder": SANTACODER_INFILLING, "starcoder": STARCODER_INFILLING, "deepseek": DEEPSEEK_CODER_INFILLING, "l2c": L2C_INFILLING}
+FIM_TOKENS = {
+    "santacoder": SANTACODER_INFILLING,
+    "starcoder": STARCODER_INFILLING,
+    "deepseek": DEEPSEEK_CODER_INFILLING,
+    "l2c": L2C_INFILLING,
+}
 
 FIM_TASKS = [
     "codex_humanevalfim_single:temp0.2",
     "codex_humanevalfim_multi:temp0.2",
-    "codex_humanevalfim_random:temp0.2"
+    "codex_humanevalfim_random:temp0.2",
 ]
 
 
@@ -463,7 +472,7 @@ ALL_NAMED_GROUPS = {
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    "fim": FIM_TASKS
+    "fim": FIM_TASKS,
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):

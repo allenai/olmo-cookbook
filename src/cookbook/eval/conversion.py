@@ -13,12 +13,12 @@ from cookbook.cli.utils import (
     check_beaker_dependencies,
     discover_weka_mount,
     download_tokenizer,
+    install_beaker_py,
     install_olmo,
     install_olmo_core,
     install_transformers,
     make_destination_dir,
     remove_conflicting_packages,
-    install_beaker_py,
 )
 from cookbook.constants import (
     BEAKER_KNOWN_CLUSTERS,
@@ -409,7 +409,8 @@ def run_checkpoint_conversion(
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
-        if not use_system_python else PythonEnv.null()
+        if not use_system_python
+        else PythonEnv.null()
     )
 
     if use_beaker:

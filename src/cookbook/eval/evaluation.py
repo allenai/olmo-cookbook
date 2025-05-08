@@ -17,9 +17,9 @@ from cookbook.cli.utils import (
 from cookbook.constants import (
     ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
+    FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
-    FIM_TOKENS,
 )
 
 
@@ -119,7 +119,6 @@ def evaluate_checkpoint(
             flags.append("--gantry-args '{\"hf_token\":true}'")
         else:
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
-
 
     if use_backend_in_run_name:
         if name_suffix.strip():
@@ -260,7 +259,7 @@ def evaluate_checkpoint(
 
             if compute_gold_bpb:
                 special_task_args["compute_gold_bpb"] = True
-            
+
             if special_task_args:
                 local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
 
