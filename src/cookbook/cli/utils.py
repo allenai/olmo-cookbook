@@ -8,10 +8,11 @@ import subprocess
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
-from packaging.version import Version
 from tempfile import NamedTemporaryFile, gettempdir, mkdtemp
 from typing import List, Optional, Union
 from urllib.parse import urlparse
+
+from packaging.version import Version
 
 from cookbook.constants import (
     AI2_OLMO_CORE_GIT_URL,
@@ -168,7 +169,6 @@ def install_beaker_py(
         ]
 
         subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
-
 
 
 def install_oe_eval(
@@ -538,19 +538,19 @@ def check_beaker_dependencies(
     if not output.returncode == 0:
         raise RuntimeError("beaker-py must be installed to use this function")
     beaker_py_version_string = next(
-        iter([r for r in output.stdout.decode('utf-8').split('\n') if "Version:" in r])
+        iter([r for r in output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     beaker_py_version = Version(beaker_py_version_string.split(":")[1].strip())
     if beaker_py_max_version is not None and beaker_py_version > Version(beaker_py_max_version):
-        raise RuntimeError(
-            f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}"
-        )
+        raise RuntimeError(f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}")
 
-    gantry_output = subprocess.run(shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path())
+    gantry_output = subprocess.run(
+        shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path()
+    )
     if not gantry_output.returncode == 0:
         raise RuntimeError("beaker-gantry must be installed to use this function")
     gantry_version_string = next(
-        iter([r for r in gantry_output.stdout.decode('utf-8').split('\n') if "Version:" in r])
+        iter([r for r in gantry_output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     gantry_version = Version(gantry_version_string.split(":")[1].strip())
     if beaker_gantry_max_version is not None and gantry_version > Version(beaker_gantry_max_version):
