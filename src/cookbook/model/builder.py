@@ -188,8 +188,6 @@ class TransformerConfigBuilder:
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
     annealing: Optional[AnnealConfig] = None
-    global_step: Optional[int] = None
-    last_pretrain_step: Optional[int] = None
     profile: bool = False
 
     def __init__(
@@ -224,8 +222,6 @@ class TransformerConfigBuilder:
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
-        global_step: Optional[int] = None,
-        max_pretrain_steps: Optional[int] = None,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -264,8 +260,6 @@ class TransformerConfigBuilder:
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
-        self.max_pretrain_steps = max_pretrain_steps
-        self.global_step = global_step
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = f"gs://ai2-llm"
@@ -496,10 +490,6 @@ class TransformerConfigBuilder:
     def get_state_from_checkpoint(self) -> SchedulerState:
         state_path, config_path = self.load_state_and_config_from_path()
         train_state = torch.load(state_path, weights_only=False)
-
-        if self.global_step and self.max_pretrain_steps:
-            logger.info(f"Using user defined global_step {self.global_step}")
-            last_pretrain_step = self.global_step
 
         last_pretrain_step: int = train_state["global_step"]
         max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)

@@ -19,7 +19,7 @@ scheduler_type: linear
 warmup_steps: 0
 annealing:
   enabled: true
-  initial_lr: 1.8e-3
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
 load_path: gs://ai2-llm/checkpoints/OLMo-medium/peteish7/step928646/
 load_state: false
 dataset:
