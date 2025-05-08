@@ -1,15 +1,20 @@
 import logging
+import os
 from pathlib import Path
 from typing import List, Tuple, cast
+from urllib.parse import urlparse
 
-import yaml
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
+    BeakerEnvVar,
     BeakerLaunchConfig,
     BeakerWekaBucket,
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
-from olmo_core.utils import get_default_device, seed_all
+from olmo_core.utils import seed_all
+from olmo_core.io import normalize_path
+import s3fs
+import yaml
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -34,11 +39,9 @@ def config_from_path(config: Path) -> ExperimentConfig:
 def mk_source_instances(
     sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
-    # If no user provided ratios, use the priors from the sources
     if priors:
         ratios_by_source, total_tokens = priors
     else:
-        # TODO(undfined): Clean this up and fail faster
         ratios_by_source = {}
 
     instances = []
@@ -99,15 +102,50 @@ def mk_instance_cmd(
     ]
 
 
+_REMOTE_FS_CACHE: dict[str, s3fs.S3FileSystem] | None = None
+
+
+def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
+    global _REMOTE_FS_CACHE
+    if _REMOTE_FS_CACHE is not None:
+        return _REMOTE_FS_CACHE
+
+    _REMOTE_FS_CACHE = dict(
+        s3=s3fs.S3FileSystem(),
+        weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+    )
+
+    return _REMOTE_FS_CACHE
+
+
 def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
     """
     Launch a training run with the given parameters.
     """
 
     base_config = config_from_path(config_path)
+    load_path_fs = None
 
-    # Because this is happening on-box in Beaker we want paths normalized for usage there.
-    source_instances = mk_source_instances(normalize_source_paths(base_config.dataset.sources), None)
+    if dry_run:
+        source_paths = base_config.dataset.sources
+        if base_config.load_path:
+            try:
+                load_path_fs = remote_fs_cache()[urlparse(base_config.load_path).scheme]
+            except KeyError:
+                raise ValueError(f"Unsupported load path scheme: {base_config.load_path}")
+
+            # When we have a weka path locally we need to treat it like a remote s3
+            # path and strip the special weka prefix and bucket name
+            base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "s3://"))
+
+    else:
+        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
+
+        if base_config.load_path:
+            # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
+            base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
+
+    source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
     config = TransformerConfigBuilder(
@@ -128,32 +166,42 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         sequence_length=base_config.sequence_length,
         sources=source_instances,
         tokenizer=base_config.tokenizer,
-        wandb_config=base_config.wandb,
+        metrics_config=base_config.metrics_config,
         weka=base_config.weka,
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
+        warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
+        scheduler_type=base_config.scheduler_type,
+        annealing=base_config.annealing,
+        hard_stop=base_config.hard_stop,
+        model_overrides=base_config.model_overrides,
+        activation_checkpointing=base_config.activation_checkpointing,
+        load_path_fs=load_path_fs,
     ).build()
-
-    device = get_default_device()
-    world_mesh = config.model.build_mesh(device=device)
 
     seed_all(config.init_seed)
     config_dict = config.as_config_dict()
-
     trainer = None
+
     if not dry_run:
-        model = config.model.build(
-            init_device="meta",
-            device=device,
-            mesh=world_mesh,
-            max_seq_len=config.dataset.sequence_length,
-        )
         dataset = config.dataset.build()
-        optim = config.optim.build(model)
-        data_loader = config.data_loader.build(dataset=dataset, mesh=world_mesh)
-        trainer = config.trainer.build(model, optim, data_loader, mesh=world_mesh)
+        model = config.model.build(init_device="meta")
+        train_module = config.train_module.build(model)
+        data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
+        trainer = config.trainer.build(train_module, data_loader)
+
+        # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
+        if (
+            not trainer.maybe_load_checkpoint(trainer.save_folder, load_trainer_state=base_config.load_state)
+            and base_config.load_path
+        ):
+            logger.info(
+                f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
+            )
+            trainer.load_checkpoint(base_config.load_path, load_trainer_state=base_config.load_state)
+
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
@@ -185,8 +233,9 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch260cu124",
+            beaker_image="petew/olmo-core-tch270cu126",
             priority=group.config.priority,
+            env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
                 BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
@@ -194,6 +243,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="AWS_CREDENTIALS", secret=f"{beaker_user}_AWS_CREDENTIALS"),
                 BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
+                BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
             setup_steps=[
                 'git clone "$REPO_URL"',

@@ -55,11 +55,11 @@ from tabulate import tabulate
 
 def parse_wandb_run_path(run_path: str) -> str:
     """
-    Parse a Weights & Biases run path, either in the form "entity/project/run_id" 
+    Parse a Weights & Biases run path, either in the form "entity/project/run_id"
     or as a full wandb.ai URL.
 
     Args:
-        run_path: Either a W&B run path like "ai2-llm/olmo-medium/cej4ya39" 
+        run_path: Either a W&B run path like "ai2-llm/olmo-medium/cej4ya39"
                  or URL like "https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39"
                  or URL with username like "https://wandb.ai/ai2-llm/olmo-medium/runs/cej4ya39?nw=nwusersoldni"
 
@@ -70,7 +70,7 @@ def parse_wandb_run_path(run_path: str) -> str:
     run_path = run_path.strip("/")
     run_path_re = re.compile(r"^[^/]+/[^/]+/[^/]+$")
     run_path_url = re.compile(r"^https?://wandb.ai/([^/]+)/([^/]+)/runs/([^/?]+)")
-    
+
     if run_path_re.match(run_path):
         return run_path
 
@@ -97,9 +97,10 @@ def read_config_files(path_patterns: List[str], data_only: bool = True) -> Dict[
     configs_by_file: Dict[str, Dict] = {}
     
     for pattern in path_patterns:
-        if pattern.startswith(('http://', 'https://')):
+        if pattern.startswith(("http://", "https://")):
             # Handle Wandb URLs
             import wandb
+
             api = wandb.Api()
             run_path = parse_wandb_run_path(pattern)
             try:
@@ -148,7 +149,7 @@ def read_config_files(path_patterns: List[str], data_only: bool = True) -> Dict[
                     with open(file, 'r') as f:
                         for line in f:
                             line = line.strip()
-                            if not line or line.startswith('#'):
+                            if not line or line.startswith("#"):
                                 continue
                             if ',' in line:
                                 path = line.split(',')[1]
@@ -169,24 +170,25 @@ def normalize_storage_path(path: str) -> str:
     """
     Normalize a file path by converting backslashes to forward slashes,
     stripping known URL schemes and domains, and removing leading slashes.
-    
+
     Args:
         path: The original file path.
-    
+
     Returns:
         The normalized file path.
     """
     # Replace backslashes with forward slashes
-    path = path.replace('\\', '/')
-    
+    path = path.replace("\\", "/")
+
     # If the path appears to be a URL (e.g., starts with http, https, s3, or gs),
     # parse it and take only the path portion.
-    if re.match(r'^(https?|s3|gs):', path, re.IGNORECASE):
+    if re.match(r"^(https?|s3|gs):", path, re.IGNORECASE):
         parsed = urlparse(path)
         path = parsed.path  # This drops the scheme and netloc
-    
+
     # Remove any leading slashes for consistency
-    return path.lstrip('/')
+    return path.lstrip("/")
+
 
 def count_paths(configs_by_file: Dict[str, Dict]) -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
     """
@@ -206,19 +208,19 @@ def count_paths(configs_by_file: Dict[str, Dict]) -> Tuple[Dict[str, Dict[str, i
         for path in paths:
             # Normalize the incoming path to remove extraneous prefixes
             norm_path = normalize_storage_path(path)
-            
+
             # Special handling for dclm paths: extract the part up to the "tokenizer" folder.
-            if '/dclm/' in norm_path.lower():
-                match = re.match(r'(.*dclm/.+?tokenizer)(?:/.*)?$', norm_path, re.IGNORECASE)
+            if "/dclm/" in norm_path.lower():
+                match = re.match(r"(.*dclm/.+?tokenizer)(?:/.*)?$", norm_path, re.IGNORECASE)
                 base_path = match.group(1) if match else os.path.normpath(norm_path)
             else:
                 # For all other paths, group by the normalized full path (removing the last component).
-                parts = norm_path.split('/')
+                parts = norm_path.split("/")
                 if len(parts) > 1:
                     base_path = os.path.normpath(os.path.join(*parts[:-1]))
                 else:
                     base_path = norm_path  # If there's no directory structure, use the path as-is.
-            
+
             base_path_counts[base_path][filename] += 1
 
     # Compute the total number of paths for each file.
@@ -236,11 +238,11 @@ def format_data_results(base_path_counts: Dict[str, Dict[str, int]],
     """
     # Sort filenames by their totals in descending order.
     sorted_filenames = sorted(file_totals.keys(), key=lambda x: file_totals[x], reverse=True)
-    
+
     # Sort base paths by counts in the largest file, using second largest file as tiebreaker
     largest_file = sorted_filenames[0]
     second_largest = sorted_filenames[1] if len(sorted_filenames) > 1 else largest_file
-    
+
     def sort_key(base_path):
         count1 = base_path_counts[base_path].get(largest_file, 0)
         count2 = base_path_counts[base_path].get(second_largest, 0)
@@ -253,10 +255,10 @@ def format_data_results(base_path_counts: Dict[str, Dict[str, int]],
     for filename in sorted_filenames:
         truncated = filename[:27] + "..." if len(filename) > 30 else filename
         truncated_filenames.append(truncated)
-    
-    headers = ['Base Path'] + truncated_filenames + ['Match']
+
+    headers = ["Base Path"] + truncated_filenames + ["Match"]
     table_data = []
-    
+
     for base_path in sorted_base_paths:
         row = [base_path]
         counts = [base_path_counts[base_path].get(filename, 0) for filename in sorted_filenames]
@@ -266,6 +268,9 @@ def format_data_results(base_path_counts: Dict[str, Dict[str, int]],
         row.append('✓' if all_same else '')
         
         table_data.append(row)
+
+    # Build totals row.
+    totals_row = ["Total"] + [file_totals[filename] for filename in sorted_filenames] + [""]
     
     totals_row = ['Total'] + [file_totals[filename] for filename in sorted_filenames] + ['']
     table_data.append(totals_row)

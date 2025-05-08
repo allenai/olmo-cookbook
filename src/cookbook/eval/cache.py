@@ -1,16 +1,16 @@
-from dataclasses import dataclass, field as dataclass_field
-from typing import TypeVar, Generic
-from platformdirs import user_cache_dir
-import smart_open
-import os
-import json
 import hashlib
+import json
+import os
 import shutil
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from typing import Generic, TypeVar
 
+import smart_open
+from platformdirs import user_cache_dir
 
 T = TypeVar("T")
 V = TypeVar("V")
-
 
 
 @dataclass(frozen=True)
@@ -18,16 +18,45 @@ class DatalakeCacheResult(Generic[T]):
     success: bool
     value: T | None
 
+
+# Singleton instance storage
+_DATALAKE_CACHE_INSTANCE = None
+
+
 @dataclass
 class DatalakeCache(Generic[T]):
-    cache_dir: str = dataclass_field(default_factory=lambda: user_cache_dir("datalake", "olmo-cookbook"))
-    invalidate: bool = dataclass_field(default_factory=lambda: os.environ.get("DATALAKE_CACHE_INVALIDATE", "false").lower() == "true")
-    do_not_cache: bool = dataclass_field(default_factory=lambda: os.environ.get("DATALAKE_DO_NOT_CACHE", "false").lower() == "true")
+    cache_dir: str
+    invalidate: bool
+    do_not_cache: bool
 
-    def __post_init__(self):
-        if self.invalidate:
+    def __init__(self, invalidate: bool = False, do_not_cache: bool = False):
+        self.invalidate = (
+            invalidate
+            if invalidate is not False
+            else (os.environ.get("DATALAKE_CACHE_INVALIDATE", "false").lower() == "true")
+        )
+
+        self.do_not_cache = (
+            do_not_cache
+            if do_not_cache is not False
+            else (os.environ.get("DATALAKE_DO_NOT_CACHE", "false").lower() == "true")
+        )
+
+        # Set cache_dir
+        self.cache_dir = user_cache_dir("datalake", "olmo-cookbook")
+
+        if self.invalidate and os.path.exists(self.cache_dir):
             shutil.rmtree(self.cache_dir, ignore_errors=True)
-        os.makedirs(self.cache_dir, exist_ok=True)
+
+            # Check if path exists but is a file instead of a directory
+            if os.path.exists(self.cache_dir) and not os.path.isdir(self.cache_dir):
+                try:
+                    os.remove(self.cache_dir)
+                except FileNotFoundError:
+                    pass
+
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir, exist_ok=True)
 
     def _make_cache_path(self, **kwargs) -> str:
         cache_key = hashlib.sha256(json.dumps(kwargs).encode()).hexdigest()
@@ -56,3 +85,18 @@ class DatalakeCache(Generic[T]):
     def delete(self, **kwargs) -> None:
         if os.path.exists(cache_file := self._make_cache_path(**kwargs)):
             os.remove(cache_file)
+
+
+def get_datalake_cache(invalidate: bool = False, do_not_cache: bool = False) -> DatalakeCache:
+    """Get or create a singleton instance of DatalakeCache."""
+    global _DATALAKE_CACHE_INSTANCE
+
+    if _DATALAKE_CACHE_INSTANCE is None:
+        kwargs = {}
+        if invalidate is not None:
+            kwargs["invalidate"] = invalidate
+        if do_not_cache is not None:
+            kwargs["do_not_cache"] = do_not_cache
+        _DATALAKE_CACHE_INSTANCE = DatalakeCache(**kwargs)
+
+    return _DATALAKE_CACHE_INSTANCE

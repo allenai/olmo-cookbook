@@ -1,8 +1,10 @@
-import pytest
 import re
 from collections import OrderedDict
-from cookbook.eval.miniframe import MiniFrame
+
+import pytest
+
 from cookbook.constants import SHORT_NAMES
+from cookbook.eval.miniframe import MiniFrame
 
 
 @pytest.fixture
@@ -375,30 +377,30 @@ class TestMiniFrame:
     def test_make_fn(self):
         """Test the _make_fn function implementation"""
         frame = MiniFrame(title="Make Function Test")
-        
+
         # Test exact match with single string filter (not reverse)
         fn = frame._make_fn(vals=("abc",), reverse=False)
         assert fn("abc") is True
         assert fn("def") is False
-        
+
         # Test exact match with multiple string filters (not reverse)
         fn = frame._make_fn(vals=("abc", "def"), reverse=False)
         assert fn("abc") is True
         assert fn("def") is True
         assert fn("ghi") is False
-        
+
         # Test exact match with single string filter (reverse=True)
         fn = frame._make_fn(vals=("abc",), reverse=True)
         assert fn("abc") is False
         assert fn("def") is True
-        
+
         # Test with regex filter (not reverse)
         pattern = re.compile(r"model\d")
         fn = frame._make_fn(vals=(pattern,), reverse=False)
         assert fn("model1") is True
         assert fn("model23") is True
         assert fn("something") is False
-        
+
         # Test with regex filter (reverse=True)
         fn = frame._make_fn(vals=(pattern,), reverse=True)
         assert fn("model1") is False
@@ -450,23 +452,20 @@ class TestMiniFrame:
         frame.add(row="row1", col="arc_challenge::olmes", val=0.5)
         frame.add(row="row1", col="hellaswag::olmes", val=0.7)
         frame.add(row="row1", col="gsm8k::olmo1", val=0.6)
-        
+
         # We can't directly test the output of show(), but we can check that
         # SHORT_NAMES constants are available and have the expected patterns
         assert isinstance(SHORT_NAMES, dict)
         assert r"::olmes$" in SHORT_NAMES
         assert r"^gsm8k::olmo1$" in SHORT_NAMES
-        
+
         # Just make sure show() doesn't crash
         frame.show()
 
     def test_chained_operations(self, sample_frame):
         """Test chaining multiple operations together"""
         # Chain multiple operations to test fluent interface
-        result = (sample_frame
-                 .sort(col="metric1")
-                 .keep_rows("model1", "model2")
-                 .drop_cols("metric2"))
+        result = sample_frame.sort(col="metric1").keep_rows("model1", "model2").drop_cols("metric2")
 
         # Verify the result has the expected shape and contents
         assert len(result) == 1  # One column remains
@@ -480,10 +479,11 @@ class TestMiniFrame:
         assert "model3" not in rows
 
         # Test more complex chaining with mixed operations
-        complex_result = (sample_frame
-                         .sort(col="metric1", reverse=True)  # Descending sort by metric1
-                         .keep_cols(re.compile(r"metric\d"))  # Keep all metric columns
-                         .drop_rows("model3"))  # Remove model3
+        complex_result = (
+            sample_frame.sort(col="metric1", reverse=True)  # Descending sort by metric1
+            .keep_cols(re.compile(r"metric\d"))  # Keep all metric columns
+            .drop_rows("model3")
+        )  # Remove model3
 
         # Verify complex chaining result
         assert len(complex_result) == 2  # Both metric columns
@@ -494,68 +494,68 @@ class TestMiniFrame:
         # First row should be model1 since sort is reversed and we removed model3
         first_row = rows[0]
         assert first_row == "model1"
-        
+
     def test_add_operator(self):
         """Test the __add__ operator for combining MiniFrames"""
         # Create two frames to combine
         frame1 = MiniFrame(title="Frame 1")
         frame1.add(row="row1", col="col1", val=0.1)
         frame1.add(row="row2", col="col1", val=0.2)
-        
+
         frame2 = MiniFrame(title="Frame 2")
         frame2.add(row="row1", col="col2", val=0.3)
         frame2.add(row="row3", col="col2", val=0.4)
-        
+
         # Combine frames with + operator
         combined = frame1 + frame2
-        
+
         # Check that combined frame has all columns
         columns = list(combined.columns)
         assert len(columns) == 2
         assert "col1" in columns
         assert "col2" in columns
-        
+
         # Check that combined frame has all rows
         rows = [r for r, _ in combined.rows]
         assert len(rows) == 3
         assert "row1" in rows
         assert "row2" in rows
         assert "row3" in rows
-        
+
         # Check specific values
         assert combined["col1", "row1"] == 0.1
         assert combined["col2", "row1"] == 0.3
         assert combined["col1", "row3"] is None
         assert combined["col2", "row3"] == 0.4
-        
+
     def test_radd_operator(self):
         """Test the __radd__ operator for combining MiniFrames with sum()"""
         # Create multiple frames
         frame1 = MiniFrame(title="Frame 1")
         frame1.add(row="row1", col="col1", val=0.1)
-        
+
         frame2 = MiniFrame(title="Frame 2")
         frame2.add(row="row1", col="col2", val=0.2)
-        
+
         frame3 = MiniFrame(title="Frame 3")
         frame3.add(row="row2", col="col1", val=0.3)
-        
+
         # Combine with sum()
         combined = sum([frame1, frame2, frame3], MiniFrame(title="Combined"))
-        
+
         # Check title is preserved from the start value
         assert combined.title == "Combined"
-        
+
         # Check columns and rows
         assert len(combined) == 2
         assert "col1" in list(combined.columns)
         assert "col2" in list(combined.columns)
-        
+
         rows = [r for r, _ in combined.rows]
         assert len(rows) == 2
         assert "row1" in rows
         assert "row2" in rows
-        
+
         # Check values
         assert combined["col1", "row1"] == 0.1
         assert combined["col2", "row1"] == 0.2

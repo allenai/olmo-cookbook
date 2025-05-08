@@ -10,18 +10,24 @@ description = ""
 authors = [
     { name = "Allen Institute for Artificial Intelligence", email = "oe-data-engineering@allenai.org" }
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
     "boto3",
     "click",
     "requests",
+    "platformdirs",
     "pydantic",
     "s3fs",
+    "gcsfs",
+    "rich",
+    "smart_open",
     "yaspin",
     "PyYAML>=6.0,<7.0",
     "paramiko>=3.5,<3.6",
     "tabulate",
+    "packaging>=24.2",
+    "tqdm>=4.67.1",
 ]
 
 [project.optional-dependencies]
@@ -33,15 +39,15 @@ dev = [
     "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 beaker = [
-    "beaker-py",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@undfined/cookbook-pin",
-    "beaker-py",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@ef28f2ab956177f4e9bf8cbcc1bb50457ae575cd",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]

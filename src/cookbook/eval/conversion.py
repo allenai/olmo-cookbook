@@ -3,12 +3,14 @@ import os
 import shlex
 import shutil
 import subprocess
+from typing import Optional
 
 import yaml
 
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
+    check_beaker_dependencies,
     discover_weka_mount,
     download_tokenizer,
     install_olmo,
@@ -16,6 +18,7 @@ from cookbook.cli.utils import (
     install_transformers,
     make_destination_dir,
     remove_conflicting_packages,
+    install_beaker_py,
 )
 from cookbook.constants import (
     BEAKER_KNOWN_CLUSTERS,
@@ -27,22 +30,133 @@ from cookbook.constants import (
     OLMO2_UNSHARD_SCRIPT,
     OLMO_CORE_COMMIT_HASH,
     OLMO_CORE_UNSHARD_CONVERT_SCRIPT,
+    OLMO_CORE_V2_COMMIT_HASH,
     OLMOE_CONVERSION_SCRIPT,
     OLMOE_UNSHARD_SCRIPT,
     TRANSFORMERS_COMMIT_HASH,
 )
 
 
+def convert_olmo_core_v2(
+    input_dir: str,
+    huggingface_tokenizer: str = DEFAULT_OLMO_CORE_TOKENIZER,
+    max_sequence_length: Optional[int] = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
+    unsharded_output_suffix: str = "unsharded",
+    huggingface_output_suffix: str = "hf",
+    olmo_core_v2_commit_hash: str = OLMO_CORE_V2_COMMIT_HASH,
+    transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
+    env: Optional[PythonEnv] = None,
+):
+    env = env or PythonEnv.null()
+
+    current_directory = os.getcwd()
+    directories_to_clean_up = []
+
+    if max_sequence_length is None:
+        # we load config.json from the input_dir and get the max_sequence_length from the config
+        config_file = os.path.join(input_dir, "config.json")
+        assert os.path.exists(config_file), f"Could not find config.json in {input_dir}"
+
+        with open(config_file, "r") as f:
+            config = json.load(f)
+        max_sequence_length = config.get("dataset", {}).get("sequence_length", None)
+
+        if max_sequence_length is None:
+            raise ValueError(
+                f"Could not find max_sequence_length in config.json for {input_dir}; "
+                "please provide it as a command line argument."
+            )
+
+    unsharded_output_dir = make_destination_dir(input_dir, unsharded_output_suffix, unsharded_output_dir)
+    huggingface_output_dir = make_destination_dir(input_dir, huggingface_output_suffix, huggingface_output_dir)
+
+    try:
+        print("Starting conversion of OLMo core model...")
+
+        olmo_code_dir = install_olmo_core(env=env, commit_hash=olmo_core_v2_commit_hash)
+        directories_to_clean_up.append(olmo_code_dir)
+
+        huggingface_code_dir = install_transformers(transformers_commit_hash, env)
+        directories_to_clean_up.append(huggingface_code_dir)
+
+        tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
+        directories_to_clean_up.append(tokenizer_dir)
+
+        # copy all tokenizer files to the huggingface output dir
+        #     we copy the tokenizer first because it might carry over config.json from the model we are
+        #     grabbing tokenizer from (e.g. allenai/OLMo-2-1124-7B), which might be incorrect for the model
+        #     we are converting. but that's okay if we copy the tokenizer first, cuz we will override it
+        #     after. This was an awful bug, and took me (@soldni) forever to figure out. Embarrassing.
+        for file in os.listdir(tokenizer_dir):
+            if not os.path.isfile(src := os.path.join(tokenizer_dir, file)):
+                # do not copy directories
+                continue
+            if file.startswith("."):
+                # do not copy hidden files
+                continue
+            shutil.copy(src, os.path.join(huggingface_output_dir, file))
+        print(f"Copied tokenizer files to {huggingface_output_dir}.")
+
+        # check if input_dir contains a "config.yaml" file. if it does not, check if it contains a
+        # "config.json" file. if it does, re-save it as a "config.yaml" file.
+        config_file = os.path.join(input_dir, "config.yaml")
+        if not os.path.exists(config_file):
+            config_json_file = os.path.join(input_dir, "config.json")
+            if not os.path.exists(config_json_file):
+                raise FileNotFoundError(f"Could not find 'config.yaml' or 'config.json' in {input_dir}")
+
+            print("Converting 'config.json' to 'config.yaml'...")
+            with open(config_json_file, "r") as json_file, open(config_file, "w") as yaml_file:
+                config = json.load(json_file)
+                yaml.dump(config, yaml_file)
+
+        print("Converting OLMo core V2 weights to Huggingface format...")
+        os.makedirs(huggingface_output_dir, exist_ok=True)
+        cmd = [
+            env.python,
+            OLMO_CORE_UNSHARD_CONVERT_SCRIPT,
+            "--checkpoint-input-path",
+            input_dir,
+            "--max-sequence-length",
+            str(max_sequence_length),
+            "--huggingface-output-dir",
+            huggingface_output_dir,
+        ]
+        print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
+
+        subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
+        print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
+
+        # change type of model to bfloat16 if it is float32
+        config_file = os.path.join(huggingface_output_dir, "config.json")
+        with open(config_file, "r") as f:
+            config = json.load(f)
+
+        if config.get("torch_dtype", "") == "float32":
+            print(f"Changing type of model to bfloat16...")
+            config["torch_dtype"] = "bfloat16"
+
+            with open(config_file, "w") as f:
+                json.dump(config, f)
+
+    finally:
+        for directory in directories_to_clean_up:
+            print(f"Cleaning up {directory}...")
+            shutil.rmtree(directory, ignore_errors=True)
+
+
 def convert_olmo_core(
     input_dir: str,
     huggingface_tokenizer: str = DEFAULT_OLMO_CORE_TOKENIZER,
-    unsharded_output_dir: str | None = None,
-    huggingface_output_dir: str | None = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
     olmo_commit_hash: str = OLMO_CORE_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
-    env: PythonEnv | None = None,
+    env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
 
@@ -107,13 +221,13 @@ def convert_olmo_core(
 def convert_olmoe(
     input_dir: str,
     huggingface_tokenizer: str = DEFAULT_OLMOE_TOKENIZER,
-    unsharded_output_dir: str | None = None,
-    huggingface_output_dir: str | None = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
-    olmo_commit_hash: str | None = None,
-    transformers_commit_hash: str | None = None,
-    env: PythonEnv | None = None,
+    olmo_commit_hash: Optional[str] = None,
+    transformers_commit_hash: Optional[str] = None,
+    env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
 
@@ -188,13 +302,13 @@ def convert_olmoe(
 def convert_olmo2(
     input_dir: str,
     huggingface_tokenizer: str = DEFAULT_OLMO2_TOKENIZER,
-    unsharded_output_dir: str | None = None,
-    huggingface_output_dir: str | None = None,
+    unsharded_output_dir: Optional[str] = None,
+    huggingface_output_dir: Optional[str] = None,
     unsharded_output_suffix: str = "unsharded",
     huggingface_output_suffix: str = "hf",
     olmo_commit_hash: str = OLMO2_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
-    env: PythonEnv | None = None,
+    env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
     current_directory = os.getcwd()
@@ -265,7 +379,7 @@ def convert_olmo2(
             shutil.rmtree(directory, ignore_errors=True)
 
 
-def convert_checkpoint(
+def run_checkpoint_conversion(
     beaker_allow_dirty: bool,
     beaker_budget: str,
     beaker_cluster: str,
@@ -274,32 +388,33 @@ def convert_checkpoint(
     beaker_priority: str,
     beaker_workspace: str,
     beaker_preemptible: bool,
-    huggingface_output_dir: str | None,
+    huggingface_output_dir: Optional[str],
     huggingface_output_suffix: str,
-    huggingface_token: str | None,
-    huggingface_tokenizer: str | None,
+    huggingface_token: Optional[str],
+    huggingface_tokenizer: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
+    olmo_core_v2_commit_hash: str,
     huggingface_transformers_commit_hash: str,
-    unsharded_output_dir: str | None,
+    unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_beaker: bool,
     use_system_python: bool,
     python_venv_name: str,
     python_venv_force: bool,
+    max_sequence_length: Optional[int] = None,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
-        if not use_system_python
-        else PythonEnv.null()
+        if not use_system_python else PythonEnv.null()
     )
 
     if use_beaker:
         print("Installing beaker and gantry clients...")
-        subprocess.run(shlex.split(f"{env.pip} install beaker-py beaker-gantry"), check=True, env=env.path())
+        install_beaker_py(env=env)
 
         assert input_dir.startswith("/"), "Input directory must be fully specified"
         if unsharded_output_dir:
@@ -336,7 +451,7 @@ def convert_checkpoint(
             gantry_flags.append(f"--cluster {cluster}")
 
         remote_command = [
-            "pip install . &&",
+            "pip install uv && uv pip install . --system &&",
             "olmo-cookbook-eval convert",
             f"{input_dir}",
             f"--olmo-type {olmo_type}",
@@ -349,6 +464,7 @@ def convert_checkpoint(
             f"--olmo2-commit-hash {olmo2_commit_hash}",
             f"--olmo-core-commit-hash {olmo_core_commit_hash}",
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
+            (f"--max-sequence-length {max_sequence_length}" if max_sequence_length is not None else ""),
             "--use-system-python",
         ]
         remote_command_str = " ".join(remote_command)
@@ -411,5 +527,19 @@ def convert_checkpoint(
             transformers_commit_hash=huggingface_transformers_commit_hash,
             env=env,
         )
+    elif olmo_type == "olmo-core-v2":
+        return convert_olmo_core_v2(
+            input_dir=input_dir,
+            max_sequence_length=max_sequence_length,
+            unsharded_output_dir=unsharded_output_dir,
+            huggingface_output_dir=huggingface_output_dir,
+            unsharded_output_suffix=unsharded_output_suffix,
+            huggingface_output_suffix=huggingface_output_suffix,
+            olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
+            transformers_commit_hash=huggingface_transformers_commit_hash,
+            env=env,
+        )
     else:
-        raise ValueError(f"Invalid olmo type: {olmo_type}; must be one of 'olmo2', 'olmoe', 'olmo-core'")
+        raise ValueError(
+            f"Invalid olmo type: {olmo_type}; must be one of 'olmo2', 'olmoe', 'olmo-core', or 'olmo-core-v2'"
+        )

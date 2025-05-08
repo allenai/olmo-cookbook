@@ -1,73 +1,65 @@
 from enum import Enum
+from typing import Dict, List
+
+from olmo_eval import list_tasks
+
+OLMO2_DEV_1B_TASKS = [
+    # OLMES Core 9(-ish) RC
+    "arc_challenge_test_rc_5shot",
+    "arc_easy_test_rc_5shot",
+    "hellaswag_rc_5shot",  # 1K subset of HellaSwag
+    "winogrande_val_rc_5shot",  # Helpful after 750M-5xC scale
+    "csqa_val_rc_5shot",
+    "piqa_val_rc_5shot",
+    "socialiqa_val_rc_5shot",
+    # MMLU RC
+    "mmlu_stem_val_rc_5shot",
+    "mmlu_humanities_val_rc_5shot",
+    "mmlu_social_sciences_val_rc_5shot",
+    "mmlu_other_val_rc_5shot",
+    "mmlu_stem_test_rc_5shot",
+    "mmlu_humanities_test_rc_5shot",
+    "mmlu_social_sciences_test_rc_5shot",
+    "mmlu_other_test_rc_5shot",
+    # Gen tasks BPB
+    "gsm8k_gold_bpb_5shot",
+    "minerva_math_algebra_gold_bpb_0shot",
+    "minerva_math_counting_and_probability_gold_bpb_0shot",
+    "minerva_math_geometry_gold_bpb_0shot",
+    "minerva_math_intermediate_algebra_gold_bpb_0shot",
+    "minerva_math_number_theory_gold_bpb_0shot",
+    "minerva_math_prealgebra_gold_bpb_0shot",
+    "minerva_math_precalculus_gold_bpb_0shot",
+    "codex_humaneval_gold_bpb_0shot",
+    "codex_mbpp_gold_bpb_0shot",
+    # Sanity check for MCQA ability
+    "copycolors_10way",
+]
+
+TASK_GROUPS: Dict[str, List[str]] = {
+    "all": list(list_tasks()),
+    "olmo2_dev_1b": OLMO2_DEV_1B_TASKS,
+}
 
 
-class DownstreamEvaluator(Enum):
-    """Enum class enumerating available in-loop evaluators."""
+ALL_TASKS_MAP = {task.upper(): task for task in list_tasks()}
 
-    PIQA = "piqa"
-    HELLASWAG = "hellaswag"
-    WINOGRANDE = "winogrande"
-    OPENBOOK_QA = "openbook_qa"
-    BOOLQ = "boolq"
-    SCIQ = "sciq"
-    ARC_EASY = "arc_easy"
-    ARC_CHALLENGE = "arc_challenge"
-    COPA = "copa"
-    COMMONSENSE_QA = "commonsense_qa"
-    SOCIAL_IQA = "social_iqa"
-    MMLU_STEM_VAR = "mmlu_stem_var"
-    MMLU_HUMANITIES_VAR = "mmlu_humanities_var"
-    MMLU_SOCIAL_SCIENCES_VAR = "mmlu_social_sciences_var"
-    MMLU_OTHER_VAR = "mmlu_other_var"
-    MMLU_STEM_MC_5SHOT = "mmlu_stem_mc_5shot"
-    MMLU_HUMANITIES_MC_5SHOT = "mmlu_humanities_mc_5shot"
-    MMLU_SOCIAL_SCIENCES_MC_5SHOT = "mmlu_social_sciences_mc_5shot"
-    MMLU_OTHER_MC_5SHOT = "mmlu_other_mc_5shot"
-    MMLU_STEM_MC_5SHOT_TEST = "mmlu_stem_mc_5shot_test"
-    MMLU_HUMANITIES_MC_5SHOT_TEST = "mmlu_humanities_mc_5shot_test"
-    MMLU_SOCIAL_SCIENCES_MC_5SHOT_TEST = "mmlu_social_sciences_mc_5shot_test"
-    MMLU_OTHER_MC_5SHOT_TEST = "mmlu_other_mc_5shot_test"
-    BASIC_ARITHMETIC = "basic_arithmetic"
-    TRIVIA_QA_WIKI_PPL = "trivia_qa_wiki_ppl"
-    NATURAL_QS_OPEN_PPL = "natural_qs_open_ppl"
-    ARC_EASY_PPL = "arc_easy_ppl"
-    PIQA_MC_5SHOT = "piqa_mc_5shot"
-    PIQA_MC_5SHOT_BPB = "piqa_mc_5shot_bpb"
-    HELLASWAG_MC_5SHOT = "hellaswag_mc_5shot"
-    HELLASWAG_MC_5SHOT_BPB = "hellaswag_mc_5shot_bpb"
-    WINOGRANDE_MC_5SHOT = "winogrande_mc_5shot"
-    WINOGRANDE_MC_5SHOT_BPB = "winogrande_mc_5shot_bpb"
-    OPENBOOKQA_MC_5SHOT = "openbookqa_mc_5shot"
-    OPENBOOKQA_MC_5SHOT_BPB = "openbookqa_mc_5shot_bpb"
-    BOOLQ_MC_5SHOT = "boolq_mc_5shot"
-    BOOLQ_MC_5SHOT_BPB = "boolq_mc_5shot_bpb"
-    ARC_EASY_MC_5SHOT = "arc_easy_mc_5shot"
-    ARC_EASY_MC_5SHOT_BPB = "arc_easy_mc_5shot_bpb"
-    ARC_CHALLENGE_MC_5SHOT = "arc_challenge_mc_5shot"
-    ARC_CHALLENGE_MC_5SHOT_BPB = "arc_challenge_mc_5shot_bpb"
-    CSQA_RC_5SHOT = "csqa_rc_5shot"
-    CSQA_RC_5SHOT_BPB = "csqa_rc_5shot_bpb"
-    CSQA_MC_5SHOT = "csqa_mc_5shot"
-    CSQA_MC_5SHOT_BPB = "csqa_mc_5shot_bpb"
-    SOCIALIQA_RC_5SHOT = "socialiqa_rc_5shot"
-    SOCIALIQA_RC_5SHOT_BPB = "socialiqa_rc_5shot_bpb"
-    SOCIALIQA_MC_5SHOT = "socialiqa_mc_5shot"
-    SOCIALIQA_MC_5SHOT_BPB = "socialiqa_mc_5shot_bpb"
-    MMLU_STEM_VAR_BPB = "mmlu_stem_var_bpb"
-    MMLU_HUMANITIES_VAR_BPB = "mmlu_humanities_var_bpb"
-    MMLU_SOCIAL_SCIENCES_VAR_BPB = "mmlu_social_sciences_var_bpb"
-    MMLU_OTHER_VAR_BPB = "mmlu_other_var_bpb"
-    MMLU_STEM_BPB = "mmlu_stem_bpb"
-    MMLU_HUMANITIES_BPB = "mmlu_humanities_bpb"
-    MMLU_SOCIAL_SCIENCES_BPB = "mmlu_social_sciences_bpb"
-    MMLU_OTHER_BPB = "mmlu_other_bpb"
-    GSM8K_BPB_5shot = "gsm8k_gold_bpb_5shot"
-    CODEX_HUMANEVAL_BPB = "codex_humaneval_gold_bpb_0shot"
-    CODEX_MBPP_BPB = "codex_mbpp_gold_bpb_0shot"
-    MINERVA_MATH_ALGEBRA_BPB = "minerva_math_algebra_gold_bpb_0shot"
-    MINERVA_MATH_COUNTING_AND_PROBABILITY_BPB = "minerva_math_counting_and_probability_gold_bpb_0shot"
-    MINERVA_MATH_GEOMETRY_BPB = "minerva_math_geometry_gold_bpb_0shot"
-    MINERVA_MATH_INTERMEDIATE_ALGEBRA_BPB = "minerva_math_intermediate_algebra_gold_bpb_0shot"
-    MINERVA_MATH_NUMBER_THEORY_BPB = "minerva_math_number_theory_gold_bpb_0shot"
-    MINERVA_MATH_PREALGEBRA_BPB = "minerva_math_prealgebra_gold_bpb_0shot"
-    MINERVA_MATH_PRECALCULUS_BPB = "minerva_math_precalculus_gold_bpb_0shot"
+DownstreamEvaluator = Enum(
+    "DownstreamEvaluator",
+    {
+        item[0].upper(): item[1] if isinstance(item[1], list) else [item[1]]
+        for item in {**TASK_GROUPS, **ALL_TASKS_MAP}.items()
+    },
+)
+
+
+def get_tasks_for_groups(groups: List[str]) -> List[str]:
+    """Return all tasks in a group"""
+    tasks = []
+    for group in groups:
+        if group not in TASK_GROUPS:
+            raise ValueError(f"Group {group} not found")
+
+        tasks.extend(TASK_GROUPS[group])
+
+    return list(set(tasks))

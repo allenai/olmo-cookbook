@@ -1,7 +1,8 @@
-from cookbook.eval.datalake import FindExperiments, MetricsAll
-from cookbook.constants import ALL_NAMED_GROUPS
-from cookbook.eval.miniframe import MiniFrame
 import re
+
+from cookbook.constants import ALL_NAMED_GROUPS
+from cookbook.eval.datalake import FindExperiments, MetricsAll
+from cookbook.eval.miniframe import MiniFrame
 
 
 def make_dashboard_table(
@@ -19,12 +20,20 @@ def make_dashboard_table(
     force: bool = False,
 ) -> tuple[MiniFrame, MiniFrame]:
     experiments = FindExperiments.run(dashboard=dashboard)
+
+    # these are the tables that will be displayed on the dashboard
+    all_metrics_table = MiniFrame(title=dashboard)
+    avg_metrics_table = MiniFrame(title=dashboard)
+
+    if len(experiments) == 0:
+        # return empty tables if no experiments are found
+        return all_metrics_table, avg_metrics_table
+
+
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
         force=[force for _ in experiments],
     )
-
-    all_metrics_table = MiniFrame(title=dashboard)
 
     for metric in metrics:
         if metric.is_aggregate:
@@ -65,8 +74,6 @@ def make_dashboard_table(
     # remove metrics that do not have any models evaluated against them
     if not show_partial:
         all_metrics_table = all_metrics_table.drop_empty()
-
-    avg_metrics_table = MiniFrame(title=dashboard)
 
     for group_name, tasks in ALL_NAMED_GROUPS.items():
         if "mmlu" in group_name and not average_mmlu:
