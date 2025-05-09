@@ -1,37 +1,34 @@
-name: "olm2-7b_10b-anneal_s2c-plablate_py-rust"
-description: "OLMo2 7b anneal to 10B Tokens | python + other PL <--- CHANGE THIS"
+name: "olmo2-7b_10b-anneal_s2c-pl-ablate_py-PLHERE"
+description: "OLMo2 7b anneal to 10B Tokens on code data | python + PLHERE"
 budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+workspace: "ai2/learn2code"
 nodes: 4
 gpus: 8
-preemptible: true
+preemptible: false
 max_tokens: 10_000_000_000
 global_batch_size: 2097152
-sequence_length: 4096
+sequence_length: 2048
 seed: 1337
 model: "olmo2_7B"
 tokenizer: "dolma2"
-priority: high
+priority: urgent
 eval_interval: 250
-learning_rate: 1.8e-3
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 32768
+rank_microbatch_size: 8192
 scheduler_type: linear
 warmup_steps: 0
-annealing: true
-load_path: gs://ai2-llm/checkpoints/OLMo-medium/peteish7/step928646/
+annealing:
+  enabled: true
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
+load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model_and_optim/
 load_state: false
-weka: false
 dataset:
   sources:
-  - name: python
+  - name: python # 108.43B tokens
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/python/dolma2-tokenizer/*.npy     
-  - name: rust
-    target_ratio: 0.5 
+    - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/python/dolma2-tokenizer/*.npy
+  - name: PLHERE # TOKCOUNT
+    target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/rust/dolma2-tokenizer/*.npy
-
-
-
+    - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/PLHERE/dolma2-tokenizer/*.npy
