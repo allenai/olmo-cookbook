@@ -1,5 +1,5 @@
-name: "olmo2-7b_10b-anneal_s2c-pl-ablate_py-rust"
-description: "OLMo2 7b anneal to 10B Tokens on code data | python + rust"
+name: "olmo2-7b_10b-anneal_s2c-pl-ablate_py-markdown"
+description: "OLMo2 7b anneal to 10B Tokens on code data | python + markdown"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
@@ -28,7 +28,7 @@ dataset:
     target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/python/dolma2-tokenizer/*.npy
-  - name: rust # 11.12B tokens
+  - name: markdown # 163.52B tokens
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/rust/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/the-stack-v2/love2code/v0/heuristic_filtered_minhash_plpartition/markdown/dolma2-tokenizer/*.npy
