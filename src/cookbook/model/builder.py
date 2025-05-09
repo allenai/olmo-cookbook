@@ -49,7 +49,7 @@ from olmo_core.train.train_module import (
     TransformerActivationCheckpointingMode,
 )
 
-from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.aliases import AnnealConfig, MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
@@ -175,7 +175,6 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    annealing: bool
     cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
@@ -188,6 +187,7 @@ class TransformerConfigBuilder:
     warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    annealing: Optional[AnnealConfig] = None
     profile: bool = False
 
     def __init__(
@@ -212,7 +212,7 @@ class TransformerConfigBuilder:
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
-        annealing: bool = False,
+        annealing: Optional[AnnealConfig] = None,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -432,7 +432,7 @@ class TransformerConfigBuilder:
                 warmup_steps=self.get_warmup_steps(),
             ),
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
             ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
@@ -444,9 +444,8 @@ class TransformerConfigBuilder:
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
-        if self.annealing:
-            scheduler_state = self.get_state_from_checkpoint()
-            lr = scheduler_state.starting_lr
+        if self.annealing is not None:
+            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
 
         return SkipStepAdamWConfig(
             lr=lr,
@@ -497,14 +496,14 @@ class TransformerConfigBuilder:
 
         if max_pretrain_steps is None:
             raise ValueError(
-                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                "Could not find max_steps. Please ensure the checkpoint is valid. Unable to load scheduler state. Exiting!"
             )
 
         logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
 
         if not self.load_path:
             raise ValueError(
-                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state. Exiting!"
             )
 
         with open(config_path, "r") as f:
