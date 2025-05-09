@@ -1,7 +1,7 @@
 name: "olmo2-7b_10b-anneal_s2c-pl-ablate_py-php"
 description: "OLMo2 7b anneal to 10B Tokens on code data | python + php"
 budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+workspace: "ai2/learn2code"
 nodes: 4
 gpus: 8
 preemptible: false
@@ -11,7 +11,7 @@ sequence_length: 2048
 seed: 1337
 model: "olmo2_7B"
 tokenizer: "dolma2"
-priority: high
+priority: urgent
 eval_interval: 250
 cluster: ai2/augusta-google-1
 rank_microbatch_size: 8192
