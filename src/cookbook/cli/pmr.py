@@ -55,7 +55,7 @@ import sys
 import time
 from dataclasses import dataclass
 from enum import Enum
-from functools import reduce
+from functools import reduce, partial
 from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union
 
 import boto3
@@ -1601,6 +1601,10 @@ def map_commands(
 
     logger.info(f"Found {len(instances):,} instances to map {len(script):,} scripts to!")
 
+    transfer_scripts_commands: list[list[str]] = []
+    execute_scripts_commands: list[list[str]] = []
+    log_script_names: list[list[str]] = []
+
     # Distribute scripts across instances
     for i, instance in enumerate(instances):
         # Calculate the range of scripts for this instance
@@ -1610,7 +1614,9 @@ def map_commands(
         instance_scripts = script[start_idx:end_idx]
 
         # Prepare commands to transfer and execute scripts
-        run_command_scripts = []
+        transfer_scripts_commands.append([])
+        execute_scripts_commands.append([])
+
         for one_script in instance_scripts:
             # Read and base64 encode each script
             with open(one_script, "rb") as f:
@@ -1618,29 +1624,43 @@ def map_commands(
 
             # Create commands to decode, save, and execute the script
             filename = os.path.basename(one_script)
-            run_command_scripts.append(f"echo {base64_encoded_script} | base64 -d > {filename}")
-            run_command_scripts.append(f"chmod +x {filename}")
-            run_command_scripts.append(f"./{filename}")
+            transfer_scripts_commands[-1].append(f"echo {base64_encoded_script} | base64 -d > {filename}")
+            transfer_scripts_commands[-1].append(f"chmod +x {filename}")
+            execute_scripts_commands[-1].append(f"./{filename}")
 
         # Log which scripts are being sent to which instance
-        script_names = [f"`{os.path.basename(s)}`" for s in instance_scripts]
-        logger.info(
-            f"Running {len(instance_scripts):,} scripts on instance {instance.instance_id}: {'; '.join(script_names)}"
+        log_script_names.append([f"`{os.path.basename(s)}`" for s in instance_scripts])
+
+
+    runner_fn = partial(run_command, name=name, region=region, ssh_key_path=ssh_key_path, script=None)
+
+
+    for i, (setup_commands, script_names) in enumerate(zip(transfer_scripts_commands, log_script_names)):
+        curr_instance_id = instances[i].instance_id
+        scripts_names_str = "; ".join(script_names)
+        logger.info(f"Copying{len(script_names):,} scripts to instance {curr_instance_id}: {scripts_names_str}")
+
+        runner_fn(
+            instance_id=[curr_instance_id],
+            command="; ".join(setup_commands),
+            spindown=False,
+            detach=False,
+            screen=False,
         )
 
-        # Execute the scripts on the instance
-        run_command(
-            name=name,
-            region=region,
-            instance_id=[instance.instance_id],
-            command="; ".join(run_command_scripts),
-            script=None,
-            ssh_key_path=ssh_key_path,
+    logger.info(f"Scripts transferred on {len(instances):,} instances")
+    for i, (run_commands, script_names) in enumerate(zip(execute_scripts_commands, log_script_names)):
+        curr_instance_id = instances[i].instance_id
+        scripts_names_str = "; ".join(script_names)
+        logger.info(f"Running{len(script_names):,} scripts on instance {curr_instance_id}: {scripts_names_str}")
+
+        runner_fn(
+            instance_id=[curr_instance_id],
+            command="; ".join(run_commands),
             spindown=spindown,
             detach=True,
             screen=True,
         )
-
 
 cli.command(name="create")(create_instances)
 cli.command(name="list")(list_instances)
