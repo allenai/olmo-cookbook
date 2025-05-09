@@ -4,7 +4,7 @@ budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
-preemptible: true
+preemptible: false
 max_tokens: 10_000_000_000
 global_batch_size: 2097152
 sequence_length: 2048
