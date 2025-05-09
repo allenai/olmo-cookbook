@@ -95,7 +95,7 @@ def read_config_files(path_patterns: List[str], data_only: bool = True) -> Dict[
         Dictionary mapping filenames to either lists of paths or full config dicts
     """
     configs_by_file: Dict[str, Dict] = {}
-    
+
     for pattern in path_patterns:
         if pattern.startswith(("http://", "https://")):
             # Handle Wandb URLs
@@ -106,13 +106,13 @@ def read_config_files(path_patterns: List[str], data_only: bool = True) -> Dict[
             try:
                 run = api.run(run_path)
                 config_raw = run._attrs["rawconfig"]
-                
+
                 filename = f"wandb_{run.id}"
                 if data_only:
                     # Extract just the data paths
-                    data_paths = config_raw.get('data', {}).get('paths', [])
-                    paths = [path for path in data_paths if path.endswith('.npy')]
-                    configs_by_file[filename] = {'paths': paths}
+                    data_paths = config_raw.get("data", {}).get("paths", [])
+                    paths = [path for path in data_paths if path.endswith(".npy")]
+                    configs_by_file[filename] = {"paths": paths}
                 else:
                     # Include full config
                     configs_by_file[filename] = config_raw
@@ -124,40 +124,40 @@ def read_config_files(path_patterns: List[str], data_only: bool = True) -> Dict[
             files = glob.glob(pattern)
             for file in files:
                 filename = Path(file).name
-                
-                if filename.endswith('.yaml'):
-                    with open(file, 'r') as f:
+
+                if filename.endswith(".yaml"):
+                    with open(file, "r") as f:
                         config = yaml.safe_load(f)
                         if data_only:
-                            data_paths = config.get('data', {}).get('paths', [])
+                            data_paths = config.get("data", {}).get("paths", [])
                             paths = []
                             for line in data_paths:
                                 line = line.strip()
-                                if not line or line.startswith('#'):
+                                if not line or line.startswith("#"):
                                     continue
-                                if ',' in line:
-                                    path = line.split(',')[1]
+                                if "," in line:
+                                    path = line.split(",")[1]
                                 else:
                                     path = line
-                                if path.endswith('.npy'):
+                                if path.endswith(".npy"):
                                     paths.append(path)
-                            configs_by_file[filename] = {'paths': paths}
+                            configs_by_file[filename] = {"paths": paths}
                         else:
                             configs_by_file[filename] = config
                 else:
                     paths = []
-                    with open(file, 'r') as f:
+                    with open(file, "r") as f:
                         for line in f:
                             line = line.strip()
                             if not line or line.startswith("#"):
                                 continue
-                            if ',' in line:
-                                path = line.split(',')[1]
+                            if "," in line:
+                                path = line.split(",")[1]
                             else:
                                 path = line
-                            if path.endswith('.npy'):
+                            if path.endswith(".npy"):
                                 paths.append(path)
-                    configs_by_file[filename] = {'paths': paths}
+                    configs_by_file[filename] = {"paths": paths}
 
     if not configs_by_file:
         print(f"No valid configs found in patterns: {path_patterns}")
@@ -202,9 +202,9 @@ def count_paths(configs_by_file: Dict[str, Dict]) -> Tuple[Dict[str, Dict[str, i
         Tuple of (base path counts dict, file totals dict)
     """
     base_path_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    
+
     for filename, config in configs_by_file.items():
-        paths = config.get('paths', [])
+        paths = config.get("paths", [])
         for path in paths:
             # Normalize the incoming path to remove extraneous prefixes
             norm_path = normalize_storage_path(path)
@@ -224,14 +224,14 @@ def count_paths(configs_by_file: Dict[str, Dict]) -> Tuple[Dict[str, Dict[str, i
             base_path_counts[base_path][filename] += 1
 
     # Compute the total number of paths for each file.
-    file_totals = {filename: len(config.get('paths', [])) for filename, config in configs_by_file.items()}
+    file_totals = {filename: len(config.get("paths", [])) for filename, config in configs_by_file.items()}
     return base_path_counts, file_totals
 
-def format_data_results(base_path_counts: Dict[str, Dict[str, int]], 
-                       file_totals: Dict[str, int]) -> None:
+
+def format_data_results(base_path_counts: Dict[str, Dict[str, int]], file_totals: Dict[str, int]) -> None:
     """
     Format and print results for data paths using tabulate.
-    
+
     Args:
         base_path_counts: Dictionary mapping base paths to counts per file.
         file_totals: Dictionary mapping filenames to total counts.
@@ -247,9 +247,9 @@ def format_data_results(base_path_counts: Dict[str, Dict[str, int]],
         count1 = base_path_counts[base_path].get(largest_file, 0)
         count2 = base_path_counts[base_path].get(second_largest, 0)
         return (count1, count2)
-        
+
     sorted_base_paths = sorted(base_path_counts.keys(), key=sort_key, reverse=True)
-    
+
     # Prepare headers and table data.
     truncated_filenames = []
     for filename in sorted_filenames:
@@ -262,26 +262,27 @@ def format_data_results(base_path_counts: Dict[str, Dict[str, int]],
     for base_path in sorted_base_paths:
         row = [base_path]
         counts = [base_path_counts[base_path].get(filename, 0) for filename in sorted_filenames]
-        row.extend([count if count > 0 else '-' for count in counts])
-        
+        row.extend([count if count > 0 else "-" for count in counts])
+
         all_same = len(set(c for c in counts if c > 0)) <= 1
-        row.append('✓' if all_same else '')
-        
+        row.append("✓" if all_same else "")
+
         table_data.append(row)
 
     # Build totals row.
     totals_row = ["Total"] + [file_totals[filename] for filename in sorted_filenames] + [""]
-    
-    totals_row = ['Total'] + [file_totals[filename] for filename in sorted_filenames] + ['']
+
+    totals_row = ["Total"] + [file_totals[filename] for filename in sorted_filenames] + [""]
     table_data.append(totals_row)
-    
-    print("\n" + tabulate(table_data, headers, tablefmt='grid'))
-    
+
+    print("\n" + tabulate(table_data, headers, tablefmt="grid"))
+
+
 def format_config_results(configs_by_file: Dict[str, Dict]) -> None:
     """
     Format and print results for non-data config keys, showing only keys with different values
     or keys that only exist in some configs.
-    
+
     Args:
         configs_by_file: Dictionary mapping filenames to full config dicts
     """
@@ -289,45 +290,44 @@ def format_config_results(configs_by_file: Dict[str, Dict]) -> None:
     all_keys = set()
     for config in configs_by_file.values():
         all_keys.update(flatten_dict(config).keys())
-    
+
     # Sort keys alphabetically
     sorted_keys = sorted(all_keys)
     filenames = list(configs_by_file.keys())
-    
+
     # Print header
     print("\nConfig differences:")
     print("-" * 80)
-    
+
     # Check each key for differences
     found_diffs = False
     for key in sorted_keys:
         # Skip data paths and dataset source mixture configs
-        if ('data.paths' in key or 
-            key == 'data' or 
-            'dataset.source_mixture_config.source_configs' in key):
+        if "data.paths" in key or key == "data" or "dataset.source_mixture_config.source_configs" in key:
             continue
-            
+
         values = []
         for filename in filenames:
             flat_config = flatten_dict(configs_by_file[filename])
-            value = flat_config.get(key, '-')
+            value = flat_config.get(key, "-")
             values.append(str(value))
-        
+
         # Check if key exists in all configs
-        exists_in_all = all(v != '-' for v in values)
-        
+        exists_in_all = all(v != "-" for v in values)
+
         # Print if values are different or key doesn't exist in all configs
-        unique_values = set(str(v) for v in values if v != '-')
+        unique_values = set(str(v) for v in values if v != "-")
         if len(unique_values) > 1 or not exists_in_all:
             found_diffs = True
             print(f"\n{key}:")
             for filename, value in zip(filenames, values):
                 print(f"  {filename}: {value}")
-    
+
     if not found_diffs:
         print("No differences found in config values.")
 
-def flatten_dict(d: Dict, parent_key: str = '', sep: str = '.') -> Dict:
+
+def flatten_dict(d: Dict, parent_key: str = "", sep: str = ".") -> Dict:
     """Flatten a nested dictionary into a single level dictionary with dot-separated keys."""
     items = []
     for k, v in d.items():
@@ -337,6 +337,7 @@ def flatten_dict(d: Dict, parent_key: str = '', sep: str = '.') -> Dict:
         else:
             items.append((new_key, v))
     return dict(items)
+
 
 def compare_config_files(path_patterns: List[str], data_only: bool = True) -> None:
     """
@@ -358,12 +359,13 @@ def compare_config_files(path_patterns: List[str], data_only: bool = True) -> No
 
 
 @click.command()
-@click.argument('path_patterns', nargs=-1, required=True)
-@click.option('--data-only/--full-config', default=True, 
-              help='Compare only data paths (default) or all config keys')
+@click.argument("path_patterns", nargs=-1, required=True)
+@click.option(
+    "--data-only/--full-config", default=True, help="Compare only data paths (default) or all config keys"
+)
 def main(path_patterns: Tuple[str, ...], data_only: bool) -> None:
     """Compare config files and print either data path counts or full config comparisons.
-    
+
     Example with flags:
         python compare_data_configs.py /Users/kylel/ai2/OLMo-core/src/scripts/train/anneal/dolmino*.txt --data-only
     """

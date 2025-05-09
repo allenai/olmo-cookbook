@@ -1,11 +1,13 @@
 import json
 import logging
-from pathlib import Path
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
 
-import s3fs
+import gcsfs
 import olmo_core.train.train_module as train_module
+import s3fs
+import torch
 from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
@@ -17,6 +19,7 @@ from olmo_core.data import (
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
 from olmo_core.float8 import Float8Config
+from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
     CosWithWarmup,
@@ -25,8 +28,6 @@ from olmo_core.optim import (
     Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.io import resource_path
-
 from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
@@ -42,14 +43,13 @@ from olmo_core.train.callbacks import (
     ProfilerCallback,
     WandBCallback,
 )
+from olmo_core.train.common import LoadStrategy
 from olmo_core.train.train_module import (
     TransformerActivationCheckpointingConfig,
     TransformerActivationCheckpointingMode,
 )
-from olmo_core.train.common import LoadStrategy
-import torch
 
-from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.aliases import AnnealConfig, MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
@@ -175,7 +175,6 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    annealing: bool
     cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
@@ -186,8 +185,9 @@ class TransformerConfigBuilder:
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
     warmup_steps: Optional[int]
-    load_path_fs: Optional[s3fs.S3FileSystem]
+    load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    annealing: Optional[AnnealConfig] = None
     profile: bool = False
 
     def __init__(
@@ -211,8 +211,8 @@ class TransformerConfigBuilder:
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
-        load_path_fs: Optional[s3fs.S3FileSystem] = None,
-        annealing: bool = False,
+        load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
+        annealing: Optional[AnnealConfig] = None,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -432,7 +432,7 @@ class TransformerConfigBuilder:
                 warmup_steps=self.get_warmup_steps(),
             ),
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
             ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
@@ -444,9 +444,8 @@ class TransformerConfigBuilder:
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
-        if self.annealing:
-            scheduler_state = self.get_state_from_checkpoint()
-            lr = scheduler_state.starting_lr
+        if self.annealing is not None:
+            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
 
         return SkipStepAdamWConfig(
             lr=lr,
@@ -497,14 +496,14 @@ class TransformerConfigBuilder:
 
         if max_pretrain_steps is None:
             raise ValueError(
-                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                "Could not find max_steps. Please ensure the checkpoint is valid. Unable to load scheduler state. Exiting!"
             )
 
         logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
 
         if not self.load_path:
             raise ValueError(
-                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state. Exiting!"
             )
 
         with open(config_path, "r") as f:

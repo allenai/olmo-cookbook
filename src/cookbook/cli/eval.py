@@ -15,13 +15,13 @@ from cookbook.cli.utils import (
 from cookbook.constants import (
     ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
+    FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
     OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
-    FIM_TOKENS,
 )
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
