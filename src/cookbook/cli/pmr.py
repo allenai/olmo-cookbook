@@ -1610,7 +1610,7 @@ def map_commands(
     transfer_scripts_commands: list[list[str]] = []
 
     # Distribute scripts across instances
-    for i, _ in enumerate(instances):
+    for i, instance in enumerate(instances):
         # Calculate the range of scripts for this instance
         ratio = len(script) / len(instances)
         start_idx = round(ratio * i)
@@ -1652,8 +1652,15 @@ def map_commands(
             # add scripts to setup
             transfer_scripts_commands[-1].extend(cmds)
 
+        # add scripts to stop the run
+        if spindown:
+            stop_command = f"aws ec2 stop-instances --instance-ids {instance.instance_id}"
+            transfer_scripts_commands[-1].append(f"echo '{stop_command}'>> {job_uuid}/run_all.sh")
+
     # wrapping up the runner function
-    runner_fn = partial(run_command, name=name, region=region, ssh_key_path=ssh_key_path, script=None)
+    runner_fn = partial(
+        run_command, name=name, region=region, ssh_key_path=ssh_key_path, script=None, spindown=False
+    )
 
     for instance, setup_commands in zip(instances, transfer_scripts_commands):
         curr_instance_id = instance.instance_id
@@ -1661,7 +1668,6 @@ def map_commands(
         runner_fn(
             instance_id=[curr_instance_id],
             command="; ".join(setup_commands),
-            spindown=False,
             detach=False,
             screen=False,
         )
@@ -1673,7 +1679,6 @@ def map_commands(
         runner_fn(
             instance_id=[curr_instance_id],
             command=f"bash {job_uuid}/run_all.sh",
-            spindown=spindown,
             detach=True,
             screen=True,
         )
