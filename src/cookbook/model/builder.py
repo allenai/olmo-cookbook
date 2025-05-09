@@ -496,14 +496,14 @@ class TransformerConfigBuilder:
 
         if max_pretrain_steps is None:
             raise ValueError(
-                "Could not find max_steps. Please ensure the checkpoint is valid or set max_pretrain_steps in config. Unable to load scheduler state."
+                "Could not find max_steps. Please ensure the checkpoint is valid. Unable to load scheduler state. Exiting!"
             )
 
         logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
 
         if not self.load_path:
             raise ValueError(
-                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state. Exiting!"
             )
 
         with open(config_path, "r") as f:
