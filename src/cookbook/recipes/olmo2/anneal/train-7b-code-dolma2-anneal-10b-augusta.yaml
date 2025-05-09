@@ -20,7 +20,7 @@ warmup_steps: 0
 annealing:
   enabled: true
   initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
-load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/
+load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model_and_optim/
 load_state: false
 dataset:
   sources:
