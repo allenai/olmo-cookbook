@@ -401,10 +401,19 @@ def evaluate_model(
 @click.option(
     "-s",
     "--sort-by",
+    type=click.Choice(["column", "name", "col", "average", "avg"]),
+    default="column",
+    help="Column sort approach (allowed values: column, name, col, average, avg)",
+)
+@click.option(
+    "-S",
+    "--sort-column-name",
     type=str,
     default="",
-    help="Sort results by a specific column",
+    help="Name of the column to sort by",
 )
+@click.option('-A/--ascending', 'sort_descending', flag_value=False, default=False, help="Sort ascending")
+@click.option('-D/--descending', 'sort_descending', flag_value=True, default=False, help="Sort descending")
 @click.option(
     "-F",
     "--force",
@@ -422,6 +431,8 @@ def get_results(
     tasks: list[str],
     format: str,
     sort_by: str,
+    sort_column_name: str,
+    sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
 ) -> None:
@@ -451,9 +462,12 @@ def get_results(
         results = results.keep_rows(*[re.compile(m) for m in models])
 
     try:
-        # sort by provided column, or first column if not provided
-        sort_by = sort_by or next(iter(results.columns))
-        results = results.sort(col=sort_by, reverse=True)
+        results = results.sort(
+            by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
+            by_name=sort_by.startswith("name"),
+            by_avg='avg' in sort_by or 'average' in sort_by,
+            reverse=not sort_descending,
+        )
     except StopIteration:
         # if no columns are left, we don't need to sort
         pass
