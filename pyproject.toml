@@ -19,6 +19,7 @@ dependencies = [
     "platformdirs",
     "pydantic",
     "s3fs",
+    "gcsfs",
     "rich",
     "smart_open",
     "yaspin",
@@ -38,15 +39,20 @@ dev = [
     "boto3-stubs[essential,ec2,s3,ssm]",
 ]
 beaker = [
-    "beaker-py",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
     "wandb",
 ]
 all = [
+<<<<<<< HEAD
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@6599c2f7b85ee584e18febdc93ee1833480348e9", 
     "beaker-py",
+=======
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@ef28f2ab956177f4e9bf8cbcc1bb50457ae575cd",
+    "beaker-py>=1,<2",
+>>>>>>> origin
     "GitPython>=3.0,<4.0",
     "wandb",
 ]

@@ -53,9 +53,10 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
 from dataclasses import dataclass
 from enum import Enum
-from functools import reduce
+from functools import partial, reduce
 from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union
 
 import boto3
@@ -768,33 +769,35 @@ class Session:
             buffer = ""
             start_time = time.time()
 
-            while not detach:
-                # Check if we have data to receive
-                if channel.recv_ready():
-                    chunk = channel.recv(4096).decode("utf-8")
-                    buffer += chunk
-
-                    # Print to stdout in real-time
-                    sys.stdout.write(chunk)
-                    sys.stdout.flush()
-
-                    # Check if our completion marker is in the output
-                    if re.search(r"\r?\n" + completion_marker + r"\r?\n", buffer):
-                        break
-
-                # Check for timeout
-                if timeout and time.time() - start_time > timeout:
-                    logger.warning(f"\nTimeout waiting for command: {command}")
-                    break
-
-                # Small delay to prevent CPU spinning
-                time.sleep(0.1)
-
-            if not terminate:
+            if detach:
+                # sleep 1 second to ensure the command has time to communicate with the server
+                time.sleep(1)
                 # Detach from screen (Ctrl+A, then d)
                 channel.send(b"\x01d")
-                time.sleep(0.5)
+            else:
+                while True:
+                    # Check if we have data to receive
+                    if channel.recv_ready():
+                        chunk = channel.recv(4096).decode("utf-8")
+                        buffer += chunk
 
+                        # Print to stdout in real-time
+                        sys.stdout.write(chunk)
+                        sys.stdout.flush()
+
+                        # Check if our completion marker is in the output
+                        if re.search(r"\r?\n" + completion_marker + r"\r?\n", buffer):
+                            break
+
+                    # Check for timeout
+                    if timeout and time.time() - start_time > timeout:
+                        logger.warning(f"\nTimeout waiting for command: {command}")
+                        break
+
+                    # Small delay to prevent CPU spinning
+                    time.sleep(0.1)
+
+            # we close the connection here to avoid the screen session from hanging
             client.close()
             return SessionContent(stdout=buffer, stderr=buffer)
 
@@ -1581,6 +1584,11 @@ def map_commands(
     # Validate script input
     assert isinstance(script, list) and len(script) > 0, "script must be a list with at least one script"
 
+    # Setup a UUID for the job; we will use to track all the jobs
+    job_uuid = str(uuid.uuid4())
+
+    logging.info(f"Starting job with UUID: {job_uuid}")
+
     # Make a copy of the script list and shuffle it for even distribution
     script = script[:]
     random.shuffle(script)
@@ -1599,6 +1607,8 @@ def map_commands(
 
     logger.info(f"Found {len(instances):,} instances to map {len(script):,} scripts to!")
 
+    transfer_scripts_commands: list[list[str]] = []
+
     # Distribute scripts across instances
     for i, instance in enumerate(instances):
         # Calculate the range of scripts for this instance
@@ -1608,7 +1618,15 @@ def map_commands(
         instance_scripts = script[start_idx:end_idx]
 
         # Prepare commands to transfer and execute scripts
-        run_command_scripts = []
+        transfer_scripts_commands.append([])
+
+        # Create a directory for the scripts associated with this job
+        # and add a run_all.sh script that will run all the scripts at once
+        transfer_scripts_commands[-1].append(f"mkdir -p {job_uuid}")
+        transfer_scripts_commands[-1].append(f"echo '#!/usr/bin/env bash' >> {job_uuid}/run_all.sh")
+        transfer_scripts_commands[-1].append(f"echo 'set -x' >> {job_uuid}/run_all.sh")
+        transfer_scripts_commands[-1].append(f"chmod +x {job_uuid}/run_all.sh")
+
         for one_script in instance_scripts:
             # Read and base64 encode each script
             with open(one_script, "rb") as f:
@@ -1616,28 +1634,55 @@ def map_commands(
 
             # Create commands to decode, save, and execute the script
             filename = os.path.basename(one_script)
-            run_command_scripts.append(f"echo {base64_encoded_script} | base64 -d > {filename}")
-            run_command_scripts.append(f"chmod +x {filename}")
-            run_command_scripts.append(f"./{filename}")
 
-        # Log which scripts are being sent to which instance
-        script_names = [f"`{os.path.basename(s)}`" for s in instance_scripts]
-        logger.info(
-            f"Running {len(instance_scripts):,} scripts on instance {instance.instance_id}: {'; '.join(script_names)}"
+            # Create commands to decode, save, and execute the script
+            cmds = [
+                # Decode the script into a file on the instance
+                f"echo {base64_encoded_script} | base64 -d > {job_uuid}/{filename}",
+                # Make the script executable
+                f"chmod +x {job_uuid}/{filename}",
+                # Add a start marker to the run_all.log file
+                f'echo "$(date) - {job_uuid}/{filename} - START" >> {job_uuid}/run_all.log',
+                # Add the script to the run_all.sh file
+                f"echo './{job_uuid}/{filename}' >> {job_uuid}/run_all.sh",
+                # Add a done marker to the run_all.log file
+                f'echo "$(date) - {job_uuid}/{filename} - DONE" >> {job_uuid}/run_all.log',
+            ]
+
+            # add scripts to setup
+            transfer_scripts_commands[-1].extend(cmds)
+
+        # add scripts to stop the run
+        if spindown:
+            stop_command = f"aws ec2 stop-instances --instance-ids {instance.instance_id}"
+            transfer_scripts_commands[-1].append(f"echo '{stop_command}'>> {job_uuid}/run_all.sh")
+
+    # wrapping up the runner function
+    runner_fn = partial(
+        run_command, name=name, region=region, ssh_key_path=ssh_key_path, script=None, spindown=False
+    )
+
+    for instance, setup_commands in zip(instances, transfer_scripts_commands):
+        curr_instance_id = instance.instance_id
+        logger.info(f"Copying scripts to instance {curr_instance_id}")
+        runner_fn(
+            instance_id=[curr_instance_id],
+            command="; ".join(setup_commands),
+            detach=False,
+            screen=False,
         )
+    logger.info(f"Scripts transferred on {len(instances):,} instances.")
 
-        # Execute the scripts on the instance
-        run_command(
-            name=name,
-            region=region,
-            instance_id=[instance.instance_id],
-            command="; ".join(run_command_scripts),
-            script=None,
-            ssh_key_path=ssh_key_path,
-            spindown=spindown,
+    for i, instance in enumerate(instances):
+        curr_instance_id = instance.instance_id
+        logger.info(f"Running {job_uuid}/run_all.sh on instance {curr_instance_id}")
+        runner_fn(
+            instance_id=[curr_instance_id],
+            command=f"bash {job_uuid}/run_all.sh",
             detach=True,
             screen=True,
         )
+    logger.info(f"Job {job_uuid} started on {len(instances):,} instances.")
 
 
 cli.command(name="create")(create_instances)

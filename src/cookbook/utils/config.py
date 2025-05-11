@@ -1,19 +1,21 @@
 import logging
 import os
 from pathlib import Path
-from typing import List, Tuple, cast
+from typing import List, Tuple, Union, cast
 from urllib.parse import urlparse
 
+import gcsfs
+import s3fs
+import yaml
+from olmo_core.io import normalize_path
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
+    BeakerEnvVar,
     BeakerLaunchConfig,
     BeakerWekaBucket,
 )
 from olmo_core.train.callbacks import ConfigSaverCallback, WandBCallback
 from olmo_core.utils import seed_all
-from olmo_core.io import normalize_path
-import s3fs
-import yaml
 
 from cookbook.aliases import (
     ExperimentConfig,
@@ -101,10 +103,10 @@ def mk_instance_cmd(
     ]
 
 
-_REMOTE_FS_CACHE: dict[str, s3fs.S3FileSystem] | None = None
+_REMOTE_FS_CACHE: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] | None = None
 
 
-def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
+def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]:
     global _REMOTE_FS_CACHE
     if _REMOTE_FS_CACHE is not None:
         return _REMOTE_FS_CACHE
@@ -112,6 +114,7 @@ def remote_fs_cache() -> dict[str, s3fs.S3FileSystem]:
     _REMOTE_FS_CACHE = dict(
         s3=s3fs.S3FileSystem(),
         weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+        gs=gcsfs.GCSFileSystem(),
     )
 
     return _REMOTE_FS_CACHE
@@ -232,8 +235,9 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu128-v2.1.0",
+            beaker_image="petew/olmo-core-tch270cu126",
             priority=group.config.priority,
+            env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
                 BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
@@ -241,6 +245,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="AWS_CREDENTIALS", secret=f"{beaker_user}_AWS_CREDENTIALS"),
                 BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
+                BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
             setup_steps=[
                 'git clone "$REPO_URL"',
@@ -248,9 +253,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install uv && uv pip install -e '.[all]' --system",
-                "uv pip install torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cu128 --system",
-                "uv pip freeze",
+                "pip install -e '.[all]'",
+                "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
                 "printenv AWS_CONFIG > ~/.aws/config",

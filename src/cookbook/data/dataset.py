@@ -1,8 +1,9 @@
 import os
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Union
 from urllib.parse import urlparse
 
+import gcsfs
 import s3fs
 from olmo_core.data.source_mixture import (
     SourceMixtureConfig,
@@ -22,12 +23,13 @@ class MixtureBuilder:
     seed: int
     dtype: NumpyDatasetDType
     processes: int = 1
-    cached_fs: dict[str, s3fs.S3FileSystem] = field(
+    cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
         default_factory=lambda: dict(
             s3=s3fs.S3FileSystem(),
             weka=s3fs.S3FileSystem(
                 client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
             ),
+            gs=gcsfs.GCSFileSystem(),
         )
     )
 

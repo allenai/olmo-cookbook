@@ -429,33 +429,49 @@ DEEPSEEK_CODER_INFILLING = {
     "generation_kwargs": {"stop_sequences": ["<|eot_id|>", "<|endoftext|>", "<|EOT|>"]},
 }
 
-SINGLE_FIM_TASK = {"task_name": "codex_humanevalfim_single:temp0.2", "metric_kwargs": {"n_exe_workers": 20}}
-MULTI_FIM_TASK = {"task_name": "codex_humanevalfim_multi:temp0.2", "metric_kwargs": {"n_exe_workers": 20}}
-RANDOM_FIM_TASK = {"task_name": "codex_humanevalfim_random:temp0.2", "metric_kwargs": {"n_exe_workers": 20}}
-INFILLING_STARCODER = [
-    json.dumps({**SINGLE_FIM_TASK, **STARCODER_INFILLING}),
-    json.dumps({**MULTI_FIM_TASK, **STARCODER_INFILLING}),
-    json.dumps({**RANDOM_FIM_TASK, **STARCODER_INFILLING}),
-]
-INFILLING_SANTACODER = [
-    json.dumps({**SINGLE_FIM_TASK, **SANTACODER_INFILLING}),
-    json.dumps({**MULTI_FIM_TASK, **SANTACODER_INFILLING}),
-    json.dumps({**RANDOM_FIM_TASK, **SANTACODER_INFILLING}),
-]
-INFILLING_DEEPSEEK_CODER = [
-    json.dumps({**SINGLE_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
-    json.dumps({**MULTI_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
-    json.dumps({**RANDOM_FIM_TASK, **DEEPSEEK_CODER_INFILLING}),
-]
-FIM_TOKEN_TYPES = {
-    "santacoder": INFILLING_SANTACODER,
-    "starcoder": INFILLING_STARCODER,
-    "deepseek-coder": INFILLING_DEEPSEEK_CODER,
+L2C_INFILLING = {
+    "context_kwargs": {
+        "lead_token": "<|fim_prefix|>",
+        "center_token": "<|fim_suffix|>",
+        "end_token": "<|fim_middle|>",
+    },
+    "generation_kwargs": {
+        "stop_sequences": ["<|endoftext|>", "<|filename|>", "<|file_sep|>"],
+    },
 }
 
-# TODO: clean up such that tasks kwargs are separate from task aliases.
-FIM_TASKS = {f"fim-{name}": tasks for name, tasks in FIM_TOKEN_TYPES.items()}
+FIM_TOKENS = {
+    "santacoder": SANTACODER_INFILLING,
+    "starcoder": STARCODER_INFILLING,
+    "deepseek": DEEPSEEK_CODER_INFILLING,
+    "l2c": L2C_INFILLING,
+}
 
+FIM_TASKS = [
+    "codex_humanevalfim_single:temp0.2",
+    "codex_humanevalfim_multi:temp0.2",
+    "codex_humanevalfim_random:temp0.2",
+]
+
+MULTILINGUAL_MBPP_TASKS = [
+    "mt_mbpp:bash",
+    "mt_mbpp:c",
+    "mt_mbpp:cpp",
+    "mt_mbpp:csharp",
+    "mt_mbpp:go",
+    "mt_mbpp:haskell",
+    "mt_mbpp:java",
+    "mt_mbpp:javascript",
+    "mt_mbpp:matlab",
+    "mt_mbpp:php",
+    "mt_mbpp:python",
+    "mt_mbpp:r",
+    "mt_mbpp:ruby",
+    "mt_mbpp:rust",
+    "mt_mbpp:scala",
+    "mt_mbpp:swift",
+    "mt_mbpp:typescript",
+]
 
 # named groups are things you should able to average; they
 # should just contain aliases
@@ -475,6 +491,8 @@ ALL_NAMED_GROUPS = {
     "starcoder": STARCODER_CODEX_TASKS,
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+    "fim": FIM_TASKS,
+    "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):

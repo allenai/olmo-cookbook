@@ -15,6 +15,7 @@ from cookbook.cli.utils import (
 from cookbook.constants import (
     ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
+    FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
     OLMO_CORE_V2_COMMIT_HASH,
@@ -266,10 +267,28 @@ def convert_checkpoint(
     help="Extra arguments to pass to the model",
 )
 @click.option(
+    "--fim-tokens",
+    type=click.Choice(list(FIM_TOKENS.keys())),
+    default=None,
+    help="Model-specific tokens to use for infilling tasks",
+)
+@click.option(
     "--vllm-use-v1-spec/--no-vllm-use-v1-spec",
     default=False,
     type=bool,
     help="Whether to use v1 spec for vLLM models",
+)
+@click.option(
+    "--use-backend-in-run-name/--no-use-backend-in-run-name",
+    default=False,
+    type=bool,
+    help="Whether to use the backend in the run name",
+)
+@click.option(
+    "--name-suffix",
+    type=str,
+    default="",
+    help="Suffix to add to the run name",
 )
 def evaluate_model(
     oe_eval_commit: str,
@@ -300,7 +319,10 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    fim_tokens: str,
     vllm_use_v1_spec: bool,
+    use_backend_in_run_name: bool,
+    name_suffix: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -346,7 +368,10 @@ def evaluate_model(
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
         model_args=parsed_model_args,
+        fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
+        use_backend_in_run_name=use_backend_in_run_name,
+        name_suffix=name_suffix,
     )
 
 
@@ -376,15 +401,29 @@ def evaluate_model(
 @click.option(
     "-s",
     "--sort-by",
+    type=click.Choice(["column", "name", "col", "average", "avg"]),
+    default="column",
+    help="Column sort approach (allowed values: column, name, col, average, avg)",
+)
+@click.option(
+    "-S",
+    "--sort-column-name",
     type=str,
     default="",
-    help="Sort results by a specific column",
+    help="Name of the column to sort by",
 )
+@click.option('-A/--ascending', 'sort_descending', flag_value=False, default=False, help="Sort ascending")
+@click.option('-D/--descending', 'sort_descending', flag_value=True, default=False, help="Sort descending")
 @click.option(
     "-F",
     "--force",
     is_flag=True,
     help="Force re-fetch results from the datalake",
+)
+@click.option(
+    "--skip-on-fail",
+    is_flag=True,
+    help="Skip experiments that fail to fetch results from the datalake",
 )
 def get_results(
     dashboard: str,
@@ -392,7 +431,10 @@ def get_results(
     tasks: list[str],
     format: str,
     sort_by: str,
+    sort_column_name: str,
+    sort_descending: bool,
     force: bool,
+    skip_on_fail: bool,
 ) -> None:
 
     all_metrics, all_averages = make_dashboard_table(
@@ -406,6 +448,7 @@ def get_results(
         average_generative=True,
         show_bpb=False,
         force=force,
+        skip_on_fail=skip_on_fail,
     )
 
     # if a task starts with *, it means it is a named group and we need to expand it
@@ -418,9 +461,16 @@ def get_results(
     if len(models) > 0:
         results = results.keep_rows(*[re.compile(m) for m in models])
 
-    # sort by provided column, or first column if not provided
-    sort_by = sort_by or next(iter(results.columns))
-    results = results.sort(col=sort_by, reverse=True)
+    try:
+        results = results.sort(
+            by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
+            by_name=sort_by.startswith("name"),
+            by_avg='avg' in sort_by or 'average' in sort_by,
+            reverse=not sort_descending,
+        )
+    except StopIteration:
+        # if no columns are left, we don't need to sort
+        pass
 
     if format == "json":
         print(json.dumps(results._data))

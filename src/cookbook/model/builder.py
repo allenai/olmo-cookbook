@@ -1,12 +1,14 @@
 import json
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from dataclasses import dataclass, replace
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
-import s3fs
+import gcsfs
 import olmo_core.train.train_module as train_module
-from olmo_core.config import replace, DType
+import s3fs
+import torch
+from olmo_core.config import DType
 from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
@@ -17,6 +19,7 @@ from olmo_core.data import (
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
 from olmo_core.float8 import Float8Config
+from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
     CosWithWarmup,
@@ -25,10 +28,10 @@ from olmo_core.optim import (
     Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.io import resource_path
 from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
+    BeakerCallback,
     Callback,
     CheckpointerCallback,
     CometCallback,
@@ -40,14 +43,13 @@ from olmo_core.train.callbacks import (
     ProfilerCallback,
     WandBCallback,
 )
+from olmo_core.train.common import LoadStrategy
 from olmo_core.train.train_module import (
     TransformerActivationCheckpointingConfig,
     TransformerActivationCheckpointingMode,
 )
-from olmo_core.train.common import LoadStrategy
-import torch
 
-from cookbook.aliases import MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.aliases import AnnealConfig, MetricBackend, MetricsConfig, SchedulerType, SourceInstance
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
@@ -173,7 +175,7 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    annealing: bool
+    cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     model_overrides: Optional[List[str]]
@@ -183,8 +185,9 @@ class TransformerConfigBuilder:
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
     warmup_steps: Optional[int]
-    load_path_fs: Optional[s3fs.S3FileSystem]
+    load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    annealing: Optional[AnnealConfig] = None
     profile: bool = False
 
     def __init__(
@@ -208,8 +211,8 @@ class TransformerConfigBuilder:
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
-        load_path_fs: Optional[s3fs.S3FileSystem] = None,
-        annealing: bool = False,
+        load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
+        annealing: Optional[AnnealConfig] = None,
         hard_stop: Optional[Duration] = None,
         load_path: Optional[str] = None,
         global_batch_size: Optional[int] = None,
@@ -219,7 +222,6 @@ class TransformerConfigBuilder:
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
-        s3: bool = True,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -234,9 +236,8 @@ class TransformerConfigBuilder:
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
-        self.s3 = s3
         self.activation_checkpointing = activation_checkpointing
-        self.data_dir: str = "s3://ai2-llm"
+        self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
@@ -258,6 +259,11 @@ class TransformerConfigBuilder:
         self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
+        self.cluster = cluster
+
+        if any(substring in cluster for substring in ["augusta"]):
+            self.root_dir = f"gs://ai2-llm"
+            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
 
         if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = f"/weka/oe-training-default/ai2-llm"
@@ -324,16 +330,21 @@ class TransformerConfigBuilder:
 
     def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
-            "gpu_monitor": GPUMemoryMonitorCallback(),
-            "garbage_collector": GarbageCollectorCallback(),
-            "config_saver": ConfigSaverCallback(),
-            "profiler": ProfilerCallback(enabled=self.profile),
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
                 save_async=True,
             ),
+            "config_saver": ConfigSaverCallback(),
+            "profiler": ProfilerCallback(enabled=self.profile),
+            "garbage_collector": GarbageCollectorCallback(),
         }
+
+        if self.beaker_user is not None:
+            callbacks["beaker"] = BeakerCallback()
+
+        if torch.cuda.is_available():
+            callbacks["gpu_monitor"] = GPUMemoryMonitorCallback()
 
         if self.metrics_config:
             if MetricBackend.wandb in self.metrics_config.backends:
@@ -420,7 +431,7 @@ class TransformerConfigBuilder:
                 warmup_steps=self.get_warmup_steps(),
             ),
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing else 0.1
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
             ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
@@ -432,9 +443,8 @@ class TransformerConfigBuilder:
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
-        if self.annealing:
-            scheduler_state = self.get_state_from_checkpoint()
-            lr = scheduler_state.starting_lr
+        if self.annealing is not None:
+            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
 
         return SkipStepAdamWConfig(
             lr=lr,
@@ -485,14 +495,14 @@ class TransformerConfigBuilder:
 
         if max_pretrain_steps is None:
             raise ValueError(
-                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                "Could not find max_steps. Please ensure the checkpoint is valid. Unable to load scheduler state. Exiting!"
             )
 
         logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
 
         if not self.load_path:
             raise ValueError(
-                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+                "load_path is not set. Please provide a valid load path when attempting to load scheduler state. Exiting!"
             )
 
         with open(config_path, "r") as f:

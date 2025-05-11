@@ -83,13 +83,20 @@ olmo-cookbook-eval convert \
 
 ```shell
 olmo-cookbook-eval convert \
-  "/weka/oe-training-default/ai2-llm/checkpoints/mattj/olmo2-1b-1xC-all-dressed-noDedup-89adf213/step12202" \
+  "/oe-training-default/ai2-llm/checkpoints/mattj/olmo2-1b-1xC-all-dressed-noDedup-89adf213/step12202" \
   -t olmo-core-v2 \
   --use-beaker
 ```
 
 
 ### Run Evaluation
+
+🛑 🛑 🛑 🛑 🛑 🛑
+**WARNING**
+
+If using models trained with OLMo Core v2 converted before  **May 7, 2025**,
+make sure to use `--model-args dtype=bfloat16` to avoid NaN with vLLM.
+🛑 🛑 🛑 🛑 🛑 🛑
 
 ```shell
 olmo-cookbook-eval evaluate \

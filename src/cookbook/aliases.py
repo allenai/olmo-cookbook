@@ -68,6 +68,11 @@ class SchedulerType(Enum):
         return [e.name for e in cls]
 
 
+class AnnealConfig(BaseModel):
+    enabled: bool = True
+    initial_lr: Optional[float] = None
+
+
 class ExperimentConfig(BaseModel, extra="forbid"):
     name: str
     description: str
@@ -85,7 +90,8 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     model: ModelConfigIdentifier
     load_path: Optional[str] = None
     load_state: bool = True
-    annealing: bool = False
+    annealing: Optional[AnnealConfig] = None
+    nccl_debug: bool = False
     activation_checkpointing: bool = False
     model_overrides: Optional[List[str]] = None
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
@@ -117,7 +123,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     @classmethod
     def validate_annealing(cls, value, info):
         """Validate that if annealing is True, then load_path must not be None."""
-        if value is True and info.data.get("load_path") is None:
+        if value is not None and info.data.get("load_path") is None:
             raise ValueError("If annealing is enabled, load_path must be specified.")
         return value
 

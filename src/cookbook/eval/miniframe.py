@@ -26,9 +26,43 @@ class MiniFrame:
         for row, col, val in elements:
             self.add(row=row, col=col, val=val)
 
-    def sort(self, col: str, reverse: bool = False) -> "MiniFrame":
+    def sort(
+        self,
+        by_col: str | None = None,
+        by_avg: bool = False,
+        by_name: bool = False,
+        reverse: bool = False,
+    ) -> "MiniFrame":
+
+        # model names to sort
         all_keys = {row for col in self._data for row in self._data[col]}
-        sorted_keys = sorted(all_keys, key=lambda row: self._data[col].get(row) or float("-inf"), reverse=reverse)
+
+        if by_col:
+            # sort by values in a column; make sure we don't provide both by_avg and by_name
+            assert by_avg is False and by_name is False, "Cannot provide both by_col and by_avg or by_name"
+
+            # make sure the column exists
+            assert by_col in self._data, f"Column {by_col} not found"
+
+            # we get values from the column; if the value is None, we use -inf as the key
+            key_fn = lambda row: self._data[by_col].get(row) or float("-inf")
+        elif by_avg:
+            # sort by average of all values; make sure we don't provide both by_col and by_name
+            assert by_col is None and by_name is False, "Cannot provide both by_avg and by_col or by_name"
+
+            # we get the average of all values; if the value is None, we use 0 as the value
+            key_fn = lambda row: sum(self._data[col].get(row) or 0 for col in self._data) / len(self._data)
+        elif by_name:
+            # we sort alphabetically by column name
+            assert by_col is None and by_avg is False, "Cannot provide both by_name and by_col or by_avg"
+            key_fn = lambda col: col
+        else:
+            # I don't recognize the sorting criteria
+            raise ValueError("No sorting criteria provided")
+
+        # actually sort the keys
+        sorted_keys = sorted(all_keys, key=key_fn, reverse=reverse)
+
         new_frame = MiniFrame(title=self.title)
         new_frame.add_many(*((row, col, self._data[col].get(row)) for col in self.columns for row in sorted_keys))
         return new_frame
@@ -93,7 +127,7 @@ class MiniFrame:
 
     def show(self):
         console = Console()
-        table = Table(title=self.title)
+        table = Table(title=self.title, min_width=len(self.title) + 4)
 
         table.add_column("")  # this is the column for the row name
         for col in self.columns:
