@@ -17,9 +17,10 @@ cluster: ai2/saturn-cirrascale
 eval_interval: 10
 downstream_evaluators:
   - mmlu_stem_val_rc_5shot
+weka: true
 dataset:
   sources:
   - name: gs-test
     target_ratio: 1.0
     paths:
-    - gs://ai2-llm/preprocessed/dclm/love2code_codeprose/codeprose/*.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/dolma2-tokenizer/**/**/part-0*-00000.npy
