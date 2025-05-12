@@ -1,5 +1,5 @@
-name: "stack-baseline-50p_dclm-50p"
-description: "Baseline for code sources; 50% stack-baseline, 50% DCLM baseline"
+name: "starcoder-filtered-50p_dclm-50p"
+description: "Baseline for code sources; 50% Starcoder (2+ stars, 30% ngram repeat), 50% DCLM baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
 nodes: 2
@@ -17,10 +17,10 @@ cluster: ai2/augusta-google-1
 
 dataset:
   sources:
-  - name: stack-edu
+  - name: starcoder-filtered
     target_ratio: 0.50
     paths:
-      - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+      - s3://ai2-llm/preprocessed/starcoder/v1-decon-100_to_20k-2star-top_token_030/allenai/dolma2-tokenizer/*.npy
 
   - name: dclm-baseline
     target_ratio: 0.50
