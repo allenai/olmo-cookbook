@@ -420,7 +420,7 @@ class TestMiniFrame:
         # row2 doesn't have a value for partial_col
 
         # Sort by this column - should work, with row2 treated as having None value
-        sorted_frame = frame.sort(col="partial_col")
+        sorted_frame = frame.sort(by_col="partial_col")
 
         # Check that rows with None values appear first
         rows = [r for r, _ in sorted_frame.rows]
