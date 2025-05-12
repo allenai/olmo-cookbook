@@ -2,7 +2,7 @@ name: "olmo2-1b-5xC-dclm-hlr-superbpe"
 description: "OLMo2 1b@5xC dclm-baseline with superbpe tokens"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
-nodes: 4
+nodes: 1
 gpus: 8
 preemptible: true
 max_tokens: 1_000_000_000
