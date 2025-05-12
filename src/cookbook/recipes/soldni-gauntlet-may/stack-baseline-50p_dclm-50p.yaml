@@ -1,7 +1,7 @@
 name: "stack-baseline-50p_dclm-50p"
 description: "Baseline for code sources; 50% stack-baseline, 50% DCLM baseline"
 budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+workspace: "ai2/learn2code"
 nodes: 2
 gpus: 4
 preemptible: true
