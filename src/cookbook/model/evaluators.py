@@ -6,7 +6,7 @@ from olmo_eval import list_tasks
 OLMO2_DEV_1B_TASKS = [
     # OLMES Core 9(-ish) RC
     "arc_challenge_test_rc_5shot",
-    # "arc_easy_test_rc_5shot",
+    "arc_easy_test_rc_5shot",
     # "hellaswag_rc_5shot",  # 1K subset of HellaSwag
     # "winogrande_val_rc_5shot",  # Helpful after 750M-5xC scale
     # "csqa_val_rc_5shot",
