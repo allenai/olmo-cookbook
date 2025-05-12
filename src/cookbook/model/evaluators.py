@@ -30,8 +30,8 @@ OLMO2_DEV_1B_TASKS = [
     "minerva_math_number_theory_gold_bpb_0shot",
     "minerva_math_prealgebra_gold_bpb_0shot",
     "minerva_math_precalculus_gold_bpb_0shot",
-    "codex_humaneval_gold_bpb_0shot",
-    "codex_mbpp_gold_bpb_0shot",
+    # "codex_humaneval_gold_bpb_0shot",
+    # "codex_mbpp_gold_bpb_0shot",
     # Sanity check for MCQA ability
     "copycolors_10way",
 ]
