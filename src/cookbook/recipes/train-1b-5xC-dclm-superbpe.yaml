@@ -15,8 +15,8 @@ tokenizer: "superbpe_experimental"
 priority: high
 eval_interval: 10
 learning_rate: 1.8e-3
-cluster: ai2/jupiter-cirrascale-2
-weka: true
+cluster: ai2/augusta-google-1
+# weka: true
 downstream_evaluators:
   - all
 dataset:
@@ -24,5 +24,5 @@ dataset:
   - name: dclm-baseline-20pct-superbpe
     target_ratio: 1.0
     paths:
-      - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-experimental-0.1.0/**/**/part-00-00000.npy
+      - s3://ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-experimental-0.1.0/creative_writing/**/part-00-00000.npy
 
