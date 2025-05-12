@@ -24,4 +24,4 @@ dataset:
   - name: dclm-baseline-20pct-superbpe
     target_ratio: 1.0
     paths:
-      - weka://ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-experimental-0.1.0/creative_writing/**/part-00-00000.npy
+      - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-experimental-0.1.0/creative_writing/**/part-00-00000.npy
