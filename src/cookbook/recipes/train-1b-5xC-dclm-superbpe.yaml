@@ -2,10 +2,10 @@ name: "olmo2-1b-5xC-dclm-hlr-superbpe"
 description: "OLMo2 1b@5xC dclm-baseline with superbpe tokens"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
-nodes: 4
+nodes: 1
 gpus: 8
 preemptible: true
-max_tokens: 113_184_153_600
+max_tokens: 1_000_000_000
 rank_microbatch_size: 16_384
 global_batch_size: 2_097_152
 sequence_length: 4096
@@ -13,7 +13,7 @@ seed: 1337
 model: "olmo2_1B"
 tokenizer: "superbpe_experimental"
 priority: high
-eval_interval: 250
+eval_interval: 10
 learning_rate: 1.8e-3
 cluster: ai2/jupiter-cirrascale-2
 weka: true
@@ -24,6 +24,4 @@ dataset:
   - name: dclm-baseline-20pct-superbpe
     target_ratio: 1.0
     paths:
-    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-olmo3-experimental/**/**/part-0*-00000.npy
-    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-olmo3-experimental/**/**/part-2*-00000.npy
-
+      - weka://ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/superbpe-experimental-0.1.0/creative_writing/**/part-00-00000.npy
