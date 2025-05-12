@@ -5,7 +5,7 @@ from olmo_eval import list_tasks
 
 OLMO2_DEV_1B_TASKS = [
     # OLMES Core 9(-ish) RC
-    # "arc_challenge_test_rc_5shot",
+    "arc_challenge_test_rc_5shot",
     # "arc_easy_test_rc_5shot",
     # "hellaswag_rc_5shot",  # 1K subset of HellaSwag
     # "winogrande_val_rc_5shot",  # Helpful after 750M-5xC scale
@@ -13,14 +13,14 @@ OLMO2_DEV_1B_TASKS = [
     # "piqa_val_rc_5shot",
     # "socialiqa_val_rc_5shot",
     # MMLU RC
-    "mmlu_stem_val_rc_5shot",
-    "mmlu_humanities_val_rc_5shot",
-    "mmlu_social_sciences_val_rc_5shot",
-    "mmlu_other_val_rc_5shot",
-    "mmlu_stem_test_rc_5shot",
-    "mmlu_humanities_test_rc_5shot",
-    "mmlu_social_sciences_test_rc_5shot",
-    "mmlu_other_test_rc_5shot",
+    # "mmlu_stem_val_rc_5shot",
+    # "mmlu_humanities_val_rc_5shot",
+    # "mmlu_social_sciences_val_rc_5shot",
+    # "mmlu_other_val_rc_5shot",
+    # "mmlu_stem_test_rc_5shot",
+    # "mmlu_humanities_test_rc_5shot",
+    # "mmlu_social_sciences_test_rc_5shot",
+    # "mmlu_other_test_rc_5shot",
     # Gen tasks BPB
     # "gsm8k_gold_bpb_5shot",
     # "minerva_math_algebra_gold_bpb_0shot",
