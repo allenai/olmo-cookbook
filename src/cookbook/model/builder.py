@@ -586,7 +586,7 @@ class TransformerConfigBuilder:
             load_path=load_path,
             load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
-            work_dir=self.dataset_cache,
+            # work_dir=self.dataset_cache,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
