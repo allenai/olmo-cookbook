@@ -16,7 +16,7 @@ priority: high
 cluster: ai2/saturn-cirrascale
 eval_interval: 10
 downstream_evaluators:
-  - mmlu_stem_val_rc_5shot
+  - olmo2_dev_1b
 weka: true
 dataset:
   sources:
