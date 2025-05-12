@@ -260,7 +260,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install uv",
-                "uv pip install -e '.[all]'",
+                "uv pip install -e '.[all]' --system",
                 "uv pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128 --system",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
