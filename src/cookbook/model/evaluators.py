@@ -62,4 +62,7 @@ def get_tasks_for_groups(groups: List[str]) -> List[str]:
 
         tasks.extend(TASK_GROUPS[group])
 
-    return list(set(tasks))
+    tasks = list(set(tasks))
+    tasks.sort()
+
+    return tasks
