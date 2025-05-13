@@ -433,9 +433,9 @@ class TransformerConfigBuilder:
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
-        if self.annealing:
-            scheduler_state = self.get_state_from_checkpoint()
-            lr = scheduler_state.starting_lr
+        # if self.annealing:
+        #     scheduler_state = self.get_state_from_checkpoint()
+        #     lr = scheduler_state.starting_lr
 
         return SkipStepAdamWConfig(
             lr=lr,
@@ -477,68 +477,68 @@ class TransformerConfigBuilder:
                 resource_path(folder=self.load_path, fname="config.json"),
             )
 
-    def get_state_from_checkpoint(self) -> SchedulerState:
-        state_path, config_path = self.load_state_and_config_from_path()
-        train_state = torch.load(state_path, weights_only=False)
+    # def get_state_from_checkpoint(self) -> SchedulerState:
+    #     state_path, config_path = self.load_state_and_config_from_path()
+    #     train_state = torch.load(state_path, weights_only=False)
 
-        last_pretrain_step: int = train_state["global_step"]
-        max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)
+    #     last_pretrain_step: int = train_state["global_step"]
+    #     max_pretrain_steps: Optional[int] = train_state.get("max_steps", None)
 
-        if max_pretrain_steps is None:
-            raise ValueError(
-                "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
-            )
+    #     if max_pretrain_steps is None:
+    #         raise ValueError(
+    #             "Could not find max_steps in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+    #         )
 
-        logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
+    #     logger.info(f"Will anneal from {last_pretrain_step:,d} of {max_pretrain_steps:,d} total steps")
 
-        if not self.load_path:
-            raise ValueError(
-                "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
-            )
+    #     if not self.load_path:
+    #         raise ValueError(
+    #             "load_path is not set. Please provide a valid load path when attempting to load scheduler state."
+    #         )
 
-        with open(config_path, "r") as f:
-            config = json.load(f)
+    #     with open(config_path, "r") as f:
+    #         config = json.load(f)
 
-        del config["dataset"]
-        logger.info("Inferring scheduler config from:")
-        logger.info(config)
+    #     del config["dataset"]
+    #     logger.info("Inferring scheduler config from:")
+    #     logger.info(config)
 
-        try:
-            # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
-            scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
-            # Now try olmo_core v1 config format
-            try:
-                base_lr: int = config["optim"]["lr"]
-                scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
-            except KeyError as e:
-                logger.error(
-                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
-                )
-                raise e
+    #     try:
+    #         # Try olmo_core v2 config format first
+    #         base_lr: int = config["optim"]["lr"]
+    #         scheduler_config = config["train_module"]["scheduler"]
+    #     except KeyError as e:
+    #         # Now try olmo_core v1 config format
+    #         try:
+    #             base_lr: int = config["optim"]["lr"]
+    #             scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
+    #         except KeyError as e:
+    #             logger.error(
+    #                 "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+    #             )
+    #             raise e
 
-        scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
+    #     scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
-        try:
-            assert scheduler_class == CosWithWarmup.__name__
-        except AssertionError as e:
-            logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
-            )
-            raise e
+    #     try:
+    #         assert scheduler_class == CosWithWarmup.__name__
+    #     except AssertionError as e:
+    #         logger.error(
+    #             f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+    #         )
+    #         raise e
 
-        scheduler = CosWithWarmup(**scheduler_config)
-        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+    #     scheduler = CosWithWarmup(**scheduler_config)
+    #     starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
-        return SchedulerState(
-            global_step=last_pretrain_step,
-            max_steps=max_pretrain_steps,
-            last_pretrain_step=last_pretrain_step,
-            max_pretrain_steps=max_pretrain_steps,
-            base_lr=base_lr,
-            starting_lr=starting_lr,
-        )
+    #     return SchedulerState(
+    #         global_step=last_pretrain_step,
+    #         max_steps=max_pretrain_steps,
+    #         last_pretrain_step=last_pretrain_step,
+    #         max_pretrain_steps=max_pretrain_steps,
+    #         base_lr=base_lr,
+    #         starting_lr=starting_lr,
+    #     )
 
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
@@ -587,7 +587,7 @@ class TransformerConfigBuilder:
             trainer_config.callbacks[callback_name] = callback
 
         # Merge any custom dotlist style overrides to the transformer config
-        if self.model_overrides:
+        if self.model_overrides is not None:
             logger.info("Applying model overrides:")
             logger.info(self.model_overrides)
 

@@ -98,7 +98,6 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     max_target_sequence_length: int = 8192
     metrics_config: Optional[MetricsConfig] = MetricsConfig()
     preemptible: bool = True
-    shared_filesystem: bool = False
     weka: bool = False
     eval_interval: int = 200
     save_interval: int = 1000
