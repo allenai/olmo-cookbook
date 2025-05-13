@@ -232,4 +232,4 @@ def get_tasks_for_groups(groups: List[str]) -> List[str]:
 
     #     tasks.extend(TASK_GROUPS[group])
 
-    return list(set(test_tasks))
+    return list(test_tasks)
