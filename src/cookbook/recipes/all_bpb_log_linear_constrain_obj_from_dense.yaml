@@ -1,6 +1,5 @@
-name: olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural
-description: Olmo-cookbook 1Bv2-5xC on dclm baseline larger sample (700B tokens =
-  no repetition), natural distribution
+name: all-bpb-log-linear-constrain-obj-from-dense
+description: Olmo-cookbook 1Bv2-5xC on dclm baseline larger sample (log-linear regression on dense swarm with constrained objective)
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
