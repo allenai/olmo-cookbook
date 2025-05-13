@@ -10,7 +10,7 @@ global_batch_size: 2097152
 rank_microbatch_size: 16384
 sequence_length: 4096
 seed: 1337
-model: "olmo2_1B_v2"
+model: "olmo2_1B"
 tokenizer: "superbpe_experimental"
 priority: high
 eval_interval: 10
