@@ -241,8 +241,9 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu126",
+            beaker_image="petew/olmo-core-tch270cu128-v2.1",
             priority=group.config.priority,
+            shared_memory="25GiB",
             env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
@@ -259,7 +260,9 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "cd olmo-cookbook",
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
-                "pip install -e '.[all]'",
+                "pip install uv",
+                "uv pip install -e '.[all]' --system",
+                "uv pip install torch==2.7.0 torchaudio torchvision --index-url https://download.pytorch.org/whl/test/cu128 --system",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
