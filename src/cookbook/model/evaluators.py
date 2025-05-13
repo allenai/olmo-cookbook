@@ -57,10 +57,12 @@ def get_tasks_for_groups(groups: List[str]) -> List[str]:
     """Return all tasks in a group"""
     tasks = []
     for group in groups:
-        if group not in TASK_GROUPS:
-            raise ValueError(f"Group {group} not found")
-
-        tasks.extend(TASK_GROUPS[group])
+        if group in TASK_GROUPS:
+            tasks.extend(TASK_GROUPS[group])
+        elif group.upper() in ALL_TASKS_MAP:
+            tasks.append(ALL_TASKS_MAP[group.upper()])
+        else:
+            raise ValueError(f"Group or task '{group}' not found")
 
     tasks = list(set(tasks))
     tasks.sort()
