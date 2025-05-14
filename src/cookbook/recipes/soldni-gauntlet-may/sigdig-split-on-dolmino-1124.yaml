@@ -1,7 +1,7 @@
 name: "sigdig-split-on-dolmino-1124"
 description: "Baseline for code sources; 50% Starcoder (2+ stars, 30% ngram repeat), 50% DCLM baseline"
 budget: "ai2/oe-training"
-workspace: "ai2/learn2code"
+workspace: "ai2/oe-data"
 nodes: 4
 gpus: 4
 preemptible: true
@@ -12,7 +12,7 @@ rank_microbatch_size: 32_768
 seed: 1337
 model: "olmo2_1B_v2"
 tokenizer: "dolma2_sigdig"
-priority: urgent
+priority: high
 cluster: ai2/augusta-google-1
 
 metrics_config:
