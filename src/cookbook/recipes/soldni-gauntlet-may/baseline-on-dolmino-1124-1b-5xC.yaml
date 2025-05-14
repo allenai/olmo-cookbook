@@ -25,22 +25,22 @@ dataset:
   - name: dolmino_1124
     target_ratio: 1.0
     paths:
-      - s3://preprocessed/basic_math_mj/dolma2-tokenizer/*npy
-      - s3://preprocessed/basic_math_mj/multiadd/dolma2-tokenizer/*npy
-      - s3://preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*npy
-      - s3://preprocessed/gsm_MIND/clean_stop/dolma2-tokenizer/*npy
-      - s3://preprocessed/gsm8k-synth/resample_v1_6x/dolma2-tokenizer/*npy
-      - s3://preprocessed/gsm8k/v0_main_train/allenai/dolma2-tokenizer/*npy
-      - s3://preprocessed/gsm8k/v0_socratic_train/allenai/dolma2-tokenizer/*npy
-      - s3://preprocessed/mathcoder2-synthmath/ajibawa-2023/dolma2-tokenizer/*npy
-      - s3://preprocessed/mathcoder2-synthmath/mathcoder2-synthmath/filtered-math/dolma2-tokenizer/*npy
-      - s3://preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*npy
-      - s3://preprocessed/owm-filtered-math/metamath/         *npy
-      - s3://preprocessed/personahub_math_v5_regen_149960/dolma2-tokenizer/*npy
-      - s3://preprocessed/pes2o/allenai/dolma2-tokenizer/*npy
-      - s3://preprocessed/stackexchange/v1_dedupe/allenai/dolma2-tokenizer/*npy
-      - s3://preprocessed/tinyGSM/mind-2students/dolma2-tokenizer/*npy
-      - s3://preprocessed/tinyGSM/mind/dolma2-tokenizer/*npy
-      - s3://preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/allenai/dolma2-tokenizer/*npy
-      - s3://preprocessed/tulu_v3.9_personahub_math_interm_algebra_20k/dolma2-tokenizer/*npy
-      - s3://preprocessed/tulu-3-sft-personas-math-grade/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/basic_math_mj/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/basic_math_mj/multiadd/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*npy
+      - s3://ai2-llm/preprocessed/gsm_MIND/clean_stop/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/gsm8k-synth/resample_v1_6x/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/gsm8k/v0_main_train/allenai/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/gsm8k/v0_socratic_train/allenai/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/mathcoder2-synthmath/ajibawa-2023/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/mathcoder2-synthmath/mathcoder2-synthmath/filtered-math/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/owm-filtered-math/metamath/         *npy
+      - s3://ai2-llm/preprocessed/personahub_math_v5_regen_149960/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/stackexchange/v1_dedupe/allenai/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/tinyGSM/mind-2students/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/tinyGSM/mind/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/allenai/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/tulu_v3.9_personahub_math_interm_algebra_20k/dolma2-tokenizer/*npy
+      - s3://ai2-llm/preprocessed/tulu-3-sft-personas-math-grade/dolma2-tokenizer/*npy
