@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 from pathlib import Path
 from typing import List, Tuple, Union, cast
@@ -208,7 +209,12 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
 
     logger.info("Configuration:")
-    logger.info(config_dict)
+    # We log estimated step count here when dry_run is enabled because we're not able to build the trainer on non-CUDA devices
+    if dry_run:
+        logger.info(
+            f"Estimated training steps: {math.ceil(base_config.max_tokens / config.data_loader.global_batch_size):,}"
+        )
+    logger.info(config)
 
     return trainer
 
