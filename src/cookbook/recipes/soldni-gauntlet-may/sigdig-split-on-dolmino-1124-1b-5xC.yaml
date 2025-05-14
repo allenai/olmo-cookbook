@@ -1,5 +1,5 @@
-name: "sigdig-split-on-dolmino-1124"
-description: "Baseline for code sources; 50% Starcoder (2+ stars, 30% ngram repeat), 50% DCLM baseline"
+name: "sigdig-split-on-dolmino-1124-1b-5xC"
+description: "Using tokenizer with right-to-left digit splitting; training from scratch 1B 5xC on dolmino-mix-1124"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
