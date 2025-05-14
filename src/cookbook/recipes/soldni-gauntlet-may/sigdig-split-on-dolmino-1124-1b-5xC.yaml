@@ -17,7 +17,7 @@ cluster: ai2/augusta-google-1
 
 metrics_config:
   project: lucas-olmo-cookbook
-  workspace: ai2-llm
+  entity: ai2-llm
   backend: wandb
 
 dataset:
