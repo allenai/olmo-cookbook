@@ -1,0 +1,46 @@
+name: "baseline-on-dolmino-1124-1b-5xC"
+description: "Using dolma2 tokenizer with left-to-right digit splitting; training from scratch 1B 5xC on dolmino-mix-1124"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 4
+preemptible: true
+max_tokens: 113_184_153_600
+sequence_length: 4096
+global_batch_size: 2_097_152
+rank_microbatch_size: 32_768
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+
+metrics_config:
+  project: lucas-olmo-cookbook
+  workspace: ai2-llm
+  backend: wandb
+
+dataset:
+  sources:
+  - name: dolmino_1124
+    target_ratio: 1.0
+    paths:
+      - s3://preprocessed/basic_math_mj/dolma2-tokenizer/*npy
+      - s3://preprocessed/basic_math_mj/multiadd/dolma2-tokenizer/*npy
+      - s3://preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*npy
+      - s3://preprocessed/gsm_MIND/clean_stop/dolma2-tokenizer/*npy
+      - s3://preprocessed/gsm8k-synth/resample_v1_6x/dolma2-tokenizer/*npy
+      - s3://preprocessed/gsm8k/v0_main_train/allenai/dolma2-tokenizer/*npy
+      - s3://preprocessed/gsm8k/v0_socratic_train/allenai/dolma2-tokenizer/*npy
+      - s3://preprocessed/mathcoder2-synthmath/ajibawa-2023/dolma2-tokenizer/*npy
+      - s3://preprocessed/mathcoder2-synthmath/mathcoder2-synthmath/filtered-math/dolma2-tokenizer/*npy
+      - s3://preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*npy
+      - s3://preprocessed/owm-filtered-math/metamath/         *npy
+      - s3://preprocessed/personahub_math_v5_regen_149960/dolma2-tokenizer/*npy
+      - s3://preprocessed/pes2o/allenai/dolma2-tokenizer/*npy
+      - s3://preprocessed/stackexchange/v1_dedupe/allenai/dolma2-tokenizer/*npy
+      - s3://preprocessed/tinyGSM/mind-2students/dolma2-tokenizer/*npy
+      - s3://preprocessed/tinyGSM/mind/dolma2-tokenizer/*npy
+      - s3://preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/allenai/dolma2-tokenizer/*npy
+      - s3://preprocessed/tulu_v3.9_personahub_math_interm_algebra_20k/dolma2-tokenizer/*npy
+      - s3://preprocessed/tulu-3-sft-personas-math-grade/dolma2-tokenizer/*npy
