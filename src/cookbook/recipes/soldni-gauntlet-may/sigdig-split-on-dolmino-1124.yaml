@@ -1,0 +1,28 @@
+name: "sigdig-split-on-dolmino-1124"
+description: "Baseline for code sources; 50% Starcoder (2+ stars, 30% ngram repeat), 50% DCLM baseline"
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 4
+gpus: 4
+preemptible: true
+max_tokens: 113_184_153_600
+sequence_length: 4096
+global_batch_size: 2_097_152
+rank_microbatch_size: 32_768
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2_sigdig"
+priority: urgent
+cluster: ai2/augusta-google-1
+
+metrics_config:
+  project: lucas-olmo-cookbook
+  workspace: ai2-llm
+  backend: wandb
+
+dataset:
+  sources:
+  - name: dolmino_1124_sigdig
+    target_ratio: 1.0
+    paths:
+      - s3://ai2-llm/preprocessed/dolmino-mix-1124/allenai/dolma2-tokenizer-sigdig/**/*.npy
