@@ -153,17 +153,18 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
 
     config = TransformerConfigBuilder(
         beaker_user=beaker_user,
+        run_name=run_name.strip(),
+        group_id=group_id.strip(),
+        max_dp_world_size=dp_world_size,
+        load_path_fs=load_path_fs,
         cluster=base_config.cluster,
         downstream_evaluators=base_config.downstream_evaluators,
         dtype=base_config.dataset.dtype,
         eval_interval=base_config.eval_interval,
-        group_id=group_id.strip(),
         lm_evaluator=base_config.lm_evaluator,
-        max_dp_world_size=dp_world_size,
         max_target_sequence_length=base_config.max_target_sequence_length,
         max_tokens=base_config.max_tokens,
         model_identifier=base_config.model,
-        run_name=run_name.strip(),
         save_interval=base_config.save_interval,
         seed=base_config.seed,
         sequence_length=base_config.sequence_length,
@@ -174,14 +175,13 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
-        warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
-        scheduler_type=base_config.scheduler_type,
+        scheduler_config=base_config.scheduler_config,
         annealing=base_config.annealing,
         hard_stop=base_config.hard_stop,
         model_overrides=base_config.model_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
-        load_path_fs=load_path_fs,
+        weight_decay=base_config.weight_decay,
     ).build()
 
     seed_all(config.init_seed)

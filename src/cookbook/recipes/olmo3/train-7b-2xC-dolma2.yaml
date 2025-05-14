@@ -1,0 +1,38 @@
+name: "OLMo3-7b-2xC-dolma2"
+description: "OLMo3 7b@1xC template"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 275_503_022_080 # 2 * 20 * 6_887_575_552 non-embedding params
+global_batch_size: 4_194_304
+rank_microbatch_size: 8192
+sequence_length: 4096
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: high
+eval_interval: 1000
+learning_rate: 1.6e-4
+weight_decay: 0.1
+scheduler_config:
+  scheduler: wsd
+  units: steps
+  warmup: 2000
+  decay: 11920 # How do we get this?
+batch_size_warmup:
+  batches: [0, 2, 4]
+  schedule: [0.0, 0.33, 1.0]
+cluster: ai2/jupiter-cirrascale-2
+metrics_config:
+  project: OLMo3-kitchen
+  workspace: ai2
+weka: true
+dataset:
+  sources:
+  - name: dclm-baseline-20pct-dolma2
+    target_ratio: 1.0
+    paths:
+    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/dolma2-tokenizer/**/**/part-0*-00000.npy
+

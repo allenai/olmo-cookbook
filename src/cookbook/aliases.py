@@ -3,6 +3,8 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
+from olmo_core.optim.scheduler import CosWithWarmup, CosWithWarmupAndLinearDecay, LinearWithWarmup, WSD, Scheduler
+from olmo_core.optim import SchedulerUnits
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from olmo_core.train.common import Duration
@@ -53,24 +55,62 @@ class MetricsConfig(BaseModel):
     backends: list[MetricBackend] = [MetricBackend.wandb]
 
 
-class SchedulerType(Enum):
-    COSINE = "cosine"
-    COS_LINEAR = "cos_linear"
-    LINEAR = "linear"
-    WSD = "wsd"
+class SchedulerClass(Enum):
+    COSINE = CosWithWarmup
+    COSINE_LINEAR = CosWithWarmupAndLinearDecay
+    LINEAR = LinearWithWarmup
+    WSD = WSD
+
+    # @classmethod
+    # def values(cls):
+    #     return [e.value for e in cls]
+
+    # @classmethod
+    # def keys(cls):
+    #     return [e.name for e in cls]
+
+
+class SchedulerConfig(BaseModel):
+    scheduler: SchedulerClass = SchedulerClass.COSINE_LINEAR
+    units: SchedulerUnits = SchedulerUnits.steps
+    warmup: Optional[int] = 2000
+    decay: Optional[float] = None
+
+    @field_validator("warmup", "decay")
+    @classmethod
+    def validate_scheduler_args(cls, value, info):
+        field_name = info.field_name
+        scheduler_class = info.data.get("scheduler")
+
+        if value is not None:
+            if field_name == "warmup" and not hasattr(scheduler_class.value, "warmup"):
+                raise ValueError(f"Scheduler {scheduler_class.name} does not support warmup parameter")
+            if field_name == "decay" and not hasattr(scheduler_class.value, "decay"):
+                raise ValueError(f"Scheduler {scheduler_class.name} does not support decay parameter")
+
+        return value
 
     @classmethod
-    def values(cls):
-        return [e.value for e in cls]
+    def build(cls, **kwargs) -> Scheduler:
+        """Build the scheduler from the config."""
+        scheduler_class = kwargs.pop("scheduler", cls.scheduler)
+        scheduler = scheduler_class.value(**kwargs)
 
-    @classmethod
-    def keys(cls):
-        return [e.name for e in cls]
+        return scheduler
 
 
 class AnnealConfig(BaseModel):
     enabled: bool = True
     initial_lr: Optional[float] = None
+
+
+class BatchSizeWarmupConfig(BaseModel):
+    # Batch size multipliers
+    # e.g. [1, 2, 4] means 1x, 2x, and 4x the base global_batch_size
+    batches: list[int]
+    # Floats representing transition points in the schedule
+    # e.g. [0.0, 0.5, 1.0] means at 0% of the training, use 1x batch size, at 50% of the training, use 2x batch size, and at 100% of the training, use 4x batch size
+    schedule: list[float]
 
 
 class ExperimentConfig(BaseModel, extra="forbid"):
@@ -88,13 +128,15 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     priority: Priority  # pyright: ignore
     dataset: DatasetConfig
     model: ModelConfigIdentifier
+    batch_size_warmup: Optional[BatchSizeWarmupConfig] = None
     load_path: Optional[str] = None
     load_state: bool = True
     annealing: Optional[AnnealConfig] = None
     nccl_debug: bool = False
     activation_checkpointing: bool = False
+    weight_decay: Optional[float] = None
     model_overrides: Optional[List[str]] = None
-    scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
+    scheduler_config: SchedulerConfig = SchedulerConfig()
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
@@ -108,7 +150,6 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     weka: bool = False
     eval_interval: int = 200
     save_interval: int = 1000
-    warmup_steps: Optional[int] = None
     path: Path
 
     @field_validator("model", mode="before")
