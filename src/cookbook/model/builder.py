@@ -348,7 +348,7 @@ class TransformerConfigBuilder:
 
         if self.metrics_config:
             if MetricBackend.wandb in self.metrics_config.backends:
-                if self.metrics_config.workspace != MetricsConfig.workspace:
+                if self.metrics_config.workspace != MetricsConfig().workspace:
                     # show warning if workspace is set to non-default value;
                     # it is ignored for wandb metrics, only entity is used
                     # (it is used for comet metrics)
@@ -366,7 +366,7 @@ class TransformerConfigBuilder:
                     enabled=True,
                 )
             if MetricBackend.comet in self.metrics_config.backends:
-                if self.metrics_config.entity != MetricsConfig.entity:
+                if self.metrics_config.entity != MetricsConfig().entity:
                     # show warning if entity is set to non-default value;
                     # it is not used for comet metrics (only workspace is used)
                     logger.warning(
