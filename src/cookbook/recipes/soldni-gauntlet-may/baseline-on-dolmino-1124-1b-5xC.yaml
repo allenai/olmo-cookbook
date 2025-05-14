@@ -3,7 +3,7 @@ description: "Using dolma2 tokenizer with left-to-right digit splitting; trainin
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
-gpus: 4
+gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
 sequence_length: 4096

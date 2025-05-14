@@ -3,7 +3,7 @@ description: "Baseline for code sources; 50% stack-edu, 50% DCLM baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
 nodes: 2
-gpus: 4
+gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
 sequence_length: 4_096
