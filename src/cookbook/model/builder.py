@@ -348,14 +348,32 @@ class TransformerConfigBuilder:
 
         if self.metrics_config:
             if MetricBackend.wandb in self.metrics_config.backends:
+                if self.metrics_config.workspace != MetricsConfig.workspace:
+                    # show warning if workspace is set to non-default value;
+                    # it is ignored for wandb metrics, only entity is used
+                    # (it is used for comet metrics)
+                    logger.warning(
+                        "metrics_config.workspace is ignored for WandB metrics. "
+                        "Use metrics_config.entity instead."
+                    )
+
                 callbacks[MetricBackend.wandb.value] = WandBCallback(
                     name=self.run_name.strip(),
                     project=self.metrics_config.project.strip(),
+                    entity=self.metrics_config.entity.strip(),
                     group=self.group_id.strip(),
                     cancel_check_interval=10,
                     enabled=True,
                 )
             if MetricBackend.comet in self.metrics_config.backends:
+                if self.metrics_config.entity != MetricsConfig.entity:
+                    # show warning if entity is set to non-default value;
+                    # it is not used for comet metrics (only workspace is used)
+                    logger.warning(
+                        "metrics_config.entity is ignored for Comet metrics. "
+                        "Use metrics_config.workspace instead."
+                    )
+
                 callbacks[MetricBackend.comet.value] = CometCallback(
                     name=self.run_name.strip(),
                     workspace=self.metrics_config.workspace.strip(),
