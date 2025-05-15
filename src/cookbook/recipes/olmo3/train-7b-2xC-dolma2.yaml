@@ -1,7 +1,7 @@
 name: "OLMo3-7b-2xC-dolma2-baseline"
 description: "OLMo3 7b@1xC template"
 budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+workspace: "ai2/dolma2-7b"
 nodes: 16
 gpus: 8
 preemptible: true
