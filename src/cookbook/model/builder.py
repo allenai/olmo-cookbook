@@ -207,6 +207,7 @@ class TransformerConfigBuilder:
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     annealing: Optional[AnnealConfig]
     batch_size_warmup: Optional[BatchSizeWarmupConfig]
+    visualize_schedule: bool = False
     profile: bool = False
 
     def __init__(
@@ -240,6 +241,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
         metrics_config: Optional[MetricsConfig] = None,
+        visualize_schedule: bool = False,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         profile: bool = False,
@@ -276,6 +278,7 @@ class TransformerConfigBuilder:
         self.load_path = load_path
         self.hard_stop = hard_stop
         self.annealing = annealing
+        self.visualize_schedule = visualize_schedule
         self.batch_size_warmup = batch_size_warmup
         self.load_path_fs = load_path_fs
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
@@ -586,21 +589,22 @@ class TransformerConfigBuilder:
         scheduler_config = self.scheduler_config.model_dump(exclude={"scheduler"}, exclude_none=True)
         scheduler = WrappedScheduler.from_name_and_config(name=scheduler_class, config=scheduler_config)
 
-        lr = self.get_learning_rate()
-        scheduler_plot = SchedulerPlot(self.scheduler_config)
+        if self.visualize_schedule:
+            lr = self.get_learning_rate()
+            scheduler_plot = SchedulerPlot(self.scheduler_config)
 
-        # Use total_steps or total_tokens depending on scheduler units
-        if self.scheduler_config.units == SchedulerUnits.tokens:
-            scheduler_plot.visualize(
-                total_steps=self.max_tokens,
-                base_lr=lr,
-                global_batch_size=global_batch_size,
-            )
-        else:
-            scheduler_plot.visualize(
-                total_steps=int(self.max_tokens / global_batch_size),
-                base_lr=lr,
-            )
+            # Use total_steps or total_tokens depending on scheduler units
+            if self.scheduler_config.units == SchedulerUnits.tokens:
+                scheduler_plot.visualize(
+                    total_steps=self.max_tokens,
+                    base_lr=lr,
+                    global_batch_size=global_batch_size,
+                )
+            else:
+                scheduler_plot.visualize(
+                    total_steps=int(self.max_tokens / global_batch_size),
+                    base_lr=lr,
+                )
 
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available

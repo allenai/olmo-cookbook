@@ -59,13 +59,21 @@ def cli():
     default=None,
     help="Overrides the generated run group_id, allows for restarts with config changes or similar",
 )
-def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
+@click.option(
+    "--visualize-schedule",
+    is_flag=True,
+    default=False,
+    help="Beta: Visualize the learning rate schedule for the experiment",
+)
+def launch(
+    config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None, visualize_schedule: bool = False
+):
     """Launch an experiment."""
 
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    experiment_config = ExperimentConfig(**data, path=config)
+    experiment_config = ExperimentConfig(**data, path=config, visualize_schedule=visualize_schedule)
     validate_sources(experiment_config.dataset.sources)
 
     token_universe = get_token_counts_and_ratios(

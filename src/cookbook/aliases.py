@@ -167,6 +167,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     weka: bool = False
     eval_interval: int = 200
     save_interval: int = 1000
+    visualize_schedule: bool = False
     path: Path
 
     @field_validator("model", mode="before")
