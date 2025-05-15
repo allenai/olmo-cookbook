@@ -27,7 +27,7 @@ except ImportError:
 class SourceConfig(BaseModel):
     name: str
     paths: list[str]
-    target_ratio: Optional[float] = None
+    target_ratio: Optional[float] = 1.0
     repetition_factor: float = 1.0
     max_source_ratio: float = 1.0
 

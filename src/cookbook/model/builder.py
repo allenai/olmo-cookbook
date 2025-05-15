@@ -463,6 +463,7 @@ class TransformerConfigBuilder:
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
+            seed=self.seed,
         )
 
         return dataset_config
