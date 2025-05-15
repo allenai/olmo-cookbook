@@ -62,7 +62,6 @@ def cli():
 @click.option(
     "--visualize-schedule",
     is_flag=True,
-    default=False,
     help="Beta: Visualize the learning rate schedule for the experiment",
 )
 def launch(
@@ -73,7 +72,7 @@ def launch(
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    experiment_config = ExperimentConfig(**data, path=config, visualize_schedule=visualize_schedule)
+    experiment_config = ExperimentConfig(**data, path=config)
     validate_sources(experiment_config.dataset.sources)
 
     token_universe = get_token_counts_and_ratios(
@@ -107,7 +106,16 @@ def launch(
     logger.info("Token distribution by source:")
     logger.info(token_universe)
     logger.info(f"Running with trainer config:")
-    logger.info(build_train_config(config, experiment_config.name, group_uuid, beaker_user, dry_run=True))
+    logger.info(
+        build_train_config(
+            config,
+            experiment_config.name,
+            group_uuid,
+            beaker_user,
+            dry_run=True,
+            visualize_schedule=visualize_schedule,
+        )
+    )
     if not click.confirm("Proceed with this configuration?", default=False):
         logger.info("Launch cancelled!")
         return

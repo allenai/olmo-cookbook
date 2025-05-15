@@ -207,7 +207,7 @@ class TransformerConfigBuilder:
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     annealing: Optional[AnnealConfig]
     batch_size_warmup: Optional[BatchSizeWarmupConfig]
-    visualize_schedule: bool = False
+    visualize_schedule: bool
     profile: bool = False
 
     def __init__(
@@ -227,6 +227,7 @@ class TransformerConfigBuilder:
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
+        visualize_schedule: bool,
         scheduler_config: SchedulerConfig,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         weight_decay: Optional[float] = None,
@@ -241,7 +242,6 @@ class TransformerConfigBuilder:
         rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
         metrics_config: Optional[MetricsConfig] = None,
-        visualize_schedule: bool = False,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         profile: bool = False,

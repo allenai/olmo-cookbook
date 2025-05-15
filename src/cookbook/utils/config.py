@@ -121,7 +121,14 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
-def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
+def build_train_config(
+    config_path: Path,
+    run_name: str,
+    group_id: str,
+    beaker_user: str,
+    dry_run: bool = False,
+    visualize_schedule: bool = False,
+) -> TransformerConfigBuilder:
     """
     Launch a training run with the given parameters.
     """
@@ -183,7 +190,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         activation_checkpointing=base_config.activation_checkpointing,
         batch_size_warmup=base_config.batch_size_warmup,
         weight_decay=base_config.weight_decay,
-        visualize_schedule=base_config.visualize_schedule,
+        visualize_schedule=visualize_schedule,
     ).build()
 
     seed_all(config.init_seed)
