@@ -138,7 +138,7 @@ def launch(
             visualize_schedule=visualize_schedule,
         )
     )
-    if not click.confirm("Proceed with this configuration?", default=False):
+    if not click.confirm(f"{'(DRY RUN) ' if dry_run else ''}Proceed with this configuration?", default=False):
         logger.info("Launch cancelled!")
         return
 
@@ -155,7 +155,7 @@ def launch(
         )
         spinner.ok("✔")
 
-    with yaspin(text="Launching experiment group...", color="yellow") as spinner:
+    with yaspin(text=f"{'(DRY RUN) ' if dry_run else ''}Launching experiment group...", color="yellow") as spinner:
         try:
             if dry_run:
                 logger.info("Dry run mode enabled. Printing experiment configurations...")
