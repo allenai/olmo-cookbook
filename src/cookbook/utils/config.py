@@ -181,6 +181,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         hard_stop=base_config.hard_stop,
         model_overrides=base_config.model_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
+        batch_size_warmup=base_config.batch_size_warmup,
         weight_decay=base_config.weight_decay,
     ).build()
 

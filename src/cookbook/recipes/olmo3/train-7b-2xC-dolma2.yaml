@@ -22,8 +22,8 @@ scheduler_config:
   warmup: 8_388_608_000 # 2000 * 4_194_304
   decay: 50_000_000_000
 batch_size_warmup:
-  batches: [0, 2, 4]
-  schedule: [0.0, 0.33, 1.0]
+  batches: [1, 2, 4]
+  schedule: [0.0, 0.5, 1.0]
 cluster: ai2/jupiter-cirrascale-2
 metrics_config:
   project: OLMo3-kitchen

@@ -24,6 +24,7 @@ from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
     OptimConfig,
     OptimGroupOverride,
+    SchedulerUnits,
     SkipStepAdamWConfig,
 )
 from olmo_core.optim.scheduler import CosWithWarmup
@@ -67,6 +68,7 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
+from cookbook.utils.schedule import SchedulerPlot
 
 logger = logging.getLogger(__name__)
 
@@ -307,8 +309,6 @@ class TransformerConfigBuilder:
                 * self.sequence_length
             )
 
-        print(f"Global batch size (in tokens) is: {global_batch_size}")
-
         return global_batch_size
 
     def get_rank_microbatch_size(self) -> int:
@@ -470,10 +470,7 @@ class TransformerConfigBuilder:
 
         return BatchSizeSchedulerCallback(
             batch_sizes=[int(batch_size * multiplier) for multiplier in self.batch_size_warmup.batches],
-            schedule=[
-                Duration.tokens(self.next_power_of_2(int(self.max_tokens / ratio)))
-                for ratio in self.batch_size_warmup.schedule
-            ],
+            schedule=[Duration.tokens(int(self.max_tokens * ratio)) for ratio in self.batch_size_warmup.schedule],
         )
 
     def get_ac_config(self):
@@ -587,8 +584,23 @@ class TransformerConfigBuilder:
 
         scheduler_class = self.scheduler_config.scheduler
         scheduler_config = self.scheduler_config.model_dump(exclude={"scheduler"}, exclude_none=True)
-
         scheduler = WrappedScheduler.from_name_and_config(name=scheduler_class, config=scheduler_config)
+
+        lr = self.get_learning_rate()
+        scheduler_plot = SchedulerPlot(self.scheduler_config)
+
+        # Use total_steps or total_tokens depending on scheduler units
+        if self.scheduler_config.units == SchedulerUnits.tokens:
+            scheduler_plot.visualize(
+                total_steps=self.max_tokens,
+                base_lr=lr,
+                global_batch_size=global_batch_size,
+            )
+        else:
+            scheduler_plot.visualize(
+                total_steps=int(self.max_tokens / global_batch_size),
+                base_lr=lr,
+            )
 
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
