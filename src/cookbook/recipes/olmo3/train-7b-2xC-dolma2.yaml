@@ -1,4 +1,4 @@
-name: "OLMo3-7b-2xC-dolma2"
+name: "OLMo3-7b-2xC-dolma2-baseline"
 description: "OLMo3 7b@1xC template"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
