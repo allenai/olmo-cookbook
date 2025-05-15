@@ -27,9 +27,6 @@ batch_size_warmup:
 cluster: ai2/jupiter-cirrascale-2
 metrics_config:
   project: dolma2-7b
-  backends:
-    - wandb
-    - comet
 weka: true
 dataset:
   mix: OLMoE-mix-0824
