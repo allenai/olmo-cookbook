@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from os import PathLike
 from pathlib import Path
@@ -55,48 +56,64 @@ class MetricsConfig(BaseModel):
     backends: list[MetricBackend] = [MetricBackend.wandb]
 
 
-class SchedulerClass(Enum):
+class WrappedScheduler:
     COSINE = CosWithWarmup
     COSINE_LINEAR = CosWithWarmupAndLinearDecay
     LINEAR = LinearWithWarmup
     WSD = WSD
 
-    # @classmethod
-    # def values(cls):
-    #     return [e.value for e in cls]
+    @classmethod
+    def from_name_and_config(cls, name: str, config: dict[str, Any]) -> Scheduler:
+        """Get the scheduler class by name and config"""
 
-    # @classmethod
-    # def keys(cls):
-    #     return [e.name for e in cls]
+        # TODO(undfined): Remove this temporary fix for issue in Scheduler conditional check
+        # where decay_fraction = None is required
+        if "decay" in config:
+            config["decay_fraction"] = None
+
+        return getattr(cls, name)(**config)
 
 
 class SchedulerConfig(BaseModel):
-    scheduler: SchedulerClass = SchedulerClass.COSINE_LINEAR
+    scheduler: str = "COSINE_LINEAR"
     units: SchedulerUnits = SchedulerUnits.steps
-    warmup: Optional[int] = 2000
-    decay: Optional[float] = None
-
-    @field_validator("warmup", "decay")
-    @classmethod
-    def validate_scheduler_args(cls, value, info):
-        field_name = info.field_name
-        scheduler_class = info.data.get("scheduler")
-
-        if value is not None:
-            if field_name == "warmup" and not hasattr(scheduler_class.value, "warmup"):
-                raise ValueError(f"Scheduler {scheduler_class.name} does not support warmup parameter")
-            if field_name == "decay" and not hasattr(scheduler_class.value, "decay"):
-                raise ValueError(f"Scheduler {scheduler_class.name} does not support decay parameter")
-
-        return value
+    warmup: Optional[int] = None
+    warmup_fraction: Optional[float] = None
+    decay: Optional[int] = None
+    decay_fraction: Optional[float] = None
 
     @classmethod
-    def build(cls, **kwargs) -> Scheduler:
-        """Build the scheduler from the config."""
-        scheduler_class = kwargs.pop("scheduler", cls.scheduler)
-        scheduler = scheduler_class.value(**kwargs)
+    def _validate_mutually_exclusive(cls, v, field_name, other_field_name, info):
+        """Helper method to validate that two fields are mutually exclusive."""
+        if v is not None and info.data.get(other_field_name) is not None:
+            raise ValueError(
+                f"{field_name} and {other_field_name} are mutually exclusive and cannot both be specified."
+            )
+        return v
 
-        return scheduler
+    @field_validator("warmup")
+    @classmethod
+    def validate_warmup(cls, v, info):
+        """Validate that warmup and warmup_fraction are not both specified."""
+        return cls._validate_mutually_exclusive(v, "warmup", "warmup_fraction", info)
+
+    @field_validator("warmup_fraction")
+    @classmethod
+    def validate_warmup_fraction(cls, v, info):
+        """Validate that warmup and warmup_fraction are not both specified."""
+        return cls._validate_mutually_exclusive(v, "warmup_fraction", "warmup", info)
+
+    @field_validator("decay")
+    @classmethod
+    def validate_decay(cls, v, info):
+        """Validate that decay and decay_fraction are not both specified."""
+        return cls._validate_mutually_exclusive(v, "decay", "decay_fraction", info)
+
+    @field_validator("decay_fraction")
+    @classmethod
+    def validate_decay_fraction(cls, v, info):
+        """Validate that decay and decay_fraction are not both specified."""
+        return cls._validate_mutually_exclusive(v, "decay_fraction", "decay", info)
 
 
 class AnnealConfig(BaseModel):
@@ -128,6 +145,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     priority: Priority  # pyright: ignore
     dataset: DatasetConfig
     model: ModelConfigIdentifier
+    scheduler_config: SchedulerConfig
     batch_size_warmup: Optional[BatchSizeWarmupConfig] = None
     load_path: Optional[str] = None
     load_state: bool = True
@@ -136,7 +154,6 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     activation_checkpointing: bool = False
     weight_decay: Optional[float] = None
     model_overrides: Optional[List[str]] = None
-    scheduler_config: SchedulerConfig = SchedulerConfig()
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None

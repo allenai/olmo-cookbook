@@ -17,7 +17,7 @@ eval_interval: 1000
 learning_rate: 1.6e-4
 weight_decay: 0.1
 scheduler_config:
-  scheduler: wsd
+  scheduler: WSD
   units: steps
   warmup: 2000
   decay: 11920 # How do we get this?

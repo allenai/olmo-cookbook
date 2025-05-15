@@ -24,10 +24,9 @@ from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
     OptimConfig,
     OptimGroupOverride,
-    Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmup, CosWithWarmupAndLinearDecay, LinearWithWarmup, WSD
+from olmo_core.optim.scheduler import CosWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BatchSizeSchedulerCallback,
@@ -56,6 +55,7 @@ from cookbook.aliases import (
     MetricsConfig,
     SchedulerConfig,
     SourceInstance,
+    WrappedScheduler,
 )
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
@@ -108,29 +108,31 @@ class TransformerConfigBuilder:
         save_interval (int): The save interval.
         lm_evaluator (bool): Whether to enable language model evaluation.
         downstream_evaluators (List[DownstreamEvaluator]): The downstream evaluators.
-        load_path (Optional[str]): Path to load a model checkpoint from.
+        scheduler_config (SchedulerConfig): Configuration for the learning rate scheduler.
+        activation_checkpointing (bool): Whether to enable activation checkpointing.
+        weight_decay (Optional[float]): Weight decay for optimization.
+        model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         hard_stop (Optional[Duration]): The hard stop duration.
+        load_path (Optional[str]): Path to load a model checkpoint from.
         learning_rate (Optional[float]): The learning rate for the optimizer.
         global_batch_size (Optional[int]): The global batch size.
         rank_microbatch_size (Optional[int]): The rank microbatch size.
-        warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
-        model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
-        activation_checkpointing (bool): Whether to enable activation checkpointing.
+        load_path_fs (Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]): Filesystem for loading checkpoints.
+        annealing (Optional[AnnealConfig]): Configuration for learning rate annealing.
+        batch_size_warmup (Optional[BatchSizeWarmupConfig]): Configuration for batch size warm-up.
         profile (bool): Whether to enable profiling.
 
     Methods:
         __init__(run_name, sources, sequence_length, max_tokens, group_id, cluster, beaker_user,
                  tokenizer, dtype, model_identifier, weka, max_dp_world_size, save_interval, eval_interval,
-                 lm_evaluator, downstream_evaluators, load_path=None, global_batch_size=None,
-                 rank_microbatch_size=None, learning_rate=None, metrics_config=None,
-                 max_target_sequence_length=8192, seed=42, s3=True, profile=False):
+                 lm_evaluator, scheduler_config, downstream_evaluators, weight_decay=None, batch_size_warmup=None,
+                 activation_checkpointing=False, model_overrides=None, load_path_fs=None, annealing=None,
+                 hard_stop=None, load_path=None, global_batch_size=None, rank_microbatch_size=None,
+                 learning_rate=None, metrics_config=None, max_target_sequence_length=8192, seed=42, profile=False):
             Initializes the TransformerConfigBuilder.
 
         get_tokenizer_config(tokenizer: str) -> TokenizerConfig:
             Returns the tokenizer configuration based on the tokenizer identifier.
-
-        get_warmup_steps() -> int:
-            Returns the number of warmup steps.
 
         get_global_batch_size() -> int:
             Returns the global batch size based on the sequence length or user-defined value.
@@ -147,14 +149,23 @@ class TransformerConfigBuilder:
         build_callbacks() -> Dict[str, Callback]:
             Builds and returns a dictionary of callbacks for the trainer.
 
-        build_dataset_config() -> NumpyDatasetConfig:
+        build_dataset_config(loader_processes: int = 16) -> NumpyDatasetConfig:
             Builds and returns the dataset configuration.
-
-        get_scheduler_config(scheduler_type: SchedulerType) -> Scheduler:
-            Returns the scheduler configuration based on the scheduler type.
 
         get_optimizer_config() -> OptimConfig:
             Returns the optimizer configuration.
+
+        get_batch_size_warmup_callback() -> BatchSizeSchedulerCallback:
+            Returns a callback for batch size warm-up scheduling.
+
+        get_ac_config() -> TransformerActivationCheckpointingConfig:
+            Returns activation checkpointing configuration.
+
+        load_state_and_config_from_path() -> Tuple[Path, Path]:
+            Loads model state and config from checkpoint path.
+
+        get_state_from_checkpoint() -> SchedulerState:
+            Extracts scheduler state from a checkpoint.
 
         build() -> ModelTrainConfig:
             Builds and returns the model training configuration.
@@ -191,7 +202,6 @@ class TransformerConfigBuilder:
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
-    warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     annealing: Optional[AnnealConfig]
     batch_size_warmup: Optional[BatchSizeWarmupConfig]
@@ -575,6 +585,11 @@ class TransformerConfigBuilder:
             num_workers=12,
         )
 
+        scheduler_class = self.scheduler_config.scheduler
+        scheduler_config = self.scheduler_config.model_dump(exclude={"scheduler"}, exclude_none=True)
+
+        scheduler = WrappedScheduler.from_name_and_config(name=scheduler_class, config=scheduler_config)
+
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
@@ -590,7 +605,7 @@ class TransformerConfigBuilder:
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
-            scheduler=self.scheduler_config.build(),
+            scheduler=scheduler,
         )
 
         trainer_config = TrainerConfig(
