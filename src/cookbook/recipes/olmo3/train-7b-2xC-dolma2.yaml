@@ -26,8 +26,7 @@ batch_size_warmup:
   schedule: [0.0, 0.33, 1.0]
 cluster: ai2/jupiter-cirrascale-2
 metrics_config:
-  project: OLMo3-kitchen
-  workspace: ai2
+  project: dolma2-7b
 weka: true
 dataset:
   mix: OLMoE-mix-0824
