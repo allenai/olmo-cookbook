@@ -1,7 +1,7 @@
 name: "olmo2-7b_10b-anneal_madlad-ablate_control"
 description: "OLMo2 7b anneal to 10B Tokens for madlad ablations data| control"
 budget: "ai2/oe-training"
-workspace: "ai2/olmo3-webdata"
+workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
