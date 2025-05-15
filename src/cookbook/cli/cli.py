@@ -302,6 +302,7 @@ def prepare_user_workspace_from(source: str, dest: str):
         f"{user}_WANDB_API_KEY",
         f"{user}_AWS_CONFIG",
         f"{user}_AWS_CREDENTIALS",
+        "GOOGLE_CLOUD_PROJECT",
         "R2_ENDPOINT_URL",
         "WEKA_ENDPOINT_URL",
     )
@@ -367,6 +368,13 @@ def prepare_user_workspace_from(source: str, dest: str):
     default=None,
     required=False,
 )
+@click.option(
+    "--google-cloud-project",
+    type=str,
+    help="The Google Cloud project to use for authentication",
+    default=None,
+    required=False,
+)
 def prepare_user_workspace(
     workspace: str,
     beaker_token: str,
@@ -375,6 +383,7 @@ def prepare_user_workspace(
     r2_endpoint_url: Optional[str] = None,
     weka_endpoint_url: Optional[str] = None,
     wandb_api_key: Optional[str] = None,
+    google_cloud_project: Optional[str] = None,
 ):
     """Prepare the workspace environment for use with OLMo-cookbook."""
 
@@ -397,6 +406,7 @@ def prepare_user_workspace(
         f"{user}_WANDB_API_KEY": wandb_api_key,
         f"{user}_AWS_CONFIG": aws_config,
         f"{user}_AWS_CREDENTIALS": aws_credentials,
+        "GOOGLE_CLOUD_PROJECT": google_cloud_project,
         "R2_ENDPOINT_URL": r2_endpoint_url,
         "WEKA_ENDPOINT_URL": weka_endpoint_url,
     }
