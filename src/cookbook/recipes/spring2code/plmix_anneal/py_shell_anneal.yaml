@@ -4,14 +4,14 @@ budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
 nodes: 4
 gpus: 8
-preemptible: false
+preemptible: true
 max_tokens: 10_000_000_000
 global_batch_size: 2097152
 sequence_length: 2048
 seed: 1337
 model: "olmo2_7B"
 tokenizer: "dolma2"
-priority: urgent
+priority: high
 eval_interval: 250
 cluster: ai2/augusta-google-1
 rank_microbatch_size: 8192
