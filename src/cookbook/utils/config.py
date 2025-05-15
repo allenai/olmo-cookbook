@@ -128,7 +128,7 @@ def build_train_config(
     beaker_user: str,
     dry_run: bool = False,
     visualize_schedule: bool = False,
-) -> TransformerConfigBuilder:
+):
     """
     Launch a training run with the given parameters.
     """
