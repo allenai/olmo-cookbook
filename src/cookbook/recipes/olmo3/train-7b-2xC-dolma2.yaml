@@ -18,9 +18,9 @@ learning_rate: 1.6e-4
 weight_decay: 0.1
 scheduler_config:
   scheduler: WSD
-  units: steps
-  warmup: 2000
-  decay: 11920 # How do we get this?
+  units: tokens
+  warmup: 8_388_608_000 # 2000 * 4_194_304
+  decay: 50_000_000_000
 batch_size_warmup:
   batches: [0, 2, 4]
   schedule: [0.0, 0.33, 1.0]
