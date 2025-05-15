@@ -25,6 +25,7 @@ from cookbook.aliases import (
     SourceConfig,
     SourceInstance,
 )
+from cookbook.model.config import Tokenizers
 from cookbook.model.builder import TransformerConfigBuilder
 from cookbook.utils.data import normalize_source_paths
 
@@ -146,6 +147,24 @@ def build_train_config(
     """
 
     base_config = config_from_path(config_path)
+
+    if base_config.dataset.mix:
+        try:
+            tokenizer_name = Tokenizers[base_config.tokenizer].value.identifier or "Unknown"
+            mix = base_config.dataset.mix.build(
+                base_dir=get_mix_base_dir(base_config.cluster, base_config.weka, local=True),
+                tokenizer=tokenizer_name,
+            )
+            base_config.dataset.sources = [
+                SourceConfig(
+                    name=base_config.dataset.mix,
+                    paths=mix[0],
+                )
+            ]
+        except Exception as e:
+            logger.error(f"Failed to build mix dataset: {e}")
+            raise
+
     load_path_fs = None
 
     if dry_run:
