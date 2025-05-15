@@ -13,7 +13,7 @@ from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
 
-from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
+from cookbook.aliases import ExperimentConfig, LaunchGroup, SourceConfig, validate_sources
 from cookbook.cli.core import estimate_batch_size
 from cookbook.cli.eval import convert_checkpoint, evaluate_model
 from cookbook.utils.config import (
@@ -21,7 +21,9 @@ from cookbook.utils.config import (
     config_from_path,
     mk_experiment_group,
     mk_launch_configs,
+    get_mix_base_dir,
 )
+from cookbook.model.config import Tokenizers
 from cookbook.utils.data import get_token_counts_and_ratios
 
 logger = logging.getLogger(__name__)
@@ -73,6 +75,26 @@ def launch(
         data = yaml.safe_load(f)
 
     experiment_config = ExperimentConfig(**data, path=config)
+
+    # Instead of relying on the named mix we build it and treat it like a normal dataset source.
+    # NOTE: If other callers start to arise we should consider refactoring this into the BaseModel.
+    if experiment_config.dataset.mix:
+        try:
+            tokenizer_name = Tokenizers[experiment_config.tokenizer].value.identifier or "Unknown"
+            mix = experiment_config.dataset.mix.build(
+                base_dir=get_mix_base_dir(experiment_config.cluster, experiment_config.weka, local=True),
+                tokenizer=tokenizer_name,
+            )
+            experiment_config.dataset.sources = [
+                SourceConfig(
+                    name=experiment_config.dataset.mix,
+                    paths=mix[0],
+                )
+            ]
+        except Exception as e:
+            logger.error(f"Failed to build mix dataset: {e}")
+            raise
+
     validate_sources(experiment_config.dataset.sources)
 
     token_universe = get_token_counts_and_ratios(

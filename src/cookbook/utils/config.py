@@ -121,6 +121,18 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
+def get_mix_base_dir(cluster: str, weka: bool, local: bool) -> str:
+    base_dir: str = "s3://ai2-llm"
+    if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
+        if local:
+            base_dir = "weka://oe-training-default/ai2-llm"
+        else:
+            base_dir = "/weka/oe-training-default/ai2-llm"
+    elif "google" in cluster:
+        base_dir = "gs://ai2-llm"
+    return base_dir
+
+
 def build_train_config(
     config_path: Path,
     run_name: str,

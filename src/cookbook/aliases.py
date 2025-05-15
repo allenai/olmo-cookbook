@@ -6,6 +6,7 @@ from typing import Any, List, Optional, Union
 
 from olmo_core.optim.scheduler import CosWithWarmup, CosWithWarmupAndLinearDecay, LinearWithWarmup, WSD, Scheduler
 from olmo_core.optim import SchedulerUnits
+from olmo_core.data import DataMix
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from olmo_core.train.common import Duration
@@ -39,10 +40,27 @@ class SourceInstance(BaseModel):
 
 
 class DatasetConfig(BaseModel):
-    sources: list[SourceConfig]
+    mix: Optional[DataMix] = None
+    sources: list[SourceConfig] = []
     dtype: NumpyDatasetDType = NumpyDatasetDType.uint32
     processes: int = 16
     seed: int = 42
+
+    @field_validator("mix")
+    @classmethod
+    def validate_mix_exclusivity(cls, v, info):
+        """Validate that mix and sources are mutually exclusive."""
+        if v is not None and info.data.get("sources"):
+            raise ValueError("'mix' and 'sources' are mutually exclusive.")
+        return v
+
+    @field_validator("sources")
+    @classmethod
+    def validate_sources_exclusivity(cls, v, info):
+        """Validate that sources and mix are mutually exclusive."""
+        if v and info.data.get("mix") is not None:
+            raise ValueError("'mix' and 'sources' are mutually exclusive and cannot both be specified.")
+        return v
 
 
 class MetricBackend(Enum):
