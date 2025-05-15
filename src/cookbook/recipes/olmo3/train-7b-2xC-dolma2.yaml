@@ -14,7 +14,7 @@ model: "olmo2_7B"
 tokenizer: "dolma2"
 priority: urgent
 eval_interval: 1000
-learning_rate: 1.6e-4
+learning_rate: 5e-4
 weight_decay: 0.1
 scheduler_config:
   scheduler: WSD
