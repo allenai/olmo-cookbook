@@ -27,6 +27,7 @@ from olmo_core.optim import (
     SchedulerUnits,
     SkipStepAdamWConfig,
 )
+from olmo_core.optim import scheduler as scheduler_module
 from olmo_core.optim.scheduler import CosWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
@@ -571,15 +572,24 @@ class TransformerConfigBuilder:
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
-        except AssertionError as e:
-            logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
-            )
-            raise e
+            scheduler_cls = getattr(scheduler_module, scheduler_class)
+        except (ImportError, AttributeError) as e:
+            logger.error(f"Failed to import scheduler class {scheduler_class}: {e}")
+            raise ValueError(f"Unsupported scheduler class when : {scheduler_class}")
 
-        scheduler = CosWithWarmup(**scheduler_config)
-        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+        try:
+            scheduler = scheduler_cls(**scheduler_config)
+
+            # Check if get_lr method exists
+            if not hasattr(scheduler, "get_lr"):
+                logger.error(f"Scheduler {scheduler_class} doesn't implement get_lr method")
+                raise AttributeError(f"Scheduler {scheduler_class} must implement get_lr method for annealing")
+
+            starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+            logger.info(f"Using scheduler {scheduler_class} with starting LR {starting_lr}")
+        except Exception as e:
+            logger.error(f"Error initializing scheduler {scheduler_class}: {e}")
+            raise
 
         return SchedulerState(
             global_step=last_pretrain_step,

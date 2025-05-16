@@ -3,9 +3,10 @@ Utility for visualizing and creating learning rate schedulers.
 """
 
 import math
-from typing import Optional, Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from olmo_core.optim import SchedulerUnits
+
 from cookbook.aliases import SchedulerConfig
 
 

@@ -25,8 +25,8 @@ from cookbook.aliases import (
     SourceConfig,
     SourceInstance,
 )
-from cookbook.model.config import Tokenizers
 from cookbook.model.builder import TransformerConfigBuilder
+from cookbook.model.config import Tokenizers
 from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)

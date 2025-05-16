@@ -4,11 +4,17 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
-from olmo_core.optim.scheduler import CosWithWarmup, CosWithWarmupAndLinearDecay, LinearWithWarmup, WSD, Scheduler
-from olmo_core.optim import SchedulerUnits
 from olmo_core.data import DataMix
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
+from olmo_core.optim import SchedulerUnits
+from olmo_core.optim.scheduler import (
+    WSD,
+    CosWithWarmup,
+    CosWithWarmupAndLinearDecay,
+    LinearWithWarmup,
+    Scheduler,
+)
 from olmo_core.train.common import Duration
 from pydantic import BaseModel, field_validator
 

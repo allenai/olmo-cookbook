@@ -412,8 +412,8 @@ def evaluate_model(
     default="",
     help="Name of the column to sort by",
 )
-@click.option('-A/--ascending', 'sort_descending', flag_value=False, default=False, help="Sort ascending")
-@click.option('-D/--descending', 'sort_descending', flag_value=True, default=False, help="Sort descending")
+@click.option("-A/--ascending", "sort_descending", flag_value=False, default=False, help="Sort ascending")
+@click.option("-D/--descending", "sort_descending", flag_value=True, default=False, help="Sort descending")
 @click.option(
     "-F",
     "--force",
@@ -465,7 +465,7 @@ def get_results(
         results = results.sort(
             by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
             by_name=sort_by.startswith("name"),
-            by_avg='avg' in sort_by or 'average' in sort_by,
+            by_avg="avg" in sort_by or "average" in sort_by,
             reverse=not sort_descending,
         )
     except StopIteration:
