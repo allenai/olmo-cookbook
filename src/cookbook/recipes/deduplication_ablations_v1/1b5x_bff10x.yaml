@@ -10,7 +10,7 @@ sequence_length: 4096
 seed: 1337
 model: "olmo2_1B_v2"
 tokenizer: "dolma2"
-priority: urgent
+priority: high
 eval_interval: 250
 global_batch_size: 2097152
 rank_microbatch_size: 32768
