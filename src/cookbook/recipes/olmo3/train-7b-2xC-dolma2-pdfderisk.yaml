@@ -33,7 +33,7 @@ metrics_config:
 weka: true
 dataset:
   sources:
-  - name: OLMoE-mix-0824
+  - name: OLMoE-mix-0824-plus-s2pdfs
     target_ratio: 1.0
     paths:
     # ProofPile 2: Algebraic Stack Data
@@ -1171,3 +1171,5 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-0-00000.npy
     - weka://oe-training-default/ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-1-00000.npy
 
+    # s2pdfs
+    - weka://e-training-default/ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality/allenai/dolma2-tokenizer/*.npy
