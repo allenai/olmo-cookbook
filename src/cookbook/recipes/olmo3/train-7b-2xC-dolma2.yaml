@@ -1,0 +1,36 @@
+name: "OLMo3-7b-2xC-dolma2-baseline"
+description: "OLMo3 7b@1xC template"
+budget: "ai2/oe-training"
+workspace: "ai2/dolma2-7b"
+nodes: 16
+gpus: 8
+preemptible: true
+max_tokens: 275_503_022_080 # 2 * 20 * 6_887_575_552 non-embedding params
+global_batch_size: 4_194_304
+rank_microbatch_size: 8192
+sequence_length: 4096
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 1000
+learning_rate: 5e-4
+weight_decay: 0.1
+scheduler_config:
+  scheduler: WSD
+  units: tokens
+  warmup: 8_388_608_000 # 2000 * 4_194_304
+  decay: 50_000_000_000
+batch_size_warmup:
+  batches: [1, 2, 4]
+  schedule: [0.0, 0.33, 1.0]
+cluster: ai2/jupiter-cirrascale-2
+downstream_evaluators:
+  - olmo2_dev_7b
+metrics_config:
+  project: dolma2-7b
+  entity: ai2-llm
+weka: true
+dataset:
+  mix: OLMoE-mix-0824
+
