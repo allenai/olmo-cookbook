@@ -29,6 +29,7 @@ downstream_evaluators:
   - olmo2_dev_7b
 metrics_config:
   project: dolma2-7b
+  entity: ai2-llm
 weka: true
 dataset:
   mix: OLMoE-mix-0824
