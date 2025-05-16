@@ -1172,4 +1172,4 @@ dataset:
     - weka://oe-training-default/ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-1-00000.npy
 
     # s2pdfs
-    - weka://e-training-default/ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality/allenai/dolma2-tokenizer/*.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality/allenai/dolma2-tokenizer/*.npy
