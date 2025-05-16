@@ -25,6 +25,8 @@ batch_size_warmup:
   batches: [1, 2, 4]
   schedule: [0.0, 0.33, 1.0]
 cluster: ai2/jupiter-cirrascale-2
+downstream_evaluators:
+  - olmo2_dev_7b
 metrics_config:
   project: dolma2-7b
 weka: true
