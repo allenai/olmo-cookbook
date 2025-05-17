@@ -46,7 +46,7 @@ wandb = [
     "wandb",
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@ef28f2ab956177f4e9bf8cbcc1bb50457ae575cd",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@5a97bda93258e8a3943518376320316126b14730",
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
