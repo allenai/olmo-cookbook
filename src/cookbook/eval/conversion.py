@@ -13,12 +13,12 @@ from cookbook.cli.utils import (
     check_beaker_dependencies,
     discover_weka_mount,
     download_tokenizer,
+    install_beaker_py,
     install_olmo,
     install_olmo_core,
     install_transformers,
     make_destination_dir,
     remove_conflicting_packages,
-    install_beaker_py,
 )
 from cookbook.constants import (
     BEAKER_KNOWN_CLUSTERS,
@@ -129,10 +129,18 @@ def convert_olmo_core_v2(
         subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path())
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
 
-    except Exception as e:
-        print(f"Error running conversion: {e}; cleaning up before raising error...")
-        os.chdir(current_directory)
-        raise e
+        # change type of model to bfloat16 if it is float32
+        config_file = os.path.join(huggingface_output_dir, "config.json")
+        with open(config_file, "r") as f:
+            config = json.load(f)
+
+        if config.get("torch_dtype", "") == "float32":
+            print(f"Changing type of model to bfloat16...")
+            config["torch_dtype"] = "bfloat16"
+
+            with open(config_file, "w") as f:
+                json.dump(config, f)
+
     finally:
         for directory in directories_to_clean_up:
             print(f"Cleaning up {directory}...")
@@ -401,7 +409,8 @@ def run_checkpoint_conversion(
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
-        if not use_system_python else PythonEnv.null()
+        if not use_system_python
+        else PythonEnv.null()
     )
 
     if use_beaker:

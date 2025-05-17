@@ -230,4 +230,5 @@ class WrappedTransformerConfig:
 
 DEFAULT_LR_MAP = {
     "olmo2_1B": 1.8e-3,
+    "olmo2_1B_v2": 1.8e-3,
 }
