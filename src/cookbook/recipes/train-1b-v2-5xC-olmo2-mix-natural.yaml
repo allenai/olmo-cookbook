@@ -24,11 +24,11 @@ dataset:
     - name: proofpile-2-arxiv
       paths:
         - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/arxiv/train/allenai/dolma2-tokenizer/*.npy
-      target_ratio: 0053613993678482625
+      target_ratio: 0.0053613993678482625
     - name: proofpile-2-open-web-math
       paths:
         - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/open-web-math/train/allenai/dolma2-tokenizer/*.npy
-      target_ratio: 0031448462446296357
+      target_ratio: 0.0031448462446296357
     - name: pes2o
       paths:
         - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
