@@ -1,12 +1,12 @@
-name: "starcoder-filtered-50p_dclm-50p"
-description: "Baseline for code sources; 50% Starcoder (2+ stars, 30% ngram repeat), 50% DCLM baseline"
+name: "open-coder-50p_dclm-50p"
+description: "Baseline for code sources; 50% OpenCoder, 50% DCLM baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
 nodes: 2
 gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
-sequence_length: 4096
+sequence_length: 4_096
 global_batch_size: 2_097_152
 rank_microbatch_size: 32_768
 seed: 1337
@@ -23,10 +23,10 @@ metrics_config:
 
 dataset:
   sources:
-  - name: starcoder-filtered
+  - name: opencoder
     target_ratio: 0.50
     paths:
-      - s3://ai2-llm/preprocessed/starcoder/v1-decon-100_to_20k-2star-top_token_030/allenai/dolma2-tokenizer/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/**/*.npy
 
   - name: dclm-baseline
     target_ratio: 0.50
