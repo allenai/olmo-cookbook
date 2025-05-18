@@ -15,6 +15,9 @@ cluster: ai2/jupiter-cirrascale-2
 weka: true
 rank_microbatch_size: 32_768
 global_batch_size: 2_097_152 # 4_194_304, 2_097_152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
 dataset:
   sources:
     - name: proofpile-2-stack
