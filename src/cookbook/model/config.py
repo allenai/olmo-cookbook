@@ -30,11 +30,17 @@ class Tokenizers(Enum):
     )
     dolma2_sigdig = TokenizerConfig(
         identifier="allenai/dolma2-tokenizer-sigdig",
-        vocab_size=100278,
-        eos_token_id=100257,
-        pad_token_id=100277,
+        vocab_size=dolma2.vocab_size,
+        eos_token_id=dolma2.eos_token_id,
+        pad_token_id=dolma2.pad_token_id,
     )
-
+    dolma2_sigdig_bos_eos = TokenizerConfig(
+        identifier=dolma2_sigdig.identifier,
+        vocab_size=dolma2_sigdig.vocab_size,
+        eos_token_id=dolma2_sigdig.eos_token_id,
+        bos_token_id=dolma2_sigdig.eos_token_id,
+        pad_token_id=dolma2_sigdig.pad_token_id,
+    )
 
 
 @dataclass
