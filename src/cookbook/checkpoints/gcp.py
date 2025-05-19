@@ -16,6 +16,9 @@ from google.oauth2.credentials import Credentials
 from google.cloud import storage
 
 
+from cookbook.cli.utils import PythonEnv
+
+
 class ShortLivedToken(NamedTuple):
     token: str
     expiry: datetime.datetime | None
@@ -111,6 +114,8 @@ def download_gcs_prefix(
                     future_to_cancel.cancel()
                 raise e
 
+
+def run_on_beaker
 
 if __name__ == "__main__":
     # download_gcs_prefix(
