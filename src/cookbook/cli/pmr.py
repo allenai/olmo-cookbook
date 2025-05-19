@@ -207,7 +207,15 @@ set -ex
 
 # install python 3.12 with pip
 sudo "${{PKG_MANAGER}}" update
-sudo "${{PKG_MANAGER}}" install python3.12 python3.12-pip tmux -y
+sudo "${{PKG_MANAGER}}" install python3.12 python3.12-pip -y
+
+# install git & tmux
+sudo "${{PKG_MANAGER}}" install git tmux -y
+
+# install s5cmd
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
+tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+sudo mv s5cmd /usr/local/bin/
 
 # install uv via pip
 pip3.12 install uv
