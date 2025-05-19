@@ -77,22 +77,31 @@ class LocatedPath:
     @classmethod
     def from_str(cls, path: str | Path) -> "Self":
         parsed_path = urlparse(str(path))
+
+        # maintain any trailing slashes
+        suffix = "/" if str(path).endswith("/") else ""
+
         if parsed_path.scheme.startswith("s3"):
             return cls(prot="s3", bucket=parsed_path.netloc, prefix=parsed_path.path.lstrip("/"))
         elif parsed_path.scheme in ("gs", "gcs"):
             return cls(prot="gs", bucket=parsed_path.netloc, prefix=parsed_path.path.lstrip("/"))
         elif parsed_path.scheme == "weka":
+            if parsed_path.netloc not in WEKA_MOUNTS:
+                raise ValueError(f"Invalid Weka bucket: {parsed_path.netloc}")
             return cls(prot="weka", bucket=parsed_path.netloc, prefix=parsed_path.path.lstrip("/"))
         elif parsed_path.scheme == "":
             _, *path_parts = Path(parsed_path.path).parts
 
-            # maintain any trailing slashes
-            suffix = "/" if str(path).endswith("/") else ""
-
-            if path_parts[0] == "weka" and path_parts[1] in WEKA_MOUNTS:
-                return cls(prot="weka", bucket=path_parts[1], prefix="/".join(path_parts[2:]) + suffix)
+            if path_parts[0] == "weka":
+                if path_parts[1] in WEKA_MOUNTS:
+                    return cls(prot="weka", bucket=path_parts[1], prefix="/".join(path_parts[2:]) + suffix)
+                else:
+                    raise ValueError(f"Invalid Weka bucket: {path_parts[1]}")
             elif path_parts[0] in WEKA_MOUNTS:
                 return cls(prot="weka", bucket=path_parts[0], prefix="/".join(path_parts[1:]) + suffix)
+
+        if parsed_path.scheme not in ("file", ""):
+            raise ValueError(f"Invalid scheme: {parsed_path.scheme}")
 
         # purely local path
         _, *path_parts = Path(path).absolute().parts
