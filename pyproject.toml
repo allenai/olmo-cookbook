@@ -37,6 +37,7 @@ dev = [
     "ruff",
     "mypy>=1.0,<1.4",
     "boto3-stubs[essential,ec2,s3,ssm]",
+    "google-api-python-client-stubs",
 ]
 beaker = [
     "beaker-py>=1,<2",
@@ -44,6 +45,10 @@ beaker = [
 ]
 wandb = [
     "wandb",
+]
+checkpoints = [
+    "google-cloud-storage",
+    "boto3"
 ]
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@ef28f2ab956177f4e9bf8cbcc1bb50457ae575cd",

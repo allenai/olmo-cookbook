@@ -199,6 +199,33 @@ cargo build --release
 """.strip()
 
 
+DOLMA_PYTHON_SETUP = f"""
+#!/bin/bash
+{PACKAGE_MANAGER_DETECTOR}
+
+set -ex
+
+# install python 3.12 with pip
+sudo "${{PKG_MANAGER}}" update
+sudo "${{PKG_MANAGER}}" install python3.12 python3.12-pip -y
+
+# install git & tmux
+sudo "${{PKG_MANAGER}}" install git tmux -y
+
+# install s5cmd
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
+tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+sudo mv s5cmd /usr/local/bin/
+
+# install uv via pip
+pip3.12 install uv
+
+# make virtual environment, install dolma
+uv venv
+uv pip install dolma
+""".strip()
+
+
 class InstanceStatus(Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -474,6 +501,8 @@ class InstanceInfo:
             InstanceInfo object containing the instance details
         """
         client = client or boto3.client("ec2", region_name=region or cls.region)
+        assert client, "EC2 client is required"
+
         response = client.describe_instances(InstanceIds=[instance_id])
         return InstanceInfo.from_instance(response.get("Reservations", [])[0].get("Instances", [])[0])
 
@@ -489,6 +518,7 @@ class InstanceInfo:
             True if pause was successful, False otherwise
         """
         client = client or boto3.client("ec2", region_name=self.region)
+        assert client, "EC2 client is required"
 
         # check if the instance is already paused
         if self.state == InstanceStatus.STOPPED:
@@ -525,6 +555,7 @@ class InstanceInfo:
             True if resume was successful, False otherwise
         """
         client = client or boto3.client("ec2", region_name=self.region)
+        assert client, "EC2 client is required"
 
         # check if the instance is already running
         if self.state == InstanceStatus.RUNNING:
@@ -561,6 +592,7 @@ class InstanceInfo:
             True if termination was successful, False otherwise
         """
         client = client or boto3.client("ec2", region_name=self.region)
+        assert client, "EC2 client is required"
 
         try:
             # Terminate the instance
@@ -599,6 +631,8 @@ class InstanceInfo:
             image_id = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 
         client = client or boto3.client("ssm")
+        assert client, "SSM client is required"
+
         parameter = client.get_parameter(Name=image_id, WithDecryption=False)
         ami_id = parameter.get("Parameter", {}).get("Value")
         assert ami_id, f"No AMI ID found for {image_id}"
@@ -613,6 +647,8 @@ class InstanceInfo:
         ami_id: str | None = None,
         wait_for_completion: bool = True,
         key_name: str | None = None,
+        storage_type: str | None = None,
+        storage_size: int | None = None,
         client: Union["EC2Client", None] = None,
     ) -> "InstanceInfo":
         """
@@ -625,6 +661,8 @@ class InstanceInfo:
             ami_id: AMI ID to use (defaults to Amazon Linux 2 in the specified region)
             wait_for_completion: Whether to wait for the instance to be running
             key_name: Name of the key pair to use for SSH access to the instance
+            storage_type: Type of EBS storage (e.g., 'gp2', 'gp3'). If None, uses AWS default
+            storage_size: Size of root volume in GB. If None, uses AWS default
             client: Optional boto3 EC2 client to use
 
         Returns:
@@ -632,6 +670,7 @@ class InstanceInfo:
         """
         # Initialize the EC2 client with the specified region
         client = client or boto3.client("ec2", region_name=region)
+        assert client, "EC2 client is required"
 
         # If AMI ID is not provided, use a default Amazon Linux 2023 AMI (x86_64 or arm64 based on instance type)
         ami_id = ami_id or cls.get_latest_ami_id(instance_type)
@@ -653,6 +692,23 @@ class InstanceInfo:
         # Add key pair if provided
         if key_name:
             launch_params["KeyName"] = key_name
+
+        # Add block device mapping if storage parameters are provided
+        if storage_size is not None:
+            launch_params.update(
+                {
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/xvda",
+                            "Ebs": {
+                                "DeleteOnTermination": True,
+                                "VolumeSize": storage_size,
+                                **({"VolumeType": storage_type} if storage_type else {}),
+                            },
+                        }
+                    ]
+                }
+            )
 
         # Launch the EC2 instance
         response = client.run_instances(**launch_params)
@@ -1056,6 +1112,18 @@ def common_cli_options(f: T) -> T:
 
 
 @common_cli_options
+@click.option(
+    "--storage-type",
+    type=click.Choice(["gp3", "gp2", "io1", "io2", "io2e", "st1", "sc1"]),
+    default=None,
+    help="Storage type to use for the instances",
+)
+@click.option(
+    "--storage-size",
+    type=int,
+    default=None,
+    help="Storage size to use for the instances",
+)
 def create_instances(
     name: str,
     instance_type: str,
@@ -1065,6 +1133,8 @@ def create_instances(
     ssh_key_path: str,
     ami_id: str | None,
     detach: bool,
+    storage_type: str | None,
+    storage_size: int | None,
     **kwargs,
 ):
     """
@@ -1138,6 +1208,8 @@ def create_instances(
             ami_id=ami_id,
             wait_for_completion=not detach,
             client=ec2_client,
+            storage_type=storage_type,
+            storage_size=storage_size,
         )
         logger.info(f"Created instance {instance.instance_id} with name {instance.name}")
         instances.append(instance)
@@ -1554,6 +1626,66 @@ def setup_dolma2_toolkit(
 
 
 @common_cli_options
+def setup_dolma_python(
+    name: str,
+    region: str,
+    owner: str,
+    instance_id: list[str] | None,
+    ssh_key_path: str,
+    detach: bool,
+    **kwargs,
+):
+    """
+    Set up the Dolma Python on EC2 instances.
+
+    Args:
+        name: Project name to filter instances by
+        region: AWS region to search in
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to target
+        ssh_key_path: Path to SSH private key file
+        detach: Whether to run setup in detached mode
+        **kwargs: Additional keyword arguments
+    """
+    # First set up AWS credentials on the instances
+    logger.info(f"Setting up AWS credentials on instances with project={name}, owner={owner} in region {region}")
+    setup_instances(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        ssh_key_path=ssh_key_path,
+    )
+
+    # Encode the Dolma2 toolkit setup script for secure transfer
+    logger.debug("Preparing Dolma2 toolkit setup script")
+    base64_encoded_setup_command = base64.b64encode(DOLMA_PYTHON_SETUP.encode("utf-8")).decode("utf-8")
+
+    # Create command to write and execute the setup script
+    command = [
+        f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
+        "chmod +x setup.sh",
+        "./setup.sh",
+    ]
+
+    # Run the Dolma2 toolkit setup command on the instances
+    logger.info(f"Setting up Dolma Python on instances with project={name}, owner={owner}")
+    run_command(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        command=" && ".join(command),
+        script=None,
+        ssh_key_path=ssh_key_path,
+        detach=detach,
+        spindown=False,
+        screen=True,
+    )
+    logger.info("Dolma Python setup completed")
+
+
+@common_cli_options
 def map_commands(
     name: str,
     region: str,
@@ -1691,6 +1823,7 @@ cli.command(name="terminate")(terminate_instances)
 cli.command(name="run")(run_command)
 cli.command(name="setup")(setup_instances)
 cli.command(name="setup-d2tk")(setup_dolma2_toolkit)
+cli.command(name="setup-dolma-python")(setup_dolma_python)
 cli.command(name="map")(map_commands)
 cli.command(name="pause")(pause_instances)
 cli.command(name="resume")(resume_instances)
