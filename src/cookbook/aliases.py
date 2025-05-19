@@ -50,7 +50,7 @@ class MetricBackend(Enum):
 class MetricsConfig(BaseModel):
     project: str = "olmo-cookbook"
     workspace: str = "ai2"
-    entity: str = "allenai"
+    entity: str = "ai2-llm"
     backends: list[MetricBackend] = [MetricBackend.wandb]
 
 
