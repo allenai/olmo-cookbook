@@ -1171,5 +1171,5 @@ dataset:
     - gs://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-0-00000.npy
     - gs://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-1-00000.npy
 
-    # s2pdfs
-    - gs://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality/allenai/dolma2-tokenizer/*.npy
+    # s2pdfs, kept on s3 temporarily, because of beaker issues at the time of startup, but feel free to move over later
+    - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality/allenai/dolma2-tokenizer/*.npy
