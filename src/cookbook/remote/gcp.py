@@ -43,14 +43,14 @@ class GoogleCloudToken(BaseAuthentication):
 
         return cls(token=credentials.token, expiry=credentials.expiry)  # pyright: ignore
 
-    def apply(self) -> None:
+    def apply(self) -> storage.Client:
         """Apply the credentials so that it can be used for remote operations."""
 
         if self.expiry is not None and datetime.datetime.now() > self.expiry:
             raise AuthenticationError("Token expired!")
 
         credentials = Credentials(self.token)
-        storage.Client(credentials=credentials)
+        return storage.Client(credentials=credentials)
 
 
 def download_gcs_prefix(
@@ -62,6 +62,9 @@ def download_gcs_prefix(
 ):
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip('/')
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
+
+    if google_cloud_token is not None:
+        client = google_cloud_token.apply()
 
     client = client or storage.Client()
     local_path = Path(local_path)
@@ -105,7 +108,7 @@ def upload_gcs_prefix(
     remote_path: str,
     client: storage.Client | None = None,
     num_workers: int | None = None,
-    token: GoogleCloudToken | None = None,
+    google_cloud_token: GoogleCloudToken | None = None,
 ):
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip('/')
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"

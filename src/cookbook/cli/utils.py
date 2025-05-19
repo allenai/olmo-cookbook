@@ -563,7 +563,6 @@ def check_beaker_dependencies(
             f"beaker-gantry version {gantry_version} not supported; use {beaker_gantry_max_version}"
         )
 
-
 def find_repository_root(current: Union[str, Path] = __file__) -> Path:
     # go up from current dir until we find a .git directory
     current = Path(current).resolve().absolute()

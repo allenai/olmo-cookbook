@@ -1,7 +1,6 @@
-from ast import TypeAlias
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Any, Union, TypeAlias, Self, Literal
+from typing import Any, Generic, TypeVar, Union, TypeAlias, Self, Literal
 import json
 from urllib.parse import urlparse
 
@@ -10,9 +9,11 @@ from cookbook.constants import WEKA_MOUNTS
 JSON_VALID_TYPES: TypeAlias = Union[str, int, float, bool, list, dict]
 
 
+C = TypeVar("C")
+
 
 @dataclass(frozen=True)
-class BaseAuthentication:
+class BaseAuthentication(Generic[C]):
     """Base class for all remote authentication classes."""
 
     @classmethod
@@ -54,7 +55,7 @@ class BaseAuthentication:
         """Create a new credentials instance to be used for remote operations."""
         raise NotImplementedError("Subclasses must implement this method")
 
-    def apply(self, *args: Any, **kwargs: Any) -> Any:
+    def apply(self, *args: Any, **kwargs: Any) -> C:
         """Apply the credentials so that it can be used for remote operations."""
         raise NotImplementedError("Subclasses must implement this method")
 

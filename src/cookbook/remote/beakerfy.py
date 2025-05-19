@@ -28,14 +28,14 @@ class BeakerWrapper:
 
     def __post_init__(self, env: PythonEnv | None):
         self._env = env or PythonEnv.null()
+        self._flags = []
 
         # setup beaker-py
         install_beaker_py(env=self._env)
 
-        if self.cluster not in BEAKER_KNOWN_CLUSTERS:
-            raise ValueError(f"Cluster {self.cluster} not in {BEAKER_KNOWN_CLUSTERS}")
+        for cluster in BEAKER_KNOWN_CLUSTERS.get(self.cluster, [self.cluster]):
+            self._flags.append(f"--cluster {cluster}")
 
-        self._flags = []
 
     def add_mount(self, path: str):
         located_path = LocatedPath.from_str(path)
