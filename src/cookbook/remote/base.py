@@ -70,7 +70,7 @@ class AuthenticationError(RuntimeError):
 
 @dataclass(frozen=True)
 class LocatedPath:
-    prot: Literal["gs", "s3", "weka"]
+    prot: Literal["gs", "s3", "weka", "file"]
     bucket: str
     prefix: str
 
@@ -93,21 +93,13 @@ class LocatedPath:
                 return cls(prot="weka", bucket=path_parts[1], prefix="/".join(path_parts[2:]) + suffix)
             elif path_parts[0] in WEKA_MOUNTS:
                 return cls(prot="weka", bucket=path_parts[0], prefix="/".join(path_parts[1:]) + suffix)
-            else:
-                raise ValueError(f"Invalid path: {path}")
 
-
-
-
-        # first_part, *rest_parts = Path(parsed_path.path).parts
-        # if first_part in WEKA_MOUNTS:
-        #     return cls(prot="weka", bucket=first_part, prefix="/".join(rest_parts))e
-        # elif first_part == "weka" and len(rest_parts) >= 1 and rest_parts[0] in WEKA_MOUNTS:
-        #     return cls(prot="weka", bucket=rest_parts[0], prefix="/".join(rest_parts[1:]))
-
-        # print(first_part, rest_parts)
-
-        raise ValueError(f"Invalid path: {path}")
+        # purely local path
+        _, *path_parts = Path(path).absolute().parts
+        if len(path_parts) == 1:
+            return cls(prot="file", bucket=path_parts[0] + suffix, prefix="")
+        else:
+            return cls(prot="file", bucket=path_parts[0], prefix="/".join(path_parts[1:]) + suffix)
 
     def to_str(self) -> str:
         """Convert a LocatedPath instance to a string."""
