@@ -17,31 +17,34 @@ from google.cloud import storage
 @dataclass(frozen=True)
 class GoogleCloudToken(BaseAuthentication):
     token: str
+    project_id: str
     expiry: datetime.datetime | None
 
     @classmethod
     def from_dict(cls, obj: dict[str, JSON_VALID_TYPES]) -> "GoogleCloudToken":
         parsed_obj = {
             "token": obj['token'],
-            "expiry": datetime.datetime.fromisoformat(e) if isinstance(e := obj.get("expiry", None), str) else e
+            "expiry": datetime.datetime.fromisoformat(e) if isinstance(e := obj.get("expiry", None), str) else e,
+            "project_id": obj["project_id"]
         }
         return super().from_dict(parsed_obj)
 
     def to_dict(self) -> dict[str, JSON_VALID_TYPES]:
         obj = {
             "token": self.token,
-            "expiry": self.expiry.isoformat() if self.expiry else None
+            "expiry": self.expiry.isoformat() if self.expiry else None,
+            "project_id": self.project_id,
         }
         return obj
 
     @classmethod
     def make(cls) -> "GoogleCloudToken":
         """Generate short-lived token for GCS access."""
-        credentials, _ = default()
+        credentials, project_id = default()
         if not credentials.valid:   # pyright: ignore
             credentials.refresh(Request())  # pyright: ignore
 
-        return cls(token=credentials.token, expiry=credentials.expiry)  # pyright: ignore
+        return cls(token=credentials.token, project_id=project_id, expiry=credentials.expiry)  # pyright: ignore
 
     def apply(self) -> storage.Client:
         """Apply the credentials so that it can be used for remote operations."""
@@ -50,7 +53,7 @@ class GoogleCloudToken(BaseAuthentication):
             raise AuthenticationError("Token expired!")
 
         credentials = Credentials(self.token)
-        return storage.Client(credentials=credentials)
+        return storage.Client(credentials=credentials, project=self.project_id)
 
 
 def download_gcs_prefix(
@@ -63,10 +66,8 @@ def download_gcs_prefix(
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip('/')
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
-    if google_cloud_token is not None:
-        client = google_cloud_token.apply()
+    client = google_cloud_token.apply() if google_cloud_token else (client or storage.Client())
 
-    client = client or storage.Client()
     local_path = Path(local_path)
     blobs = client.list_blobs(bucket_name, prefix=prefix)
     futures = []
@@ -113,7 +114,7 @@ def upload_gcs_prefix(
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip('/')
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
-    client = client or storage.Client()
+    client = google_cloud_token.apply() if google_cloud_token else (client or storage.Client())
     local_path = Path(local_path).absolute()
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:

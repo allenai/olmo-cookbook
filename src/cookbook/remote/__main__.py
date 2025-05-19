@@ -1,6 +1,6 @@
 from typing import Any
 from .base import LocatedPath
-from .beakerfy import BeakerWrapper
+from .gantry_launcher import GantryLauncher
 
 from .gcp import GoogleCloudToken
 from cookbook.cli.utils import PythonEnv
@@ -60,7 +60,7 @@ def main():
 
     env = PythonEnv.create('test-env')
 
-    bw = BeakerWrapper(
+    bw = GantryLauncher(
         allow_dirty=True,
         budget="ai2/oe-data",
         cluster='ai2/ceres-cirrascale',
@@ -73,7 +73,7 @@ def main():
     )
 
     gct = GoogleCloudToken.make()
-    bw.add_env_secret("GOOGLE_CLOUD_TOKEN", gct.token, overwrite=True)
+    bw.add_env_secret("GOOGLE_CLOUD_TOKEN", gct.to_json(), overwrite=True)
 
     bw.run(
         command="python -m cookbook.remote",
