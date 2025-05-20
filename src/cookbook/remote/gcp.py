@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 from pathlib import Path
 from urllib.parse import urlparse
 from google.cloud import storage
@@ -119,9 +120,9 @@ def upload_gcs_prefix(
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = []
-        for dp, _, files in local_path.walk():
+        for dp, _, files in os.walk(str(local_path)):
             for fp_str in files:
-                fp = local_path / dp / Path(fp_str)
+                fp = Path(dp) / fp_str
                 if not fp.is_file():
                     continue
 
