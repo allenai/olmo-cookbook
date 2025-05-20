@@ -110,6 +110,7 @@ class TransformerConfigBuilder:
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
+        dataset_overrides (Optional[List[str]]): Optional dotlist overrides for the dataset configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
         profile (bool): Whether to enable profiling.
 
@@ -179,6 +180,7 @@ class TransformerConfigBuilder:
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     model_overrides: Optional[List[str]]
+    dataset_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -211,6 +213,7 @@ class TransformerConfigBuilder:
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
+        dataset_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
         annealing: Optional[AnnealConfig] = None,
         hard_stop: Optional[Duration] = None,
@@ -233,6 +236,7 @@ class TransformerConfigBuilder:
         self.model_identifier = model_identifier
         self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
         self.model_overrides = model_overrides
+        self.dataset_overrides = dataset_overrides
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
@@ -620,6 +624,12 @@ class TransformerConfigBuilder:
             logger.info(self.model_overrides)
 
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
+
+        if self.dataset_overrides:
+            logger.info("Applying dataset overrides:")
+            logger.info(self.dataset_overrides)
+
+            dataset_config = dataset_config.merge(dotlist=self.dataset_overrides)
 
         return ModelTrainConfig(
             init_seed=self.seed,

@@ -28,7 +28,9 @@ dataset:
     target_ratio: 1.0
     paths:
       - s3://ai2-llm/preprocessed/dolmino-mix-1124/allenai/dolma2-tokenizer-sigdig-bos-eos/**/*.npy
-  generate_doc_lengths: True
 
 model_overrides:
   - "block.attention.use_flash=true"
+
+dataset_overrides:
+  - "generate_doc_lengths=True"
