@@ -4,7 +4,8 @@
 ## In-loop evaluation
 
 For **OLMo 3 7B** integration tests use this set of evals, baked into the OLMo 3 7B config in OLMo-Core: https://github.com/allenai/OLMo-core/blob/a91a82e6b8b37103f738e190cdddd6278f2c7f1f/src/scripts/train/OLMo3-7B.py#L113. In summary:
-* Don't slow down training run --> Prune to minimal set of tasks + use a fast version of MC
+* Don't slow down training run:
+    * Prune to minimal set of tasks + use a fast version of MC. This is captured in OLMo Core as the `fast` set. See PR: https://github.com/allenai/OLMo-core/pull/282
 * Focus on BPB + MC, ignoring RC:
     * BPB should spot any major issues early on in training before MC takeoff
     * Still track MC because we want to make sure there is sensible metric takeoff. For an example of OLMo 3 7B MC metric takeoff slightly after 150B tokens, see https://wandb.ai/ai2-llm/olmo3/reports/OLMo-3-vs-OLMo-2--VmlldzoxMjc2MTA4Mw
@@ -58,7 +59,7 @@ olmo-cookbook-eval results \
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks basic_skills:rc::olmes
+    --tasks basic_skills
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
@@ -68,6 +69,9 @@ olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
     --tasks mt_mbpp
 ```
+
+*Notes*
+* I don't know why `basic_skills` pull dashboard requires removing `:rc::olmes` but launching eval requires adding it or it'll only launch the Arithmetic subportion. Something weird.
 
 ## FAQs
 
