@@ -1,5 +1,5 @@
-name: "sigdig-split-bos-eos-on-dolmino-1124-1b-5xC"
-description: "Using tokenizer with right-to-left digit splitting; training from scratch 1B 5xC on dolmino-mix-1124"
+name: "sigdig-split-bos-eos-interdoc-on-dolmino-1124-1b-5xC"
+description: "Using tokenizer with right-to-left digit splitting; training from scratch 1B 5xC on dolmino-mix-1124; BOS+EOS; inter-document attention masking"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
@@ -15,6 +15,8 @@ tokenizer: "dolma2_sigdig_bos_eos"
 priority: high
 cluster: ai2/augusta-google-1
 
+
+
 metrics_config:
   project: lucas-olmo-cookbook
   entity: ai2-llm
@@ -25,4 +27,8 @@ dataset:
   - name: dolmino_1124_sigdig
     target_ratio: 1.0
     paths:
-      - s3://ai2-llm/preprocessed/dolmino-mix-1124_bos_eos/allenai/dolma2-tokenizer-sigdig/**/*.npy
+      - s3://ai2-llm/preprocessed/dolmino-mix-1124/allenai/dolma2-tokenizer-sigdig-bos-eos/**/*.npy
+  generate_doc_lengths: True
+
+model_overrides:
+  - "block.attention.use_flash=true"
