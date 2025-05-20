@@ -33,6 +33,8 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
     --tasks mmlu:rc \
     --tasks basic_skills:rc::olmes \
     --tasks minerva \
+    --tasks codex_humaneval:3shot:bpb::none \
+    --tasks mbpp:3shot:bpb::none \
     --tasks mt_mbpp \
     --priority high \
     --cluster 80g \
@@ -64,6 +66,11 @@ olmo-cookbook-eval results \
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
     --tasks minerva
+
+olmo-cookbook-eval results \
+    --dashboard olmo-3-evals \
+    --tasks codex_humaneval:3shot:bpb::none \
+    --tasks mbpp:3shot:bpb::none
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
