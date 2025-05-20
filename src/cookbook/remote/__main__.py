@@ -50,11 +50,8 @@ def main():
     beaker_experiment_id = os.environ.get("BEAKER_EXPERIMENT_ID")
 
     if beaker_experiment_id:
-        if os.environ.get("GOOGLE_CLOUD_TOKEN"):
-            cloud_token = GoogleCloudToken.from_json(os.environ["GOOGLE_CLOUD_TOKEN"])
-            google_cloud_token = cloud_token.apply()
-        else:
-            google_cloud_token = None
+        # fetch google cloud token
+        gct = GoogleCloudToken.from_json(t) if (t := os.environ.get("GOOGLE_CLOUD_TOKEN")) else None
 
         # running in beaker
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -64,7 +61,7 @@ def main():
             return copy_prefix(
                 src_path=tmp_dir,
                 dst_path=f"gs://ai2-llm/temp/{beaker_experiment_id}",
-                google_cloud_token=google_cloud_token,
+                google_cloud_token=gct,
             )
 
     env = PythonEnv.create("test-env")
