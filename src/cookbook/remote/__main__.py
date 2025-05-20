@@ -1,4 +1,5 @@
 from typing import Any
+import uuid
 from .base import LocatedPath
 from .gantry_launcher import GantryLauncher
 
@@ -57,7 +58,7 @@ def main():
 
         # running in beaker
         with tempfile.TemporaryDirectory() as tmp_dir:
-            with open(os.path.join(tmp_dir, "output.txt"), "w") as f:
+            with open(os.path.join(tmp_dir, f"{uuid.uuid4()}.txt"), "w") as f:
                 f.write("Hello, world!")
 
             return copy_prefix(
