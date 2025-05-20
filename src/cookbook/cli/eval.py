@@ -451,11 +451,28 @@ def get_results(
         skip_on_fail=skip_on_fail,
     )
 
-    # if a task starts with *, it means it is a named group and we need to expand it
-    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+    # First expand any named groups
+    expanded_tasks = []
+    for task in tasks:
+        if task.startswith("*"):
+            # Handle named groups
+            expanded_tasks.extend(ALL_NAMED_GROUPS.get(task.lstrip("*"), [task]))
+        else:
+            # Handle task patterns
+            expanded_tasks.append(task)
 
-    # after that, we check for task patterns
-    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
+    # Then create patterns for matching
+    task_patterns = []
+    for task in expanded_tasks:
+        # If the task contains a colon, it's a pattern that should match all subcategories
+        if ":" in task:
+            # Convert the pattern into a regex that matches all subcategories
+            pattern = task.replace(":", ".*:")
+            task_patterns.append(re.compile(pattern))
+        else:
+            # For regular tasks, use the display tasks mapping or the task itself
+            task_patterns.extend([re.compile(t_) for t_ in ALL_DISPLAY_TASKS.get(task, [task])])
+
     results = (all_averages + all_metrics).keep_cols(*task_patterns)
 
     if len(models) > 0:
