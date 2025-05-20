@@ -2,7 +2,7 @@ name: "olmo2-1b-5xC-dedupablate-minhash-suffar500"
 description: "OLMo2 1b@5xC, deduplication ablation | minhash + suffarr_500"
 budget: "ai2/oe-training"
 workspace: "ai2/olmo3-webdata"
-nodes: 4
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000 # 1279395840 nonembed params x 20 x 5
