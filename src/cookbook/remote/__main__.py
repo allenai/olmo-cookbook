@@ -87,6 +87,10 @@ def main():
             env=env,
         )
 
+        # adds mount if necessary
+        bw.add_mount(args.src_path)
+        bw.add_mount(args.dst_path)
+
         gct = GoogleCloudToken.make()
         bw.add_env_secret("GOOGLE_CLOUD_TOKEN", gct.to_json(), overwrite=True)
 
