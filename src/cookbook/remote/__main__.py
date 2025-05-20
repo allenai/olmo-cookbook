@@ -1,3 +1,6 @@
+import argparse
+import os
+import tempfile
 from typing import Any
 import uuid
 from .base import LocatedPath
@@ -44,47 +47,53 @@ def copy_prefix(
 
 
 def main():
-    import os
-    import tempfile
+    parser = argparse.ArgumentParser("Move prefixes between storage systems")
+    parser.add_argument("src_path", type=str, help="Source path")
+    parser.add_argument("dst_path", type=str, help="Destination path")
+    parser.add_argument("--num-workers", type=int, default=10, help="Number of workers")
+    parser.add_argument("--google-cloud-token", type=str, default=None, help="Google Cloud token")
+    parser.add_argument("--allow-dirty", action="store_true", help="Allow dirty operations")
+    parser.add_argument("--budget", type=str, default="ai2/oe-data", help="Budget")
+    parser.add_argument("--cluster", type=str, default="aus", help="Clusters to run on")
+    parser.add_argument("--dry-run", action="store_true", help="Dry run")
+    parser.add_argument("--gpus", type=int, default=0, help="Number of GPUs")
+    parser.add_argument("--priority", type=str, default="high", help="Priority")
+    parser.add_argument("--preemptible", action="store_true", help="Preemptible")
+    parser.add_argument("--workspace", type=str, default="ai2/oe-data", help="Workspace")
+    args = parser.parse_args()
 
-    beaker_experiment_id = os.environ.get("BEAKER_EXPERIMENT_ID")
-
-    if beaker_experiment_id:
-        # fetch google cloud token
+    if (beaker_experiment_id := os.environ.get("BEAKER_EXPERIMENT_ID")):
+        # running on beaker, do the actual work
         gct = GoogleCloudToken.from_json(t) if (t := os.environ.get("GOOGLE_CLOUD_TOKEN")) else None
+        copy_prefix(
+            src_path=args.src_path,
+            dst_path=args.dst_path,
+            google_cloud_token=gct,
+            num_workers=args.num_workers,
+        )
 
-        # running in beaker
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with open(os.path.join(tmp_dir, f"{uuid.uuid4()}.txt"), "w") as f:
-                f.write("Hello, world!")
+    else:
+        # running locally, submit to beaker
+        env = PythonEnv.create("copy-prefix")
+        bw = GantryLauncher(
+            allow_dirty=args.allow_dirty,
+            budget=args.budget,
+            cluster=args.cluster,
+            dry_run=args.dry_run,
+            gpus=args.gpus,
+            priority=args.priority,
+            preemptible=args.preemptible,
+            workspace=args.workspace,
+            env=env,
+        )
 
-            return copy_prefix(
-                src_path=tmp_dir,
-                dst_path=f"gs://ai2-llm/temp/{beaker_experiment_id}",
-                google_cloud_token=gct,
-            )
+        gct = GoogleCloudToken.make()
+        bw.add_env_secret("GOOGLE_CLOUD_TOKEN", gct.to_json(), overwrite=True)
 
-    env = PythonEnv.create("test-env")
-
-    bw = GantryLauncher(
-        allow_dirty=True,
-        budget="ai2/oe-data",
-        cluster="ai2/ceres-cirrascale",
-        dry_run=False,
-        gpus=0,
-        priority="high",
-        preemptible=False,
-        workspace="ai2/oe-data",
-        env=env,
-    )
-
-    gct = GoogleCloudToken.make()
-    bw.add_env_secret("GOOGLE_CLOUD_TOKEN", gct.to_json(), overwrite=True)
-
-    bw.run(
-        command="python -m cookbook.remote",
-        description="Hello, world!",
-    )
+        bw.run(
+            command=f"python -m cookbook.remote '{args.src_path}' '{args.dst_path}'",
+            description=f"Copying {args.src_path} to {args.dst_path}",
+        )
 
 
 if __name__ == "__main__":
