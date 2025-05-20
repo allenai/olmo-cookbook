@@ -243,6 +243,18 @@ poormanray create --name chipstest --number 5 --instance i4i.2xlarge --detach
 
 This will create 5 instances as part of a cluster named `chipstest`. The `--detach` flag makes the process return immediately while instances are created in the background.
 
+### Storage Configuration
+
+You can customize the storage configuration for your instances using the `--storage-type` and `--storage-size` options.
+By default, storage is not configured (and thus left to whatever AWS defaults to).
+
+```shell
+poormanray create --name chipstest --number 5 --instance i4i.2xlarge --storage-type gp3 --storage-size 100 --detach
+```
+
+This will create 5 instances as part of a cluster named `chipstest` with 100GB of gp3 storage.
+
+
 ### List instances in a cluster
 
 ```shell
