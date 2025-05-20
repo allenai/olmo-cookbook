@@ -20,10 +20,6 @@ metrics_config:
   entity: ai2-llm
 dataset:
   sources:
-  - name: proofpile-2-stack
-    paths:
-    - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/algebraic-stack/train/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
   - name: proofpile-2-arxiv
     paths:
     - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/arxiv/train/allenai/dolma2-tokenizer/*.npy
@@ -36,18 +32,10 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.03960396
-  - name: starcoder
-    paths:
-    - s3://ai2-llm/preprocessed/starcoder/v1-decon-100_to_20k-2star-top_token_030/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
   - name: dclm
     paths:
     - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.46534653
-  - name: wikipedia
-    paths:
-    - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
 downstream_evaluators:
 - olmo2_dev_1b
 lm_evaluator: true

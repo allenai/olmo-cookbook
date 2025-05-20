@@ -44,10 +44,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.7826374809215809
-  - name: wikipedia
-    paths:
-    - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
 downstream_evaluators:
 - olmo2_dev_1b
 lm_evaluator: true
