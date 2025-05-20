@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Any, Generic, TypeVar, Union, TypeAlias, Literal
+from typing import Any, Generic, TypeVar, Union, TypeAlias, Literal, Optional
 import json
 from urllib.parse import urlparse
 
@@ -47,7 +47,6 @@ class BaseAuthentication(Generic[C]):
             raise ValueError(f"Invalid JSON object: {obj}")
         return cls.from_dict(obj)
 
-
     def to_json(self) -> str:
         """Convert a BaseAuthentication instance to a JSON string."""
         return json.dumps(self.to_dict())
@@ -62,61 +61,96 @@ class BaseAuthentication(Generic[C]):
         raise NotImplementedError("Subclasses must implement this method")
 
 
-
 class AuthenticationError(RuntimeError):
     """Error raised when authentication fails."""
+
     ...
 
 
 @dataclass(frozen=True)
 class LocatedPath:
     prot: Literal["gs", "s3", "weka", "file"]
-    bucket: str
-    prefix: str
+    path: str
+
+    @classmethod
+    def weka_path(cls, path: str | Path) -> Optional["Self"]:
+        parsed = urlparse(str(path))
+        termination = "/" if str(path).endswith("/") else ""
+
+        if parsed.scheme == "weka":
+            if parsed.netloc not in WEKA_MOUNTS:
+                raise ValueError(f"Invalid Weka bucket: {parsed.netloc}")
+            return cls(prot="weka", path=f"/{parsed.netloc.strip('/')}/{parsed.path.lstrip('/')}{termination}")
+
+        # the first part is usually '/'
+        _, *parts = Path(path).parts
+
+        if parts[0] in WEKA_MOUNTS:
+            return cls(prot="weka", path="/" + "/".join(parts).strip("/") + termination)
+        elif parts[0] == "weka" and parts[1] in WEKA_MOUNTS:
+            return cls(prot="weka", path="/" + "/".join(parts[1:]).strip("/") + termination)
+
+        return None
+
+    @classmethod
+    def local_path(cls, path: str | Path) -> Optional["Self"]:
+        parsed = urlparse(str(path))
+        termination = "/" if str(path).endswith("/") else ""
+        if parsed.scheme == "file":
+            return cls(prot="file", path=f"/{parsed.netloc.strip('/')}/{parsed.path.lstrip('/')}{termination}")
+
+        if parsed.scheme == "":
+            return cls(prot="file", path=str(path))
+
+        return None
+
+    @classmethod
+    def s3_path(cls, path: str | Path) -> Optional["Self"]:
+        parsed = urlparse(str(path))
+        if parsed.scheme.startswith("s3"):
+            return cls(prot="s3", path=parsed.netloc.strip("/") + "/" + parsed.path.lstrip("/"))
+        return None
+
+    @classmethod
+    def gcs_path(cls, path: str | Path) -> Optional["Self"]:
+        parsed = urlparse(str(path))
+        if parsed.scheme in ("gs", "gcs"):
+            return cls(prot="gs", path=parsed.netloc.strip("/") + "/" + parsed.path.lstrip("/"))
+        return None
 
     @classmethod
     def from_str(cls, path: str | Path) -> "Self":
-        parsed_path = urlparse(str(path))
-
-        # maintain any trailing slashes
-        suffix = "/" if str(path).endswith("/") else ""
-
-        if parsed_path.scheme.startswith("s3"):
-            return cls(prot="s3", bucket=parsed_path.netloc, prefix=parsed_path.path.lstrip("/"))
-        elif parsed_path.scheme in ("gs", "gcs"):
-            return cls(prot="gs", bucket=parsed_path.netloc, prefix=parsed_path.path.lstrip("/"))
-        elif parsed_path.scheme == "weka":
-            if parsed_path.netloc not in WEKA_MOUNTS:
-                raise ValueError(f"Invalid Weka bucket: {parsed_path.netloc}")
-            return cls(prot="weka", bucket=parsed_path.netloc, prefix=parsed_path.path.lstrip("/"))
-        elif parsed_path.scheme == "":
-            _, *path_parts = Path(parsed_path.path).parts
-
-            if path_parts[0] == "weka":
-                if path_parts[1] in WEKA_MOUNTS:
-                    return cls(prot="weka", bucket=path_parts[1], prefix="/".join(path_parts[2:]) + suffix)
-                else:
-                    raise ValueError(f"Invalid Weka bucket: {path_parts[1]}")
-            elif path_parts[0] in WEKA_MOUNTS:
-                return cls(prot="weka", bucket=path_parts[0], prefix="/".join(path_parts[1:]) + suffix)
-
-        if parsed_path.scheme not in ("file", ""):
-            raise ValueError(f"Invalid scheme: {parsed_path.scheme}")
-
-        # purely local path
-        _, *path_parts = Path(path).absolute().parts
-        if len(path_parts) == 1:
-            return cls(prot="file", bucket=path_parts[0] + suffix, prefix="")
-        else:
-            return cls(prot="file", bucket=path_parts[0], prefix="/".join(path_parts[1:]) + suffix)
-
-    def to_str(self) -> str:
-        """Convert a LocatedPath instance to a string."""
-        return f"{self.prot}://{self.bucket}/{self.prefix}"
+        if p := cls.weka_path(path):
+            return p
+        elif p := cls.local_path(path):
+            return p
+        elif p := cls.s3_path(path):
+            return p
+        elif p := cls.gcs_path(path):
+            return p
+        raise ValueError(f"Invalid path: {path}")
 
     @property
-    def full(self) -> Path:
-        return Path(f"/{self.bucket.strip('/')}/{self.prefix.lstrip('/')}")
+    def local(self) -> Path:
+        if self.prot in ("weka", "file"):
+            return Path(self.path)
 
-    def __str__(self) -> str:
-        return self.to_str()
+        raise ValueError(f"Path is not local: {self.path}")
+
+    @property
+    def remote(self) -> str:
+        if self.prot == "file":
+            raise ValueError(f"Path is not remote: {self.path}")
+        return f"{self.prot}://{self.path.lstrip('/')}"
+
+    @property
+    def bucket(self) -> str:
+        remote = self.remote
+        url = urlparse(remote)
+        return url.netloc
+
+    @property
+    def prefix(self) -> str:
+        remote = self.remote
+        url = urlparse(remote)
+        return url.path.lstrip("/")

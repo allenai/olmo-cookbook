@@ -16,25 +16,30 @@ def copy_prefix(
     dst_loc = LocatedPath.from_str(dst_path)
 
     if src_loc.prot == "gs":
-        from .gcp import download_gcs_prefix
-        if dst_loc.prot != "weka":
-            raise ValueError("Cannot copy from GCS to non-Weka destination")
-        else:
-            download_gcs_prefix(src_loc.to_str(), dst_loc.to_str(), *args, **kwargs)
+        if dst_loc.prot in ("weka", "file"):
+            from .gcp import download_gcs_prefix
+
+            download_gcs_prefix(src_loc.remote, dst_loc.local, *args, **kwargs)
+        elif dst_loc.prot == "gs":
+            raise ValueError("GCS -> GCS: not supported")
+        elif dst_loc.prot == "s3":
+            raise NotImplementedError("GCS -> S3: not implemented")
 
     elif src_loc.prot == "s3":
-        raise NotImplementedError("S3 copy not implemented")
+        raise NotImplementedError(f"S3 -> {dst_loc.prot.upper()}: not implemented")
 
-    elif src_loc.prot == "weka":
-        if dst_loc.prot == "weka":
-            raise ValueError("Cannot copy from Weka to Weka")
+    elif src_loc.prot in ("weka", "file"):
+        if dst_loc.prot in ("weka", "file"):
+            raise ValueError("Weka -> Weka: not supported")
         elif dst_loc.prot == "gs":
             from .gcp import upload_gcs_prefix
-            upload_gcs_prefix(src_loc.to_str(), dst_loc.to_str(), *args, **kwargs)
-        elif dst_loc.prot == "s3":
-            raise NotImplementedError("S3 copy not implemented")
 
-    raise ValueError(f"Cannot copy from {src_loc.prot} to {dst_loc.prot} destination")
+            upload_gcs_prefix(src_loc.local, dst_loc.remote, *args, **kwargs)
+        elif dst_loc.prot == "s3":
+            raise NotImplementedError("Weka -> S3: not implemented")
+
+    else:
+        raise ValueError(f"{src_loc.prot.upper()} -> {dst_loc.prot.upper()}: not recognized")
 
 
 def main():
@@ -44,8 +49,11 @@ def main():
     beaker_experiment_id = os.environ.get("BEAKER_EXPERIMENT_ID")
 
     if beaker_experiment_id:
-        cloud_token = GoogleCloudToken.from_json(os.environ["GOOGLE_CLOUD_TOKEN"])
-        google_cloud_token = cloud_token.apply()
+        if os.environ.get("GOOGLE_CLOUD_TOKEN"):
+            cloud_token = GoogleCloudToken.from_json(os.environ["GOOGLE_CLOUD_TOKEN"])
+            google_cloud_token = cloud_token.apply()
+        else:
+            google_cloud_token = None
 
         # running in beaker
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -58,12 +66,12 @@ def main():
                 google_cloud_token=google_cloud_token,
             )
 
-    env = PythonEnv.create('test-env')
+    env = PythonEnv.create("test-env")
 
     bw = GantryLauncher(
         allow_dirty=True,
         budget="ai2/oe-data",
-        cluster='ai2/ceres-cirrascale',
+        cluster="ai2/ceres-cirrascale",
         dry_run=False,
         gpus=0,
         priority="high",

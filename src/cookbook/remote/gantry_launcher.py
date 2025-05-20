@@ -14,6 +14,7 @@ from cookbook.constants import BEAKER_KNOWN_CLUSTERS
 
 from .base import LocatedPath
 
+
 @dataclass
 class GantryLauncher:
     allow_dirty: bool
@@ -35,7 +36,6 @@ class GantryLauncher:
 
         for cluster in BEAKER_KNOWN_CLUSTERS.get(self.cluster, [self.cluster]):
             self._flags.append(f"--cluster {cluster}")
-
 
     def add_mount(self, path: str):
         located_path = LocatedPath.from_str(path)

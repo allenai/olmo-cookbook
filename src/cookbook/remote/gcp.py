@@ -23,9 +23,9 @@ class GoogleCloudToken(BaseAuthentication):
     @classmethod
     def from_dict(cls, obj: dict[str, JSON_VALID_TYPES]) -> "GoogleCloudToken":
         parsed_obj = {
-            "token": obj['token'],
+            "token": obj["token"],
             "expiry": datetime.datetime.fromisoformat(e) if isinstance(e := obj.get("expiry", None), str) else e,
-            "project_id": obj["project_id"]
+            "project_id": obj["project_id"],
         }
         return super().from_dict(parsed_obj)
 
@@ -41,7 +41,7 @@ class GoogleCloudToken(BaseAuthentication):
     def make(cls) -> "GoogleCloudToken":
         """Generate short-lived token for GCS access."""
         credentials, project_id = default()
-        if not credentials.valid:   # pyright: ignore
+        if not credentials.valid:  # pyright: ignore
             credentials.refresh(Request())  # pyright: ignore
 
         return cls(token=credentials.token, project_id=project_id, expiry=credentials.expiry)  # pyright: ignore
@@ -63,7 +63,7 @@ def download_gcs_prefix(
     num_workers: int | None = None,
     google_cloud_token: GoogleCloudToken | None = None,
 ):
-    protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip('/')
+    protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
     client = google_cloud_token.apply() if google_cloud_token else (client or storage.Client())
@@ -111,7 +111,7 @@ def upload_gcs_prefix(
     num_workers: int | None = None,
     google_cloud_token: GoogleCloudToken | None = None,
 ):
-    protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip('/')
+    protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
     client = google_cloud_token.apply() if google_cloud_token else (client or storage.Client())
@@ -143,7 +143,7 @@ def upload_gcs_prefix(
                         _upload_file,
                         _fp=fp,
                         _blob=blob,
-                        _expiration_time=token.expiry if token else None,
+                        _expiration_time=google_cloud_token.expiry if google_cloud_token else None,
                     )
                 )
 
