@@ -33,4 +33,4 @@ model_overrides:
   - "block.attention.use_flash=true"
 
 dataset_overrides:
-  - "generate_doc_lengths=True"
+  - "generate_doc_lengths=true"

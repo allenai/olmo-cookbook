@@ -625,6 +625,7 @@ class TransformerConfigBuilder:
 
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
 
+        # Merge any custom dotlist style overrides to the dataset config
         if self.dataset_overrides:
             logger.info("Applying dataset overrides:")
             logger.info(self.dataset_overrides)
