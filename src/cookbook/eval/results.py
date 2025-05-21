@@ -1,9 +1,33 @@
+import logging
 import re
 
 from cookbook.constants import ALL_NAMED_GROUPS
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.eval.miniframe import MiniFrame
 
+logger = logging.getLogger(__name__)
+
+def validate_metrics_coverage(metrics: list[MetricsAll]) -> dict[str, list[str]]:
+    """Validate that all models have completed all tasks and return missing combinations.
+    
+    Returns:
+        Dict mapping model names to lists of missing task names.
+    """
+    # Get unique model and task names
+    unique_model_names = {metric.model_name for metric in metrics if metric.model_name is not None}
+    unique_task_names = {metric.alias for metric in metrics if metric.alias is not None}
+
+    # Check for missing task-model combinations
+    missing_by_model = {}
+    for model in unique_model_names:
+        missing_tasks = []
+        for task in unique_task_names:
+            if not any(m.model_name == model and m.alias == task for m in metrics):
+                missing_tasks.append(task)
+        if missing_tasks:
+            missing_by_model[model] = missing_tasks
+
+    return missing_by_model
 
 def make_dashboard_table(
     dashboard: str,
@@ -20,11 +44,14 @@ def make_dashboard_table(
     force: bool = False,
     skip_on_fail: bool = False,
 ) -> tuple[MiniFrame, MiniFrame]:
+    dashboard = "alldressed_v1/dedup_ablations_v1_BLESSED"
     experiments = FindExperiments.run(dashboard=dashboard)
+
+    logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
 
     # these are the tables that will be displayed on the dashboard
     all_metrics_table = MiniFrame(title=dashboard)
-    avg_metrics_table = MiniFrame(title=dashboard)
+    avg_metrics_table = MiniFrame(title=dashboard)    
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
@@ -34,7 +61,16 @@ def make_dashboard_table(
         experiment_id=[experiment.experiment_id for experiment in experiments],
         force=[force for _ in experiments],
         skip_on_fail=[skip_on_fail for _ in experiments],
+        quiet=True,
     )
+
+    import random
+    metrics = [m for m in metrics if not m.alias.startswith("mmlu_jurisprudence")] + random.sample([m for m in metrics if m.alias.startswith("mmlu_jurisprudence")], len([m for m in metrics if m.alias.startswith("mmlu_jurisprudence")]) // 2)
+    # Log the number of metrics
+    logger.info(f"Testing {len(metrics)} metrics after randomly removing half of the mmlu_jurisprudence metrics")
+
+    # validate that all models have completed all tasks
+    missing_by_model = validate_metrics_coverage(metrics)
 
     for metric in metrics:
         if metric.is_aggregate:
@@ -94,4 +130,4 @@ def make_dashboard_table(
             average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
             avg_metrics_table.add(col=group_name, row=model, val=average)
 
-    return all_metrics_table, avg_metrics_table
+    return all_metrics_table, avg_metrics_table, missing_by_model

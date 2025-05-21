@@ -436,8 +436,7 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
-    all_metrics, all_averages = make_dashboard_table(
+    all_metrics, all_averages, missing_by_model = make_dashboard_table(
         dashboard=dashboard,
         show_rc=True,
         show_mc=True,
@@ -446,7 +445,7 @@ def get_results(
         average_mmlu=True,
         average_core=True,
         average_generative=True,
-        show_bpb=False,
+        show_bpb=True,
         force=force,
         skip_on_fail=skip_on_fail,
     )
@@ -471,6 +470,11 @@ def get_results(
     except StopIteration:
         # if no columns are left, we don't need to sort
         pass
+
+    if missing_by_model:
+        for model, missing_tasks in missing_by_model.items():
+            logger.warning(f"\t😱 Model {model} is missing tasks:\t\t{', '.join(missing_tasks)}")
+        logger.warning("\n")
 
     if format == "json":
         print(json.dumps(results._data))
