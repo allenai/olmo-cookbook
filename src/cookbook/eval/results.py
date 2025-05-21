@@ -44,7 +44,6 @@ def make_dashboard_table(
     force: bool = False,
     skip_on_fail: bool = False,
 ) -> tuple[MiniFrame, MiniFrame]:
-    dashboard = "alldressed_v1/dedup_ablations_v1_BLESSED"
     experiments = FindExperiments.run(dashboard=dashboard)
 
     logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
