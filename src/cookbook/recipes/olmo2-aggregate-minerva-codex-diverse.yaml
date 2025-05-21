@@ -32,6 +32,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/open-web-math/train/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.13370921792057194
+    repetition_factor: 1.403873897
   - name: pes2o
     paths:
     - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
