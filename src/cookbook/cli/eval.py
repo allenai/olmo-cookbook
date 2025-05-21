@@ -290,6 +290,12 @@ def convert_checkpoint(
     default="",
     help="Suffix to add to the run name",
 )
+@click.option(
+    "--quiet",
+    is_flag=True,
+    default=False,
+    help="Suppress progress bars and info output."
+)
 def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -323,6 +329,7 @@ def evaluate_model(
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    quiet: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -372,6 +379,7 @@ def evaluate_model(
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
+        quiet=quiet,
     )
 
 
@@ -425,6 +433,12 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
+@click.option(
+    "--quiet",
+    is_flag=True,
+    default=False,
+    help="Suppress progress bars and info output."
+)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -435,6 +449,7 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
+    quiet: bool,
 ) -> None:
     all_metrics, all_averages, missing_by_model = make_dashboard_table(
         dashboard=dashboard,
@@ -448,6 +463,7 @@ def get_results(
         show_bpb=False,
         force=force,
         skip_on_fail=skip_on_fail,
+        quiet=quiet,
     )
 
     # if a task starts with *, it means it is a named group and we need to expand it

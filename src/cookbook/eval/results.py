@@ -49,6 +49,7 @@ def make_dashboard_table(
     show_partial: bool = True,
     force: bool = False,
     skip_on_fail: bool = False,
+    quiet: bool = False,
 ) -> DashboardTables:
     experiments = FindExperiments.run(dashboard=dashboard)
 
@@ -66,7 +67,7 @@ def make_dashboard_table(
         experiment_id=[experiment.experiment_id for experiment in experiments],
         force=[force for _ in experiments],
         skip_on_fail=[skip_on_fail for _ in experiments],
-        quiet=True,
+        quiet=quiet,
     )
 
     # validate that all models have completed all tasks
