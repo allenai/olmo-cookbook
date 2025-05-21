@@ -18,7 +18,7 @@ def validate_metrics_coverage(metrics: list[MetricsAll]) -> dict[str, list[str]]
     unique_task_names = {metric.alias for metric in metrics if metric.alias is not None}
 
     # Check for missing task-model combinations
-    missing_by_model = {}
+    missing_by_model: dict[str, list[str]] = {}
     for model in unique_model_names:
         missing_tasks = []
         for task in unique_task_names:
