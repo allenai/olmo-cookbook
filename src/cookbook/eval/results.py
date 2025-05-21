@@ -64,11 +64,6 @@ def make_dashboard_table(
         quiet=True,
     )
 
-    import random
-    metrics = [m for m in metrics if not m.alias.startswith("mmlu_jurisprudence")] + random.sample([m for m in metrics if m.alias.startswith("mmlu_jurisprudence")], len([m for m in metrics if m.alias.startswith("mmlu_jurisprudence")]) // 2)
-    # Log the number of metrics
-    logger.info(f"Testing {len(metrics)} metrics after randomly removing half of the mmlu_jurisprudence metrics")
-
     # validate that all models have completed all tasks
     missing_by_model = validate_metrics_coverage(metrics)
 
