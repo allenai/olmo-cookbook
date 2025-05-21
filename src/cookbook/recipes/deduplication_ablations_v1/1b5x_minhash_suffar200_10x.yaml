@@ -13,7 +13,7 @@ tokenizer: "dolma2"
 priority: urgent
 eval_interval: 250
 global_batch_size: 2097152
-rank_microbatch_size: 32768
+rank_microbatch_size: 16384
 learning_rate: 1.8e-3
 cluster: ai2/augusta-google-1
 weka: false
