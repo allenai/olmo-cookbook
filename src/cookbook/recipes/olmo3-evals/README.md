@@ -56,12 +56,15 @@ olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
     --tasks arc_easy:rc::olmes \
     --tasks arc_challenge:rc::olmes \
-    --tasks hellaswag:rc::olmes \
+    --tasks hellaswag:rc::olmes
+
+olmo-cookbook-eval results \
+    --dashboard olmo-3-evals \
     --tasks mmlu:rc
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks basic_skills
+    --tasks basic_skills:rc
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
