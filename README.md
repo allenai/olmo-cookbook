@@ -133,6 +133,8 @@ You can also provide a list of `--tasks` to get results for specific tasks.
 
 You can also provide a list of `--models` regular expressions to filter the models by name.
 
+You can use `--format json` to see full results when model names are long.
+
 
 
 ## Running OLMo-core script

@@ -49,7 +49,7 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
 *Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py#L478*
 
 
-To pull dashboard results:
+To pull dashboard results (use `--format json` to see full results):
 
 ```
 olmo-cookbook-eval results \
