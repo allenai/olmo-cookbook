@@ -445,7 +445,7 @@ def get_results(
         average_mmlu=True,
         average_core=True,
         average_generative=True,
-        show_bpb=True,
+        show_bpb=False,
         force=force,
         skip_on_fail=skip_on_fail,
     )
