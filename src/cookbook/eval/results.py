@@ -21,10 +21,15 @@ class DashboardTables:
         return cls(metrics=MiniFrame(title=title), averages=MiniFrame(title=title))
 
     def find_missing_tasks(self, metrics: list[MetricsAll]):
-        """Validate that all models have completed all tasks and return missing combinations.
+        """
+        This method looks for missing task-model combinations. A missing task for a model is a task whose
+        result exists only for some models.
 
-        Returns:
-            Dict mapping model names to lists of missing task names.
+        We need to keep track of these missing tasks because they will skew averages in unexpected ways
+        otherwise.
+
+        They are also useful for users to debug issues with Datalake, since they can identify which Beaker
+        runs have not been uploaded correctly.
         """
         # Get unique model and task names
         unique_model_names = {metric.model_name for metric in metrics if metric.model_name is not None}
@@ -38,6 +43,8 @@ class DashboardTables:
             for task in unique_task_names:
                 if not any(m.model_name == model and m.alias == task for m in metrics):
                     missing_tasks.append(task)
+
+            # only append a model if it has 1+ missing task
             if missing_tasks:
                 self.missing_tasks[model] = missing_tasks
 
