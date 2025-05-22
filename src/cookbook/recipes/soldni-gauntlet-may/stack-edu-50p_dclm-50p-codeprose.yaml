@@ -2,7 +2,7 @@ name: "stack-edu-50p_dclm-50p-codeprose"
 description: "Baseline for code sources; 30% stack-edu, 20% codeprose, 50% DCLM baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/learn2code"
-nodes: 2
+nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 113_184_153_600
@@ -12,7 +12,7 @@ rank_microbatch_size: 32_768
 seed: 1337
 model: "olmo2_1B_v2"
 tokenizer: "dolma2"
-priority: urgent
+priority: high
 cluster: ai2/augusta-google-1
 
 
