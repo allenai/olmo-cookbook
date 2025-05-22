@@ -246,6 +246,7 @@ def add_secret_to_beaker_workspace(
     secret_name: str,
     secret_value: str,
     workspace: str,
+    overwrite: bool = False,
 ) -> str:
     try:
         import beaker  # pyright: ignore
@@ -256,7 +257,11 @@ def add_secret_to_beaker_workspace(
     full_secret_name = f"{client.account.name}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
+        write_secret = False
     except beaker.exceptions.SecretNotFound:
+        write_secret = True
+
+    if write_secret or overwrite:
         client.secret.write(full_secret_name, secret_value)
 
     return full_secret_name

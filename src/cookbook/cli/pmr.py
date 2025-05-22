@@ -649,6 +649,7 @@ class InstanceInfo:
         key_name: str | None = None,
         storage_type: str | None = None,
         storage_size: int | None = None,
+        storage_iops: int | None = None,
         client: Union["EC2Client", None] = None,
     ) -> "InstanceInfo":
         """
@@ -663,6 +664,7 @@ class InstanceInfo:
             key_name: Name of the key pair to use for SSH access to the instance
             storage_type: Type of EBS storage (e.g., 'gp2', 'gp3'). If None, uses AWS default
             storage_size: Size of root volume in GB. If None, uses AWS default
+            storage_iops: IOPS for the root volume. If None, uses AWS default
             client: Optional boto3 EC2 client to use
 
         Returns:
@@ -704,6 +706,7 @@ class InstanceInfo:
                                 "DeleteOnTermination": True,
                                 "VolumeSize": storage_size,
                                 **({"VolumeType": storage_type} if storage_type else {}),
+                                **({"Iops": storage_iops} if storage_iops else {}),
                             },
                         }
                     ]
@@ -1124,6 +1127,12 @@ def common_cli_options(f: T) -> T:
     default=None,
     help="Storage size to use for the instances",
 )
+@click.option(
+    "--storage-iops",
+    type=int,
+    default=None,
+    help="IOPS for the root volume",
+)
 def create_instances(
     name: str,
     instance_type: str,
@@ -1135,6 +1144,7 @@ def create_instances(
     detach: bool,
     storage_type: str | None,
     storage_size: int | None,
+    storage_iops: int | None,
     **kwargs,
 ):
     """
@@ -1149,6 +1159,9 @@ def create_instances(
         ssh_key_path: Path to SSH private key file
         ami_id: Optional AMI ID to use (if None, latest Amazon Linux 2 AMI will be used)
         detach: Whether to detach after creation without waiting for completion
+        storage_type: Type of EBS storage (e.g., 'gp2', 'gp3'). If None, uses AWS default
+        storage_size: Size of root volume in GB. If None, uses AWS default
+        storage_iops: IOPS for the root volume. If None, uses AWS default
         **kwargs: Additional keyword arguments
 
     Returns:
@@ -1210,6 +1223,7 @@ def create_instances(
             client=ec2_client,
             storage_type=storage_type,
             storage_size=storage_size,
+            storage_iops=storage_iops,
         )
         logger.info(f"Created instance {instance.instance_id} with name {instance.name}")
         instances.append(instance)
