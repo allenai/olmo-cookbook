@@ -507,15 +507,15 @@ def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = 
 
 def remove_conflicting_packages(env: Optional[PythonEnv] = None):
     env = env or PythonEnv.null()
-    is_flash_attention_installed = (
-        subprocess.run(
-            shlex.split(f"{env.pip} show flash-attention"), capture_output=True, env=env.path()
-        ).returncode
-        == 0
-    )
-    if is_flash_attention_installed:
-        print("Uninstalling flash attention to avoid conflicts...")
-        subprocess.run(shlex.split(f"{env.pip} uninstall -y flash-attention"), env=env.path())
+    # is_flash_attention_installed = (
+    #     subprocess.run(
+    #         shlex.split(f"{env.pip} show flash-attention"), capture_output=True, env=env.path()
+    #     ).returncode
+    #     == 0
+    # )
+    # if is_flash_attention_installed:
+    #     print("Uninstalling flash attention to avoid conflicts...")
+    #     subprocess.run(shlex.split(f"{env.pip} uninstall -y flash-attention"), env=env.path())
 
     is_olmo_core_installed = (
         subprocess.run(
