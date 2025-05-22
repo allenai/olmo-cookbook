@@ -1,14 +1,14 @@
 import shlex
 import subprocess
-from typing import Optional, ClassVar
-from dataclasses import dataclass, InitVar
+from dataclasses import InitVar, dataclass
+from typing import ClassVar, Optional
 
 from cookbook.cli.utils import (
     PythonEnv,
-    remove_conflicting_packages,
-    install_beaker_py,
     add_secret_to_beaker_workspace,
     discover_weka_mount,
+    install_beaker_py,
+    remove_conflicting_packages,
 )
 from cookbook.constants import BEAKER_KNOWN_CLUSTERS
 

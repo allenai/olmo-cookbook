@@ -1,13 +1,14 @@
 import argparse
 import os
 import tempfile
-from typing import Any
 import uuid
+from typing import Any
+
+from cookbook.cli.utils import PythonEnv
+
 from .base import LocatedPath
 from .gantry_launcher import GantryLauncher
-
 from .gcp import GoogleCloudToken
-from cookbook.cli.utils import PythonEnv
 
 
 def copy_prefix(
@@ -62,7 +63,7 @@ def main():
     parser.add_argument("--workspace", type=str, default="ai2/oe-data", help="Workspace")
     args = parser.parse_args()
 
-    if (beaker_experiment_id := os.environ.get("BEAKER_EXPERIMENT_ID")):
+    if beaker_experiment_id := os.environ.get("BEAKER_EXPERIMENT_ID"):
         # running on beaker, do the actual work
         gct = GoogleCloudToken.from_json(t) if (t := os.environ.get("GOOGLE_CLOUD_TOKEN")) else None
         copy_prefix(

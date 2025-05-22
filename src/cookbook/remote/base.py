@@ -1,12 +1,12 @@
-from dataclasses import dataclass, asdict
-from pathlib import Path
-from typing import Any, Generic, TypeVar, Union, TypeAlias, Literal, Optional
 import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Generic, Literal, Optional, TypeAlias, TypeVar, Union
 from urllib.parse import urlparse
 
-from cookbook.constants import WEKA_MOUNTS
-
 from typing_extensions import Self
+
+from cookbook.constants import WEKA_MOUNTS
 
 JSON_VALID_TYPES: TypeAlias = Union[str, int, float, bool, list, dict]
 

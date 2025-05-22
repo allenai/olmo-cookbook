@@ -6,13 +6,11 @@ from cookbook.constants import ALL_NAMED_GROUPS
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.eval.miniframe import MiniFrame
 
-
 logger = logging.getLogger(__name__)
 
 RE_MC_TASK = re.compile(r"(?P<prefix>:mc)($|:)")
 RE_RC_TASK = re.compile(r"(?P<prefix>:rc)($|:)")
 RE_SUITE_TASK = re.compile(r"(?P<prefix>::.+)$")
-
 
 
 class DashboardTables(NamedTuple):
@@ -83,7 +81,6 @@ def make_dashboard_table_v2(
             if (bpb_alias := make_bpb_name(metric.alias)) is not None:
                 tables.metrics.add(col=bpb_alias, row=metric.model_name, val=metric.metrics.bpb)
                 bpb_to_og_metric_name_map[bpb_alias] = metric.alias
-
 
     for model_row in tables.metrics.rows:
         for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):

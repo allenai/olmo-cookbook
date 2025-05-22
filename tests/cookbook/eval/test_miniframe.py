@@ -1,6 +1,5 @@
 import re
 
-
 import pytest
 
 from cookbook.constants import SHORT_NAMES
