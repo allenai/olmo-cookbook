@@ -51,9 +51,6 @@ def convert_olmo_core_v2(
 ):
     env = env or PythonEnv.null()
 
-    # install flash attention
-    subprocess.run(shlex.split(f"{env.pip} install flash-attn --no-build-isolation"), check=True, env=env.path())
-
     current_directory = os.getcwd()
     directories_to_clean_up = []
 
@@ -83,6 +80,9 @@ def convert_olmo_core_v2(
 
         huggingface_code_dir = install_transformers(transformers_commit_hash, env)
         directories_to_clean_up.append(huggingface_code_dir)
+
+        # install flash attention
+        subprocess.run(shlex.split(f"{env.pip} install flash-attn --no-build-isolation"), check=True, env=env.path())
 
         tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
         directories_to_clean_up.append(tokenizer_dir)
