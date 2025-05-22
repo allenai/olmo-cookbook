@@ -7,15 +7,16 @@ from dataclasses import field as dataclass_field
 from dataclasses import fields as dataclass_fields
 from datetime import datetime
 from functools import partial
+from sys import stderr
 from threading import current_thread, main_thread
 from typing import Callable, ClassVar, Generic, List, TypeVar
 
 import requests
 from tqdm import tqdm
+from typing_extensions import Self
 
-from cookbook.eval.cache import DatalakeCache, get_datalake_cache  # Change import
+from cookbook.eval.cache import get_datalake_cache
 
-Self = TypeVar("Self", bound="BaseDatalakeItem")
 T = TypeVar("T")
 V = TypeVar("V")
 
@@ -50,7 +51,7 @@ class BaseDatalakeItem(Generic[T]):
         with ExitStack() as stack:
             # Set up thread pool and progress bar
             pool = stack.enter_context(ThreadPoolExecutor(max_workers=num_workers))
-            pbar = stack.enter_context(tqdm(total=len(fns), desc=cls.__name__, disable=quiet))
+            pbar = stack.enter_context(tqdm(total=len(fns), desc=cls.__name__, disable=quiet, file=stderr))
 
             # Submit all tasks to the thread pool
             futures = [pool.submit(fn) for fn in fns]
@@ -69,7 +70,7 @@ class BaseDatalakeItem(Generic[T]):
         return results
 
     @classmethod
-    def prun(cls, num_workers: int | None = None, **kwargs: list[T]) -> list[Self]:
+    def prun(cls, num_workers: int | None = None, quiet: bool = False, **kwargs: list[T]) -> list[Self]:
         """Same as run() method, but runs in parallel.
 
         Args:
@@ -90,7 +91,7 @@ class BaseDatalakeItem(Generic[T]):
         fns = [partial(cls.run, **{k: v[i] for k, v in kwargs.items()}) for i in range(num_args)]
 
         # actually run the function in parallel
-        results = cls._prun(fns=fns, num_workers=num_workers, quiet=False)
+        results = cls._prun(fns=fns, num_workers=num_workers, quiet=quiet)
         return [result for result_group in results for result in result_group]
 
 
