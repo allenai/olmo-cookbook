@@ -1,41 +1,45 @@
 import logging
 import re
-from typing import NamedTuple
+from dataclasses import dataclass, field
 
 from cookbook.constants import ALL_NAMED_GROUPS
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.eval.miniframe import MiniFrame
 
+
 logger = logging.getLogger(__name__)
 
 
-class DashboardTables(NamedTuple):
-    all_metrics: MiniFrame
-    avg_metrics: MiniFrame
-    missing_by_model: dict[str, list[str]]
+@dataclass
+class DashboardTables:
+    metrics: MiniFrame
+    averages: MiniFrame
+    missing_tasks: dict[str, list[str]] = field(default_factory=dict)
 
+    @classmethod
+    def from_title(cls, title: str) -> "DashboardTables":
+        return cls(metrics=MiniFrame(title=title), averages=MiniFrame(title=title))
 
-def validate_metrics_coverage(metrics: list[MetricsAll]) -> dict[str, list[str]]:
-    """Validate that all models have completed all tasks and return missing combinations.
+    def find_missing_tasks(self, metrics: list[MetricsAll]):
+        """Validate that all models have completed all tasks and return missing combinations.
 
-    Returns:
-        Dict mapping model names to lists of missing task names.
-    """
-    # Get unique model and task names
-    unique_model_names = {metric.model_name for metric in metrics if metric.model_name is not None}
-    unique_task_names = {metric.alias for metric in metrics if metric.alias is not None}
+        Returns:
+            Dict mapping model names to lists of missing task names.
+        """
+        # Get unique model and task names
+        unique_model_names = {metric.model_name for metric in metrics if metric.model_name is not None}
+        unique_task_names = {metric.alias for metric in metrics if metric.alias is not None}
 
-    # Check for missing task-model combinations
-    missing_by_model: dict[str, list[str]] = {}
-    for model in unique_model_names:
-        missing_tasks: list[str] = []
-        for task in unique_task_names:
-            if not any(m.model_name == model and m.alias == task for m in metrics):
-                missing_tasks.append(task)
-        if missing_tasks:
-            missing_by_model[model] = missing_tasks
+        assert len(self.missing_tasks) == 0, "Missing tasks already found"
 
-    return missing_by_model
+        # Check for missing task-model combinations
+        for model in unique_model_names:
+            missing_tasks: list[str] = []
+            for task in unique_task_names:
+                if not any(m.model_name == model and m.alias == task for m in metrics):
+                    missing_tasks.append(task)
+            if missing_tasks:
+                self.missing_tasks[model] = missing_tasks
 
 
 def make_dashboard_table(
@@ -58,12 +62,11 @@ def make_dashboard_table(
     logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
 
     # these are the tables that will be displayed on the dashboard
-    all_metrics_table = MiniFrame(title=dashboard)
-    avg_metrics_table = MiniFrame(title=dashboard)
+    tables = DashboardTables.from_title(dashboard)
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
-        return DashboardTables(all_metrics=all_metrics_table, avg_metrics=avg_metrics_table, missing_by_model={})
+        return tables
 
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
@@ -72,7 +75,7 @@ def make_dashboard_table(
     )
 
     # validate that all models have completed all tasks
-    missing_by_model = validate_metrics_coverage(metrics)
+    tables.find_missing_tasks(metrics)
 
     for metric in metrics:
         if metric.is_aggregate:
@@ -104,15 +107,15 @@ def make_dashboard_table(
             continue
 
         # add primary score
-        all_metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
+        tables.metrics.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
 
         # add bpb if available and selected
         if metric.metrics.bpb is not None and show_bpb:
-            all_metrics_table.add(col=f"{metric.alias}:bpb", row=metric.model_name, val=metric.metrics.bpb)
+            tables.metrics.add(col=f"{metric.alias}:bpb", row=metric.model_name, val=metric.metrics.bpb)
 
     # remove metrics that do not have any models evaluated against them
     if not show_partial:
-        all_metrics_table = all_metrics_table.drop_empty()
+        tables.metrics = tables.metrics.drop_empty()
 
     for group_name, tasks in ALL_NAMED_GROUPS.items():
         if "mmlu" in group_name and not average_mmlu:
@@ -122,7 +125,7 @@ def make_dashboard_table(
         elif "gen" in group_name and not average_generative:
             continue
 
-        tasks_table = all_metrics_table.keep_cols(*tasks)
+        tasks_table = tables.metrics.keep_cols(*tasks)
         if len(tasks_table) == 0:
             # no need to keep averages for groups that have no models evaluated against their tasks
             continue
@@ -130,8 +133,6 @@ def make_dashboard_table(
         for model, scores in tasks_table.rows:
             filtered_scores = [s for s in scores if s is not None]
             average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
-            avg_metrics_table.add(col=group_name, row=model, val=average)
+            tables.averages.add(col=group_name, row=model, val=average)
 
-    return DashboardTables(
-        all_metrics=all_metrics_table, avg_metrics=avg_metrics_table, missing_by_model=missing_by_model
-    )
+    return tables
