@@ -26,6 +26,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
+from cookbook.model.config import Tokenizers
 from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
@@ -121,12 +122,49 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
-def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
+def get_mix_base_dir(cluster: str, weka: bool, local: bool) -> str:
+    base_dir: str = "s3://ai2-llm"
+    if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
+        if local:
+            base_dir = "weka://oe-training-default/ai2-llm"
+        else:
+            base_dir = "/weka/oe-training-default/ai2-llm"
+    elif "google" in cluster:
+        base_dir = "gs://ai2-llm"
+    return base_dir
+
+
+def build_train_config(
+    config_path: Path,
+    run_name: str,
+    group_id: str,
+    beaker_user: str,
+    dry_run: bool = False,
+    visualize_schedule: bool = False,
+):
     """
     Launch a training run with the given parameters.
     """
 
     base_config = config_from_path(config_path)
+
+    if base_config.dataset.mix:
+        try:
+            tokenizer_name = Tokenizers[base_config.tokenizer].value.identifier or "Unknown"
+            mix = base_config.dataset.mix.build(
+                base_dir=get_mix_base_dir(base_config.cluster, base_config.weka, local=True),
+                tokenizer=tokenizer_name,
+            )
+            base_config.dataset.sources = [
+                SourceConfig(
+                    name=base_config.dataset.mix,
+                    paths=mix[0],
+                )
+            ]
+        except Exception as e:
+            logger.error(f"Failed to build mix dataset: {e}")
+            raise
+
     load_path_fs = None
 
     if dry_run:
@@ -153,17 +191,18 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
 
     config = TransformerConfigBuilder(
         beaker_user=beaker_user,
+        run_name=run_name.strip(),
+        group_id=group_id.strip(),
+        max_dp_world_size=dp_world_size,
+        load_path_fs=load_path_fs,
         cluster=base_config.cluster,
         downstream_evaluators=base_config.downstream_evaluators,
         dtype=base_config.dataset.dtype,
         eval_interval=base_config.eval_interval,
-        group_id=group_id.strip(),
         lm_evaluator=base_config.lm_evaluator,
-        max_dp_world_size=dp_world_size,
         max_target_sequence_length=base_config.max_target_sequence_length,
         max_tokens=base_config.max_tokens,
         model_identifier=base_config.model,
-        run_name=run_name.strip(),
         save_interval=base_config.save_interval,
         seed=base_config.seed,
         sequence_length=base_config.sequence_length,
@@ -174,14 +213,15 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
-        warmup_steps=base_config.warmup_steps,
         learning_rate=base_config.learning_rate,
-        scheduler_type=base_config.scheduler_type,
+        scheduler_config=base_config.scheduler_config,
         annealing=base_config.annealing,
         hard_stop=base_config.hard_stop,
         model_overrides=base_config.model_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
-        load_path_fs=load_path_fs,
+        batch_size_warmup=base_config.batch_size_warmup,
+        weight_decay=base_config.weight_decay,
+        visualize_schedule=visualize_schedule,
     ).build()
 
     seed_all(config.init_seed)

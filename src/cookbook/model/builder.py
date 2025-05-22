@@ -22,15 +22,16 @@ from olmo_core.float8 import Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
-    CosWithWarmup,
     OptimConfig,
     OptimGroupOverride,
-    Scheduler,
+    SchedulerUnits,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim import scheduler as scheduler_module
+from olmo_core.optim.scheduler import CosWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
+    BatchSizeSchedulerCallback,
     BeakerCallback,
     Callback,
     CheckpointerCallback,
@@ -49,7 +50,15 @@ from olmo_core.train.train_module import (
     TransformerActivationCheckpointingMode,
 )
 
-from cookbook.aliases import AnnealConfig, MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.aliases import (
+    AnnealConfig,
+    BatchSizeWarmupConfig,
+    MetricBackend,
+    MetricsConfig,
+    SchedulerConfig,
+    SourceInstance,
+    WrappedScheduler,
+)
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
@@ -60,7 +69,7 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
-from cookbook.model.schedulers import WSD
+from cookbook.utils.schedule import SchedulerPlot
 
 logger = logging.getLogger(__name__)
 
@@ -102,30 +111,31 @@ class TransformerConfigBuilder:
         save_interval (int): The save interval.
         lm_evaluator (bool): Whether to enable language model evaluation.
         downstream_evaluators (List[DownstreamEvaluator]): The downstream evaluators.
-        load_path (Optional[str]): Path to load a model checkpoint from.
+        scheduler_config (SchedulerConfig): Configuration for the learning rate scheduler.
+        activation_checkpointing (bool): Whether to enable activation checkpointing.
+        weight_decay (Optional[float]): Weight decay for optimization.
+        model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         hard_stop (Optional[Duration]): The hard stop duration.
+        load_path (Optional[str]): Path to load a model checkpoint from.
         learning_rate (Optional[float]): The learning rate for the optimizer.
         global_batch_size (Optional[int]): The global batch size.
         rank_microbatch_size (Optional[int]): The rank microbatch size.
-        warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
-        scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
-        model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
-        activation_checkpointing (bool): Whether to enable activation checkpointing.
+        load_path_fs (Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]): Filesystem for loading checkpoints.
+        annealing (Optional[AnnealConfig]): Configuration for learning rate annealing.
+        batch_size_warmup (Optional[BatchSizeWarmupConfig]): Configuration for batch size warm-up.
         profile (bool): Whether to enable profiling.
 
     Methods:
         __init__(run_name, sources, sequence_length, max_tokens, group_id, cluster, beaker_user,
                  tokenizer, dtype, model_identifier, weka, max_dp_world_size, save_interval, eval_interval,
-                 lm_evaluator, downstream_evaluators, load_path=None, global_batch_size=None,
-                 rank_microbatch_size=None, learning_rate=None, metrics_config=None,
-                 max_target_sequence_length=8192, seed=42, s3=True, profile=False):
+                 lm_evaluator, scheduler_config, downstream_evaluators, weight_decay=None, batch_size_warmup=None,
+                 activation_checkpointing=False, model_overrides=None, load_path_fs=None, annealing=None,
+                 hard_stop=None, load_path=None, global_batch_size=None, rank_microbatch_size=None,
+                 learning_rate=None, metrics_config=None, max_target_sequence_length=8192, seed=42, profile=False):
             Initializes the TransformerConfigBuilder.
 
         get_tokenizer_config(tokenizer: str) -> TokenizerConfig:
             Returns the tokenizer configuration based on the tokenizer identifier.
-
-        get_warmup_steps() -> int:
-            Returns the number of warmup steps.
 
         get_global_batch_size() -> int:
             Returns the global batch size based on the sequence length or user-defined value.
@@ -142,14 +152,23 @@ class TransformerConfigBuilder:
         build_callbacks() -> Dict[str, Callback]:
             Builds and returns a dictionary of callbacks for the trainer.
 
-        build_dataset_config() -> NumpyDatasetConfig:
+        build_dataset_config(loader_processes: int = 16) -> NumpyDatasetConfig:
             Builds and returns the dataset configuration.
-
-        get_scheduler_config(scheduler_type: SchedulerType) -> Scheduler:
-            Returns the scheduler configuration based on the scheduler type.
 
         get_optimizer_config() -> OptimConfig:
             Returns the optimizer configuration.
+
+        get_batch_size_warmup_callback() -> BatchSizeSchedulerCallback:
+            Returns a callback for batch size warm-up scheduling.
+
+        get_ac_config() -> TransformerActivationCheckpointingConfig:
+            Returns activation checkpointing configuration.
+
+        load_state_and_config_from_path() -> Tuple[Path, Path]:
+            Loads model state and config from checkpoint path.
+
+        get_state_from_checkpoint() -> SchedulerState:
+            Extracts scheduler state from a checkpoint.
 
         build() -> ModelTrainConfig:
             Builds and returns the model training configuration.
@@ -177,17 +196,19 @@ class TransformerConfigBuilder:
     lm_evaluator: bool
     cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
-    scheduler_type: SchedulerType
+    scheduler_config: SchedulerConfig
+    activation_checkpointing: bool
+    weight_decay: Optional[float]
     model_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
-    warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
-    activation_checkpointing: bool
-    annealing: Optional[AnnealConfig] = None
+    annealing: Optional[AnnealConfig]
+    batch_size_warmup: Optional[BatchSizeWarmupConfig]
+    visualize_schedule: bool
     profile: bool = False
 
     def __init__(
@@ -207,8 +228,11 @@ class TransformerConfigBuilder:
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
+        visualize_schedule: bool,
+        scheduler_config: SchedulerConfig,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
-        scheduler_type: SchedulerType,
+        weight_decay: Optional[float] = None,
+        batch_size_warmup: Optional[BatchSizeWarmupConfig] = None,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
@@ -221,7 +245,6 @@ class TransformerConfigBuilder:
         metrics_config: Optional[MetricsConfig] = None,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
-        warmup_steps: Optional[int] = None,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -240,10 +263,12 @@ class TransformerConfigBuilder:
         self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
+        self.scheduler_config = scheduler_config
         self.metrics_config = metrics_config
         self.max_dp_world_size = max_dp_world_size
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
+        self.weight_decay = weight_decay
         self.save_interval = save_interval
         self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
@@ -251,12 +276,12 @@ class TransformerConfigBuilder:
         self.global_batch_size = global_batch_size
         self.rank_microbatch_size = rank_microbatch_size
         self.downstream_evaluators = downstream_evaluators
-        self.warmup_steps = warmup_steps
         self.load_path = load_path
         self.hard_stop = hard_stop
         self.annealing = annealing
+        self.visualize_schedule = visualize_schedule
+        self.batch_size_warmup = batch_size_warmup
         self.load_path_fs = load_path_fs
-        self.scheduler_type = scheduler_type
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
@@ -279,13 +304,6 @@ class TransformerConfigBuilder:
             logger.info(f"Invalid tokenizer identifier: {tokenizer}")
             raise e
 
-    def get_warmup_steps(self) -> int:
-        if not self.warmup_steps == None:
-            logger.info(f"Using user-defined warmup steps: {self.warmup_steps}")
-            return self.warmup_steps
-
-        return 2000
-
     def get_global_batch_size(self) -> int:
         if self.global_batch_size:
             global_batch_size = self.global_batch_size
@@ -294,8 +312,6 @@ class TransformerConfigBuilder:
                 estimate_batch_size(sequence_length=self.sequence_length, total_tokens=self.max_tokens)
                 * self.sequence_length
             )
-
-        print(f"Global batch size (in tokens) is: {global_batch_size}")
 
         return global_batch_size
 
@@ -326,7 +342,13 @@ class TransformerConfigBuilder:
         return lr
 
     def next_power_of_2(self, x: int) -> int:
-        return 1 if x == 0 else 2 ** (x - 1).bit_length()
+        if x == 0:
+            return 1
+        # If x is already a power of 2, return it as is
+        if x & (x - 1) == 0:
+            return x
+        # Otherwise, find the next power of 2
+        return 2 ** (x - 1).bit_length()
 
     def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
@@ -345,6 +367,9 @@ class TransformerConfigBuilder:
 
         if torch.cuda.is_available():
             callbacks["gpu_monitor"] = GPUMemoryMonitorCallback()
+
+        if self.batch_size_warmup:
+            callbacks["batchwup"] = self.get_batch_size_warmup_callback()
 
         if self.metrics_config:
             if MetricBackend.wandb in self.metrics_config.backends:
@@ -443,22 +468,6 @@ class TransformerConfigBuilder:
 
         return dataset_config
 
-    def get_scheduler_config(self) -> Scheduler:
-        scheduler_map = {
-            SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
-            SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
-                warmup_steps=self.get_warmup_steps(),
-            ),
-            SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
-            ),
-            SchedulerType.WSD: lambda: WSD(
-                warmup_steps=self.get_warmup_steps(),
-            ),
-        }
-
-        return scheduler_map[self.scheduler_type]()
-
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
@@ -467,9 +476,23 @@ class TransformerConfigBuilder:
 
         return SkipStepAdamWConfig(
             lr=lr,
-            weight_decay=0.033,
+            weight_decay=self.weight_decay if self.weight_decay else 0.033,
             betas=(0.9, 0.95),
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+            compile=True,
+        )
+
+    def get_batch_size_warmup_callback(self):
+        if not self.batch_size_warmup:
+            raise ValueError(
+                "Batch size warmup config is not set. Please provide a valid batch size warmup config when adding this callback."
+            )
+
+        batch_size = self.get_global_batch_size()
+
+        return BatchSizeSchedulerCallback(
+            batch_sizes=[int(batch_size * multiplier) for multiplier in self.batch_size_warmup.batches],
+            schedule=[Duration.tokens(int(self.max_tokens * ratio)) for ratio in self.batch_size_warmup.schedule],
         )
 
     def get_ac_config(self):
@@ -549,15 +572,24 @@ class TransformerConfigBuilder:
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
-        except AssertionError as e:
-            logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
-            )
-            raise e
+            scheduler_cls = getattr(scheduler_module, scheduler_class)
+        except (ImportError, AttributeError) as e:
+            logger.error(f"Failed to import scheduler class {scheduler_class}: {e}")
+            raise ValueError(f"Unsupported scheduler class when : {scheduler_class}")
 
-        scheduler = CosWithWarmup(**scheduler_config)
-        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+        try:
+            scheduler = scheduler_cls(**scheduler_config)
+
+            # Check if get_lr method exists
+            if not hasattr(scheduler, "get_lr"):
+                logger.error(f"Scheduler {scheduler_class} doesn't implement get_lr method")
+                raise AttributeError(f"Scheduler {scheduler_class} must implement get_lr method for annealing")
+
+            starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+            logger.info(f"Using scheduler {scheduler_class} with starting LR {starting_lr}")
+        except Exception as e:
+            logger.error(f"Error initializing scheduler {scheduler_class}: {e}")
+            raise
 
         return SchedulerState(
             global_step=last_pretrain_step,
@@ -581,6 +613,27 @@ class TransformerConfigBuilder:
             num_workers=12,
         )
 
+        scheduler_class = self.scheduler_config.scheduler
+        scheduler_config = self.scheduler_config.model_dump(exclude={"scheduler"}, exclude_none=True)
+        scheduler = WrappedScheduler.from_name_and_config(name=scheduler_class, config=scheduler_config)
+
+        if self.visualize_schedule:
+            lr = self.get_learning_rate()
+            scheduler_plot = SchedulerPlot(self.scheduler_config)
+
+            # Use total_steps or total_tokens depending on scheduler units
+            if self.scheduler_config.units == SchedulerUnits.tokens:
+                scheduler_plot.visualize(
+                    total_steps=self.max_tokens,
+                    base_lr=lr,
+                    global_batch_size=global_batch_size,
+                )
+            else:
+                scheduler_plot.visualize(
+                    total_steps=int(self.max_tokens / global_batch_size),
+                    base_lr=lr,
+                )
+
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
@@ -596,7 +649,7 @@ class TransformerConfigBuilder:
             float8_config=Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
-            scheduler=self.get_scheduler_config(),
+            scheduler=scheduler,
         )
 
         trainer_config = TrainerConfig(

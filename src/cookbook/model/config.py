@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config

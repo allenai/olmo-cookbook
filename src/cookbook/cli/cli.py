@@ -13,12 +13,19 @@ from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
 
-from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
+from cookbook.aliases import (
+    ExperimentConfig,
+    LaunchGroup,
+    SourceConfig,
+    validate_sources,
+)
 from cookbook.cli.core import estimate_batch_size
 from cookbook.cli.eval import convert_checkpoint, evaluate_model
+from cookbook.model.config import Tokenizers
 from cookbook.utils.config import (
     build_train_config,
     config_from_path,
+    get_mix_base_dir,
     mk_experiment_group,
     mk_launch_configs,
 )
@@ -59,13 +66,40 @@ def cli():
     default=None,
     help="Overrides the generated run group_id, allows for restarts with config changes or similar",
 )
-def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
+@click.option(
+    "--visualize-schedule",
+    is_flag=True,
+    help="Beta: Visualize the learning rate schedule for the experiment",
+)
+def launch(
+    config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None, visualize_schedule: bool = False
+):
     """Launch an experiment."""
 
     with open(config, "r") as f:
         data = yaml.safe_load(f)
 
     experiment_config = ExperimentConfig(**data, path=config)
+
+    # Instead of relying on the named mix we build it and treat it like a normal dataset source.
+    # NOTE: If other callers start to arise we should consider refactoring this into the BaseModel.
+    if experiment_config.dataset.mix:
+        try:
+            tokenizer_name = Tokenizers[experiment_config.tokenizer].value.identifier or "Unknown"
+            mix = experiment_config.dataset.mix.build(
+                base_dir=get_mix_base_dir(experiment_config.cluster, experiment_config.weka, local=True),
+                tokenizer=tokenizer_name,
+            )
+            experiment_config.dataset.sources = [
+                SourceConfig(
+                    name=experiment_config.dataset.mix,
+                    paths=mix[0],
+                )
+            ]
+        except Exception as e:
+            logger.error(f"Failed to build mix dataset: {e}")
+            raise
+
     validate_sources(experiment_config.dataset.sources)
 
     token_universe = get_token_counts_and_ratios(
@@ -99,8 +133,17 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
     logger.info("Token distribution by source:")
     logger.info(token_universe)
     logger.info(f"Running with trainer config:")
-    logger.info(build_train_config(config, experiment_config.name, group_uuid, beaker_user, dry_run=True))
-    if not click.confirm("Proceed with this configuration?", default=False):
+    logger.info(
+        build_train_config(
+            config,
+            experiment_config.name,
+            group_uuid,
+            beaker_user,
+            dry_run=True,
+            visualize_schedule=visualize_schedule,
+        )
+    )
+    if not click.confirm(f"{'(DRY RUN) ' if dry_run else ''}Proceed with this configuration?", default=False):
         logger.info("Launch cancelled!")
         return
 
@@ -117,7 +160,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
         )
         spinner.ok("✔")
 
-    with yaspin(text="Launching experiment group...", color="yellow") as spinner:
+    with yaspin(text=f"{'(DRY RUN) ' if dry_run else ''}Launching experiment group...", color="yellow") as spinner:
         try:
             if dry_run:
                 logger.info("Dry run mode enabled. Printing experiment configurations...")
@@ -264,6 +307,7 @@ def prepare_user_workspace_from(source: str, dest: str):
         f"{user}_WANDB_API_KEY",
         f"{user}_AWS_CONFIG",
         f"{user}_AWS_CREDENTIALS",
+        "GOOGLE_CLOUD_PROJECT",
         "R2_ENDPOINT_URL",
         "WEKA_ENDPOINT_URL",
     )
@@ -329,6 +373,13 @@ def prepare_user_workspace_from(source: str, dest: str):
     default=None,
     required=False,
 )
+@click.option(
+    "--google-cloud-project",
+    type=str,
+    help="The Google Cloud project to use for authentication",
+    default=None,
+    required=False,
+)
 def prepare_user_workspace(
     workspace: str,
     beaker_token: str,
@@ -337,6 +388,7 @@ def prepare_user_workspace(
     r2_endpoint_url: Optional[str] = None,
     weka_endpoint_url: Optional[str] = None,
     wandb_api_key: Optional[str] = None,
+    google_cloud_project: Optional[str] = None,
 ):
     """Prepare the workspace environment for use with OLMo-cookbook."""
 
@@ -359,6 +411,7 @@ def prepare_user_workspace(
         f"{user}_WANDB_API_KEY": wandb_api_key,
         f"{user}_AWS_CONFIG": aws_config,
         f"{user}_AWS_CREDENTIALS": aws_credentials,
+        "GOOGLE_CLOUD_PROJECT": google_cloud_project,
         "R2_ENDPOINT_URL": r2_endpoint_url,
         "WEKA_ENDPOINT_URL": weka_endpoint_url,
     }
