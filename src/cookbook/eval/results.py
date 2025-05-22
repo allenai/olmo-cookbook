@@ -39,7 +39,7 @@ def make_bpb_name(alias: str) -> str | None:
         return f"{alias}:bpb"
 
 
-def make_dashboard_table_v2(
+def make_dashboard_table(
     dashboard: str,
     force: bool = False,
     skip_on_fail: bool = False,
