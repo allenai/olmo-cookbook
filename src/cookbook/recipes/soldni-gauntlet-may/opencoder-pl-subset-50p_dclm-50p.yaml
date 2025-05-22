@@ -1,0 +1,47 @@
+name: "opencoder-pl-subset-50p_dclm-50p"
+description: "Baseline for code sources; 50% OpenCoder (filtered to same PL as Stack-Edu), 50% DCLM baseline"
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 113_184_153_600
+sequence_length: 4_096
+global_batch_size: 2_097_152
+rank_microbatch_size: 32_768
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/augusta-google-1
+
+
+metrics_config:
+  project: lucas-olmo-cookbook
+  entity: ai2-llm
+  backend: wandb
+
+dataset:
+  sources:
+  - name: opencoder-pl-subset
+    target_ratio: 0.50
+    paths:
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/C/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/C_/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/C_Sharp/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Go/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Java/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/JavaScript/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Markdown/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/PHP/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Python/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Rust/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Shell/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/SQL/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/Swift/*.npy
+      - s3://ai2-llm/preprocessed/opencoder/allenai/dolma2-tokenizer/TypeScript/*.npy
+
+  - name: dclm-baseline
+    target_ratio: 0.50
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
