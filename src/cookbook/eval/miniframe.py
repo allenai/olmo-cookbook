@@ -2,12 +2,21 @@ import re
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Callable, Generator, Iterable
+from typing import Callable, Generator, Iterable, NamedTuple
 
 from rich.console import Console
 from rich.table import Table
 
 from cookbook.constants import SHORT_NAMES
+
+
+class Row(NamedTuple):
+    name: str
+    columns: list[str]
+    values: list[float | None]
+
+    def missing(self) -> list[str]:
+        return [col for col, val in zip(self.columns, self.values) if val is None]
 
 
 @dataclass
@@ -112,13 +121,14 @@ class MiniFrame:
             yield col
 
     @property
-    def rows(self) -> Generator[tuple[str, list[float | None]], None, None]:
+    def rows(self) -> Generator[Row, None, None]:
         seen = set()
+        columns = list(self.columns)
         for col in self._data:
             for row in self._data[col]:
                 if row in seen:
                     continue
-                yield row, [self._data[col].get(row, None) for col in self._data]
+                yield Row(name=row, columns=columns, values=[self._data[c].get(row, None) for c in columns])
                 seen.add(row)
 
     def drop_empty(self) -> "MiniFrame":
@@ -138,9 +148,9 @@ class MiniFrame:
             # we add column and center the text
             table.add_column(col, justify="center")
 
-        for row, values in self.rows:
-            formatted_values = [f"{v * 100:.2f}" if v else "-" for v in values]
-            table.add_row(row, *formatted_values)
+        for row in self.rows:
+            formatted_values = [f"{v * 100:.2f}" if v is not None else "-" for v in row.values]
+            table.add_row(row.name, *formatted_values)
 
         console.print(table)
 

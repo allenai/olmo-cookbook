@@ -1,5 +1,5 @@
 import re
-from collections import OrderedDict
+
 
 import pytest
 
@@ -8,7 +8,7 @@ from cookbook.eval.miniframe import MiniFrame
 
 
 @pytest.fixture
-def sample_frame():
+def sample_frame() -> MiniFrame:
     """Create a sample MiniFrame for testing"""
     frame = MiniFrame(title="Test Frame")
 
@@ -83,17 +83,17 @@ class TestMiniFrame:
         """Test sorting by column values"""
         # Sort by metric1, ascending (default)
         sorted_frame = sample_frame.sort(col="metric1")
-        rows = [r for r, _ in sorted_frame.rows]
+        rows = [r.name for r in sorted_frame.rows]
         assert rows == ["model2", "model1", "model3"], "Rows should be sorted by metric1 values ascending"
 
         # Sort by metric1, descending
         sorted_frame = sample_frame.sort(col="metric1", reverse=True)
-        rows = [r for r, _ in sorted_frame.rows]
+        rows = [r.name for r in sorted_frame.rows]
         assert rows == ["model3", "model1", "model2"], "Rows should be sorted by metric1 values descending"
 
         # Sort by metric2 (with None value)
         sorted_frame = sample_frame.sort(col="metric2")
-        rows = [r for r, _ in sorted_frame.rows]
+        rows = [r.name for r in sorted_frame.rows]
         assert rows[0] == "model3", "None values should be sorted first (as -inf)"
 
     def test_columns_property(self, sample_frame):
@@ -122,19 +122,19 @@ class TestMiniFrame:
         """Test dropping rows"""
         # Drop a single row by exact match
         frame = sample_frame.drop_rows("model1")
-        rows = [r for r, _ in frame.rows]
+        rows = [r.name for r in frame.rows]
         assert "model1" not in rows
         assert len(rows) == 2
 
         # Drop rows using a regex pattern
         frame = sample_frame.drop_rows(re.compile(r"model[13]"))
-        rows = [r for r, _ in frame.rows]
+        rows = [r.name for r in frame.rows]
         assert len(rows) == 1
         assert rows[0] == "model2"
 
         # Drop multiple rows
         frame = sample_frame.drop_rows("model1", "model2")
-        rows = [r for r, _ in frame.rows]
+        rows = [r.name for r in frame.rows]
         assert len(rows) == 1
         assert rows[0] == "model3"
 
@@ -142,19 +142,19 @@ class TestMiniFrame:
         """Test keeping only specified rows"""
         # Keep a single row by exact match
         frame = sample_frame.keep_rows("model1")
-        rows = [r for r, _ in frame.rows]
+        rows = [r.name for r in frame.rows]
         assert len(rows) == 1
         assert rows[0] == "model1"
 
         # Keep rows using a regex pattern
         frame = sample_frame.keep_rows(re.compile(r"model[12]"))
-        rows = [r for r, _ in frame.rows]
+        rows = [r.name for r in frame.rows]
         assert len(rows) == 2
         assert "model3" not in rows
 
         # Keep multiple rows
         frame = sample_frame.keep_rows("model1", "model3")
-        rows = [r for r, _ in frame.rows]
+        rows = [r.name for r in frame.rows]
         assert len(rows) == 2
         assert "model2" not in rows
 
@@ -275,8 +275,8 @@ class TestMiniFrame:
 
         # The first rows should be the ones with None values
         rows_with_none = []
-        for row, values in sorted_frame.rows:
-            if values[0] is None:  # First column (metric1) is None
+        for row in sorted_frame.rows:
+            if row.values[0] is None:  # First column (metric1) is None
                 rows_with_none.append(row)
 
         assert len(rows_with_none) == 2
@@ -285,7 +285,7 @@ class TestMiniFrame:
 
         # Testing sort with another column
         sorted_frame = none_heavy_frame.sort(col="metric2", reverse=True)
-        rows = [r for r, _ in sorted_frame.rows]
+        rows = [r.name for r in sorted_frame.rows]
         # model1 should be first (0.8), then the None values
         assert rows[0] == "model1"
 
@@ -317,17 +317,17 @@ class TestMiniFrame:
         frame.add(row="row1", col="col1", val=0.7)
 
         # Verify the new value is used
-        for row, values in frame.rows:
-            if row == "row1":
-                assert values[0] == 0.7
+        for row in frame.rows:
+            if row.name == "row1":
+                assert row.values[0] == 0.7
 
         # Overwrite with None
         frame.add(row="row1", col="col1", val=None)
 
         # Verify the value is now None
-        for row, values in frame.rows:
-            if row == "row1":
-                assert values[0] is None
+        for row in frame.rows:
+            if row.name == "row1":
+                assert row.values[0] is None
 
     def test_multiple_none_values(self, none_heavy_frame):
         """Test frames with multiple None values in different patterns"""
@@ -423,7 +423,7 @@ class TestMiniFrame:
         sorted_frame = frame.sort(by_col="partial_col")
 
         # Check that rows with None values appear first
-        rows = [r for r, _ in sorted_frame.rows]
+        rows = [r.name for r in sorted_frame.rows]
         assert rows[0] == "row2"  # row2 should come first (has None for partial_col)
         assert rows[1] == "row1"  # row1 has value 0.3
 
@@ -472,7 +472,7 @@ class TestMiniFrame:
         assert "metric1" in list(result.columns)
         assert "metric2" not in list(result.columns)
 
-        rows = [r for r, _ in result.rows]
+        rows = [r.name for r in result.rows]
         assert len(rows) == 2
         assert "model1" in rows
         assert "model2" in rows
@@ -487,7 +487,7 @@ class TestMiniFrame:
 
         # Verify complex chaining result
         assert len(complex_result) == 2  # Both metric columns
-        rows = [r for r, _ in complex_result.rows]
+        rows = [r.name for r in complex_result.rows]
         assert len(rows) == 2  # model1 and model2 only
         assert "model3" not in rows
 
@@ -516,7 +516,7 @@ class TestMiniFrame:
         assert "col2" in columns
 
         # Check that combined frame has all rows
-        rows = [r for r, _ in combined.rows]
+        rows = [r.name for r in combined.rows]
         assert len(rows) == 3
         assert "row1" in rows
         assert "row2" in rows
@@ -551,7 +551,7 @@ class TestMiniFrame:
         assert "col1" in list(combined.columns)
         assert "col2" in list(combined.columns)
 
-        rows = [r for r, _ in combined.rows]
+        rows = [r.name for r in combined.rows]
         assert len(rows) == 2
         assert "row1" in rows
         assert "row2" in rows
