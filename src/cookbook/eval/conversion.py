@@ -51,6 +51,9 @@ def convert_olmo_core_v2(
 ):
     env = env or PythonEnv.null()
 
+    # install flash attention
+    subprocess.run(shlex.split(f"{env.pip} install flash-attn --no-build-isolation"), check=True, env=env.path())
+
     current_directory = os.getcwd()
     directories_to_clean_up = []
 
