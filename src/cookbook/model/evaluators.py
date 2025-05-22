@@ -34,6 +34,13 @@ OLMO2_DEV_1B_TASKS = [
     "codex_mbpp_gold_bpb_0shot",
     # Sanity check for MCQA ability
     "copycolors_10way",
+    # Basic Skills rc 5shot
+    "basic_skills_arithmetic_rc_5shot",
+    "basic_skills_coding_rc_5shot",
+    "basic_skills_common_knowledge_rc_5shot",
+    "basic_skills_logical_reasoning_rc_5shot",
+    "basic_skills_pattern_rc_5shot",
+    "basic_skills_string_operations_rc_5shot",
 ]
 
 TASK_GROUPS: Dict[str, List[str]] = {
