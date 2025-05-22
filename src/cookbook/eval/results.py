@@ -8,14 +8,16 @@ from cookbook.eval.miniframe import MiniFrame
 
 logger = logging.getLogger(__name__)
 
+
 class DashboardTables(NamedTuple):
     all_metrics: MiniFrame
     avg_metrics: MiniFrame
     missing_by_model: dict[str, list[str]]
 
+
 def validate_metrics_coverage(metrics: list[MetricsAll]) -> dict[str, list[str]]:
     """Validate that all models have completed all tasks and return missing combinations.
-    
+
     Returns:
         Dict mapping model names to lists of missing task names.
     """
@@ -35,6 +37,7 @@ def validate_metrics_coverage(metrics: list[MetricsAll]) -> dict[str, list[str]]
 
     return missing_by_model
 
+
 def make_dashboard_table(
     dashboard: str,
     task_regex: str = r"^.*$",
@@ -49,7 +52,6 @@ def make_dashboard_table(
     show_partial: bool = True,
     force: bool = False,
     skip_on_fail: bool = False,
-    quiet: bool = False,
 ) -> DashboardTables:
     experiments = FindExperiments.run(dashboard=dashboard)
 
@@ -57,7 +59,7 @@ def make_dashboard_table(
 
     # these are the tables that will be displayed on the dashboard
     all_metrics_table = MiniFrame(title=dashboard)
-    avg_metrics_table = MiniFrame(title=dashboard)    
+    avg_metrics_table = MiniFrame(title=dashboard)
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
@@ -67,7 +69,6 @@ def make_dashboard_table(
         experiment_id=[experiment.experiment_id for experiment in experiments],
         force=[force for _ in experiments],
         skip_on_fail=[skip_on_fail for _ in experiments],
-        quiet=quiet,
     )
 
     # validate that all models have completed all tasks
@@ -131,4 +132,6 @@ def make_dashboard_table(
             average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
             avg_metrics_table.add(col=group_name, row=model, val=average)
 
-    return DashboardTables(all_metrics=all_metrics_table, avg_metrics=avg_metrics_table, missing_by_model=missing_by_model)
+    return DashboardTables(
+        all_metrics=all_metrics_table, avg_metrics=avg_metrics_table, missing_by_model=missing_by_model
+    )

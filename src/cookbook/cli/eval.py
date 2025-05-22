@@ -290,12 +290,6 @@ def convert_checkpoint(
     default="",
     help="Suffix to add to the run name",
 )
-@click.option(
-    "--quiet",
-    is_flag=True,
-    default=False,
-    help="Suppress progress bars and info output."
-)
 def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -329,7 +323,6 @@ def evaluate_model(
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
-    quiet: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -379,7 +372,6 @@ def evaluate_model(
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
-        quiet=quiet,
     )
 
 
@@ -420,8 +412,8 @@ def evaluate_model(
     default="",
     help="Name of the column to sort by",
 )
-@click.option('-A/--ascending', 'sort_descending', flag_value=False, default=False, help="Sort ascending")
-@click.option('-D/--descending', 'sort_descending', flag_value=True, default=False, help="Sort descending")
+@click.option("-A/--ascending", "sort_descending", flag_value=False, default=False, help="Sort ascending")
+@click.option("-D/--descending", "sort_descending", flag_value=True, default=False, help="Sort descending")
 @click.option(
     "-F",
     "--force",
@@ -433,12 +425,6 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
-@click.option(
-    "--quiet",
-    is_flag=True,
-    default=False,
-    help="Suppress progress bars and info output."
-)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -449,7 +435,6 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-    quiet: bool,
 ) -> None:
     all_metrics, all_averages, missing_by_model = make_dashboard_table(
         dashboard=dashboard,
@@ -463,7 +448,6 @@ def get_results(
         show_bpb=False,
         force=force,
         skip_on_fail=skip_on_fail,
-        quiet=quiet,
     )
 
     # if a task starts with *, it means it is a named group and we need to expand it
@@ -480,7 +464,7 @@ def get_results(
         results = results.sort(
             by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
             by_name=sort_by.startswith("name"),
-            by_avg='avg' in sort_by or 'average' in sort_by,
+            by_avg="avg" in sort_by or "average" in sort_by,
             reverse=not sort_descending,
         )
     except StopIteration:

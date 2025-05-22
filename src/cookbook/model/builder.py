@@ -49,7 +49,13 @@ from olmo_core.train.train_module import (
     TransformerActivationCheckpointingMode,
 )
 
-from cookbook.aliases import AnnealConfig, MetricBackend, MetricsConfig, SchedulerType, SourceInstance
+from cookbook.aliases import (
+    AnnealConfig,
+    MetricBackend,
+    MetricsConfig,
+    SchedulerType,
+    SourceInstance,
+)
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
 from cookbook.model.config import (
