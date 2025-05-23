@@ -12,7 +12,7 @@ from ..cli.utils import get_aws_access_key_id, get_aws_secret_access_key
 from .base import AuthenticationError, BaseAuthentication
 
 if TYPE_CHECKING:
-    from types_boto3_s3.client import S3Client
+    from mypy_boto3_s3.client import S3Client
 
 
 @dataclass(frozen=True)
@@ -68,8 +68,9 @@ def download_s3_prefix(
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
     assert protocol.startswith("s3"), "Only S3 and S3A protocols are supported"
 
-    client = credentials.apply() if credentials else (session or boto3.Session()).client("s3")
+    client = (credentials.apply() if credentials else (session or boto3.Session())).client("s3")
 
+    # Create a local directory if it doesn't exist
     local_path = Path(local_path)
     futures = []
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
@@ -114,7 +115,7 @@ def upload_s3_prefix(
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
     assert protocol.startswith("s3"), "Only S3 and S3A protocols are supported"
 
-    client = credentials.apply() if credentials else (session or boto3.Session()).client("s3")
+    client = (credentials.apply() if credentials else (session or boto3.Session())).client("s3")
     local_path = Path(local_path).absolute()
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
