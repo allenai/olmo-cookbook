@@ -436,19 +436,7 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-    tables = make_dashboard_table(
-        dashboard=dashboard,
-        show_rc=True,
-        show_mc=True,
-        show_generative=True,
-        show_partial=True,
-        average_mmlu=True,
-        average_core=True,
-        average_generative=True,
-        show_bpb=False,
-        force=force,
-        skip_on_fail=skip_on_fail,
-    )
+    tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
     # if a task starts with *, it means it is a named group and we need to expand it
     tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
@@ -473,8 +461,9 @@ def get_results(
 
     if tables.missing_tasks:
         for model, missing_tasks in tables.missing_tasks.items():
-            logger.warning(f"\t😱 Model {model} is missing tasks:\t\t{', '.join(missing_tasks)}")
-        logger.warning("\n")
+            logger.warning(
+                f"\t😱 Model {model} is missing {len(missing_tasks):,} tasks:\t{', '.join(missing_tasks)}"
+            )
 
     if format == "json":
         print(json.dumps(results._data))

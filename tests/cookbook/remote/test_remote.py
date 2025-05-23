@@ -1,7 +1,8 @@
-from cookbook.remote.base import LocatedPath
-from unittest import TestCase
-from pathlib import Path
 import os
+from pathlib import Path
+from unittest import TestCase
+
+from cookbook.remote.base import LocatedPath
 
 
 class TestLocatedPath(TestCase):

@@ -1,18 +1,17 @@
-from dataclasses import dataclass
+import datetime
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
-from google.cloud import storage
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
 
-from .base import BaseAuthentication, AuthenticationError, JSON_VALID_TYPES
 from google.auth import default
 from google.auth.transport.requests import Request
-import datetime
-
-from google.oauth2.credentials import Credentials
 from google.cloud import storage
+from google.oauth2.credentials import Credentials
+from tqdm import tqdm
+
+from .base import JSON_VALID_TYPES, AuthenticationError, BaseAuthentication
 
 
 @dataclass(frozen=True)
