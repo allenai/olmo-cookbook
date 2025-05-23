@@ -1,5 +1,6 @@
 import json
 from dataclasses import asdict, dataclass
+from hashlib import md5
 from pathlib import Path
 from typing import Any, Generic, Literal, Optional, TypeAlias, TypeVar, Union
 from urllib.parse import urlparse
@@ -71,6 +72,13 @@ class AuthenticationError(RuntimeError):
 class LocatedPath:
     prot: Literal["gs", "s3", "weka", "file"]
     path: str
+
+    @property
+    def hash(self) -> str:
+        h = md5()
+        h.update(self.prot.encode())
+        h.update(self.path.encode())
+        return h.hexdigest()
 
     @classmethod
     def weka_path(cls, path: str | Path) -> Optional["Self"]:

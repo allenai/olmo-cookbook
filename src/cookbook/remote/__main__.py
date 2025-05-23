@@ -1,14 +1,12 @@
 import argparse
 import os
-import tempfile
-import uuid
+from hashlib import md5
 from typing import Any
 
 from cookbook.cli.utils import PythonEnv
 
-from .base import LocatedPath
+from .base import BaseAuthentication, LocatedPath
 from .gantry_launcher import GantryLauncher
-from .gcp import GoogleCloudToken
 
 
 def copy_prefix(
@@ -31,7 +29,14 @@ def copy_prefix(
             raise NotImplementedError("GCS -> S3: not implemented")
 
     elif src_loc.prot == "s3":
-        raise NotImplementedError(f"S3 -> {dst_loc.prot.upper()}: not implemented")
+        if dst_loc.prot in ("weka", "file"):
+            from .aws import download_s3_prefix
+
+            download_s3_prefix(src_loc.remote, dst_loc.local, *args, **kwargs)
+        elif dst_loc.prot == "s3":
+            raise ValueError("S3 -> S3: not supported")
+        elif dst_loc.prot == "gs":
+            raise NotImplementedError("S3 -> GCS: not implemented")
 
     elif src_loc.prot in ("weka", "file"):
         if dst_loc.prot in ("weka", "file"):
@@ -41,10 +46,43 @@ def copy_prefix(
 
             upload_gcs_prefix(src_loc.local, dst_loc.remote, *args, **kwargs)
         elif dst_loc.prot == "s3":
-            raise NotImplementedError("Weka -> S3: not implemented")
+            from .aws import upload_s3_prefix
+
+            upload_s3_prefix(src_loc.local, dst_loc.remote, *args, **kwargs)
 
     else:
         raise ValueError(f"{src_loc.prot.upper()} -> {dst_loc.prot.upper()}: not recognized")
+
+
+def push_credentials(gantry_launcher: GantryLauncher, *paths: str):
+    for path in paths:
+        loc = LocatedPath.from_str(path)
+        if loc.prot == "gs":
+            from .gcp import GoogleCloudToken
+
+            gct = GoogleCloudToken.make()
+            return gantry_launcher.add_env_secret(f"COOKBOOK_AUTH_{loc.hash[:6]}", gct.to_json(), overwrite=True)
+        elif loc.prot == "s3":
+            from .aws import AwsCredentials
+
+            aws_creds = AwsCredentials.make()
+            return gantry_launcher.add_env_secret(
+                f"COOKBOOK_AUTH_{loc.hash[:6]}", aws_creds.to_json(), overwrite=True
+            )
+
+
+def pull_credentials(*paths: str) -> BaseAuthentication | None:
+    for path in paths:
+        loc = LocatedPath.from_str(path)
+        if loc.prot == "gs":
+            from .gcp import GoogleCloudToken
+
+            return GoogleCloudToken.from_json(os.environ[f"COOKBOOK_AUTH_{loc.hash[:6]}"])
+        elif loc.prot == "s3":
+            from .aws import AwsCredentials
+
+            return AwsCredentials.from_json(os.environ[f"COOKBOOK_AUTH_{loc.hash[:6]}"])
+    return None
 
 
 def main():
@@ -61,15 +99,21 @@ def main():
     parser.add_argument("--priority", type=str, default="high", help="Priority")
     parser.add_argument("--preemptible", action="store_true", help="Preemptible")
     parser.add_argument("--workspace", type=str, default="ai2/oe-data", help="Workspace")
+    parser.add_argument("--local-only", action="store_true", help="Local only")
+    parser.add_argument(
+        "--credentials_env_name", type=str, default="COOKBOOK_REMOTE_CREDENTIALS", help="Credentials env name"
+    )
     args = parser.parse_args()
 
-    if beaker_experiment_id := os.environ.get("BEAKER_EXPERIMENT_ID"):
-        # running on beaker, do the actual work
-        gct = GoogleCloudToken.from_json(t) if (t := os.environ.get("GOOGLE_CLOUD_TOKEN")) else None
+    if os.environ.get("BEAKER_EXPERIMENT_ID") or args.local_only:
+
+        # only pull credentials if running on beaker
+        creds = pull_credentials(args.src_path, args.dst_path) if not args.local_only else None
+
         copy_prefix(
             src_path=args.src_path,
             dst_path=args.dst_path,
-            google_cloud_token=gct,
+            credentials=creds,
             num_workers=args.num_workers,
         )
 
@@ -92,8 +136,7 @@ def main():
         bw.add_mount(args.src_path)
         bw.add_mount(args.dst_path)
 
-        gct = GoogleCloudToken.make()
-        bw.add_env_secret("GOOGLE_CLOUD_TOKEN", gct.to_json(), overwrite=True)
+        push_credentials(bw, args.src_path, args.dst_path)
 
         bw.run(
             command=f"python -m cookbook.remote '{args.src_path}' '{args.dst_path}'",
