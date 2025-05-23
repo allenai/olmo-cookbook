@@ -61,12 +61,12 @@ def download_gcs_prefix(
     local_path: str | Path,
     client: storage.Client | None = None,
     num_workers: int | None = None,
-    google_cloud_token: GoogleCloudToken | None = None,
+    credentials: GoogleCloudToken | None = None,
 ):
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
-    client = google_cloud_token.apply() if google_cloud_token else (client or storage.Client())
+    client = credentials.apply() if credentials else (client or storage.Client())
 
     local_path = Path(local_path)
     blobs = client.list_blobs(bucket_name, prefix=prefix)
@@ -91,7 +91,7 @@ def download_gcs_prefix(
                     _download_file,
                     _blob=blob,
                     _local_file_path=local_file_path,
-                    _expiration_time=google_cloud_token.expiry if google_cloud_token else None,
+                    _expiration_time=credentials.expiry if credentials else None,
                 )
             )
 
@@ -109,12 +109,12 @@ def upload_gcs_prefix(
     remote_path: str,
     client: storage.Client | None = None,
     num_workers: int | None = None,
-    google_cloud_token: GoogleCloudToken | None = None,
+    credentials: GoogleCloudToken | None = None,
 ):
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
-    client = google_cloud_token.apply() if google_cloud_token else (client or storage.Client())
+    client = credentials.apply() if credentials else (client or storage.Client())
     local_path = Path(local_path).absolute()
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
@@ -143,7 +143,7 @@ def upload_gcs_prefix(
                         _upload_file,
                         _fp=fp,
                         _blob=blob,
-                        _expiration_time=google_cloud_token.expiry if google_cloud_token else None,
+                        _expiration_time=credentials.expiry if credentials else None,
                     )
                 )
 
