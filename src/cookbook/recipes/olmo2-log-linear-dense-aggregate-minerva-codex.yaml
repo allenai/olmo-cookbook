@@ -1,5 +1,5 @@
-name: olmo-cookbook-core-v2-1bv2-5xC-olmo2-mix-natural
-description: Olmo-cookbook 1Bv2-5xC on olmo-2-mix, natural distribution
+name: olmo2-1b-log-linear-dense-aggregate-minerva-codex
+description: Olmo-cookbook 1Bv2-5xC on olmo-2, log-linear on dense swarm 6cf425be with aggregated math/code eval
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
@@ -10,7 +10,7 @@ sequence_length: 4096
 seed: 1337
 model: olmo2_1B_v2
 tokenizer: dolma2
-priority: high
+priority: urgent
 cluster: ai2/jupiter-cirrascale-2
 weka: true
 rank_microbatch_size: 32768
