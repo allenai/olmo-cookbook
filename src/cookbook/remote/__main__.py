@@ -1,7 +1,8 @@
 import argparse
 import os
-from hashlib import md5
-from typing import Any
+import shutil
+from tempfile import TemporaryDirectory
+from typing import Any, Generator
 
 from cookbook.cli.utils import PythonEnv
 
@@ -12,6 +13,8 @@ from .gantry_launcher import GantryLauncher
 def copy_prefix(
     src_path: str,
     dst_path: str,
+    src_credentials: BaseAuthentication | None = None,
+    dst_credentials: BaseAuthentication | None = None,
     *args: Any,
     **kwargs: Any,
 ):
@@ -20,35 +23,67 @@ def copy_prefix(
 
     if src_loc.prot == "gs":
         if dst_loc.prot in ("weka", "file"):
-            from .gcp import download_gcs_prefix
+            from .gcp import GoogleCloudToken, download_gcs_prefix
 
-            download_gcs_prefix(src_loc.remote, dst_loc.local, *args, **kwargs)
+            assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
+            download_gcs_prefix(src_loc.remote, dst_loc.local, credentials=src_credentials, *args, **kwargs)
         elif dst_loc.prot == "gs":
-            raise ValueError("GCS -> GCS: not supported")
+            from .gcp import GoogleCloudToken, download_gcs_prefix, upload_gcs_prefix
+
+            assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
+            assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
+            with TemporaryDirectory(delete=True) as tmp_dir:
+                download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
+                upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+
         elif dst_loc.prot == "s3":
-            raise NotImplementedError("GCS -> S3: not implemented")
+            from .aws import AwsCredentials, upload_s3_prefix
+            from .gcp import GoogleCloudToken, download_gcs_prefix
+
+            assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
+            assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
+            with TemporaryDirectory(delete=True) as tmp_dir:
+                download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
+                upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
     elif src_loc.prot == "s3":
         if dst_loc.prot in ("weka", "file"):
-            from .aws import download_s3_prefix
+            from .aws import AwsCredentials, download_s3_prefix
 
-            download_s3_prefix(src_loc.remote, dst_loc.local, *args, **kwargs)
+            assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
+            download_s3_prefix(src_loc.remote, dst_loc.local, credentials=src_credentials, *args, **kwargs)
         elif dst_loc.prot == "s3":
-            raise ValueError("S3 -> S3: not supported")
+            from .aws import AwsCredentials, download_s3_prefix, upload_s3_prefix
+
+            assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
+            assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
+            with TemporaryDirectory(delete=True) as tmp_dir:
+                download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
+                upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
         elif dst_loc.prot == "gs":
-            raise NotImplementedError("S3 -> GCS: not implemented")
+            from .aws import AwsCredentials, download_s3_prefix
+            from .gcp import GoogleCloudToken, upload_gcs_prefix
+
+            assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
+            assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
+            with TemporaryDirectory(delete=True) as tmp_dir:
+                download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
+                upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
     elif src_loc.prot in ("weka", "file"):
         if dst_loc.prot in ("weka", "file"):
-            raise ValueError("Weka -> Weka: not supported")
+            # local copy
+            shutil.copytree(src_loc.local, dst_loc.local)
         elif dst_loc.prot == "gs":
-            from .gcp import upload_gcs_prefix
+            from .gcp import GoogleCloudToken, upload_gcs_prefix
 
-            upload_gcs_prefix(src_loc.local, dst_loc.remote, *args, **kwargs)
+            assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
+            upload_gcs_prefix(src_loc.local, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
         elif dst_loc.prot == "s3":
-            from .aws import upload_s3_prefix
+            from .aws import AwsCredentials, upload_s3_prefix
 
-            upload_s3_prefix(src_loc.local, dst_loc.remote, *args, **kwargs)
+            assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
+            upload_s3_prefix(src_loc.local, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
     else:
         raise ValueError(f"{src_loc.prot.upper()} -> {dst_loc.prot.upper()}: not recognized")
@@ -61,28 +96,27 @@ def push_credentials(gantry_launcher: GantryLauncher, *paths: str):
             from .gcp import GoogleCloudToken
 
             gct = GoogleCloudToken.make()
-            return gantry_launcher.add_env_secret(f"COOKBOOK_AUTH_{loc.hash[:6]}", gct.to_json(), overwrite=True)
+            gantry_launcher.add_env_secret(f"COOKBOOK_AUTH_{loc.hash[:6]}", gct.to_json(), overwrite=True)
         elif loc.prot == "s3":
             from .aws import AwsCredentials
 
             aws_creds = AwsCredentials.make()
-            return gantry_launcher.add_env_secret(
-                f"COOKBOOK_AUTH_{loc.hash[:6]}", aws_creds.to_json(), overwrite=True
-            )
+            gantry_launcher.add_env_secret(f"COOKBOOK_AUTH_{loc.hash[:6]}", aws_creds.to_json(), overwrite=True)
 
 
-def pull_credentials(*paths: str) -> BaseAuthentication | None:
+def pull_credentials(*paths: str) -> Generator[BaseAuthentication | None, Any, Any]:
     for path in paths:
         loc = LocatedPath.from_str(path)
         if loc.prot == "gs":
             from .gcp import GoogleCloudToken
 
-            return GoogleCloudToken.from_json(os.environ[f"COOKBOOK_AUTH_{loc.hash[:6]}"])
+            yield GoogleCloudToken.from_json(os.environ[f"COOKBOOK_AUTH_{loc.hash[:6]}"])
         elif loc.prot == "s3":
             from .aws import AwsCredentials
 
-            return AwsCredentials.from_json(os.environ[f"COOKBOOK_AUTH_{loc.hash[:6]}"])
-    return None
+            yield AwsCredentials.from_json(os.environ[f"COOKBOOK_AUTH_{loc.hash[:6]}"])
+        else:
+            yield None
 
 
 def main():
@@ -108,12 +142,15 @@ def main():
     if os.environ.get("BEAKER_EXPERIMENT_ID") or args.local_only:
 
         # only pull credentials if running on beaker
-        creds = pull_credentials(args.src_path, args.dst_path) if not args.local_only else None
+        source_credentials, destination_credentials = (
+            pull_credentials(args.src_path, args.dst_path) if not args.local_only else (None, None)
+        )
 
         copy_prefix(
             src_path=args.src_path,
             dst_path=args.dst_path,
-            credentials=creds,
+            src_credentials=source_credentials,
+            dst_credentials=destination_credentials,
             num_workers=args.num_workers,
         )
 
