@@ -462,7 +462,10 @@ def get_results(
     if tables.missing_tasks:
         for model, missing_tasks in tables.missing_tasks.items():
             logger.warning(
-                f"\t😱 Model {model} is missing {len(missing_tasks):,} tasks:\t{', '.join(missing_tasks)}"
+                "\t😱 Model \033[1m%s\033[0m is missing \033[1m%d tasks\033[0m:\t%s",
+                model,
+                len(missing_tasks),
+                ", ".join(missing_tasks),
             )
 
     if format == "json":
