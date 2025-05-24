@@ -10,9 +10,9 @@ sequence_length: 2048
 seed: 1337
 model: "olmo_30m"
 tokenizer: "dolma2"
-priority: high
-cluster: ai2/jupiter-cirrascale-2
-weka: true
+priority: urgent
+cluster: ai2/augusta-google-1
+weka: false
 rank_microbatch_size: 65536
 global_batch_size: 131072
 metrics_config:
