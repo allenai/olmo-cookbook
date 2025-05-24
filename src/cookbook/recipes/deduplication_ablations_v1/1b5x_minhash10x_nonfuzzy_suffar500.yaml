@@ -1,0 +1,26 @@
+name: "olmo2-1b-5xC-dedupablate-minhash10x-suffar200_nonfuzzy_1x"
+description: "OLMo2 1b@5xC, deduplication ablation | minhash10x + both shards of nonfuzzy SA 500"
+budget: "ai2/oe-training"
+workspace: "ai2/olmo3-webdata"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127_939_584_000 # 1279395840 nonembed params x 20 x 5
+sequence_length: 4096
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+global_batch_size: 2097152
+rank_microbatch_size: 16384
+learning_rate: 1.8e-3
+cluster: ai2/augusta-google-1
+weka: false
+dataset:
+  sources:
+  - name: minhash10x_nonfuzzy_suffar500 # 146.6B tokens
+    target_ratio: 1.0
+    paths:
+    -  s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_subsamples/deduplication_ablations_v1/final_ablation/minhash_10x_nonfuzzy/tokens/*.npy
+
