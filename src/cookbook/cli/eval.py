@@ -412,8 +412,8 @@ def evaluate_model(
     default="",
     help="Name of the column to sort by",
 )
-@click.option('-A/--ascending', 'sort_descending', flag_value=False, default=False, help="Sort ascending")
-@click.option('-D/--descending', 'sort_descending', flag_value=True, default=False, help="Sort descending")
+@click.option("-A/--ascending", "sort_descending", flag_value=False, default=False, help="Sort ascending")
+@click.option("-D/--descending", "sort_descending", flag_value=True, default=False, help="Sort descending")
 @click.option(
     "-F",
     "--force",
@@ -436,27 +436,14 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
-    all_metrics, all_averages = make_dashboard_table(
-        dashboard=dashboard,
-        show_rc=True,
-        show_mc=True,
-        show_generative=True,
-        show_partial=True,
-        average_mmlu=True,
-        average_core=True,
-        average_generative=True,
-        show_bpb=False,
-        force=force,
-        skip_on_fail=skip_on_fail,
-    )
+    tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
     # if a task starts with *, it means it is a named group and we need to expand it
     tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
 
     # after that, we check for task patterns
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
-    results = (all_averages + all_metrics).keep_cols(*task_patterns)
+    results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
 
     if len(models) > 0:
         results = results.keep_rows(*[re.compile(m) for m in models])
@@ -465,12 +452,18 @@ def get_results(
         results = results.sort(
             by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
             by_name=sort_by.startswith("name"),
-            by_avg='avg' in sort_by or 'average' in sort_by,
+            by_avg="avg" in sort_by or "average" in sort_by,
             reverse=not sort_descending,
         )
     except StopIteration:
         # if no columns are left, we don't need to sort
         pass
+
+    if tables.missing_tasks:
+        for model, missing_tasks in tables.missing_tasks.items():
+            logger.warning(
+                f"\t😱 Model {model} is missing {len(missing_tasks):,} tasks:\t{', '.join(missing_tasks)}"
+            )
 
     if format == "json":
         print(json.dumps(results._data))

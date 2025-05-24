@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 from dataclasses import dataclass
-from dataclasses import field as dataclass_field
 from typing import Generic, TypeVar
 
 import smart_open

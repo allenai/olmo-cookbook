@@ -372,6 +372,15 @@ ALL_MINERVA_TASKS = [
 ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
 
 
+BASIC_SKILLS = [
+    "basic_skills_arithmetic",
+    "basic_skills_coding",
+    "basic_skills_common_knowledge",
+    "basic_skills_logical_reasoning",
+    "basic_skills_string_operations",
+    "basic_skills_pattern",
+]
+
 ALL_AGI_EVAL_TASKS = [
     "agi_eval_lsat-ar:1shot::olmes",
     "agi_eval_lsat-lr:1shot::olmes",
@@ -480,8 +489,9 @@ ALL_NAMED_GROUPS = {
     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
-    "mmlu_pro:rc": [f"{category}:rc::olmes" for category in MMLU_PRO_CATEGORIES],
-    "mmlu_pro:mc": [f"{category}:mc::olmes" for category in MMLU_PRO_CATEGORIES],
+    "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
+    "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
+    "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "minerva": ALL_MINERVA_TASKS,

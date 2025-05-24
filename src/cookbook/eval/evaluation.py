@@ -187,7 +187,9 @@ def evaluate_checkpoint(
 
             # add all tasks in the partition as flag
             partition_tasks = tasks_names[i : i + partition_size] if partition_size else tasks_names
-            escaped_partition_tasks = [json.dumps(task) if task[0] == "{" else task for task in partition_tasks]
+            escaped_partition_tasks = [
+                json.dumps(task) if task[0] == "{" else task.replace(" ", "\\ ") for task in partition_tasks
+            ]
 
             local_flags.append(f"--task {' '.join(escaped_partition_tasks)}")
 
