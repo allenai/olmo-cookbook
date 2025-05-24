@@ -1,0 +1,53 @@
+name: olmo2-log-linear-dense-correlation-weighting-dense
+description: Olmo-cookbook 1Bv2-5xC on olmo-2, log-linear on all tasks (in-loop and offline) with obj weighted by correlation matrix
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: high
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+  - name: proofpile-2-stack
+    paths:
+    - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/algebraic-stack/train/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.01605901811801169
+  - name: proofpile-2-arxiv
+    paths:
+    - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/arxiv/train/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.03249988580606734
+  - name: proofpile-2-open-web-math
+    paths:
+    - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/open-web-math/train/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.018303837503062158
+  - name: pes2o
+    paths:
+    - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.004653523703552183
+  - name: starcoder
+    paths:
+    - s3://ai2-llm/preprocessed/starcoder/v1-decon-100_to_20k-2star-top_token_030/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.13682942150288666
+  - name: dclm
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.7915833554196734
+  - name: wikipedia
+    paths:
+    - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 7.095794674647857e-05
+downstream_evaluators:
+- olmo2_dev_1b
+lm_evaluator: true
