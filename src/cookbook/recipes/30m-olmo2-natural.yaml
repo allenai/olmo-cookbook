@@ -1,0 +1,53 @@
+name: "olmo-cookbook-30m"
+description: "Olmo-cookbook 30m-5xC on olmo-2-mix, natural distribution olmo-eval=0.8.2"
+budget: "ai2/oe-data"
+workspace: "ai2/oe-data"
+nodes: 1
+gpus: 1
+preemptible: true
+max_tokens: 2_910_233_600
+sequence_length: 2048 
+seed: 1337
+model: "olmo_30m"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 65536
+global_batch_size: 131072
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+    - name: proofpile-2-stack
+      paths:
+        - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/algebraic-stack/train/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.0030502843358416586
+    - name: proofpile-2-arxiv
+      paths:
+        - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/arxiv/train/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.0053613993678482625
+    - name: proofpile-2-open-web-math
+      paths:
+        - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/open-web-math/train/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.0031448462446296357
+    - name: pes2o
+      paths:
+        - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.015111458687507727
+    - name: starcoder
+      paths:
+        - s3://ai2-llm/preprocessed/starcoder/v1-decon-100_to_20k-2star-top_token_030/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.02143185698434755
+    - name: dclm
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.9509550395810318
+    - name: wikipedia
+      paths:
+        - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.0009451147987934355
+downstream_evaluators:
+- olmo2_dev_1b
+lm_evaluator: true

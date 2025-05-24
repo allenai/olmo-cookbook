@@ -239,7 +239,7 @@ class TransformerConfigBuilder:
         self.model_identifier = model_identifier
         self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
         self.model_overrides = model_overrides
-        self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
+        self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer) if model_identifier != "olmo_30m" else WrappedTransformerConfig.olmo_30m(self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.activation_checkpointing = activation_checkpointing
