@@ -1,4 +1,4 @@
-name: "olmo2-7b_10b-anneal (all dclm baseline)"
+name: "olmo2-7b_10b-anneal-all_dclm_baseline"
 description: "OLMo2 7b anneal to 10B Tokens for s2pdf baseline + 100% dclm baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
