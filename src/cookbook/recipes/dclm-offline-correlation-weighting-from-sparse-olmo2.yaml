@@ -1,7 +1,7 @@
 name: dclm-offline-correlation-weighting-from-sparse-olmo2
 description: Olmo-cookbook 1Bv2-5xC on dclm baseline (log-linear on sparse swarm, aggregating tasks using correlation weighting from sparse olmo2)
 budget: ai2/oe-data
-workspace: ai2/oe-data
+workspace: ai2/dolma2
 nodes: 4
 gpus: 8
 preemptible: true
