@@ -1,0 +1,61 @@
+name: "sigdig-split-bos-eos-on-olmo-mix-1124-1b-5xC"
+description: "Using tokenizer with right-to-left digit splitting; training from scratch 1B 5xC on olmo-mix-1124; BOS+EOS; inter-document attention masking"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 113_184_153_600
+sequence_length: 4096
+global_batch_size: 2_097_152
+rank_microbatch_size: 32_768
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2_sigdig_bos_eos"
+priority: high
+cluster: ai2/augusta-google-1
+
+
+
+metrics_config:
+  project: lucas-olmo-cookbook
+  entity: ai2-llm
+  backend: wandb
+
+dataset:
+  sources:
+  - name: DCLM-Baseline
+    target_ratio: 0.9512576600599985
+    paths:
+      - s3://ai2-llm/preprocessed/200B_olmo2_sample/dclm/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+  - name: peS2o
+    target_ratio: 0.015025255762672753
+    paths:
+    - s3://ai2-llm/preprocessed/200B_olmo2_sample/pes2o/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+  - name: arXiv
+    target_ratio: 0.005333196584702956
+    paths:
+    - s3://ai2-llm/preprocessed/200B_olmo2_sample/arxiv/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+  - name: OpenWebMath
+    target_ratio: 0.0031281249198738493
+    paths:
+    - s3://ai2-llm/preprocessed/200B_olmo2_sample/owm/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+  - name: StarCoder
+    target_ratio: 0.02128150560242045
+    paths:
+    - s3://ai2-llm/preprocessed/200B_olmo2_sample/starcoder/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+  - name: Algebraic Stack
+    target_ratio: 0.0030255634470911
+    paths:
+    - s3://ai2-llm/preprocessed/200B_olmo2_sample/algebraic_stack/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+  - name: Wikipedia-Wikibooks
+    target_ratio: 0.0009486936232404298
+    paths:
+    - s3://ai2-llm/preprocessed/200B_olmo2_sample/wiki/allenai/dolma2-tokenizer-sigdig_bos/*.npy
+
+
+model_overrides:
+  - "block.attention.use_flash=true"
+
+dataset_overrides:
+  - "generate_doc_lengths=true"
