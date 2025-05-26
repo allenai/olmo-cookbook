@@ -19,6 +19,7 @@ metrics_config:
   project: olmo-cookbook
   entity: ai2-llm
 dataset:
+  sources:
   - name: finemath-3plus
     paths:
       - s3://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
