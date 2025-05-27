@@ -1,0 +1,25 @@
+#!/bin/bash
+olmo-cookbook-eval results \
+    --dashboard regmixer \
+    --models 5xC-30m-superswarm-ee28fc9c-0000 \
+    --tasks arc_easy:rc::olmes:full \
+    --tasks arc_challenge:rc::olmes:full \
+    --tasks hellaswag:rc::olmes \
+    --tasks winogrande:rc::olmes:full \
+    --tasks csqa:rc::olmes:full \
+    --tasks piqa:rc::olmes:full \
+    --tasks socialiqa:rc::olmes:full \
+    --tasks mmlu:rc \
+    --tasks basic_skills:rc::olmes \
+    --tasks minerva \
+    --tasks codex_humaneval:3shot:bpb::none \
+    --tasks mbpp:3shot:bpb::none \
+    --tasks mt_mbpp \
+    --tasks medmcqa:rc:bpb::none \
+    --tasks lambada \
+    --tasks sciq:bpb::olmo1 \
+    --tasks squad:rc:bpb::gen2mc \
+    --tasks naturalqs:rc:bpb::gen2mc  \
+    --tasks jeopardy:rc:bpb::gen2mc \
+    --tasks drop:rc:bpb::gen2mc \
+    --tasks coqa:rc:bpb::gen2mc \
