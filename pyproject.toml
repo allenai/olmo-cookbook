@@ -10,27 +10,37 @@ description = ""
 authors = [
     { name = "Allen Institute for Artificial Intelligence", email = "oe-data-engineering@allenai.org" }
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
     "boto3",
     "click",
+    "requests",
+    "platformdirs",
     "pydantic",
     "s3fs",
+    "gcsfs",
+    "rich",
+    "smart_open",
     "yaspin",
     "PyYAML>=6.0,<7.0",
+    "paramiko>=3.5,<3.6",
+    "tabulate",
+    "packaging>=24.2",
+    "tqdm>=4.67.1",
 ]
 
 [project.optional-dependencies]
 dev = [
     "ruff",
     "mypy>=1.0,<1.4",
-    "black>=23.1,<24.0",
-    "isort>=5.12,<5.13",
-    "pytest",
+    "ruff",
+    "mypy>=1.0,<1.4",
+    "boto3-stubs[essential,ec2,s3,ssm]",
+    "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -42,10 +52,13 @@ analysis = [
     "scipy",
     "pandas",
     "tqdm"
+checkpoints = [
+    "google-cloud-storage",
+    "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@revert-147-epwalsh/mixture-fix",
-    "beaker-py",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@c779ca546cc3194e73e7491aaefcdffbed042c65",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]
@@ -54,6 +67,8 @@ all = [
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
 olmo-cookbook-analysis = "cookbook.cli:analysis.cli"
+olmo-cookbook-core = "cookbook.cli:core.cli"
+poormanray = "cookbook.cli:pmr.cli"
 
 [tool.black]
 line-length = 115

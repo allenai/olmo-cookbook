@@ -1,7 +1,11 @@
+import json
 import logging
 import re
+from typing import Optional
 
 import click
+from rich.console import Console
+from rich.table import Table
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -9,15 +13,20 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
+    ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
+    FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
-from cookbook.eval.conversion import convert_checkpoint
+from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.results import make_dashboard_table
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +41,9 @@ logger = logging.getLogger(__name__)
 @click.option("--olmoe-commit-hash", type=str, default=OLMOE_COMMIT_HASH, help="OLMoE commit hash")
 @click.option("--olmo2-commit-hash", type=str, default=OLMO2_COMMIT_HASH, help="OLMo2 commit hash")
 @click.option("--olmo-core-commit-hash", type=str, default=OLMO_CORE_COMMIT_HASH, help="OLMo core commit hash")
+@click.option(
+    "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
+)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -58,7 +70,13 @@ logger = logging.getLogger(__name__)
     default="oe-conversion-venv",
     help="Name of the environment to use for conversion",
 )
-def convert(
+@click.option(
+    "--max-sequence-length",
+    type=int,
+    default=None,
+    help="Maximum sequence length of the model (olmo-core only)",
+)
+def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
     beaker_cluster: str,
@@ -67,24 +85,26 @@ def convert(
     beaker_priority: str,
     beaker_workspace: str,
     force_venv: bool,
-    huggingface_output_dir: str | None,
+    huggingface_output_dir: Optional[str],
     huggingface_output_suffix: str,
-    huggingface_token: str | None,
-    huggingface_tokenizer: str | None,
+    huggingface_token: Optional[str],
+    huggingface_tokenizer: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
+    olmo_core_v2_commit_hash: str,
     huggingface_transformers_commit_hash: str,
-    unsharded_output_dir: str | None,
+    unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_system_python: bool,
     use_beaker: bool,
     env_name: str,
     beaker_preemptible: bool,
+    max_sequence_length: Optional[int] = None,
 ):
-    convert_checkpoint(
+    run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
         beaker_budget=beaker_budget,
         beaker_cluster=beaker_cluster,
@@ -98,8 +118,10 @@ def convert(
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
-        input_dir=input_dir,
+        input_dir=input_dir.rstrip("/"),
+        max_sequence_length=max_sequence_length,
         olmo_core_commit_hash=olmo_core_commit_hash,
+        olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
         olmo_type=olmo_type,
         olmo2_commit_hash=olmo2_commit_hash,
         olmoe_commit_hash=olmoe_commit_hash,
@@ -238,7 +260,37 @@ def convert(
     type=bool,
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
-def evaluate(
+@click.option(
+    "--model-args",
+    type=str,
+    default="",
+    help="Extra arguments to pass to the model",
+)
+@click.option(
+    "--fim-tokens",
+    type=click.Choice(list(FIM_TOKENS.keys())),
+    default=None,
+    help="Model-specific tokens to use for infilling tasks",
+)
+@click.option(
+    "--vllm-use-v1-spec/--no-vllm-use-v1-spec",
+    default=False,
+    type=bool,
+    help="Whether to use v1 spec for vLLM models",
+)
+@click.option(
+    "--use-backend-in-run-name/--no-use-backend-in-run-name",
+    default=False,
+    type=bool,
+    help="Whether to use the backend in the run name",
+)
+@click.option(
+    "--name-suffix",
+    type=str,
+    default="",
+    help="Suffix to add to the run name",
+)
+def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
     aws_access_key_id: str,
@@ -266,6 +318,11 @@ def evaluate(
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
+    model_args: str,
+    fim_tokens: str,
+    vllm_use_v1_spec: bool,
+    use_backend_in_run_name: bool,
+    name_suffix: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -274,6 +331,13 @@ def evaluate(
 
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
+    parsed_model_args: dict[str, str] = {}
+    for arg in model_args.split(","):
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_model_args[key] = value
 
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
@@ -303,7 +367,196 @@ def evaluate(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        model_args=parsed_model_args,
+        fim_tokens=fim_tokens,
+        use_vllm_v1_spec=vllm_use_v1_spec,
+        use_backend_in_run_name=use_backend_in_run_name,
+        name_suffix=name_suffix,
     )
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    default=None,
+    help="Set specific models to show. Can be specified multiple times.",
+)
+@click.option(
+    "-t",
+    "--tasks",
+    type=str,
+    required=True,
+    multiple=True,
+)
+@click.option(
+    "-f",
+    "--format",
+    type=click.Choice(["json", "table"]),
+    default="table",
+    help="Output results in JSON format",
+)
+@click.option(
+    "-s",
+    "--sort-by",
+    type=click.Choice(["column", "name", "col", "average", "avg"]),
+    default="column",
+    help="Column sort approach (allowed values: column, name, col, average, avg)",
+)
+@click.option(
+    "-S",
+    "--sort-column-name",
+    type=str,
+    default="",
+    help="Name of the column to sort by",
+)
+@click.option("-A/--ascending", "sort_descending", flag_value=False, default=False, help="Sort ascending")
+@click.option("-D/--descending", "sort_descending", flag_value=True, default=False, help="Sort descending")
+@click.option(
+    "-F",
+    "--force",
+    is_flag=True,
+    help="Force re-fetch results from the datalake",
+)
+@click.option(
+    "--skip-on-fail",
+    is_flag=True,
+    help="Skip experiments that fail to fetch results from the datalake",
+)
+def get_results(
+    dashboard: str,
+    models: list[str],
+    tasks: list[str],
+    format: str,
+    sort_by: str,
+    sort_column_name: str,
+    sort_descending: bool,
+    force: bool,
+    skip_on_fail: bool,
+) -> None:
+    tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
+
+    # if a task starts with *, it means it is a named group and we need to expand it
+    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+
+    # after that, we check for task patterns
+    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
+    results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
+
+    if len(models) > 0:
+        results = results.keep_rows(*[re.compile(m) for m in models])
+
+    try:
+        results = results.sort(
+            by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
+            by_name=sort_by.startswith("name"),
+            by_avg="avg" in sort_by or "average" in sort_by,
+            reverse=not sort_descending,
+        )
+    except StopIteration:
+        # if no columns are left, we don't need to sort
+        pass
+
+    if tables.missing_tasks:
+        for model, missing_tasks in tables.missing_tasks.items():
+            logger.warning(
+                "\t😱 Model \033[1m%s\033[0m is missing \033[1m%d tasks\033[0m:\t%s",
+                model,
+                len(missing_tasks),
+                ", ".join(missing_tasks),
+            )
+
+    if format == "json":
+        print(json.dumps(results._data))
+    elif format == "table":
+        results.show()
+    else:
+        raise ValueError(f"Invalid format: {format}")
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    required=True,
+    help="Models to add to the dashboard",
+)
+def add_to_dashboard(dashboard: str, models: list[str]) -> None:
+    resp = AddToDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+    print(f"Added {len(resp)} models to the dashboard")
+
+
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    required=True,
+    multiple=True,
+)
+def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
+    resp = RemoveFromDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+    print(f"Removed {len(resp)} models from the dashboard")
+
+
+@click.argument("subset_type", type=str)
+@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
+def list_tasks(subset_type: str, task: list[str] | None):
+    valid_tasks = [re.compile(t) for t in task] if task else []
+
+    table = Table(title=f"Listing {subset_type.capitalize()} tasks")
+    table.add_column("Group")
+    table.add_column("Tasks")
+    table.add_column("Count")
+
+    assert subset_type in ["display", "named"], f"Invalid task type: {subset_type}"
+
+    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == "display" else ALL_NAMED_GROUPS).items():
+        if len(valid_tasks) > 0:
+            valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
+            valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
+            if not valid_task_in_key and not valid_task_in_names:
+                continue
+        table.add_row(task_group, "\n".join(task_names), f"{len(task_names):,}")
+
+    console = Console()
+    console.print(table)
+
+
+@click.option("-m", "--model", type=str, required=True, help="List models for a given suite")
+@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
+def list_all_experiments(model: str, task: list[str] | None) -> None:
+    experiments = FindExperiments.run(model_name=model)
+    valid_tasks = [re.compile(t) for t in task] if task else []
+
+    table = Table()
+    table.add_column("Experiment ID")
+    table.add_column("Model Name")
+    table.add_column("Task Name")
+    table.add_column("Tags")
+    table.add_column("Count")
+    for experiment in experiments:
+        tasks_in_experiment = experiment.task_name.split(",")
+        if valid_tasks:
+            tasks_in_experiment = [t for t in tasks_in_experiment if any(v.search(t) for v in valid_tasks)]
+
+        if len(tasks_in_experiment) == 0:
+            continue
+
+        table.add_row(
+            experiment.experiment_id,
+            experiment.model_name,
+            "\n".join(tasks_in_experiment),
+            "\n".join(map(str, experiment.tags)),
+            f"{len(tasks_in_experiment):,}",
+        )
+
+    console = Console()
+    console.print(table)
 
 
 @click.group()
@@ -311,8 +564,14 @@ def cli():
     pass
 
 
-cli.command()(convert)
-cli.command()(evaluate)
+cli.command("convert")(convert_checkpoint)
+cli.command("evaluate")(evaluate_model)
+cli.command("results")(get_results)
+cli.command("list")(list_tasks)
+cli.command("experiments")(list_all_experiments)
+cli.command("add-dashboard")(add_to_dashboard)
+cli.command("remove-dashboard")(remove_from_dashboard)
+
 
 if __name__ == "__main__":
     cli({})

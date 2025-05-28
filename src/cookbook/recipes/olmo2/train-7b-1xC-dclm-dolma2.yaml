@@ -1,0 +1,27 @@
+name: "olmo2-7b-1xC-dclm-dolma2"
+description: "OLMo2 7b@1xC dclm-baseline"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 16
+gpus: 8
+preemptible: true
+max_tokens: 137_751_511_040 # 6,887,575,552 * 20
+global_batch_size: 2097152
+rank_microbatch_size: 8192
+sequence_length: 4096
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: high
+eval_interval: 250
+warmup_steps: 6568
+learning_rate: 6.8e-4 # sqrt scaling from 1.8e-3
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+dataset:
+  sources:
+  - name: dclm-baseline-20pct-dolma2
+    target_ratio: 1.0
+    paths:
+    - weka://oe-training-default/ai2-llm/preprocessed/dclm/baseline_type_topic_classified_20pct/allenai/dolma2-tokenizer/**/**/part-0*-00000.npy
+

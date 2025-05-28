@@ -1,0 +1,24 @@
+name: "olmo2-1b-augusta-test"
+description: ""
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 1
+gpus: 8
+preemptible: true
+max_tokens: 1_000_000_000
+global_batch_size: 2097152
+rank_microbatch_size: 32768
+sequence_length: 4096
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+activation_checkpointing: true
+eval_interval: 10
+dataset:
+  sources:
+  - name: gs-test
+    target_ratio: 1.0
+    paths:
+    - gs://ai2-llm/preprocessed/dclm/love2code_codeprose/codeprose/*.npy

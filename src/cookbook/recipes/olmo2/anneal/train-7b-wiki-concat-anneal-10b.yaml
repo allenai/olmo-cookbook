@@ -1,0 +1,30 @@
+name: "olmo2-7b_10b-anneal_wiki-concat"
+description: "OLMo2 7b anneal to 10B Tokens for structured-wikipedia-concat with links"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 2048
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: high
+eval_interval: 250
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+annealing:
+  enabled: true
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
+load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model_and_optim/
+load_state: false
+dataset:
+  sources:
+  - name: structure-wiki-concat-with-links
+    target_ratio: 1.0
+    paths:
+    - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy

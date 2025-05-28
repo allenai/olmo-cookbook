@@ -1,8 +1,10 @@
+import json
 import re
 import shlex
 import subprocess
 from copy import deepcopy
 from hashlib import md5
+from typing import Optional
 from urllib.parse import urlparse
 
 from cookbook.cli.utils import (
@@ -15,6 +17,7 @@ from cookbook.cli.utils import (
 from cookbook.constants import (
     ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
+    FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
@@ -42,12 +45,17 @@ def evaluate_checkpoint(
     dry_run: bool,
     beaker_image: str,
     use_gantry: bool,
-    gantry_args: str,
+    gantry_args: str | dict,
     python_venv_name: str,
     python_venv_force: bool,
     vllm_memory_utilization: float,
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
+    model_args: Optional[dict],
+    fim_tokens: str,
+    use_vllm_v1_spec: bool,
+    use_backend_in_run_name: bool,
+    name_suffix: str,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -112,8 +120,19 @@ def evaluate_checkpoint(
         else:
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
+    if use_backend_in_run_name:
+        if name_suffix.strip():
+            raise ValueError("name_suffix and use_backend_in_run_name cannot both be provided")
+
+        print("[WARNING] `--use-backend-in-run-name` is deprecated; use `--name-suffix <backend name>` instead.")
+        name_suffix = model_backend
+
     # we use this run name when storing store all the output files
-    run_name = make_eval_run_name(checkpoint_path=checkpoint_path, add_bos_token=add_bos_token)
+    run_name = make_eval_run_name(
+        checkpoint_path=checkpoint_path,
+        add_bos_token=add_bos_token,
+        name_suffix=name_suffix.strip(),
+    )
 
     # replace nicknames for actual cluster names, joined with commas
     beaker_clusters = ",".join(set(BEAKER_KNOWN_CLUSTERS.get(cluster, [cluster])).difference(clusters_to_exclude))
@@ -132,10 +151,12 @@ def evaluate_checkpoint(
     flags.append("--push-datalake")
 
     # figure out model args based on cli
-    model_args = {"model_path": checkpoint_path, "add_bos_token": "true" if add_bos_token else "false"}
-    if model_backend == "vllm":
-        # if we are using vllm, we need to set the memory utilization
-        model_args["gpu_memory_utilization"] = str(vllm_memory_utilization)
+    model_args = {
+        "model_path": checkpoint_path,
+        "add_bos_token": "true" if add_bos_token else "false",
+        **({"gpu_memory_utilization": str(vllm_memory_utilization)} if model_backend == "vllm" else {}),
+        **(model_args or {}),
+    }
     model_args_str = ",".join(f"{k}={v}" for k, v in model_args.items())
 
     # set model info
@@ -166,7 +187,11 @@ def evaluate_checkpoint(
 
             # add all tasks in the partition as flag
             partition_tasks = tasks_names[i : i + partition_size] if partition_size else tasks_names
-            local_flags.append(f"--task {' '.join(partition_tasks)}")
+            escaped_partition_tasks = [
+                json.dumps(task) if task[0] == "{" else task.replace(" ", "\\ ") for task in partition_tasks
+            ]
+
+            local_flags.append(f"--task {' '.join(escaped_partition_tasks)}")
 
             if add_aws_flags(
                 aws_access_key_id=aws_access_key_id,
@@ -210,17 +235,35 @@ def evaluate_checkpoint(
             if beaker_image:
                 local_flags.append(f"--beaker-image {beaker_image}")
 
-            # set gantry args
+            # set gantry
             if use_gantry:
                 local_flags.append("--use-gantry")
-                if gantry_args:
-                    local_flags.append(f"--gantry-args '{gantry_args}'")
+
+            # processing gantry args
+            if isinstance(gantry_args, str):
+                # load gantry args using json
+                gantry_args = json.loads(gantry_args.strip() or "{}")
+
+            assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
+
+            # user might want to disable vllm v1 spec because its causing eval failures
+            gantry_args = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args}
+
+            # finally append gantry args
+            local_flags.append(f"--gantry-args '{json.dumps(gantry_args)}'")
 
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            if model_backend == "vllm" and task_group == "gen" and compute_gold_bpb:
-                local_flags.append("--task-args compute_gold_bpb=true")
+            special_task_args = {}
+            if fim_tokens:
+                special_task_args = FIM_TOKENS[fim_tokens]
+
+            if compute_gold_bpb:
+                special_task_args["compute_gold_bpb"] = True
+
+            if special_task_args:
+                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
