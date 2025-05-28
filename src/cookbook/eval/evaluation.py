@@ -56,6 +56,7 @@ def evaluate_checkpoint(
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    special_task_args_str: str,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -255,7 +256,7 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            special_task_args = {}
+            special_task_args = json.loads(special_task_args_str)
             if fim_tokens:
                 special_task_args = FIM_TOKENS[fim_tokens]
 
