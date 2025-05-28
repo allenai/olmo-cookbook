@@ -299,6 +299,12 @@ def convert_checkpoint(
     default="",
     help="Suffix to add to the run name",
 )
+@click.option(
+    "--special-task-args",
+    type=str,
+    default="",
+    help="Extra arguments to pass to the tasks (will be passed to all tasks run as --task-args)",
+)
 def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -333,6 +339,7 @@ def evaluate_model(
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    special_task_args: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -386,6 +393,7 @@ def evaluate_model(
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
+        special_task_args_str=special_task_args
     )
 
 
