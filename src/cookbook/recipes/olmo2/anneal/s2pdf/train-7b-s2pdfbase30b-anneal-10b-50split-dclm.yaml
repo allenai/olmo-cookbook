@@ -20,7 +20,7 @@ warmup_steps: 0
 annealing:
   enabled: true
   initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
-load_path: gs://ai2-llm/checkpoints/jakep/olmo2-7b_10b-anneal_s2pdf_base30b_plus-dclm-c705058f/step4000/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/jakep/olmo2-7b_10b-anneal_s2pdf_base30b_plus-dclm-c705058f/step4000/
 load_state: true
 dataset:
   sources:
