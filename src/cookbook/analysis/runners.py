@@ -11,9 +11,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from cookbook.analysis.constants import (
-    PLOT_DIR,
-    get_cache_path,
-    get_task_sets,
     get_title_from_task,
 )
 from cookbook.analysis.stats import compute_significance

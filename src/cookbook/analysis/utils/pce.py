@@ -18,7 +18,6 @@
 import warnings
 
 import numpy as np
-from scipy.stats import t
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="invalid value encountered in multiply")
 
