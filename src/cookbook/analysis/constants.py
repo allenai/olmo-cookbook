@@ -1,5 +1,15 @@
-DATA_DIR = "/tmp/cookbook/analysis/data"
+from platformdirs import user_cache_dir
+from pathlib import Path
+import os
+
 PLOT_DIR = "/tmp/cookbook/analysis/plots"
+
+def get_cache_path(dashboard) -> Path:
+    cache_dir = user_cache_dir("cookbook")
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir, exist_ok=True)
+    path = Path(cache_dir) / dashboard
+    return path
 
 
 def get_title_from_task(task):

@@ -70,9 +70,6 @@ def plot_heatmap(
         ax.set_xticklabels([])
         ax.set_yticklabels([])
 
-    # Add gridlines
-    ax.grid(which="both", color="gray", linestyle="-", linewidth=0.5, alpha=0.3)
-
     # Add colorbar only for the viridis range
     norm = plt.Normalize(0, 1)
     sm = plt.cm.ScalarMappable(cmap=plt.cm.get_cmap("viridis"), norm=norm)

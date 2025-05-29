@@ -370,7 +370,7 @@ class PredictionsAll(BaseDatalakeItem):
             metrics: MetricsAll = task_predictions.metrics
             
             prediction: Prediction
-            for prediction in task_predictions.predictions:                
+            for prediction in task_predictions.predictions:
                 # Convert list of dicts to dict of lists for model outputs
                 model_output_dict = defaultdict(list)
                 for output in prediction.model_output:
@@ -419,11 +419,24 @@ class PredictionsAll(BaseDatalakeItem):
                 # Get the instance-level primary_metric
                 primary_metric = row["task_config"]["primary_metric"]
                 correct_choice = row["correct_choice"]
-                row["primary_score"] = row[primary_metric][correct_choice]
+                if primary_metric not in row:
+                    # If the metric doesn't exist (e.g., exact_match), use acc_raw
+                    assert not isinstance(row['acc_raw'], list)
+                    row["primary_score"] = row['acc_raw']
+                elif isinstance(row[primary_metric], list):
+                    # If the primary_metric is a list (acc_per_char), get the correct choice
+                    row["primary_score"] = row[primary_metric][correct_choice] 
+                else:
+                    row["primary_score"] = row[primary_metric]
 
                 rows.append(row)
                 
-        return pd.DataFrame(rows)
+        df = pd.DataFrame(rows)
+
+        # set multiindex
+        df.set_index(["alias", "model_name"], inplace=True)
+
+        return df
 
 
 @dataclass

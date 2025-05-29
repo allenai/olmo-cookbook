@@ -20,7 +20,9 @@ def get_slice(df, model=None, task=None):
 
     if is_multiindex:
         try:
-            df = df.loc[slicing_tuple]
+            # df = df.loc[slicing_tuple]
+            idx = pd.MultiIndex.from_product(slicing_tuple, names=['alias', 'model_name'])
+            df = df.loc[idx]
         except KeyError:
             return df.iloc[0:0]  # Return an empty DataFrame if no match
     else:
@@ -42,7 +44,6 @@ def get_nd_array(df, col, metric, model=None, task=None, sorted=False):
     slices = get_slice(df, model, task)
 
     if len(slices) == 0:
-        # raise RuntimeError(f'Encountered empty slice: {slices}')
         return [], np.array([])
 
     is_multiindex = isinstance(df.index, pd.MultiIndex)

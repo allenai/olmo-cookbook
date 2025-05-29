@@ -1,16 +1,18 @@
 import json
 import logging
-from pathlib import Path
 
 import click
 import pandas as pd
 
-from cookbook.analysis.constants import DATA_DIR
+from cookbook.analysis.constants import get_cache_path
 from cookbook.analysis.runners import run_instance_analysis
 from cookbook.eval.datalake import FindExperiments, PredictionsAll
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 @click.group()
 def cli():
@@ -38,8 +40,9 @@ def cli():
     help="Skip tasks that fail instead of raising an error",
 )
 def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
-    """Download and process evaluation results from S3."""
-    data_dir = Path(DATA_DIR).resolve()
+    """Download and process evaluation results from the datalake to a dataframe."""
+    cache_dir = get_cache_path(dashboard)
+    prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
 
     experiments = FindExperiments.run(dashboard=dashboard)
 
@@ -52,10 +55,9 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     )
 
     df = PredictionsAll.to_parquet(task_predictions)
-
-    # Save predictions to parquet file
-    prediction_path = data_dir / f"{dashboard}_predictions.parquet"
     df.to_parquet(prediction_path)
+
+    logger.info(f"Saved predictions to {prediction_path}")
 
 
 @cli.command()
@@ -66,19 +68,24 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     help="Dashboard name to analyze",
 )
 def run(dashboard: str):
-    """Run analysis on processed prediction files."""
-    data_dir = Path(DATA_DIR).resolve()
-    prediction_path = data_dir / f"{dashboard}_predictions.parquet"
+    """Run analysis on prediction dataframe."""
+    cache_dir = get_cache_path(dashboard)
+    prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
+    plot_dir = cache_dir / "plot"
+
+    logger.info(f"Loading predictions from {prediction_path}")
 
     # Load the results
     df = pd.read_parquet(prediction_path)
 
     # Run the analysis
-    outcomes = run_instance_analysis(df)
+    outcomes = run_instance_analysis(df, plot_dir=plot_dir)
+
+    logger.info(f"Saved plots to {plot_dir}")
 
     # Dump the results to a JSON file
     for item in outcomes:
-        output_path = data_dir / f"{dashboard}_{item[0]}.json"
+        output_path = cache_dir / f"{dashboard}_{item[0]}.json"
         js = json.loads(item[1].to_json(orient="records"))
         with open(output_path, "w") as f:
             json.dump(js, f, indent=4, sort_keys=True)

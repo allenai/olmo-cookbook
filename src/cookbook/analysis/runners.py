@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import warnings
@@ -11,10 +12,14 @@ from tqdm import tqdm
 
 from cookbook.analysis.constants import (
     PLOT_DIR,
+    get_cache_path,
     get_task_sets,
     get_title_from_task,
 )
 from cookbook.analysis.stats import compute_significance
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 REVERSED_METRICS = [
     "margin_per_byte",
@@ -42,8 +47,6 @@ def run_paired_comparison(
         df,
         models=model_names,
         metric=metric,
-        step=None,  # the models have different checkpoint steps
-        last_n=1,  # the "last n" checkpoints to average results
         alpha=0.05,  # significance level
         tasks=task,
         plot_axes=ax,
@@ -69,20 +72,22 @@ def run_paired_comparison(
     }
 
 
-def run_instance_analysis(df) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
+def run_instance_analysis(df, plot_dir=None) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
     # Set the 'mix' column to the value of the 'model' column
     df = df.reset_index()
     df = df.set_index(["alias", "model_name"])
 
-    print(f"Loaded {len(df):,} model evaluations")
+    logger.info(f"Loaded {len(df):,} model predictions")
 
     ALL_MODELS = sorted(df.index.get_level_values("model_name").unique().to_list())
     ALL_TASKS = sorted(df.index.get_level_values("alias").unique().to_list())
 
-    print(ALL_TASKS)
+    logger.info(ALL_TASKS)
+    logger.info(ALL_MODELS)
 
-    tasks = get_task_sets(ALL_TASKS)
+    # tasks = get_task_sets(ALL_TASKS)
+    tasks = ALL_TASKS
     # named_tasks = [get_title_from_task(task_set) for task_set in tasks]
 
     # Negate metrics where lower is better, so the ordering is the same
@@ -121,13 +126,13 @@ def run_instance_analysis(df) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.D
             )
 
             if any(ax.has_data() for row in axes for ax in row):
-                print(f"Saving figure(s) for {task_name}...")
+                logger.info(f"Saving figure(s) for {task_name}...")
+                os.makedirs(plot_dir, exist_ok=True)
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=UserWarning)
                     fig.tight_layout()
-                os.makedirs(PLOT_DIR, exist_ok=True)
                 plt.savefig(
-                    f"{PLOT_DIR}/paired_comparison_{task_name}.pdf",
+                    plot_dir / f"paired_comparison_{task_name.replace(':', '_')}.pdf",
                     format="pdf",
                     bbox_inches="tight",
                 )

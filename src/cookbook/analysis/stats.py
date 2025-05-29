@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -13,6 +14,12 @@ from cookbook.analysis.utils.pce import (
     compute_pairwise_p_values,
     compute_weighted_pairwise_p_values,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 
 def perc_significant(p_values, alpha=0.05):
@@ -78,8 +85,6 @@ def compute_significance(
     models,
     metric: str,
     plot_axes: plt.Axes,
-    step: Optional[str] = "max",
-    last_n: int = 1,
     tasks: Optional[list[list[str] | str]] = None,
     alpha: float = 0.05,
     num_permutations: int = 1_000,
@@ -99,7 +104,7 @@ def compute_significance(
         mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task, sorted=True)
 
         if len(scores) == 0:
-            print(f"Found no scores for {get_title_from_task(task)}! Skipping...")
+            logger.info(f"Found no scores for {get_title_from_task(task)}! Skipping...")
             continue
 
         if isinstance(task, list):
@@ -136,8 +141,6 @@ def compute_significance(
         all_p_values[task] = (mixes, scores, p_values, sig_clusters)
 
         if plot_axes and len(tasks) == 1:
-            print(f"Plotting {task}...")
-
             if pretty_mix_names is not None:
                 mix_names = [pretty_mix_names[mix] for mix in mixes]
             else:
@@ -149,7 +152,7 @@ def compute_significance(
             axes[i] = plot
             title = (
                 r"$p$"
-                + f'-values for {task} (n={scores.shape[1]}) {("last " + str(last_n) + " steps" if last_n > 1 else "")}({metric}), perc sig={(perc_sig*100):.2f}%'
+                + f'-values for {task} (n={scores.shape[1]}) ({metric}), perc sig={(perc_sig*100):.2f}%'
             )
 
             if len(models) < 15:
