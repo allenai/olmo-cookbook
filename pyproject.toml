@@ -52,6 +52,7 @@ analysis = [
     "scipy",
     "pandas",
     "tqdm"
+]
 checkpoints = [
     "google-cloud-storage",
     "boto3"
