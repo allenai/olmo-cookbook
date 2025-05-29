@@ -99,13 +99,11 @@ def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = Non
     # Load the results
     df = pd.read_parquet(prediction_path)
 
-    # # Add the BPB variant
-    # tasks = list(tasks)
-    # bpb_tasks = [make_bpb_name(task) for task in tasks]
-    # tasks += [task for task in bpb_tasks if task is not None]
-
     # Run the analysis
-    outcomes = run_instance_analysis(df, tasks, render_plots=render_plots, plot_dir=plot_dir)
+    outcomes = run_instance_analysis(
+        df, tasks, 
+        render_plots=render_plots, plot_dir=plot_dir
+    )
 
     logger.info(f"Saved plots to {plot_dir}")
 

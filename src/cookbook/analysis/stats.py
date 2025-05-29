@@ -86,18 +86,14 @@ def compute_significance(
     metric: str,
     ax: plt.Axes,
     task: list[str] | str,
+    task_alias: list[str] | str,
     alpha: float = 0.05,
     num_permutations: int = 1_000,
     plot_sig_clusters: bool = True,
     plot_clean: bool = False,
     pretty_mix_names: Optional[dict[str, str]] = None,
 ) -> tuple[DataFrame, dict]:
-    # Expand the named group if it exists
-    task_list = task
-    if task in ALL_NAMED_GROUPS:
-        task_list = ALL_NAMED_GROUPS[task]
-
-    mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task_list, sorted=True)
+    mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task_alias, sorted=True)
 
     if len(scores) == 0:
         logger.info(f"Found no scores for {task}! Skipping...")
@@ -105,7 +101,7 @@ def compute_significance(
 
     if isinstance(task, list):
         # Get value counts for each task
-        slices = get_slice(df, model=models, task=task_list)
+        slices = get_slice(df, model=models, task=task_alias)
         unique_counts = slices.groupby("task")["native_id"].nunique()
         weights = create_stratified_array(unique_counts)
 

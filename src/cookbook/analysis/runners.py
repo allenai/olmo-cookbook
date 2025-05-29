@@ -4,6 +4,9 @@ import sys
 import warnings
 from typing import Optional
 
+from cookbook.constants import ALL_NAMED_GROUPS
+from cookbook.eval.results import make_bpb_name
+
 sys.path.append(os.path.dirname(os.getcwd()))
 
 import matplotlib.pyplot as plt
@@ -18,7 +21,8 @@ logger.setLevel(logging.INFO)
 
 def run_paired_comparison(
     df: pd.DataFrame,
-    task: list[list[str] | str],
+    task: str,
+    task_alias: list[str] | str,
     model_names: list[str],
     ax: Optional[plt.Axes],
     metric: str = "primary_score",
@@ -31,6 +35,7 @@ def run_paired_comparison(
         metric=metric,
         alpha=0.05,  # significance level
         task=task,
+        task_alias=task_alias,
         ax=ax,
         plot_sig_clusters=False,
     )
@@ -54,7 +59,7 @@ def run_paired_comparison(
 
 
 def run_instance_analysis(
-    df, tasks, negate_metric = False, render_plots=True, plot_dir=None
+    df, tasks, render_plots=True, plot_dir=None
 ) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
     # Set the 'mix' column to the value of the 'model' column
@@ -64,16 +69,28 @@ def run_instance_analysis(
 
     logger.info(ALL_MODELS)
 
-    if negate_metric:
-        # Negate metrics where lower is better, so the ordering is the same
-        for col in df.columns:
-            if not pd.api.types.is_numeric_dtype(df[col]):
-                continue
-            df[col] = df[col].apply(lambda x: -x if pd.notna(x) else x)
+    task_names = [] # e.g., mmlu:rc
+    task_aliases = [] # e.g., [mmlu_abstract_algebra:rc::olmes, ...]
+    metrics = [] # e.g., primary_score
+    for task in tasks:
+        # Expand the named group if it exists
+        task_alias = ALL_NAMED_GROUPS.get(task, task)
+
+        # Add setup for primary_score
+        metrics += ["primary_score"]
+        task_aliases += [task_alias]
+        task_names += [task]
+
+        # Add setup for bpb, if it exists
+        bpb_task_name = make_bpb_name(task)
+        if bpb_task_name is not None:
+            metrics += ["logits_per_byte_corr"]
+            task_names += [bpb_task_name]
+            task_aliases += [task_alias]
 
     results = []
     with tqdm(total=len(tasks)) as pbar:
-        for task in tasks:
+        for task, task_alias, metric in zip(task_names, task_aliases, metrics):
             pbar.set_description(f"Computing paired permutation test on {len(ALL_MODELS)} models for {task}")
 
             N_COLS = 2
@@ -90,8 +107,9 @@ def run_instance_analysis(
             result = run_paired_comparison(
                 df, 
                 task=task, 
+                task_alias=task_alias,
+                metric=metric, 
                 model_names=ALL_MODELS, 
-                metric="primary_score", 
                 ax=axes[0, 0]
             )
 
