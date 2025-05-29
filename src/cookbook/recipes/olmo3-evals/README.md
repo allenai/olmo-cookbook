@@ -25,6 +25,21 @@ For all OLMo models (+ external baselines), this is a running list of evals we c
 For **OLMo 2 1B 5xC** runs, it's still good practice to look at both BPB & RC numbers, which usually track together with each other; MC numbers typically haven't broken through noise at this point.
 
 The command to run an eval looks like:
+
+```python
+olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
+    --tasks olmo3:dev:1b \
+    --priority high \
+    --cluster 80g \
+    --num-gpus 1 \
+    --model-backend vllm \
+    --model-args dtype=bfloat16 \
+    --partition-size 8 \
+    --dashboard olmo-3-evals  \
+    --workspace ai2/olmo-3-evals
+```
+
+If you want them all spelled out:
 ```python
 olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
     --tasks arc_easy:rc::olmes \
@@ -102,7 +117,16 @@ olmo-cookbook-eval evaluate "/oe-data-default/ai2-llm/checkpoints/mayeec/5xC-30m
 
 To pull dashboard results (use `--format json` to see full results):
 
+```python
+olmo-cookbook-eval results \
+    --dashboard olmo-3-evals \
+    --tasks olmo3:dev:1b \
+    --format json | jq '.' | less
 ```
+
+
+Or if you want specific ones:
+```python
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
     --tasks arc_easy:rc::olmes \
@@ -128,7 +152,7 @@ olmo-cookbook-eval results \
     --tasks coqa:rc::gen2mc \
     --tasks ultrachat_masked_ppl \
     --tasks wildchat_masked_ppl \
-    --format json | jq '.'
+    --format json | jq '.' | less
 ```
 
 *Notes*
