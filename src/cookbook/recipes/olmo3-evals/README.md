@@ -61,20 +61,23 @@ olmo-cookbook-eval results \
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks basic_skills
+    --tasks basic_skills \
+    --format json | jq '.'
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks minerva
+    --tasks minerva \
+    --format json | jq '.'
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks codex_humaneval:3shot:bpb::none \
-    --tasks mbpp:3shot:bpb::none
+    --tasks codex_humaneval:3shot \
+    --tasks mbpp:3shot
 
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks mt_mbpp
+    --tasks mt_mbpp \
+    --format json | jq '.'
 ```
 
 *Notes*
