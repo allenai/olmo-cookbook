@@ -59,15 +59,13 @@ def run_paired_comparison(
 
 
 def run_instance_analysis(
-    df, tasks, render_plots=True, plot_dir=None
+    df, tasks, models, render_plots=True, plot_dir=None
 ) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
     # Set the 'mix' column to the value of the 'model' column
     logger.info(f"Loaded {len(df):,} model predictions")
 
-    ALL_MODELS = sorted(df.index.get_level_values("model_name").unique().to_list())
-
-    logger.info(ALL_MODELS)
+    logger.info(models)
 
     task_names = []  # e.g., mmlu:rc
     task_aliases = []  # e.g., [mmlu_abstract_algebra:rc::olmes, ...]
@@ -91,7 +89,7 @@ def run_instance_analysis(
     results = []
     with tqdm(total=len(tasks)) as pbar:
         for task, task_alias, metric in zip(task_names, task_aliases, metrics):
-            pbar.set_description(f"Computing paired permutation test on {len(ALL_MODELS)} models for {task}")
+            pbar.set_description(f"Computing paired permutation test on {len(models)} models for {task}")
 
             N_COLS = 2
             N_ROWS = 1
@@ -100,12 +98,12 @@ def run_instance_analysis(
                 N_ROWS,
                 N_COLS // 2,
                 gridspec_kw={"wspace": 0.4, "hspace": 0},
-                figsize=(0.4 * len(ALL_MODELS) * (N_COLS // 2), 0.85 * len(ALL_MODELS) * (N_ROWS * 2)),
+                figsize=(0.4 * len(models) * (N_COLS // 2), 0.85 * len(models) * (N_ROWS * 2)),
                 squeeze=False,
             )
 
             result = run_paired_comparison(
-                df, task=task, task_alias=task_alias, metric=metric, model_names=ALL_MODELS, ax=axes[0, 0]
+                df, task=task, task_alias=task_alias, metric=metric, model_names=models, ax=axes[0, 0]
             )
 
             results.append(result)

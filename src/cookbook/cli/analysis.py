@@ -78,13 +78,22 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     help="Whether to generate plots",
 )
 @click.option(
+    "-t",
     "--tasks",
     type=str,
     multiple=True,
     default=None,
     help="Tasks to analyze. If not specified, each task alias will have a comparison rendered",
 )
-def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = None):
+@click.option(
+    "-m",
+    "--models",
+    type=str,
+    multiple=True,
+    default=None,
+    help="Set specific models to show. If not specified, all models will be used.",
+)
+def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = None, models: list[str] | None = None):
     """Run analysis on prediction dataframe."""
     cache_dir = get_cache_path(dashboard)
     prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
@@ -99,8 +108,15 @@ def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = Non
         ALL_TASKS = sorted(df.index.get_level_values("alias").unique().to_list())
         tasks = ALL_TASKS
 
+    if models is None or len(models) == 0:
+        ALL_MODELS = sorted(df.index.get_level_values("model_name").unique().to_list())
+        models = ALL_MODELS
+
+        logger.info("No model specified, using the following models:")
+        logger.info(models)
+
     # Run the analysis
-    outcomes = run_instance_analysis(df, tasks, render_plots=render_plots, plot_dir=plot_dir)
+    outcomes = run_instance_analysis(df, tasks, models, render_plots=render_plots, plot_dir=plot_dir)
 
     logger.info(f"Saved plots to {plot_dir}")
 

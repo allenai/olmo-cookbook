@@ -96,7 +96,7 @@ def compute_significance(
     mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task_alias, sorted=True)
 
     if len(scores) == 0:
-        logger.info(f"Found no scores for {task}! Skipping...")
+        logger.info(f"Did not find a complete set of scores for {task} on {len(models)} models. Skipping...")
         return None, None
 
     if isinstance(task, list):
