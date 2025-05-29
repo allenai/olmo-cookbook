@@ -3,10 +3,11 @@ import logging
 from pathlib import Path
 
 import click
+import pandas as pd
 
 from cookbook.analysis.constants import DATA_DIR
-from cookbook.analysis.data.aws import mirror_s3_to_local, process_local_folder
 from cookbook.analysis.runners import run_instance_analysis
+from cookbook.eval.datalake import FindExperiments, PredictionsAll
 
 logger = logging.getLogger(__name__)
 
@@ -19,58 +20,65 @@ def cli():
 
 @cli.command()
 @click.option(
-    "--bucket-name",
-    type=str,
-    default="ai2-llm",
-    help="S3 bucket name containing evaluation results",
-)
-@click.option(
-    "--s3-prefix",
-    type=str,
-    multiple=True,
-    help="S3 prefix(es) for evaluation results. Can be specified multiple times.",
-)
-@click.option(
-    "--local-results-path",
+    "--dashboard",
     type=str,
     required=True,
-    help="Local path to store results",
+    help="Dashboard name to analyze",
 )
 @click.option(
-    "--max-threads",
-    type=int,
-    default=100,
-    help="Maximum number of threads for S3 download",
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Force recomputation of metrics",
 )
-def download(bucket_name: str, s3_prefix: list[str], local_results_path: str, max_threads: int):
+@click.option(
+    "--skip-on-fail",
+    is_flag=True,
+    default=False,
+    help="Skip tasks that fail instead of raising an error",
+)
+def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     """Download and process evaluation results from S3."""
-    local_dir = f"{DATA_DIR}/{local_results_path}"
+    data_dir = Path(DATA_DIR).resolve()
 
-    # Download from S3
-    mirror_s3_to_local(bucket_name, s3_prefix, local_dir, max_threads=max_threads)
+    experiments = FindExperiments.run(dashboard=dashboard)
 
-    # Convert to parquet
-    process_local_folder(local_results_path, file_type="predictions")
+    logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
+
+    task_predictions = PredictionsAll.prun(
+        experiment_id=[experiment.experiment_id for experiment in experiments],
+        force=[force for _ in experiments],
+        skip_on_fail=[skip_on_fail for _ in experiments],
+    )
+
+    df = PredictionsAll.to_parquet(task_predictions)
+
+    # Save predictions to parquet file
+    prediction_path = data_dir / f"{dashboard}_predictions.parquet"
+    df.to_parquet(prediction_path)
 
 
 @cli.command()
 @click.option(
-    "--local-results-path",
+    "--dashboard",
     type=str,
     required=True,
     help="Local path to results file",
 )
-def run(local_results_path: str):
+def run(dashboard: str):
     """Run analysis on processed prediction files."""
     data_dir = Path(DATA_DIR).resolve()
-    prediction_path = data_dir / f"{local_results_path}_predictions.parquet"
+    prediction_path = data_dir / f"{dashboard}_predictions.parquet"
+
+    # Load the results
+    df = pd.read_parquet(prediction_path)
 
     # Run the analysis
-    outcomes = run_instance_analysis(prediction_path)
+    outcomes = run_instance_analysis(df)
 
     # Dump the results to a JSON file
     for item in outcomes:
-        output_path = data_dir / f"{local_results_path}_{item[0]}.json"
+        output_path = data_dir / f"{dashboard}_{item[0]}.json"
         js = json.loads(item[1].to_json(orient="records"))
         with open(output_path, "w") as f:
             json.dump(js, f, indent=4, sort_keys=True)

@@ -1,15 +1,14 @@
+from collections import defaultdict
 import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import ExitStack
-from dataclasses import dataclass
-from dataclasses import field as dataclass_field
-from dataclasses import fields as dataclass_fields
+from dataclasses import dataclass, field as dataclass_field, fields as dataclass_fields, asdict
 from datetime import datetime
 from functools import partial
 from sys import stderr
 from threading import current_thread, main_thread
-from typing import Callable, ClassVar, Generic, List, TypeVar
+from typing import Any, Callable, ClassVar, Generic, List, TypeVar
 
 import requests
 from tqdm import tqdm
@@ -274,6 +273,157 @@ class MetricsAll(BaseDatalakeItem):
         result = [cls(**metric) for metric in (result.value or [])]
 
         return result
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass
+class Prediction:
+    """
+    A predictions from a model.
+    """
+    doc_id: int
+    native_id: int
+    metrics: dict
+    model_output: List[dict]
+    label: int
+    task_hash: str
+    model_hash: str
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass
+class Predictions:
+    """
+    A collection of predictions for a given task and model.
+    """
+    predictions: List[Prediction]
+    metrics: MetricsAll
+
+    def __iter__(self):
+        return iter(self.predictions)
+
+
+@dataclass
+class PredictionsAll(BaseDatalakeItem):
+    """ Find all predictions for a given experiment. """
+    all_predictions: List[Predictions]
+
+    # this is not a field in dataclass
+    _endpoint: ClassVar[str] = "greenlake/download-result/"
+
+    @classmethod
+    def run(cls, experiment_id: str, force: bool = False, skip_on_fail: bool = False) -> List[Self]:
+        cache = get_datalake_cache()
+
+        # Get indices of all tasks
+        metrics = MetricsAll.run(
+            experiment_id=experiment_id,
+            force=force,
+            skip_on_fail=skip_on_fail
+        )
+        
+        # TODO: This should run in parallel
+        all_predictions = []
+        for metric in metrics:
+            if not (result := cache.get(experiment_id=experiment_id, type='predictions')).success or force:
+                response = requests.get(
+                    f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
+                    params={
+                        "resulttype": "PREDICTIONS",
+                        "task_idx": metric.task_idx
+                    },
+                    headers={"accept": "application/json"},
+                )
+                try:
+                    response.raise_for_status()
+                except Exception as e:
+                    if skip_on_fail:
+                        return []
+                    else:
+                        raise e
+                
+                # Response is a List[dict]
+                parsed = [json.loads(line) for line in response.iter_lines(decode_unicode=True) if line]
+
+                result = cache.set(parsed, experiment_id=experiment_id, type='predictions')
+
+            task_predictions = Predictions(
+                predictions=[Prediction(**prediction) for prediction in (result.value or [])],
+                metrics=metric
+            )
+
+            all_predictions.append(task_predictions)
+
+        return all_predictions
+
+    @classmethod
+    def to_parquet(cls, predictions: List[Predictions]):
+        import pandas as pd # lazy load
+
+        rows = []
+        task_predictions: Predictions
+        for task_predictions in tqdm(predictions, desc='Converting to parquet'):
+            metrics: MetricsAll = task_predictions.metrics
+            
+            prediction: Prediction
+            for prediction in task_predictions.predictions:                
+                # Convert list of dicts to dict of lists for model outputs
+                model_output_dict = defaultdict(list)
+                for output in prediction.model_output:
+                    for key, value in output.items():
+                        model_output_dict[key].append(value)
+                
+                row = {
+                    "alias": metrics.alias,
+                    "model_name": metrics.model_name,
+                    "model_path": metrics.model_path,
+                    **metrics.to_dict(),
+                    **prediction.to_dict(),
+                    **model_output_dict
+                }
+
+                # Expand metrics dict but don't override existing columns
+                for metric_key, metric_value in row["metrics"].items():
+                    if metric_key not in row:
+                        row[metric_key] = metric_value
+
+                # For some generation benchmarks, correct_choice is a str, but this will cause a type error
+                # when indexing this column
+                if isinstance(row["correct_choice"], str):
+                    row["correct_choice"] = 0
+
+                # Sometimes exact_match is bool when it should be float
+                if "exact_match" in row and isinstance(row["exact_match"], bool):
+                    row["exact_match"] = float(row["exact_match"])
+
+                # Standardize cols with multiple dtypes
+                if not isinstance(row["native_id"], str):
+                    row["native_id"] = str(row["native_id"])
+                    
+                if not isinstance(row["label"], str):
+                    row["label"] = str(row["label"])
+
+                # Fix legacy names
+                #   bits_per_byte_corr -> logits_per_byte_corr
+                #   bits_per_byte -> logits_per_byte_corr
+                if "bits_per_byte_corr" in row and row["bits_per_byte_corr"] is not None:
+                    row["logits_per_byte_corr"] = row["bits_per_byte_corr"]
+
+                if "logits_per_byte_corr" in row and row["logits_per_byte_corr"] is not None:
+                    row["bits_per_byte_corr"] = row["logits_per_byte_corr"]
+
+                # Get the instance-level primary_metric
+                primary_metric = row["task_config"]["primary_metric"]
+                correct_choice = row["correct_choice"]
+                row["primary_score"] = row[primary_metric][correct_choice]
+
+                rows.append(row)
+                
+        return pd.DataFrame(rows)
 
 
 @dataclass

@@ -69,72 +69,16 @@ def run_paired_comparison(
     }
 
 
-def task_tag(task_name):
-    return task_name.split("::")[0].replace(":rc", "") if "::" in task_name else task_name
-
-
-def is_excluded_external_model(m):
-    """Models excluded from external base evals in allenai/ladder-evals"""
-    OLL2_INSTRUCT_MODELS = [
-        # These are models on the OLL2 leaderboard that are actually instruct models
-        "instruct",
-        "superthoughts",
-        "helpingai",
-        "fox",
-        "llmchat",
-        "intern",
-        "magistrate",  # legal annealing
-        "fietje",  # phi fine-tune
-        "llama-3-6.3b",  # pruned llama 3
-        "loxa",  # very suspicious
-        "llumix",  # hungarian instruction tune
-        "yarm",  # instruction tune for context
-        "lucie",  # looks suspicious, i really think they snuck in instruct data here
-        "nepali",
-        "windy",
-        "yarn"  # long context fine-tuned models
-        "llama-160m",  # these models are just really bad
-        "llama-43m",
-        "llama-68m",
-        # missing code evals
-        "salamandra",
-        "llama-160m",
-    ]
-
-    # These models have broken or incomplete results
-    if (
-        "Minitron" in m
-        or "Mistral" in m
-        or "bloom" in m
-        or "granite" in m
-        or "pruned" in m
-        or "INTELLECT-1" in m
-        or "TinyYi-7B-Test" in m
-        or "InstructLM-500M" in m
-        or "Qwen1.5-MoE" in m
-    ):
-        return True
-    if any(name in m.lower() for name in OLL2_INSTRUCT_MODELS):
-        return True
-    return False
-
-
-def run_instance_analysis(local_path_instances) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
+def run_instance_analysis(df) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
-    print(f"Loading {local_path_instances}")
-
-    df = pd.read_parquet(local_path_instances)
-
     # Set the 'mix' column to the value of the 'model' column
     df = df.reset_index()
-    df["mix"] = df["model"]
-    df["step"] = df["step"].fillna("0")
-    df = df.set_index(["task", "model", "step", "mix"])
+    df = df.set_index(["alias", "model_name"])
 
     print(f"Loaded {len(df):,} model evaluations")
 
-    ALL_MODELS = sorted(df.index.get_level_values("model").unique().to_list())
-    ALL_TASKS = sorted(df.index.get_level_values("task").unique().to_list())
+    ALL_MODELS = sorted(df.index.get_level_values("model_name").unique().to_list())
+    ALL_TASKS = sorted(df.index.get_level_values("alias").unique().to_list())
 
     print(ALL_TASKS)
 

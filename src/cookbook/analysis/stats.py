@@ -96,23 +96,7 @@ def compute_significance(
     axes = [plot_axes]
 
     for i, task in tqdm(enumerate(tasks), desc="Computing pairwise comparisons", total=len(tasks), disable=quiet):
-        if last_n > 1:
-            assert step == "max"
-
-            mixes, scores = get_nd_array(df, ["mix", "step"], metric, model=models, task=task)
-            scores = scores[:, -last_n:, :]  # get last n steps
-            scores = scores.mean(axis=1)  # average over last n ckpts
-
-            # Recover just the mix names
-            mixes = np.array([name for name, step in mixes])
-
-            # Sort based on new aggregate (average/concat)
-            mix_sums = scores.sum(axis=1)
-            sorted_indices = mix_sums.argsort()[::-1]
-            mixes = mixes[sorted_indices].tolist()
-            scores = scores[sorted_indices]
-        else:
-            mixes, scores = get_nd_array(df, "mix", metric, model=models, task=task, step=step, sorted=True)
+        mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task, sorted=True)
 
         if len(scores) == 0:
             print(f"Found no scores for {get_title_from_task(task)}! Skipping...")

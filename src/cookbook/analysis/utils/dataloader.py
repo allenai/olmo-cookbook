@@ -4,19 +4,15 @@ import numpy as np
 import pandas as pd
 
 
-def get_slice(df, mix=None, model=None, task=None, step=None):
-    """Index to return a df of some (data mix, model, task, step)"""
-    mixes = [mix] if isinstance(mix, str) else mix
+def get_slice(df, model=None, task=None):
+    """Index to return a df of some (model, task)"""
     models = [model] if isinstance(model, str) else model
     tasks = [task] if isinstance(task, str) else task
-    steps = [step] if isinstance(step, int) else step
 
     # Dynamically create a slicing tuple matching the index levels
     level_slices = {
-        "mix": mixes if mixes else slice(None),
-        "model": models if models else slice(None),
-        "task": tasks if tasks else slice(None),
-        "step": steps if steps else slice(None),
+        "model_name": models if models else slice(None),
+        "alias": tasks if tasks else slice(None),
     }
     slicing_tuple = tuple(level_slices.get(level, slice(None)) for level in df.index.names)
 
@@ -30,63 +26,39 @@ def get_slice(df, mix=None, model=None, task=None, step=None):
     else:
         # Slow index
         df = df[
-            (df["mix"].isin(level_slices["mix"]) if isinstance(level_slices["mix"], list) else True)
-            & (df["model"].isin(level_slices["model"]) if isinstance(level_slices["model"], list) else True)
-            & (df["task"].isin(level_slices["task"]) if isinstance(level_slices["task"], list) else True)
-            & (df["step"].isin(level_slices["step"]) if isinstance(level_slices["step"], list) else True)
+            (df["model_name"].isin(level_slices["model_name"]) if isinstance(level_slices["model_name"], list) else True)
+            & (df["alias"].isin(level_slices["alias"]) if isinstance(level_slices["alias"], list) else True)
         ]
 
-    # Sort and return
-    if "step" in df.index.names:
-        df = df.sort_index(level="step")
     df = df.reset_index()
 
     return df
 
 
-def get_max_k_step(_slice, k=1):
-    """Filter for only rows with the top 5 steps."""
-    top_steps = _slice["step"].nlargest(k).unique()
-    step_filter = _slice["step"].isin(top_steps)
-    _slice = _slice[step_filter]
-    return _slice
-
-
-def get_nd_array(df, col, metric, mix=None, model=None, task=None, step=None, sorted=False):
+def get_nd_array(df, col, metric, model=None, task=None, sorted=False):
     """Get an nd array of (COL, instances), sorted by overall performance"""
     col = [col] if not isinstance(col, list) else col
 
-    use_max_step = False
-    if step == "max":
-        use_max_step = True
-        step = None
-
-    slices = get_slice(df, mix, model, task, step)
+    slices = get_slice(df, model, task)
 
     if len(slices) == 0:
         # raise RuntimeError(f'Encountered empty slice: {slices}')
         return [], np.array([])
 
-    if use_max_step:
-        slices = get_max_k_step(slices)
-
     is_multiindex = isinstance(df.index, pd.MultiIndex)
 
     if is_multiindex:
         # For native_ids which count up from 0, there are the same IDs across tasks. Append the task name.
-        slices["native_id"] = slices["native_id"] + "_" + slices["task"].astype(str)
+        slices["native_id"] = slices["native_id"] + "_" + slices["alias"].astype(str)
 
         duplicates_count = slices.duplicated(subset=["native_id"] + col).sum()
         if duplicates_count > 0 and task is not None:
-            if (
-                "hellaswag" not in task and "drop" not in task
-            ):  # this is a known problem for 433 HellaSwag instances, 1 Drop instance
-                warnings.simplefilter("once", UserWarning)
-                warnings.warn(
-                    f"Warning: {duplicates_count}/{len(slices)} duplicate native_id-key pairs found for task='{task}' model='{model}'. Removing duplicates...",
-                    category=UserWarning,
-                    stacklevel=2,
-                )
+            warnings.simplefilter("once", UserWarning)
+            warnings.warn(
+                f"Warning: {duplicates_count}/{len(slices)} duplicate native_id-key pairs found for task='{task}' model='{model}'. Removing duplicates...",
+                category=UserWarning,
+                stacklevel=2,
+            )
             slices = slices.sort_values(by=col, na_position="last").drop_duplicates(
                 subset=["native_id"] + col, keep="first"
             )
