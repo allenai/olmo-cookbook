@@ -90,14 +90,14 @@ def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = Non
     prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
     plot_dir = cache_dir / "plot"
 
-    if tasks is None:
-        ALL_TASKS = sorted(df.index.get_level_values("alias").unique().to_list())
-        tasks = ALL_TASKS
-
     logger.info(f"Loading predictions from {prediction_path}")
 
     # Load the results
     df = pd.read_parquet(prediction_path)
+
+    if tasks is None or len(tasks) == 0:
+        ALL_TASKS = sorted(df.index.get_level_values("alias").unique().to_list())
+        tasks = ALL_TASKS
 
     # Run the analysis
     outcomes = run_instance_analysis(df, tasks, render_plots=render_plots, plot_dir=plot_dir)

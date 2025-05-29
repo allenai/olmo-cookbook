@@ -81,7 +81,7 @@ def predictions_to_parquet(predictions):  # List[Predictions]
                 row["primary_score"] = row[primary_metric]
 
             # To save on memory, delete specific fields
-            for field in ["compute_config", "metrics", "model_config", "task_config", "model_output"]:
+            for field in ["compute_config", "metrics", "model_config", "task_config", "model_output", "model_answer"]:
                 if field in row:
                     del row[field]
 
