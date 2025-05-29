@@ -85,10 +85,6 @@ def predictions_to_parquet(predictions):  # List[Predictions]
                 if field in row:
                     del row[field]
 
-            if len(str(row)) >= 30_000:
-                print(row)
-                raise RuntimeError()
-
             rows.append(row)
 
     df = pd.DataFrame(rows)
