@@ -1,8 +1,10 @@
-from platformdirs import user_cache_dir
-from pathlib import Path
 import os
+from pathlib import Path
+
+from platformdirs import user_cache_dir
 
 PLOT_DIR = "/tmp/cookbook/analysis/plots"
+
 
 def get_cache_path(dashboard) -> Path:
     cache_dir = user_cache_dir("cookbook")

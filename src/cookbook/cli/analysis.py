@@ -14,6 +14,7 @@ handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
 logger.addHandler(handler)
 
+
 @click.group()
 def cli():
     """CLI tools for analyzing OLMo evaluation results."""
@@ -85,9 +86,7 @@ def run(dashboard: str, render_plots: bool = True):
     df = pd.read_parquet(prediction_path)
 
     # Run the analysis
-    outcomes = run_instance_analysis(
-        df, render_plots=render_plots, plot_dir=plot_dir
-    )
+    outcomes = run_instance_analysis(df, render_plots=render_plots, plot_dir=plot_dir)
 
     logger.info(f"Saved plots to {plot_dir}")
 

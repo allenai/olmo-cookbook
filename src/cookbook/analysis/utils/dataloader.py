@@ -21,14 +21,18 @@ def get_slice(df, model=None, task=None):
     if is_multiindex:
         try:
             # df = df.loc[slicing_tuple]
-            idx = pd.MultiIndex.from_product(slicing_tuple, names=['alias', 'model_name'])
+            idx = pd.MultiIndex.from_product(slicing_tuple, names=["alias", "model_name"])
             df = df.loc[idx]
         except KeyError:
             return df.iloc[0:0]  # Return an empty DataFrame if no match
     else:
         # Slow index
         df = df[
-            (df["model_name"].isin(level_slices["model_name"]) if isinstance(level_slices["model_name"], list) else True)
+            (
+                df["model_name"].isin(level_slices["model_name"])
+                if isinstance(level_slices["model_name"], list)
+                else True
+            )
             & (df["alias"].isin(level_slices["alias"]) if isinstance(level_slices["alias"], list) else True)
         ]
 

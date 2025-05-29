@@ -150,10 +150,7 @@ def compute_significance(
                 axes[i], p_values, mix_names, mix_scores, sig_clusters, alpha=alpha, plot_clean=plot_clean
             )
             axes[i] = plot
-            title = (
-                r"$p$"
-                + f'-values for {task} (n={scores.shape[1]}) ({metric}), perc sig={(perc_sig*100):.2f}%'
-            )
+            title = r"$p$" + f"-values for {task} (n={scores.shape[1]}) ({metric}), perc sig={(perc_sig*100):.2f}%"
 
             if len(models) < 15:
                 title = r"$p$" + f"-values for {task}, perc sig={(perc_sig*100):.2f}%"

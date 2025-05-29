@@ -72,7 +72,9 @@ def run_paired_comparison(
     }
 
 
-def run_instance_analysis(df, render_plots=True, plot_dir=None) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
+def run_instance_analysis(
+    df, render_plots=True, plot_dir=None
+) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
     # Set the 'mix' column to the value of the 'model' column
     df = df.reset_index()

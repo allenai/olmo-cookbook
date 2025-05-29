@@ -1,9 +1,11 @@
-from collections import defaultdict
 import hashlib
 import json
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import ExitStack
-from dataclasses import dataclass, field as dataclass_field, fields as dataclass_fields, asdict
+from dataclasses import asdict, dataclass
+from dataclasses import field as dataclass_field
+from dataclasses import fields as dataclass_fields
 from datetime import datetime
 from functools import partial
 from sys import stderr
@@ -283,6 +285,7 @@ class Prediction:
     """
     A predictions from a model.
     """
+
     doc_id: int
     native_id: int
     metrics: dict
@@ -300,6 +303,7 @@ class Predictions:
     """
     A collection of predictions for a given task and model.
     """
+
     predictions: List[Prediction]
     metrics: MetricsAll
 
@@ -309,7 +313,8 @@ class Predictions:
 
 @dataclass
 class PredictionsAll(BaseDatalakeItem):
-    """ Find all predictions for a given experiment. """
+    """Find all predictions for a given experiment."""
+
     all_predictions: List[Predictions]
 
     # this is not a field in dataclass
@@ -320,22 +325,15 @@ class PredictionsAll(BaseDatalakeItem):
         cache = get_datalake_cache()
 
         # Get indices of all tasks
-        metrics = MetricsAll.run(
-            experiment_id=experiment_id,
-            force=force,
-            skip_on_fail=skip_on_fail
-        )
-        
+        metrics = MetricsAll.run(experiment_id=experiment_id, force=force, skip_on_fail=skip_on_fail)
+
         # TODO: This should run in parallel
         all_predictions = []
         for metric in metrics:
-            if not (result := cache.get(experiment_id=experiment_id, type='predictions')).success or force:
+            if not (result := cache.get(experiment_id=experiment_id, type="predictions")).success or force:
                 response = requests.get(
                     f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
-                    params={
-                        "resulttype": "PREDICTIONS",
-                        "task_idx": metric.task_idx
-                    },
+                    params={"resulttype": "PREDICTIONS", "task_idx": metric.task_idx},
                     headers={"accept": "application/json"},
                 )
                 try:
@@ -345,15 +343,14 @@ class PredictionsAll(BaseDatalakeItem):
                         return []
                     else:
                         raise e
-                
+
                 # Response is a List[dict]
                 parsed = [json.loads(line) for line in response.iter_lines(decode_unicode=True) if line]
 
-                result = cache.set(parsed, experiment_id=experiment_id, type='predictions')
+                result = cache.set(parsed, experiment_id=experiment_id, type="predictions")
 
             task_predictions = Predictions(
-                predictions=[Prediction(**prediction) for prediction in (result.value or [])],
-                metrics=metric
+                predictions=[Prediction(**prediction) for prediction in (result.value or [])], metrics=metric
             )
 
             all_predictions.append(task_predictions)
@@ -362,14 +359,14 @@ class PredictionsAll(BaseDatalakeItem):
 
     @classmethod
     def to_parquet(cls, predictions: List[Predictions]):
-        """ Convert a list of predictions to a dataframe, by collapsing the nested dicts to a table. This makes "slicing" data into NumPy arrays easy. """
-        import pandas as pd # lazy load
+        """Convert a list of predictions to a dataframe, by collapsing the nested dicts to a table. This makes "slicing" data into NumPy arrays easy."""
+        import pandas as pd  # lazy load
 
         rows = []
         task_predictions: Predictions
-        for task_predictions in tqdm(predictions, desc='Converting to parquet'):
+        for task_predictions in tqdm(predictions, desc="Converting to parquet"):
             metrics: MetricsAll = task_predictions.metrics
-            
+
             prediction: Prediction
             for prediction in task_predictions.predictions:
                 # Convert list of dicts to dict of lists for model outputs
@@ -377,14 +374,14 @@ class PredictionsAll(BaseDatalakeItem):
                 for output in prediction.model_output:
                     for key, value in output.items():
                         model_output_dict[key].append(value)
-                
+
                 row = {
                     "alias": metrics.alias,
                     "model_name": metrics.model_name,
                     "model_path": metrics.model_path,
                     **metrics.to_dict(),
                     **prediction.to_dict(),
-                    **model_output_dict
+                    **model_output_dict,
                 }
 
                 # Expand metrics dict but don't override existing columns
@@ -404,7 +401,7 @@ class PredictionsAll(BaseDatalakeItem):
                 # Standardize cols with multiple dtypes
                 if not isinstance(row["native_id"], str):
                     row["native_id"] = str(row["native_id"])
-                    
+
                 if not isinstance(row["label"], str):
                     row["label"] = str(row["label"])
 
@@ -422,17 +419,17 @@ class PredictionsAll(BaseDatalakeItem):
                 correct_choice = row["correct_choice"]
                 if primary_metric not in row:
                     # If the metric doesn't exist (e.g., exact_match), use acc_raw
-                    assert 'acc_raw' in row, row
-                    assert not isinstance(row['acc_raw'], list), row
-                    row["primary_score"] = row['acc_raw']
+                    assert "acc_raw" in row, row
+                    assert not isinstance(row["acc_raw"], list), row
+                    row["primary_score"] = row["acc_raw"]
                 elif isinstance(row[primary_metric], list):
                     # If the primary_metric is a list (acc_per_char), get the correct choice
-                    row["primary_score"] = row[primary_metric][correct_choice] 
+                    row["primary_score"] = row[primary_metric][correct_choice]
                 else:
                     row["primary_score"] = row[primary_metric]
 
                 rows.append(row)
-                
+
         df = pd.DataFrame(rows)
 
         # set multiindex
