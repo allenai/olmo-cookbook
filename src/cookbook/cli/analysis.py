@@ -9,6 +9,7 @@ from cookbook.analysis.constants import get_cache_path
 from cookbook.analysis.runners import run_instance_analysis
 from cookbook.constants import ALL_DISPLAY_TASKS, ALL_NAMED_GROUPS
 from cookbook.eval.datalake import FindExperiments, PredictionsAll
+from cookbook.eval.results import make_bpb_name
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -98,10 +99,13 @@ def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = Non
     # Load the results
     df = pd.read_parquet(prediction_path)
 
+    # # Add the BPB variant
+    # tasks = list(tasks)
+    # bpb_tasks = [make_bpb_name(task) for task in tasks]
+    # tasks += [task for task in bpb_tasks if task is not None]
+
     # Run the analysis
     outcomes = run_instance_analysis(df, tasks, render_plots=render_plots, plot_dir=plot_dir)
-
-    # make_bpb_name() to re-run also with bpb version
 
     logger.info(f"Saved plots to {plot_dir}")
 
