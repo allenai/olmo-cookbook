@@ -30,12 +30,26 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
     --tasks arc_easy:rc::olmes \
     --tasks arc_challenge:rc::olmes \
     --tasks hellaswag:rc::olmes \
+    --tasks winogrande:rc::olmes:full \
+    --tasks csqa:rc::olmes:full \
+    --tasks piqa:rc::olmes:full \
+    --tasks socialiqa:rc::olmes:full \
     --tasks mmlu:rc \
     --tasks basic_skills:rc::olmes \
     --tasks minerva \
     --tasks codex_humaneval:3shot:bpb::none \
     --tasks mbpp:3shot:bpb::none \
     --tasks mt_mbpp \
+    --tasks medmcqa:rc::none \
+    --tasks lambada \
+    --tasks sciq::olmo1 \
+    --tasks squad:rc::gen2mc \
+    --tasks naturalqs:rc::gen2mc  \
+    --tasks jeopardy:rc::gen2mc \
+    --tasks drop:rc::gen2mc \
+    --tasks coqa:rc::gen2mc \
+    --tasks ultrachat_masked_ppl \
+    --tasks wildchat_masked_ppl \
     --priority high \
     --cluster 80g \
     --num-gpus 1 \
@@ -44,6 +58,43 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
     --partition-size 8 \
     --dashboard olmo-3-evals  \
     --workspace ai2/olmo-3-evals
+```
+
+For **OLMo 2 30B 5xC** runs, such as those done when performing data mixing swarms, we want to be looking at only BPB-type evals:
+```
+olmo-cookbook-eval evaluate "/oe-data-default/ai2-llm/checkpoints/mayeec/5xC-30m-superswarm-ee28fc9c-0000/step22100-hf" \
+    --tasks arc_easy:rc::olmes:full \
+    --tasks arc_challenge:rc::olmes:full \
+    --tasks hellaswag:rc::olmes \
+    --tasks winogrande:rc::olmes:full \
+    --tasks csqa:rc::olmes:full \
+    --tasks piqa:rc::olmes:full \
+    --tasks socialiqa:rc::olmes:full \
+    --tasks mmlu:rc \
+    --tasks basic_skills:rc::olmes \
+    --tasks minerva \
+    --tasks codex_humaneval:3shot:bpb::none \
+    --tasks mbpp:3shot:bpb::none \
+    --tasks mt_mbpp \
+    --tasks medmcqa:rc:bpb::none \
+    --tasks lambada \
+    --tasks sciq:bpb::olmo1 \
+    --tasks squad:rc:bpb::gen2mc \
+    --tasks naturalqs:rc:bpb::gen2mc  \
+    --tasks jeopardy:rc:bpb::gen2mc \
+    --tasks drop:rc:bpb::gen2mc \
+    --tasks coqa:rc:bpb::gen2mc \
+    --tasks ultrachat_masked_ppl \
+    --tasks wildchat_masked_ppl \
+    --compute-gold-bpb \
+    --priority high \
+    --cluster 80g \
+    --num-gpus 1 \
+    --model-backend vllm \
+    --model-args dtype=bfloat16 \
+    --partition-size 8 \
+    --dashboard regmixer  \
+    --workspace ai2/dolma2
 ```
 
 *Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py#L478*
@@ -57,26 +108,26 @@ olmo-cookbook-eval results \
     --tasks arc_easy:rc::olmes \
     --tasks arc_challenge:rc::olmes \
     --tasks hellaswag:rc::olmes \
-    --tasks mmlu:rc
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks basic_skills \
-    --format json | jq '.'
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
+    --tasks winogrande:rc::olmes:full \
+    --tasks csqa:rc::olmes:full \
+    --tasks piqa:rc::olmes:full \
+    --tasks socialiqa:rc::olmes:full \
+    --tasks mmlu:rc \
+    --tasks basic_skills:rc::olmes \
     --tasks minerva \
-    --format json | jq '.'
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks codex_humaneval:3shot \
-    --tasks mbpp:3shot
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
+    --tasks codex_humaneval:3shot:bpb::none \
+    --tasks mbpp:3shot:bpb::none \
     --tasks mt_mbpp \
+    --tasks medmcqa:rc::none \
+    --tasks lambada \
+    --tasks sciq::olmo1 \
+    --tasks squad:rc::gen2mc \
+    --tasks naturalqs:rc::gen2mc  \
+    --tasks jeopardy:rc::gen2mc \
+    --tasks drop:rc::gen2mc \
+    --tasks coqa:rc::gen2mc \
+    --tasks ultrachat_masked_ppl \
+    --tasks wildchat_masked_ppl \
     --format json | jq '.'
 ```
 
