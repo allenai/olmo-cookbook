@@ -1,7 +1,7 @@
 name: dclm-1b-log-linear-extended-eval
 description: Olmo-cookbook 1Bv2-5xC on dclm baseline larger sample using log-linear regression on extended offline evals
 budget: ai2/oe-data
-workspace: ai2/oe-data
+workspace: ai2/dolma2
 nodes: 4
 gpus: 8
 preemptible: true
