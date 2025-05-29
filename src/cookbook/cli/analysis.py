@@ -93,7 +93,9 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     default=None,
     help="Set specific models to show. If not specified, all models will be used.",
 )
-def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = None, models: list[str] | None = None):
+def run(
+    dashboard: str, render_plots: bool = True, tasks: list[str] | None = None, models: list[str] | None = None
+):
     """Run analysis on prediction dataframe."""
     cache_dir = get_cache_path(dashboard)
     prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
