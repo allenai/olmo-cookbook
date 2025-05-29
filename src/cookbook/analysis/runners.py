@@ -72,7 +72,7 @@ def run_paired_comparison(
     }
 
 
-def run_instance_analysis(df, plot_dir=None) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
+def run_instance_analysis(df, render_plots=True, plot_dir=None) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
     # Set the 'mix' column to the value of the 'model' column
     df = df.reset_index()
@@ -125,8 +125,9 @@ def run_instance_analysis(df, plot_dir=None) -> tuple[tuple[str, pd.DataFrame], 
                 )
             )
 
-            if any(ax.has_data() for row in axes for ax in row):
+            if any(ax.has_data() for row in axes for ax in row) and render_plots:
                 logger.info(f"Saving figure(s) for {task_name}...")
+                assert plot_dir is not None, plot_dir
                 os.makedirs(plot_dir, exist_ok=True)
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=UserWarning)

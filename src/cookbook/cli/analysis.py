@@ -67,7 +67,13 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     required=True,
     help="Dashboard name to analyze",
 )
-def run(dashboard: str):
+@click.option(
+    "--render-plots",
+    type=bool,
+    default=True,
+    help="Whether to generate plots",
+)
+def run(dashboard: str, render_plots: bool = True):
     """Run analysis on prediction dataframe."""
     cache_dir = get_cache_path(dashboard)
     prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
@@ -79,7 +85,9 @@ def run(dashboard: str):
     df = pd.read_parquet(prediction_path)
 
     # Run the analysis
-    outcomes = run_instance_analysis(df, plot_dir=plot_dir)
+    outcomes = run_instance_analysis(
+        df, render_plots=render_plots, plot_dir=plot_dir
+    )
 
     logger.info(f"Saved plots to {plot_dir}")
 

@@ -362,6 +362,7 @@ class PredictionsAll(BaseDatalakeItem):
 
     @classmethod
     def to_parquet(cls, predictions: List[Predictions]):
+        """ Convert a list of predictions to a dataframe, by collapsing the nested dicts to a table. This makes "slicing" data into NumPy arrays easy. """
         import pandas as pd # lazy load
 
         rows = []
@@ -393,7 +394,7 @@ class PredictionsAll(BaseDatalakeItem):
 
                 # For some generation benchmarks, correct_choice is a str, but this will cause a type error
                 # when indexing this column
-                if isinstance(row["correct_choice"], str):
+                if "correct_choice" not in row or isinstance(row["correct_choice"], str):
                     row["correct_choice"] = 0
 
                 # Sometimes exact_match is bool when it should be float
@@ -421,7 +422,8 @@ class PredictionsAll(BaseDatalakeItem):
                 correct_choice = row["correct_choice"]
                 if primary_metric not in row:
                     # If the metric doesn't exist (e.g., exact_match), use acc_raw
-                    assert not isinstance(row['acc_raw'], list)
+                    assert 'acc_raw' in row, row
+                    assert not isinstance(row['acc_raw'], list), row
                     row["primary_score"] = row['acc_raw']
                 elif isinstance(row[primary_metric], list):
                     # If the primary_metric is a list (acc_per_char), get the correct choice
