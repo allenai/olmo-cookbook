@@ -10,11 +10,11 @@ def predictions_to_parquet(predictions):  # List[Predictions]
     import pandas as pd  # lazy load
 
     rows = []
-    task_predictions  # Predictions
+    # task_predictions: Predictions
     for task_predictions in tqdm(predictions, desc="Converting to parquet"):
         metrics = task_predictions.metrics  # MetricsAll
 
-        prediction  # Prediction
+        # prediction: Prediction
         for prediction in task_predictions.predictions:
             # Convert list of dicts to dict of lists for model outputs
             model_output_dict = defaultdict(list)
@@ -79,6 +79,15 @@ def predictions_to_parquet(predictions):  # List[Predictions]
                 row["primary_score"] = row[primary_metric][correct_choice]
             else:
                 row["primary_score"] = row[primary_metric]
+
+            # To save on memory, delete specific fields
+            for field in ["compute_config", "metrics", "model_config", "task_config", "model_output"]:
+                if field in row:
+                    del row[field]
+
+            if len(str(row)) >= 30_000:
+                print(row)
+                raise RuntimeError()
 
             rows.append(row)
 

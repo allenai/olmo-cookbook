@@ -328,7 +328,6 @@ class PredictionsAll(BaseDatalakeItem):
         # Get indices of all tasks
         metrics = MetricsAll.run(experiment_id=experiment_id, force=force, skip_on_fail=skip_on_fail)
 
-        # TODO: This should run in parallel
         all_predictions = []
         for metric in metrics:
             if not (result := cache.get(experiment_id=experiment_id, type="predictions")).success or force:
