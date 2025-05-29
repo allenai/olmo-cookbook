@@ -63,7 +63,7 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     "--dashboard",
     type=str,
     required=True,
-    help="Local path to results file",
+    help="Dashboard name to analyze",
 )
 def run(dashboard: str):
     """Run analysis on processed prediction files."""
