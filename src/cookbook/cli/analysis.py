@@ -100,10 +100,7 @@ def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = Non
     df = pd.read_parquet(prediction_path)
 
     # Run the analysis
-    outcomes = run_instance_analysis(
-        df, tasks, 
-        render_plots=render_plots, plot_dir=plot_dir
-    )
+    outcomes = run_instance_analysis(df, tasks, render_plots=render_plots, plot_dir=plot_dir)
 
     logger.info(f"Saved plots to {plot_dir}")
 

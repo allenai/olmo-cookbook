@@ -134,9 +134,7 @@ def compute_significance(
         else:
             mix_names = mixes
 
-        ax = plot_heatmap(
-            ax, p_values, mix_names, mix_scores, sig_clusters, alpha=alpha, plot_clean=plot_clean
-        )
+        ax = plot_heatmap(ax, p_values, mix_names, mix_scores, sig_clusters, alpha=alpha, plot_clean=plot_clean)
         title = r"$p$" + f"-values for {task} (n={scores.shape[1]}) ({metric}), perc sig={(perc_sig*100):.2f}%"
 
         if len(models) < 15:

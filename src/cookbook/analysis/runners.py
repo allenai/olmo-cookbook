@@ -69,9 +69,9 @@ def run_instance_analysis(
 
     logger.info(ALL_MODELS)
 
-    task_names = [] # e.g., mmlu:rc
-    task_aliases = [] # e.g., [mmlu_abstract_algebra:rc::olmes, ...]
-    metrics = [] # e.g., primary_score
+    task_names = []  # e.g., mmlu:rc
+    task_aliases = []  # e.g., [mmlu_abstract_algebra:rc::olmes, ...]
+    metrics = []  # e.g., primary_score
     for task in tasks:
         # Expand the named group if it exists
         task_alias = ALL_NAMED_GROUPS.get(task, task)
@@ -105,12 +105,7 @@ def run_instance_analysis(
             )
 
             result = run_paired_comparison(
-                df, 
-                task=task, 
-                task_alias=task_alias,
-                metric=metric, 
-                model_names=ALL_MODELS, 
-                ax=axes[0, 0]
+                df, task=task, task_alias=task_alias, metric=metric, model_names=ALL_MODELS, ax=axes[0, 0]
             )
 
             results.append(result)

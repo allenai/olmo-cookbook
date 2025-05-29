@@ -3,18 +3,18 @@ from collections import defaultdict
 from tqdm import tqdm
 
 
-def predictions_to_parquet(predictions): # List[Predictions]
+def predictions_to_parquet(predictions):  # List[Predictions]
     """
     Convert a list of predictions to a dataframe, by collapsing the nested dicts to a table. This makes "slicing" data into NumPy arrays easy.
     """
     import pandas as pd  # lazy load
 
     rows = []
-    task_predictions # Predictions
+    task_predictions  # Predictions
     for task_predictions in tqdm(predictions, desc="Converting to parquet"):
-        metrics = task_predictions.metrics # MetricsAll
+        metrics = task_predictions.metrics  # MetricsAll
 
-        prediction # Prediction
+        prediction  # Prediction
         for prediction in task_predictions.predictions:
             # Convert list of dicts to dict of lists for model outputs
             model_output_dict = defaultdict(list)
