@@ -20,11 +20,10 @@ def run_paired_comparison(
     df: pd.DataFrame,
     task: list[list[str] | str],
     model_names: list[str],
-    axes: plt.Axes,
+    ax: Optional[plt.Axes],
     metric: str = "primary_score",
 ) -> dict:
     model_names = sorted(list(set(model_names)))
-    ax: Optional[plt.Axes] = axes
 
     _, p_values = compute_significance(
         df,
@@ -59,9 +58,6 @@ def run_instance_analysis(
 ) -> tuple[tuple[str, pd.DataFrame], tuple[str, pd.DataFrame]]:
     """Run instance analysis on the given local path to instances."""
     # Set the 'mix' column to the value of the 'model' column
-    df = df.reset_index()
-    df = df.set_index(["alias", "model_name"])
-
     logger.info(f"Loaded {len(df):,} model predictions")
 
     ALL_MODELS = sorted(df.index.get_level_values("model_name").unique().to_list())
@@ -75,7 +71,7 @@ def run_instance_analysis(
                 continue
             df[col] = df[col].apply(lambda x: -x if pd.notna(x) else x)
 
-    result = []
+    results = []
     with tqdm(total=len(tasks)) as pbar:
         for task in tasks:
             pbar.set_description(f"Computing paired permutation test on {len(ALL_MODELS)} models for {task}")
@@ -91,11 +87,15 @@ def run_instance_analysis(
                 squeeze=False,
             )
 
-            result.append(
-                run_paired_comparison(
-                    df, task=task, model_names=ALL_MODELS, metric="primary_score", axes=axes[0, 0]
-                )
+            result = run_paired_comparison(
+                df, 
+                task=task, 
+                model_names=ALL_MODELS, 
+                metric="primary_score", 
+                ax=axes[0, 0]
             )
+
+            results.append(result)
 
             if any(ax.has_data() for row in axes for ax in row) and render_plots:
                 logger.info(f"Saving figure(s) for {task}...")
@@ -115,10 +115,10 @@ def run_instance_analysis(
             pbar.update(1)
 
     # Remove tasks with empty results
-    result = [item for item in result if item]
+    results = [item for item in results if item]
 
     # Sort by task name
-    result.sort(key=lambda x: x["task"])
+    results.sort(key=lambda x: x["task"])
 
     output_columns = [
         "scores",
@@ -128,4 +128,4 @@ def run_instance_analysis(
         "task",
     ]
 
-    return pd.DataFrame(result, columns=output_columns)
+    return pd.DataFrame(results, columns=output_columns)
