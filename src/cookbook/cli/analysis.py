@@ -1,11 +1,13 @@
 import json
 import logging
+import re
 
 import click
 import pandas as pd
 
 from cookbook.analysis.constants import get_cache_path
 from cookbook.analysis.runners import run_instance_analysis
+from cookbook.constants import ALL_DISPLAY_TASKS, ALL_NAMED_GROUPS
 from cookbook.eval.datalake import FindExperiments, PredictionsAll
 
 logger = logging.getLogger(__name__)
@@ -74,11 +76,22 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
     default=True,
     help="Whether to generate plots",
 )
-def run(dashboard: str, render_plots: bool = True):
+@click.option(
+    "--tasks",
+    type=str,
+    multiple=True,
+    default=None,
+    help="Tasks to analyze. If not specified, each task alias will have a comparison rendered",
+)
+def run(dashboard: str, render_plots: bool = True, tasks: list[str] | None = None):
     """Run analysis on prediction dataframe."""
     cache_dir = get_cache_path(dashboard)
     prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
     plot_dir = cache_dir / "plot"
+
+    if tasks is None:
+        ALL_TASKS = sorted(df.index.get_level_values("alias").unique().to_list())
+        tasks = ALL_TASKS
 
     logger.info(f"Loading predictions from {prediction_path}")
 
@@ -86,16 +99,17 @@ def run(dashboard: str, render_plots: bool = True):
     df = pd.read_parquet(prediction_path)
 
     # Run the analysis
-    outcomes = run_instance_analysis(df, render_plots=render_plots, plot_dir=plot_dir)
+    outcomes = run_instance_analysis(df, tasks, render_plots=render_plots, plot_dir=plot_dir)
+
+    # make_bpb_name() to re-run also with bpb version
 
     logger.info(f"Saved plots to {plot_dir}")
 
     # Dump the results to a JSON file
-    for item in outcomes:
-        output_path = cache_dir / f"{dashboard}_{item[0]}.json"
-        js = json.loads(item[1].to_json(orient="records"))
-        with open(output_path, "w") as f:
-            json.dump(js, f, indent=4, sort_keys=True)
+    output_path = cache_dir / f"{dashboard}.json"
+    js = json.loads(outcomes.to_json(orient="records"))
+    with open(output_path, "w") as f:
+        json.dump(js, f, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":

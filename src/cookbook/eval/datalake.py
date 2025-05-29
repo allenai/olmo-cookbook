@@ -10,7 +10,7 @@ from datetime import datetime
 from functools import partial
 from sys import stderr
 from threading import current_thread, main_thread
-from typing import Any, Callable, ClassVar, Generic, List, TypeVar
+from typing import Callable, ClassVar, Generic, List, TypeVar
 
 import requests
 from tqdm import tqdm
@@ -419,9 +419,14 @@ class PredictionsAll(BaseDatalakeItem):
                 correct_choice = row["correct_choice"]
                 if primary_metric not in row:
                     # If the metric doesn't exist (e.g., exact_match), use acc_raw
-                    assert "acc_raw" in row, row
-                    assert not isinstance(row["acc_raw"], list), row
-                    row["primary_score"] = row["acc_raw"]
+                    if "acc_raw" in row:
+                        primary_score = row["acc_raw"]
+                    elif "exact_match" in row:
+                        primary_score = row["exact_match"]
+                    else:
+                        raise ValueError(row)
+                    assert not isinstance(primary_score, list), row
+                    row["primary_score"] = primary_score
                 elif isinstance(row[primary_metric], list):
                     # If the primary_metric is a list (acc_per_char), get the correct choice
                     row["primary_score"] = row[primary_metric][correct_choice]

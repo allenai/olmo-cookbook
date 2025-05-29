@@ -7,13 +7,13 @@ import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
 
-from cookbook.analysis.constants import get_title_from_task
 from cookbook.analysis.plot.heatmap import plot_heatmap
 from cookbook.analysis.utils.dataloader import get_nd_array, get_slice
 from cookbook.analysis.utils.pce import (
     compute_pairwise_p_values,
     compute_weighted_pairwise_p_values,
 )
+from cookbook.constants import ALL_NAMED_GROUPS
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -84,77 +84,68 @@ def compute_significance(
     df: DataFrame,
     models,
     metric: str,
-    plot_axes: plt.Axes,
-    tasks: Optional[list[list[str] | str]] = None,
+    ax: plt.Axes,
+    task: list[str] | str,
     alpha: float = 0.05,
     num_permutations: int = 1_000,
-    pretty_mix_names: Optional[dict[str, str]] = None,
     plot_sig_clusters: bool = True,
     plot_clean: bool = False,
-    quiet: bool = False,
+    pretty_mix_names: Optional[dict[str, str]] = None,
 ) -> tuple[DataFrame, dict]:
-    if tasks is None:
-        tasks = df.index.get_level_values("task").unique().tolist()
+    # Expand the named group if it exists
+    task_list = task
+    if task in ALL_NAMED_GROUPS:
+        task_list = ALL_NAMED_GROUPS[task]
 
-    sig_results = pd.DataFrame(index=["perc_sig"], columns=tasks)
-    all_p_values = {}
-    axes = [plot_axes]
+    mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task_list, sorted=True)
 
-    for i, task in tqdm(enumerate(tasks), desc="Computing pairwise comparisons", total=len(tasks), disable=quiet):
-        mixes, scores = get_nd_array(df, "model_name", metric, model=models, task=task, sorted=True)
+    if len(scores) == 0:
+        logger.info(f"Found no scores for {task}! Skipping...")
+        return None, None
 
-        if len(scores) == 0:
-            logger.info(f"Found no scores for {get_title_from_task(task)}! Skipping...")
-            continue
+    if isinstance(task, list):
+        # Get value counts for each task
+        slices = get_slice(df, model=models, task=task_list)
+        unique_counts = slices.groupby("task")["native_id"].nunique()
+        weights = create_stratified_array(unique_counts)
 
-        if isinstance(task, list):
-            # Get value counts for each task
-            slices = get_slice(df, model=models, task=task)
-            unique_counts = slices.groupby("task")["native_id"].nunique()
-            weights = create_stratified_array(unique_counts)
+        # Compute paired permutation test with instance weights
+        p_values, mix_scores, _ = compute_weighted_pairwise_p_values(
+            scores, num_permutations=num_permutations, weights=weights, return_scores=True
+        )
 
-            # Compute paired permutation test with instance weights
-            p_values, mix_scores, _ = compute_weighted_pairwise_p_values(
-                scores, num_permutations=num_permutations, weights=weights, return_scores=True
-            )
+        # Reorder both rows and columns of p_values
+        sorted_indices = np.argsort(mix_scores)[::-1]
+        p_values = p_values[np.ix_(sorted_indices, sorted_indices)]
+        mixes = np.array(mixes)[sorted_indices]
+        mix_scores = mix_scores[sorted_indices]
+        p_values[np.tril_indices_from(p_values, k=-1)] = np.nan
+    else:
+        p_values, mix_scores, _ = compute_pairwise_p_values(
+            scores, num_permutations=num_permutations, return_scores=True
+        )
 
-            # Reorder both rows and columns of p_values
-            sorted_indices = np.argsort(mix_scores)[::-1]
-            p_values = p_values[np.ix_(sorted_indices, sorted_indices)]
-            mixes = np.array(mixes)[sorted_indices]
-            mix_scores = mix_scores[sorted_indices]
-            p_values[np.tril_indices_from(p_values, k=-1)] = np.nan
+    sig_clusters = None
+    if plot_sig_clusters:
+        sig_clusters = get_sig_clusters(p_values, alpha=alpha)
 
-            # Change task name
-            task = get_title_from_task(task)
+    perc_sig = perc_significant(p_values, alpha=alpha)
+    sig_results = perc_sig
+
+    if ax:
+        if pretty_mix_names is not None:
+            mix_names = [pretty_mix_names[mix] for mix in mixes]
         else:
-            p_values, mix_scores, _ = compute_pairwise_p_values(
-                scores, num_permutations=num_permutations, return_scores=True
-            )
+            mix_names = mixes
 
-        sig_clusters = None
-        if plot_sig_clusters:
-            sig_clusters = get_sig_clusters(p_values, alpha=alpha)
+        ax = plot_heatmap(
+            ax, p_values, mix_names, mix_scores, sig_clusters, alpha=alpha, plot_clean=plot_clean
+        )
+        title = r"$p$" + f"-values for {task} (n={scores.shape[1]}) ({metric}), perc sig={(perc_sig*100):.2f}%"
 
-        perc_sig = perc_significant(p_values, alpha=alpha)
-        sig_results.loc["perc_sig", task] = perc_sig
-        all_p_values[task] = (mixes, scores, p_values, sig_clusters)
+        if len(models) < 15:
+            title = r"$p$" + f"-values for {task}, perc sig={(perc_sig*100):.2f}%"
 
-        if plot_axes and len(tasks) == 1:
-            if pretty_mix_names is not None:
-                mix_names = [pretty_mix_names[mix] for mix in mixes]
-            else:
-                mix_names = mixes
+        ax.set_title(title, fontsize=14)
 
-            plot = plot_heatmap(
-                axes[i], p_values, mix_names, mix_scores, sig_clusters, alpha=alpha, plot_clean=plot_clean
-            )
-            axes[i] = plot
-            title = r"$p$" + f"-values for {task} (n={scores.shape[1]}) ({metric}), perc sig={(perc_sig*100):.2f}%"
-
-            if len(models) < 15:
-                title = r"$p$" + f"-values for {task}, perc sig={(perc_sig*100):.2f}%"
-
-            axes[i].set_title(title, fontsize=14)
-
-    return sig_results, all_p_values
+    return sig_results, (mixes, scores, p_values, sig_clusters)
