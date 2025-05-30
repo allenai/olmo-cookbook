@@ -31,7 +31,7 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
     --tasks olmo3:dev:1b \
     --priority high \
     --cluster l40 \
-    --num-gpus 1 \
+    --num-gpus 8 \
     --model-backend vllm \
     --model-args dtype=bfloat16 \
     --partition-size 1 \
