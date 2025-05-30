@@ -209,8 +209,14 @@ set -ex
 sudo "${{PKG_MANAGER}}" update
 sudo "${{PKG_MANAGER}}" install python3.12 python3.12-pip -y
 
-# install git & tmux
-sudo "${{PKG_MANAGER}}" install git tmux -y
+# install git, tmux, htop
+sudo "${{PKG_MANAGER}}" install git tmux htop -y
+
+# install gcc, g++, cmake, openssl-devel
+sudo "${{PKG_MANAGER}}" install gcc g++ cmake openssl-devel -y
+
+# install github cli
+curl -sS https://webi.sh/gh | sh
 
 # install s5cmd
 wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
@@ -221,6 +227,7 @@ sudo mv s5cmd /usr/local/bin/
 pip3.12 install uv
 
 # make virtual environment, install dolma
+uv python install 3.12
 uv venv
 uv pip install dolma
 """.strip()
