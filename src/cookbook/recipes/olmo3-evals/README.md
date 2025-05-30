@@ -39,41 +39,6 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
     --workspace ai2/olmo-3-evals
 ```
 
-If you want them all spelled out:
-```python
-olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
-    --tasks arc_easy:rc::olmes \
-    --tasks arc_challenge:rc::olmes \
-    --tasks hellaswag:rc::olmes \
-    --tasks winogrande:rc::olmes:full \
-    --tasks csqa:rc::olmes:full \
-    --tasks piqa:rc::olmes:full \
-    --tasks socialiqa:rc::olmes:full \
-    --tasks mmlu:rc \
-    --tasks basic_skills:rc::olmes \
-    --tasks minerva \
-    --tasks codex_humaneval:3shot:bpb::none \
-    --tasks mbpp:3shot:bpb::none \
-    --tasks mt_mbpp \
-    --tasks medmcqa:rc::none \
-    --tasks lambada \
-    --tasks sciq::olmo1 \
-    --tasks squad:rc::gen2mc \
-    --tasks naturalqs:rc::gen2mc  \
-    --tasks jeopardy:rc::gen2mc \
-    --tasks drop:rc::gen2mc \
-    --tasks coqa:rc::gen2mc \
-    --tasks ultrachat_masked_ppl \
-    --tasks wildchat_masked_ppl \
-    --priority high \
-    --cluster 80g \
-    --num-gpus 1 \
-    --model-backend vllm \
-    --model-args dtype=bfloat16 \
-    --partition-size 8 \
-    --dashboard olmo-3-evals  \
-    --workspace ai2/olmo-3-evals
-```
 
 For **OLMo 2 30B 5xC** runs, such as those done when performing data mixing swarms, we want to be looking at only BPB-type evals:
 ```
@@ -124,36 +89,6 @@ olmo-cookbook-eval results \
     --format json | jq '.' | less
 ```
 
-
-Or if you want specific ones:
-```python
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks arc_easy:rc::olmes \
-    --tasks arc_challenge:rc::olmes \
-    --tasks hellaswag:rc::olmes \
-    --tasks winogrande:rc::olmes:full \
-    --tasks csqa:rc::olmes:full \
-    --tasks piqa:rc::olmes:full \
-    --tasks socialiqa:rc::olmes:full \
-    --tasks mmlu:rc \
-    --tasks basic_skills:rc::olmes \
-    --tasks minerva \
-    --tasks codex_humaneval:3shot:bpb::none \
-    --tasks mbpp:3shot:bpb::none \
-    --tasks mt_mbpp \
-    --tasks medmcqa:rc::none \
-    --tasks lambada \
-    --tasks sciq::olmo1 \
-    --tasks squad:rc::gen2mc \
-    --tasks naturalqs:rc::gen2mc  \
-    --tasks jeopardy:rc::gen2mc \
-    --tasks drop:rc::gen2mc \
-    --tasks coqa:rc::gen2mc \
-    --tasks ultrachat_masked_ppl \
-    --tasks wildchat_masked_ppl \
-    --format json | jq '.' | less
-```
 
 *Notes*
 * I don't know why `basic_skills` pull dashboard requires removing `:rc::olmes` but launching eval requires adding it or it'll only launch the Arithmetic subportion. Something weird.
