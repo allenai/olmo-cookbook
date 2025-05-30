@@ -1,5 +1,5 @@
-name: "olmo2-1b-5xC-dclm-pstar-001-hlr-dolma2-wsd"
-description: "OLMo2 1b@5xC dclm-baseline p* mix"
+name: "olmo3-1b-5xC-dclm-pstar-001-hlr-dolma2-wsd"
+description: "OLMo3 1b@5xC dclm-baseline p* mix"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
