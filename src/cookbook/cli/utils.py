@@ -376,7 +376,8 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
         cmd = shlex.split(f"git clone --depth 1 {git_url}")
 
         if commit_hash:
-            cmd.append("--no-checkout")
+            # cmd.append("--no-checkout")
+            cmd += shlex.split(f"--branch '{commit_hash}'")
 
         cmd.append(tmp_dir)
 
