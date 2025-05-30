@@ -56,7 +56,7 @@ OLMO3_DEV_1B_TASKS = [
     "jeopardy:rc::gen2mc",
     "lambada",
     "mbpp:3shot:bpb::none",
-    "minerva_math::olmes",      # why is this not just called `minerva`, ugh...
+    "minerva_math::olmes",  # why is this not just called `minerva`, ugh...
     "mmlu:rc",
     "mt_mbpp",
     "naturalqs:rc::gen2mc",

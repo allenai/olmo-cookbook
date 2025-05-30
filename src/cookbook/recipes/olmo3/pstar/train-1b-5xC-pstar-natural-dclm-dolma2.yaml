@@ -17,7 +17,7 @@ eval_interval: 250
 learning_rate: 1.8e-3
 cluster: ai2/augusta-google-1
 downstream_evaluators:
-  - olmo3:dev:1b
+  - olmo2_dev_1b
 dataset:
   sources:
     - name: adult_content
