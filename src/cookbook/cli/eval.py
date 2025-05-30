@@ -375,7 +375,9 @@ def evaluate_model(
     )
 
 
-@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
+@click.option(
+    "-d", "--dashboard", type=str, required=True, help="Set dashboard name"
+)
 @click.option(
     "-m",
     "--models",
@@ -425,6 +427,11 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
+@click.option(
+    "--missing-pairs",
+    is_flag=True,
+    help="Return only missing model-task pairs in JSON format",
+)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -435,6 +442,7 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
+    missing_pairs: bool,
 ) -> None:
     tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
@@ -467,6 +475,26 @@ def get_results(
                 len(missing_tasks),
                 ", ".join(missing_tasks),
             )
+
+    if missing_pairs:
+        missing_pairs_list = []
+        # Convert requested tasks to a set for efficient lookup
+        requested_tasks = set()
+        for task in tasks:
+            if task.startswith("*"):
+                # Expand named groups
+                requested_tasks.update(ALL_NAMED_GROUPS.get(task.lstrip("*"), []))
+            else:
+                # Expand display tasks
+                requested_tasks.update(ALL_DISPLAY_TASKS.get(task, [task]))
+        
+        for model, missing_tasks in tables.missing_tasks.items():
+            # Only include tasks that were actually requested
+            for task in missing_tasks:
+                if task in requested_tasks:
+                    missing_pairs_list.append({"model": model, "task": task})
+        print(json.dumps(missing_pairs_list))
+        return
 
     if format == "json":
         print(json.dumps(results._data))
