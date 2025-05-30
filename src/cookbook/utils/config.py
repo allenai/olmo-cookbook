@@ -48,7 +48,7 @@ def mk_source_instances(
 
     instances = []
     for source in sources:
-        ratio = source.target_ratio or ratios_by_source[source.name]
+        ratio = source.target_ratio
         instances.append(
             SourceInstance(
                 name=source.name,
