@@ -26,15 +26,30 @@ For **OLMo 2 1B 5xC** runs, it's still good practice to look at both BPB & RC nu
 
 The command to run an eval looks like:
 
-```python
+```bash
 olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
     --tasks olmo3:dev:1b \
     --priority high \
-    --cluster 80g \
-    --num-gpus 1 \
+    --cluster l40 \
+    --num-gpus 8 \
     --model-backend vllm \
     --model-args dtype=bfloat16 \
-    --partition-size 8 \
+    --partition-size 1 \
+    --dashboard olmo-3-evals  \
+    --workspace ai2/olmo-3-evals
+```
+
+A couple of newer evals looks like may have some iffyness with running VLLM, so use HF for now.
+
+```bash
+olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
+    --tasks ultrachat_masked_ppl \
+    --tasks wildchat_masked_ppl \
+    --priority high \
+    --cluster l40 \
+    --num-gpus 1 \
+    --model-backend hf \
+    --model-args dtype=bfloat16 \
     --dashboard olmo-3-evals  \
     --workspace ai2/olmo-3-evals
 ```
