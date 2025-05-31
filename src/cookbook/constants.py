@@ -503,6 +503,30 @@ ALL_NAMED_GROUPS = {
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
     "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
+    "olmo3:dev:1b": [
+        "arc_challenge:rc::olmes:full",
+        "arc_easy:rc::olmes:full",
+        "basic_skills:rc::olmes",
+        "codex_humaneval:3shot:bpb::none",
+        "coqa:rc::gen2mc",
+        "csqa:rc::olmes:full",
+        "drop:rc::gen2mc",
+        "hellaswag:rc::olmes:full",
+        "jeopardy:rc::gen2mc",
+        "lambada",                  # need to make :full in oe-eval
+        "mbpp:3shot:bpb::none",
+        "minerva",                  # dont need full because no limit
+        "mmlu:rc",                  # dont need full because no limit
+        "mt_mbpp",                  # need to make :full version in oe-eval
+        "naturalqs:rc::gen2mc",
+        "piqa:rc::olmes:full",
+        "sciq::olmo1:full",
+        "socialiqa:rc::olmes:full",
+        "squad:rc::gen2mc",
+        "ultrachat_masked_ppl",     # doesnt need limit
+        "wildchat_masked_ppl",      # doesnt need limit 
+        "winogrande:rc::olmes:full",
+    ],
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
@@ -546,6 +570,30 @@ ALL_DISPLAY_TASKS = {
         r"^gsm8k::olmo1$",
         r"^mmlu:rc$",
         r"^core:rc$",
+    ],
+    "olmo3:dev:1b": [
+        "arc_challenge:rc::olmes:full",
+        "arc_easy:rc::olmes:full",
+        "basic_skills:rc::olmes",
+        "codex_humaneval:3shot:bpb::none",
+        "coqa:rc::gen2mc",
+        "csqa:rc::olmes:full",
+        "drop:rc::gen2mc",
+        "hellaswag:rc::olmes:full",
+        "jeopardy:rc::gen2mc",
+        "lambada",                  # need to make :full in oe-eval
+        "mbpp:3shot:bpb::none",
+        "minerva",                  # dont need full because no limit
+        "mmlu:rc",                  # dont need full because no limit
+        "mt_mbpp",                  # need to make :full version in oe-eval
+        "naturalqs:rc::gen2mc",
+        "piqa:rc::olmes:full",
+        "sciq::olmo1:full",
+        "socialiqa:rc::olmes:full",
+        "squad:rc::gen2mc",
+        "ultrachat_masked_ppl",     # doesnt need limit
+        "wildchat_masked_ppl",      # doesnt need limit 
+        "winogrande:rc::olmes:full",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],

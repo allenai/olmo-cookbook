@@ -25,57 +25,48 @@ For all OLMo models (+ external baselines), this is a running list of evals we c
 For **OLMo 2 1B 5xC** runs, it's still good practice to look at both BPB & RC numbers, which usually track together with each other; MC numbers typically haven't broken through noise at this point.
 
 The command to run an eval looks like:
-```python
+
+```bash
 olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
-    --tasks arc_easy:rc::olmes \
-    --tasks arc_challenge:rc::olmes \
-    --tasks hellaswag:rc::olmes \
-    --tasks mmlu:rc \
-    --tasks basic_skills:rc::olmes \
-    --tasks minerva \
-    --tasks codex_humaneval:3shot:bpb::none \
-    --tasks mbpp:3shot:bpb::none \
-    --tasks mt_mbpp \
+    --tasks olmo3:dev:1b \
     --priority high \
-    --cluster 80g \
-    --num-gpus 1 \
+    --cluster l40 \
+    --num-gpus 8 \
     --model-backend vllm \
     --model-args dtype=bfloat16 \
-    --partition-size 8 \
+    --partition-size 1 \
     --dashboard olmo-3-evals  \
     --workspace ai2/olmo-3-evals
 ```
+
+A couple of newer evals looks like may have some iffyness with running VLLM, so use HF for now.
+
+```bash
+olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
+    --tasks ultrachat_masked_ppl \
+    --tasks wildchat_masked_ppl \
+    --priority high \
+    --cluster l40 \
+    --num-gpus 1 \
+    --model-backend hf \
+    --model-args dtype=bfloat16 \
+    --dashboard olmo-3-evals  \
+    --workspace ai2/olmo-3-evals
+```
+
 
 *Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py#L478*
 
 
 To pull dashboard results (use `--format json` to see full results):
 
+```python
+olmo-cookbook-eval results \
+    --dashboard olmo-3-evals \
+    --tasks olmo3:dev:1b \
+    --format json | jq '.' | less
 ```
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks arc_easy:rc::olmes \
-    --tasks arc_challenge:rc::olmes \
-    --tasks hellaswag:rc::olmes \
-    --tasks mmlu:rc
 
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks basic_skills
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks minerva
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks codex_humaneval:3shot:bpb::none \
-    --tasks mbpp:3shot:bpb::none
-
-olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
-    --tasks mt_mbpp
-```
 
 *Notes*
 * I don't know why `basic_skills` pull dashboard requires removing `:rc::olmes` but launching eval requires adding it or it'll only launch the Arithmetic subportion. Something weird.
