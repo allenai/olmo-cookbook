@@ -33,8 +33,8 @@ NUM_GPUS=1
 PARTITION=8
 PRIORITY="high"
 MODEL_ARGS="dtype=bfloat16"
-DASHBOARD="olmoe-2-evals"
-WORKSPACE="ai2/olmoe-2-evals"
+DASHBOARD="olmo-3-evals"
+WORKSPACE="ai2/olmo-3-evals"
 
 olmo-cookbook-eval evaluate "$CHECKPOINT" \
     --tasks "*olmo3:dev:1b:vllm" \
@@ -71,9 +71,9 @@ To pull dashboard results (use `--format json` to see full results):
 
 ```python
 olmo-cookbook-eval results \
-    --dashboard olmoe-2-evals \
+    --dashboard olmo-3-evals \
     --tasks olmo3:dev:1b \
-    --format json | jq 'keys' | less
+    --format json | jq '.' | less
 ```
 
 
