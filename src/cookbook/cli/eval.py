@@ -14,6 +14,7 @@ from cookbook.cli.utils import (
 )
 from cookbook.constants import (
     ALL_DISPLAY_TASKS,
+    ALL_EVAL_TASKS,
     ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
@@ -339,6 +340,9 @@ def evaluate_model(
         key, value = arg.split("=")
         parsed_model_args[key] = value
 
+    # expand tasks; note must be aliases or task suites in oe-eval
+    tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+    
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
@@ -448,7 +452,7 @@ def get_results(
 
     # if a task starts with *, it means it is a named group and we need to expand it
     tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-
+    
     # after that, we check for task patterns
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
