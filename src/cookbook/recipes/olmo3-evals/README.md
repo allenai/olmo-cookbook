@@ -59,8 +59,13 @@ olmo-cookbook-eval evaluate "$CHECKPOINT" \
     --workspace "$WORKSPACE"
 ```
 
-*Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py#L478*
+Notes: 
+* Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py*
 
+
+*How long does it take?*
+* "*olmo3:dev:1b:vllm" are a full suite of 20 tasks, each task w multiple metrics + some tasks as families w multiple subtasks. In total, this is around 150 metrics. Takes 2 hours to do all of them on `--partition-size 8` and `num-gpus 1` with single L40 (launches 5 jobs).
+* "*olmo3:dev:1b:hf" are two masked PPL evals. Takes 1 hour to do both on a single L40.
 
 To pull dashboard results (use `--format json` to see full results):
 
