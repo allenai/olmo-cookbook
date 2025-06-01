@@ -66,13 +66,14 @@ To pull dashboard results (use `--format json` to see full results):
 
 ```python
 olmo-cookbook-eval results \
-    --dashboard olmo-3-evals \
+    --dashboard olmoe-2-evals \
     --tasks olmo3:dev:1b \
-    --format json | jq '.' | less
+    --format json | jq 'keys' | less
 ```
 
 
 *Notes*
+* If you want to see if the datalake uploading job ran, use your beaker experimental ID to this URL: `https://oe-eval-datalake.allen.ai/greenlake/metadata/01JWMGNY3G3R5N91NW9TCKF6FB`.
 * I hate this design, but currently in order to use a named group when pulling dashboard results, you need to use it with a `*`, like `--tasks *mmlu:rc`, which then matches to `ALL_NAMED_GROUPS` in `constants.py`. If you don't include the `*`, it'll pass the exact string `mmlu:rc` and fail to match things.
 * I don't know why `basic_skills` pull dashboard requires removing `:rc::olmes` but launching eval requires adding it or it'll only launch the Arithmetic subportion. Something weird.
 
