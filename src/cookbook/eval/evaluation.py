@@ -175,6 +175,9 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
+        #     # these tasks don't work with vllm, so we run them on huggingface
+        #     partitioned_tasks.setdefault("hf", []).append(task)
         else:
             partitioned_tasks.setdefault("gen", []).append(task)
 

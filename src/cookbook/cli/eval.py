@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import sys
 from typing import Optional
 
 import click
@@ -494,10 +495,13 @@ def get_results(
             continue
 
         # the empty print adds a new line
-        print(f"😱 Model \033[1m{model}\033[0m is missing \033[1m{len(model_missing_tasks)}\033[0m tasks:")
+        print(
+            f"😱 Model \033[1m{model}\033[0m is missing \033[1m{len(model_missing_tasks)}\033[0m tasks:",
+            file=sys.stderr,
+        )
         for task in model_missing_tasks:
-            print(f"  -{task}")
-        print()
+            print(f"  -{task}", file=sys.stderr)
+        print(file=sys.stderr)
 
     # output according to format requested by the user
     if format == "json":

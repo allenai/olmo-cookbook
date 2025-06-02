@@ -643,10 +643,10 @@ ALL_NAMED_GROUPS = {
     #     "squad:rc::gen2mc",
     #     "winogrande:rc::olmes:full",
     # ],
-    # "olmo3:dev:1b:hf": [
-    #     "ultrachat_masked_ppl",
-    #     "wildchat_masked_ppl",
-    # ],
+    "olmo3:dev:1b:hf": [
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ],
     "olmo2:paper": [
         "arc_challenge:mc::olmes",
         "hellaswag:mc::olmes",
