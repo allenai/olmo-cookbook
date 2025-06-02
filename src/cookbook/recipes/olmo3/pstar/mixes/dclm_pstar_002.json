@@ -1,0 +1,98 @@
+[
+  {
+    "domain": "adult_content",
+    "weight": 0.0000497999482706765
+  },
+  {
+    "domain": "art_and_design",
+    "weight": 0.0008890156319389095
+  },
+  {
+    "domain": "crime_and_law",
+    "weight": 0.016186555467287898
+  },
+  {
+    "domain": "education_and_jobs",
+    "weight": 0.000810837888896179
+  },
+  {
+    "domain": "electronics_and_hardware",
+    "weight": 0.0007234640858286977
+  },
+  {
+    "domain": "entertainment",
+    "weight": 0.007313197890536659
+  },
+  {
+    "domain": "fashion_and_beauty",
+    "weight": 0.0000411900615375631
+  },
+  {
+    "domain": "finance_and_business",
+    "weight": 0.0002518954652144411
+  },
+  {
+    "domain": "food_and_dining",
+    "weight": 0.003309783527164619
+  },
+  {
+    "domain": "games",
+    "weight": 0.0017901306583973666
+  },
+  {
+    "domain": "health",
+    "weight": 0.08071548886090384
+  },
+  {
+    "domain": "history_and_geography",
+    "weight": 0.0004153629844012423
+  },
+  {
+    "domain": "home_and_hobbies",
+    "weight": 0.008164976242805017
+  },
+  {
+    "domain": "industrial",
+    "weight": 0.04250079499662069
+  },
+  {
+    "domain": "literature",
+    "weight": 0.12352451996832144
+  },
+  {
+    "domain": "politics",
+    "weight": 0.001356369544468529
+  },
+  {
+    "domain": "religion",
+    "weight": 0.0005276023343452912
+  },
+  {
+    "domain": "science_math_and_technology",
+    "weight": 0.3859178478770352
+  },
+  {
+    "domain": "social_life",
+    "weight": 0.022827908810393156
+  },
+  {
+    "domain": "software",
+    "weight": 0.0008462566212385966
+  },
+  {
+    "domain": "software_development",
+    "weight": 0.2563807300394595
+  },
+  {
+    "domain": "sports_and_fitness",
+    "weight": 0.04400562004176248
+  },
+  {
+    "domain": "transportation",
+    "weight": 0.0011793381768489277
+  },
+  {
+    "domain": "travel_and_tourism",
+    "weight": 0.0002713128763231578
+  }
+]

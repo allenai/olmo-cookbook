@@ -43,7 +43,6 @@ OLMO2_DEV_1B_TASKS = [
     "basic_skills_string_operations_rc_5shot",
 ]
 
-
 TASK_GROUPS: Dict[str, List[str]] = {
     "all": list(list_tasks()),
     "olmo2_dev_1b": OLMO2_DEV_1B_TASKS
