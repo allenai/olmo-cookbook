@@ -76,6 +76,11 @@ logger = logging.getLogger(__name__)
     default=None,
     help="Maximum sequence length of the model (olmo-core only)",
 )
+@click.option(
+    "--skip-validation",
+    is_flag=True,
+    help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -103,6 +108,7 @@ def convert_checkpoint(
     env_name: str,
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
+    skip_validation: bool = False,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -131,6 +137,7 @@ def convert_checkpoint(
         unsharded_output_suffix=unsharded_output_suffix,
         use_beaker=use_beaker,
         use_system_python=use_system_python,
+        skip_validation=skip_validation,
     )
 
 
@@ -487,7 +494,7 @@ def get_results(
             else:
                 # Expand display tasks
                 requested_tasks.update(ALL_DISPLAY_TASKS.get(task, [task]))
-        
+
         for model, missing_tasks in tables.missing_tasks.items():
             # Only include tasks that were actually requested
             for task in missing_tasks:
