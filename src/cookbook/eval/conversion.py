@@ -125,7 +125,7 @@ def convert_olmo_core_v2(
             "--huggingface-output-dir",
             huggingface_output_dir,
             ("--skip-validation" if skip_validation else ""),
-            (f"--dtype {dtype}" if dtype else "")
+            (f"--dtype {dtype}" if dtype else ""),
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
 
@@ -469,10 +469,12 @@ def run_checkpoint_conversion(
             f"--olmoe-commit-hash {olmoe_commit_hash}",
             f"--olmo2-commit-hash {olmo2_commit_hash}",
             f"--olmo-core-commit-hash {olmo_core_commit_hash}",
+            f"--olmo-core-v2-commit-hash {olmo_core_v2_commit_hash}",
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
             (f"--max-sequence-length {max_sequence_length}" if max_sequence_length is not None else ""),
             "--use-system-python",
             ("--skip-validation" if skip_validation else ""),
+            (f"--dtype {dtype}" if dtype else ""),
         ]
         remote_command_str = " ".join(remote_command)
 
