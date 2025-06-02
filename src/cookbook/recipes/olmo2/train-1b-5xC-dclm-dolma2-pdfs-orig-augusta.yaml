@@ -1,5 +1,5 @@
-name: "OLMo3-1b-5xC-dolma2-s2pdfs-v2"
-description: "OLMo3 1b@5xC run, with v2 s2pdfs"
+name: "OLMo3-1b-5xC-dolma2-s2pdfs-orig"
+description: "OLMo3 1b@5xC run, with orig s2pdfs set"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
@@ -1163,7 +1163,7 @@ dataset:
     - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/part-1-00000.npy
 
     # s2pdfs, kept on s3 temporarily, because of beaker issues at the time of startup, but feel free to move over later
-  - name: s2pdfs-norefs_mdtables_v2
+  - name: s2pdfs-orig
     target_ratio: 0.15
     paths:    
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/adult/*.npy
