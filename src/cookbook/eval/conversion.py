@@ -47,6 +47,7 @@ def convert_olmo_core_v2(
     olmo_core_v2_commit_hash: str = OLMO_CORE_V2_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
     skip_validation: bool = False,
+    dtype: Optional[str] = None,
     env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
@@ -124,6 +125,7 @@ def convert_olmo_core_v2(
             "--huggingface-output-dir",
             huggingface_output_dir,
             ("--skip-validation" if skip_validation else ""),
+            (f"--dtype {dtype}" if dtype else "")
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
 
@@ -408,6 +410,7 @@ def run_checkpoint_conversion(
     python_venv_force: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    dtype: Optional[str] = None,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -542,6 +545,7 @@ def run_checkpoint_conversion(
             olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
             transformers_commit_hash=huggingface_transformers_commit_hash,
             skip_validation=skip_validation,
+            dtype=dtype,
             env=env,
         )
     else:
