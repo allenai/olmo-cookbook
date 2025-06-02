@@ -434,11 +434,6 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
-# @click.option(
-#     "--missing-pairs",
-#     is_flag=True,
-#     help="Return only missing model-task pairs in JSON format",
-# )
 def get_results(
     dashboard: str,
     models: list[str],
