@@ -1,5 +1,5 @@
 name: dclm-1b-log-linear-full-eval-constrain-obj-pareto-with-predicted-scores-repetition-5
-description: Olmo-cookbook 1Bv2-5xC on dclm baseline using log-linear regression on full offline evals, constrain obj, pareto constraints w.r.t natural distr's predicted scores, repetition_factor=2
+description: Olmo-cookbook 1Bv2-5xC on dclm baseline using log-linear regression on full offline evals, constrain obj, pareto constraints w.r.t natural distr's predicted scores, repetition_factor=5
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
