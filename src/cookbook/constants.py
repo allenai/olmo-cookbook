@@ -689,7 +689,7 @@ ALL_NAMED_GROUPS = {
         "jeopardy:rc::gen2mc",
         "lambada",
         "mbpp:3shot:bpb::none",
-        "minerva_math::olmes",
+        "minerva:bpb",
         "mmlu:rc",
         "mt_mbpp",
         "naturalqs:rc::gen2mc",
