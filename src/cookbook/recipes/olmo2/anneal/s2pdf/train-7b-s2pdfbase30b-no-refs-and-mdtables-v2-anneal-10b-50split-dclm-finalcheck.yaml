@@ -1,4 +1,4 @@
-name: "olmo2-7b_10b-anneal_s2pdf_base30b-norefs-and-mdtables_v2_plus-dclm"
+name: "olmo2-7b_10b-anneal_s2pdf_base30b-norefs-and-mdtables_v2_finalcheck_plus-dclm"
 description: "OLMo2 7b anneal to 10B Tokens for s2pdf baseline (30B experimental subset with no references and mdtables converted and fixed) + dclm"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
