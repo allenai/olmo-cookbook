@@ -13,7 +13,7 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
-    ALL_DISPLAY_TASKS,
+    # ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
@@ -448,14 +448,11 @@ def get_results(
 ) -> None:
     tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
-    # first look for named groups
-    expanded_tasks = [e for t in tasks for e in ALL_NAMED_GROUPS.get(t, [t])]
-
-    # after that, we check for task patterns; we only compile the pattern if the would need to be escaped
+    # expand named groups, compile patters if needed
     columns_filter_tasks = [
         re.compile(t_) if re.escape(t_) != t_ else t_
-        for task in expanded_tasks
-        for t_ in ALL_DISPLAY_TASKS.get(task, [task])
+        for task in tasks
+        for t_ in ALL_NAMED_GROUPS.get(task, [task])
     ]
     # we expand the filters with the named groups users might have provided as input
     # we put those at the very beginning of the list so that they are displayed first
@@ -503,7 +500,7 @@ def get_results(
             print(f"  -{task}")
         print()
 
-
+    # output according to format requested by the user
     if format == "json":
         print(json.dumps(results._data))
     elif format == "table":
@@ -566,7 +563,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
     experiments = FindExperiments.run(model_name=model)
     valid_tasks = [re.compile(t) for t in task] if task else []
 
-    table = Table()
+    table = Table(title=f"Listing experiments for model {model}")
     table.add_column("Experiment ID")
     table.add_column("Model Name")
     table.add_column("Task Name")
