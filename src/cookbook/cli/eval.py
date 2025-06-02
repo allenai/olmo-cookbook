@@ -19,6 +19,7 @@ from cookbook.constants import (
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_CONVERT_DTYPES,
     OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
@@ -82,6 +83,12 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
 )
+@click.option(
+    "--dtype",
+    type=click.Choice(OLMO_CORE_CONVERT_DTYPES),
+    default=None,
+    help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -110,6 +117,7 @@ def convert_checkpoint(
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    dtype: Optional[str] = None,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -139,6 +147,7 @@ def convert_checkpoint(
         use_beaker=use_beaker,
         use_system_python=use_system_python,
         skip_validation=skip_validation,
+        dtype=dtype,
     )
 
 
