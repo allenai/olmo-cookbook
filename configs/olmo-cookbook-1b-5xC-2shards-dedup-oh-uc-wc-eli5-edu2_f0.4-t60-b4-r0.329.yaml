@@ -1,0 +1,56 @@
+name: "olmo-core-1b_v2-6ishxC-2shards-dedup-oh-uc-wc-eli5-edu2_f0.4-t60-b4-r0.329"
+description: "olmo-cookbook 1Bv2-6ishxC dclm baseline natural (core v2 4096 1.8e-3, 2_097_152 global batch, 32_768 rank microbatch)"
+budget: "ai2/oe-data"
+workspace: "ai2/olmo3-data-quality"
+cluster: ai2/jupiter-cirrascale-2
+priority: high
+preemptible: true
+nodes: 4
+gpus: 8
+wandb:
+  project: "olmo3-data-quality"
+
+dataset:
+  sources:
+  - name: "2shards-dedup-oh-uc-wc-eli5-edu2_f0.4-t60-b4-r0.329"
+    target_ratio: 1.0
+    repetition_factor: 1.0
+    paths:
+    - "s3://ai2-llm/preprocessed/dclm/ablations/2shards-dedup-oh-uc-wc-eli5-edu2_f0.4-t60-b4-r0.329/*.npy"
+
+max_tokens: 150_000_000_000 # 127_939_584_000 # for olmo2_1B_v2, we have  1_279_395_840 non-embedding params
+sequence_length: 4096 # 4096, 2048
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+weka: false
+rank_microbatch_size: 32_768
+global_batch_size: 2_097_152 # 4_194_304, 2_097_152
+
+downstream_evaluators:
+- arc_challenge_test_rc_5shot
+- arc_easy_test_rc_5shot
+- hellaswag_rc_5shot
+- winogrande_val_rc_5shot
+- csqa_val_rc_5shot
+- piqa_val_rc_5shot
+- socialiqa_val_rc_5shot
+- mmlu_stem_val_rc_5shot
+- mmlu_humanities_val_rc_5shot
+- mmlu_social_sciences_val_rc_5shot
+- mmlu_other_val_rc_5shot
+- mmlu_stem_test_rc_5shot
+- mmlu_humanities_test_rc_5shot
+- mmlu_social_sciences_test_rc_5shot
+- mmlu_other_test_rc_5shot
+- gsm8k_gold_bpb_5shot
+- minerva_math_algebra_gold_bpb_0shot
+- minerva_math_counting_and_probability_gold_bpb_0shot
+- minerva_math_geometry_gold_bpb_0shot
+- minerva_math_intermediate_algebra_gold_bpb_0shot
+- minerva_math_number_theory_gold_bpb_0shot
+- minerva_math_prealgebra_gold_bpb_0shot
+- minerva_math_precalculus_gold_bpb_0shot
+- codex_humaneval_gold_bpb_0shot
+- codex_mbpp_gold_bpb_0shot
+- copycolors_10way
