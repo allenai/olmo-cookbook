@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 # Define the paths to the JSON files
-json_files = ["dclm_natural.json", "dclm_pstar_001.json", "dclm_pstar_002.json"]
+json_files = ["dclm_bert_natural.json", "dclm_ft_natural.json"]
 
 # Load and combine data from all JSON files
 all_data = []
