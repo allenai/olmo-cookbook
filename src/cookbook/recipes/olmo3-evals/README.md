@@ -34,7 +34,7 @@ olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olm
     --num-gpus 8 \
     --model-backend vllm \
     --model-args dtype=bfloat16 \
-    --partition-size 1 \
+    --partition-size 8 \
     --dashboard olmo-3-evals  \
     --workspace ai2/olmo-3-evals
 ```
