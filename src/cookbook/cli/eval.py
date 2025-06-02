@@ -24,6 +24,7 @@ from cookbook.constants import (
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
+    TRANSFORMERS_GIT_URL,
 )
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
@@ -46,6 +47,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
 )
+@click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -108,6 +110,7 @@ def convert_checkpoint(
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     olmo_core_v2_commit_hash: str,
+    huggingface_transformers_git_url: str,
     huggingface_transformers_commit_hash: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
@@ -132,6 +135,7 @@ def convert_checkpoint(
         huggingface_output_suffix=huggingface_output_suffix,
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
+        huggingface_transformers_git_url=huggingface_transformers_git_url,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
         max_sequence_length=max_sequence_length,
