@@ -43,34 +43,9 @@ OLMO2_DEV_1B_TASKS = [
     "basic_skills_string_operations_rc_5shot",
 ]
 
-# these have to match aliases in oe-eval, NOT, display names in cookbook
-OLMO3_DEV_1B_TASKS = [
-    "arc_challenge:rc::olmes:full",
-    "arc_easy:rc::olmes:full",
-    "basic_skills:rc::olmes",
-    "codex_humaneval:3shot:bpb::none",
-    "coqa:rc::gen2mc",
-    "csqa:rc::olmes:full",
-    "drop:rc::gen2mc",
-    "hellaswag:rc::olmes:full",
-    "jeopardy:rc::gen2mc",
-    "lambada",
-    "mbpp:3shot:bpb::none",
-    "minerva_math::olmes",  # why is this not just called `minerva`, ugh...
-    "mmlu:rc",
-    "mt_mbpp",
-    "naturalqs:rc::gen2mc",
-    "piqa:rc::olmes:full",
-    "sciq::olmo1:full",
-    "socialiqa:rc::olmes:full",
-    "squad:rc::gen2mc",
-    "winogrande:rc::olmes:full",
-]
-
 TASK_GROUPS: Dict[str, List[str]] = {
     "all": list(list_tasks()),
-    "olmo2_dev_1b": OLMO2_DEV_1B_TASKS,
-    "olmo3:dev:1b": OLMO3_DEV_1B_TASKS,
+    "olmo2_dev_1b": OLMO2_DEV_1B_TASKS
 }
 
 

@@ -27,36 +27,45 @@ For **OLMo 2 1B 5xC** runs, it's still good practice to look at both BPB & RC nu
 The command to run an eval looks like:
 
 ```bash
-olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
-    --tasks olmo3:dev:1b \
-    --priority high \
-    --cluster l40 \
-    --num-gpus 8 \
+CHECKPOINT="/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf"
+CLUSTER="l40"
+NUM_GPUS=1
+PARTITION=8
+PRIORITY="high"
+MODEL_ARGS="dtype=bfloat16"
+DASHBOARD="olmo-3-evals"
+WORKSPACE="ai2/olmo-3-evals"
+
+olmo-cookbook-eval evaluate "$CHECKPOINT" \
+    --tasks "*olmo3:dev:1b:vllm" \
+    --priority "$PRIORITY" \
+    --cluster "$CLUSTER" \
+    --num-gpus "$NUM_GPUS" \
     --model-backend vllm \
-    --model-args dtype=bfloat16 \
-    --partition-size 1 \
-    --dashboard olmo-3-evals  \
-    --workspace ai2/olmo-3-evals
-```
+    --model-args "$MODEL_ARGS" \
+    --partition-size "$PARTITION" \
+    --dashboard "$DASHBOARD"  \
+    --workspace "$WORKSPACE"
 
-A couple of newer evals looks like may have some iffyness with running VLLM, so use HF for now.
-
-```bash
-olmo-cookbook-eval evaluate "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo-cookbook-core-v2-1bv2-5xC-dclm-baseline-topic-classified-sample-natural-28f8e9a9/step61000-hf" \
-    --tasks ultrachat_masked_ppl \
-    --tasks wildchat_masked_ppl \
-    --priority high \
-    --cluster l40 \
-    --num-gpus 1 \
+olmo-cookbook-eval evaluate "$CHECKPOINT" \
+    --tasks "*olmo3:dev:1b:hf" \
+    --priority "$PRIORITY" \
+    --cluster "$CLUSTER" \
+    --num-gpus "$NUM_GPUS" \
     --model-backend hf \
-    --model-args dtype=bfloat16 \
-    --dashboard olmo-3-evals  \
-    --workspace ai2/olmo-3-evals
+    --model-args "$MODEL_ARGS" \
+    --partition-size "$PARTITION" \
+    --dashboard "$DASHBOARD"  \
+    --workspace "$WORKSPACE"
 ```
 
+Notes: 
+* Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py*
 
-*Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py#L478*
 
+*How long does it take?*
+* "*olmo3:dev:1b:vllm" are a full suite of 20 tasks, each task w multiple metrics + some tasks as families w multiple subtasks. In total, this is around 150 metrics. Takes 2 hours to do all of them on `--partition-size 8` and `num-gpus 1` with single L40 (launches 5 jobs).
+* "*olmo3:dev:1b:hf" are two masked PPL evals. Takes 1 hour to do both on a single L40.
 
 To pull dashboard results (use `--format json` to see full results):
 
@@ -69,6 +78,8 @@ olmo-cookbook-eval results \
 
 
 *Notes*
+* If you want to see if the datalake uploading job ran, use your beaker experimental ID to this URL: `https://oe-eval-datalake.allen.ai/greenlake/metadata/01JWMGNY3G3R5N91NW9TCKF6FB`.
+* I hate this design, but currently in order to use a named group when pulling dashboard results, you need to use it with a `*`, like `--tasks *mmlu:rc`, which then matches to `ALL_NAMED_GROUPS` in `constants.py`. If you don't include the `*`, it'll pass the exact string `mmlu:rc` and fail to match things.
 * I don't know why `basic_skills` pull dashboard requires removing `:rc::olmes` but launching eval requires adding it or it'll only launch the Arithmetic subportion. Something weird.
 
 ## FAQs
