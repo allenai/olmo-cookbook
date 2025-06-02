@@ -1,7 +1,7 @@
 # 6d2d4c39
 group_id=8b10a86d # 48
 
-for i in $(seq -f "%04g" 1 47); do
+for i in $(seq -f "%04g" 0 47); do
     echo "Syncing checkpoint part-$i..."
     python -m cookbook.remote \
         s3://ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-$group_id-$i/step2210 \
