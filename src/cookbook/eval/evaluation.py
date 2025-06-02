@@ -22,7 +22,6 @@ from cookbook.constants import (
     WEKA_MOUNTS,
 )
 
-
 def evaluate_checkpoint(
     oe_eval_commit: str,
     checkpoint_path: str,

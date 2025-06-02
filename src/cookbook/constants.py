@@ -502,7 +502,33 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
-    "mt_mbpp": MULTILINGUAL_MBPP_TASKS
+    "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
+    "olmo3:dev:1b:vllm": [
+        "arc_challenge:rc::olmes:full",
+        "arc_easy:rc::olmes:full",
+        "basic_skills:rc::olmes",
+        "codex_humaneval:3shot:bpb::none",
+        "coqa:rc::gen2mc",
+        "csqa:rc::olmes:full",
+        "drop:rc::gen2mc",
+        "hellaswag:rc::olmes:full",
+        "jeopardy:rc::gen2mc",
+        "lambada",
+        "mbpp:3shot:bpb::none",
+        "minerva_math::olmes",
+        "mmlu:rc::olmes",
+        "mt_mbpp",
+        "naturalqs:rc::gen2mc",
+        "piqa:rc::olmes:full",
+        "sciq::olmo1",                  # no :full because no olmes, fix in eval
+        "socialiqa:rc::olmes:full",
+        "squad:rc::gen2mc",
+        "winogrande:rc::olmes:full",
+    ],
+    "olmo3:dev:1b:hf": [
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ]
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
@@ -595,33 +621,3 @@ OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
-
-# use these tasks to launch oe-eval jobs
-ALL_EVAL_TASKS = {
-    "olmo3:dev:1b:vllm": [
-        "arc_challenge:rc::olmes:full",
-        "arc_easy:rc::olmes:full",
-        "basic_skills:rc::olmes",
-        "codex_humaneval:3shot:bpb::none",
-        "coqa:rc::gen2mc",
-        "csqa:rc::olmes:full",
-        "drop:rc::gen2mc",
-        "hellaswag:rc::olmes:full",
-        "jeopardy:rc::gen2mc",
-        "lambada",
-        "mbpp:3shot:bpb::none",
-        "minerva_math::olmes",
-        "mmlu:rc::olmes",
-        "mt_mbpp",
-        "naturalqs:rc::gen2mc",
-        "piqa:rc::olmes:full",
-        "sciq::olmo1",                  # no :full because no olmes, fix in eval
-        "socialiqa:rc::olmes:full",
-        "squad:rc::gen2mc",
-        "winogrande:rc::olmes:full",
-    ],
-    "olmo3:dev:1b:hf": [
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ]
-}
