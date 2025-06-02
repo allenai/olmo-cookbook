@@ -13,7 +13,6 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
-    # ALL_DISPLAY_TASKS,
     ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
