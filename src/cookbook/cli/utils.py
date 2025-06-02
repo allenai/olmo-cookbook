@@ -492,11 +492,12 @@ def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = No
     return tokenizer_dir
 
 
-def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = None) -> str:
+def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = None, git_url: Optional[str] = None) -> str:
     env = env or PythonEnv.null()
+    git_url = git_url or TRANSFORMERS_GIT_URL
 
     # Clone the repository
-    transformers_dir = clone_repository(TRANSFORMERS_GIT_URL, commit_hash)
+    transformers_dir = clone_repository(git_url, commit_hash)
 
     # Install the package
     print(f"Installing the correct version of Transformers ({commit_hash}) from {transformers_dir}...")
