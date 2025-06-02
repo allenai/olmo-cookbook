@@ -1,0 +1,48 @@
+name: "stack-edu-50p_dclm-50p-codeprose"
+description: "Baseline for code sources; 30% stack-edu, 20% codeprose, 50% DCLM baseline"
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 113_184_153_600
+sequence_length: 4_096
+global_batch_size: 2_097_152
+rank_microbatch_size: 32_768
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+
+
+metrics_config:
+  project: lucas-olmo-cookbook
+  entity: ai2-llm
+  backend: wandb
+
+dataset:
+  sources:
+  # somewhat exaggerated ratio of gh-issues and kaggle-notebooks to stack-edu
+  # in reality, stack edu is like 552.88GB, gh issues is 16.23GB, and kaggle-notebooks is 2.77GB
+  # so the ratio should be 0.48 + 0.015 + 0.05.
+  - name: stack-edu
+    target_ratio: 0.45
+    paths:
+      - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+
+  - name: gh-issues
+    target_ratio: 0.04
+    paths:
+      - s3://ai2-llm/preprocessed/HuggingFaceTB_issues-kaggle-notebooks/allenai/dolma2-tokenizer/issues/*.npy
+
+  - name: kaggle-notebooks
+    target_ratio: 0.01
+    paths:
+      - s3://ai2-llm/preprocessed/HuggingFaceTB_issues-kaggle-notebooks/allenai/dolma2-tokenizer/kaggle/*.npy
+
+
+  - name: dclm-baseline
+    target_ratio: 0.50
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
