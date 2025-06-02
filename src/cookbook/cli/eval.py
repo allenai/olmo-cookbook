@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import sys
 from typing import Optional
 
 import click
@@ -13,8 +14,6 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
-    ALL_DISPLAY_TASKS,
-    ALL_EVAL_TASKS,
     ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
@@ -347,9 +346,6 @@ def evaluate_model(
         key, value = arg.split("=")
         parsed_model_args[key] = value
 
-    # expand tasks; note must be aliases or task suites in oe-eval
-    tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
@@ -438,11 +434,6 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
-@click.option(
-    "--missing-pairs",
-    is_flag=True,
-    help="Return only missing model-task pairs in JSON format",
-)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -453,19 +444,28 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-    missing_pairs: bool,
+    # missing_pairs: bool,
 ) -> None:
     tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
-    # if a task starts with *, it means it is a named group and we need to expand it
-    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
-    # after that, we check for task patterns
-    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
-    results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
+    # expand named groups, compile patters if needed
+    columns_filter_tasks = [
+        re.compile(t_) if re.escape(t_) != t_ else t_
+        for task in tasks
+        for t_ in ALL_NAMED_GROUPS.get(task, [task])
+    ]
+    # we expand the filters with the named groups users might have provided as input
+    # we put those at the very beginning of the list so that they are displayed first
+    columns_filter_tasks = [t for t in tasks if t in ALL_NAMED_GROUPS] + columns_filter_tasks
 
+    # do the actual filtering here!
+    results = (tables.averages + tables.metrics).keep_cols(*columns_filter_tasks)
+
+    rows_filter_models: list[str | re.Pattern] = []
     if len(models) > 0:
-        results = results.keep_rows(*[re.compile(m) for m in models])
+        # okay we filter models too! do the same regex trick as above
+        rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
+        results = results.keep_rows(*rows_filter_models)
 
     try:
         results = results.sort(
@@ -478,35 +478,32 @@ def get_results(
         # if no columns are left, we don't need to sort
         pass
 
-    if tables.missing_tasks:
-        for model, missing_tasks in tables.missing_tasks.items():
-            logger.warning(
-                "\t😱 Model \033[1m%s\033[0m is missing \033[1m%d tasks\033[0m:\t%s",
-                model,
-                len(missing_tasks),
-                ", ".join(missing_tasks),
-            )
+    # go through the missing models and tasks and print them out
+    for model, missing_task in tables.missing_tasks.items():
+        # filter to only models user requested
+        if rows_filter_models and not any(
+            m.search(model) if isinstance(m, re.Pattern) else m == model for m in rows_filter_models
+        ):
+            continue
 
-    if missing_pairs:
-        missing_pairs_list = []
-        # Convert requested tasks to a set for efficient lookup
-        requested_tasks = set()
-        for task in tasks:
-            if task.startswith("*"):
-                # Expand named groups
-                requested_tasks.update(ALL_NAMED_GROUPS.get(task.lstrip("*"), []))
-            else:
-                # Expand display tasks
-                requested_tasks.update(ALL_DISPLAY_TASKS.get(task, [task]))
+        # filter the missing tasks to only include the tasks that were requested
+        model_missing_tasks = {
+            task for task in missing_task
+            if any(t.search(task) if isinstance(t, re.Pattern) else t == task for t in columns_filter_tasks)
+        }
+        if not model_missing_tasks:
+            continue
 
-        for model, missing_tasks in tables.missing_tasks.items():
-            # Only include tasks that were actually requested
-            for task in missing_tasks:
-                if task in requested_tasks:
-                    missing_pairs_list.append({"model": model, "task": task})
-        print(json.dumps(missing_pairs_list))
-        return
+        # the empty print adds a new line
+        print(
+            f"😱 Model \033[1m{model}\033[0m is missing \033[1m{len(model_missing_tasks)}\033[0m tasks:",
+            file=sys.stderr,
+        )
+        for task in model_missing_tasks:
+            print(f"  -{task}", file=sys.stderr)
+        print(file=sys.stderr)
 
+    # output according to format requested by the user
     if format == "json":
         print(json.dumps(results._data))
     elif format == "table":
@@ -542,19 +539,16 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
-@click.argument("subset_type", type=str)
 @click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
-def list_tasks(subset_type: str, task: list[str] | None):
+def list_tasks(task: list[str] | None):
     valid_tasks = [re.compile(t) for t in task] if task else []
 
-    table = Table(title=f"Listing {subset_type.capitalize()} tasks")
+    table = Table(title=f"Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")
 
-    assert subset_type in ["display", "named"], f"Invalid task type: {subset_type}"
-
-    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == "display" else ALL_NAMED_GROUPS).items():
+    for task_group, task_names in ALL_NAMED_GROUPS.items():
         if len(valid_tasks) > 0:
             valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
             valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
@@ -572,7 +566,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
     experiments = FindExperiments.run(model_name=model)
     valid_tasks = [re.compile(t) for t in task] if task else []
 
-    table = Table()
+    table = Table(title=f"Listing experiments for model {model}")
     table.add_column("Experiment ID")
     table.add_column("Model Name")
     table.add_column("Task Name")

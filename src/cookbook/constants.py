@@ -482,6 +482,123 @@ MULTILINGUAL_MBPP_TASKS = [
     "mt_mbpp:typescript",
 ]
 
+
+OLMO3_DEV_1B_TASKS_VLLM = [
+     # Arc tasks
+     "arc_challenge:rc::olmes:full",
+     "arc_easy:rc::olmes:full",
+     # Basic Skills rc 5shot
+     "basic_skills_arithmetic:rc::olmes",
+     "basic_skills_coding:rc::olmes",
+     "basic_skills_common_knowledge:rc::olmes",
+     "basic_skills_logical_reasoning:rc::olmes",
+     "basic_skills_pattern:rc::olmes",
+     "basic_skills_string_operations:rc::olmes",
+     #
+     "codex_humaneval:3shot:bpb::none",
+     "coqa:rc::gen2mc",
+     "csqa:rc::olmes:full",
+     "drop:rc::gen2mc",
+     "hellaswag:rc::olmes:full",
+     "jeopardy:rc::gen2mc",
+     "lambada",
+     "mbpp:3shot:bpb::none",
+     # minerva math tasks
+     "minerva_math_500::olmes",
+     "minerva_math_algebra::olmes",
+     "minerva_math_counting_and_probability::olmes",
+     "minerva_math_geometry::olmes",
+     "minerva_math_intermediate_algebra::olmes",
+     "minerva_math_number_theory::olmes",
+     "minerva_math_prealgebra::olmes",
+     "minerva_math_precalculus::olmes",
+     # mmlu tasks
+     "mmlu_abstract_algebra:rc::olmes",
+     "mmlu_anatomy:rc::olmes",
+     "mmlu_astronomy:rc::olmes",
+     "mmlu_business_ethics:rc::olmes",
+     "mmlu_clinical_knowledge:rc::olmes",
+     "mmlu_college_biology:rc::olmes",
+     "mmlu_college_chemistry:rc::olmes",
+     "mmlu_college_computer_science:rc::olmes",
+     "mmlu_college_mathematics:rc::olmes",
+     "mmlu_college_medicine:rc::olmes",
+     "mmlu_college_physics:rc::olmes",
+     "mmlu_computer_security:rc::olmes",
+     "mmlu_conceptual_physics:rc::olmes",
+     "mmlu_econometrics:rc::olmes",
+     "mmlu_electrical_engineering:rc::olmes",
+     "mmlu_elementary_mathematics:rc::olmes",
+     "mmlu_formal_logic:rc::olmes",
+     "mmlu_global_facts:rc::olmes",
+     "mmlu_high_school_biology:rc::olmes",
+     "mmlu_high_school_chemistry:rc::olmes",
+     "mmlu_high_school_computer_science:rc::olmes",
+     "mmlu_high_school_european_history:rc::olmes",
+     "mmlu_high_school_geography:rc::olmes",
+     "mmlu_high_school_government_and_politics:rc::olmes",
+     "mmlu_high_school_macroeconomics:rc::olmes",
+     "mmlu_high_school_mathematics:rc::olmes",
+     "mmlu_high_school_microeconomics:rc::olmes",
+     "mmlu_high_school_physics:rc::olmes",
+     "mmlu_high_school_psychology:rc::olmes",
+     "mmlu_high_school_statistics:rc::olmes",
+     "mmlu_high_school_us_history:rc::olmes",
+     "mmlu_high_school_world_history:rc::olmes",
+     "mmlu_human_aging:rc::olmes",
+     "mmlu_human_sexuality:rc::olmes",
+     "mmlu_international_law:rc::olmes",
+     "mmlu_jurisprudence:rc::olmes",
+     "mmlu_logical_fallacies:rc::olmes",
+     "mmlu_machine_learning:rc::olmes",
+     "mmlu_management:rc::olmes",
+     "mmlu_marketing:rc::olmes",
+     "mmlu_medical_genetics:rc::olmes",
+     "mmlu_miscellaneous:rc::olmes",
+     "mmlu_moral_disputes:rc::olmes",
+     "mmlu_moral_scenarios:rc::olmes",
+     "mmlu_nutrition:rc::olmes",
+     "mmlu_philosophy:rc::olmes",
+     "mmlu_prehistory:rc::olmes",
+     "mmlu_professional_accounting:rc::olmes",
+     "mmlu_professional_law:rc::olmes",
+     "mmlu_professional_medicine:rc::olmes",
+     "mmlu_professional_psychology:rc::olmes",
+     "mmlu_public_relations:rc::olmes",
+     "mmlu_security_studies:rc::olmes",
+     "mmlu_sociology:rc::olmes",
+     "mmlu_us_foreign_policy:rc::olmes",
+     "mmlu_virology:rc::olmes",
+     "mmlu_world_religions:rc::olmes",
+     # mt tasks
+     "mt_mbpp:bash",
+     "mt_mbpp:c",
+     "mt_mbpp:cpp",
+     "mt_mbpp:csharp",
+     "mt_mbpp:go",
+     "mt_mbpp:haskell",
+     "mt_mbpp:java",
+     "mt_mbpp:javascript",
+     "mt_mbpp:matlab",
+     "mt_mbpp:php",
+     "mt_mbpp:python",
+     "mt_mbpp:r",
+     "mt_mbpp:ruby",
+     "mt_mbpp:rust",
+     "mt_mbpp:scala",
+     "mt_mbpp:swift",
+     "mt_mbpp:typescript",
+     #
+     "naturalqs:rc::gen2mc",
+     "piqa:rc::olmes:full",
+     "sciq::olmo1",
+     "socialiqa:rc::olmes:full",
+     "squad:rc::gen2mc",
+     "winogrande:rc::olmes:full",
+ ]
+
+
+
 # named groups are things you should able to average; they
 # should just contain aliases
 ALL_NAMED_GROUPS = {
@@ -502,8 +619,90 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
-    "mt_mbpp": MULTILINGUAL_MBPP_TASKS
+    "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
+    "olmo3:dev:1b:vllm" : OLMO3_DEV_1B_TASKS_VLLM,
+    # "olmo3:dev:1b:vllm": [
+    #     "arc_challenge:rc::olmes:full",
+    #     "arc_easy:rc::olmes:full",
+    #     "basic_skills:rc::olmes",
+    #     "codex_humaneval:3shot:bpb::none",
+    #     "coqa:rc::gen2mc",
+    #     "csqa:rc::olmes:full",
+    #     "drop:rc::gen2mc",
+    #     "hellaswag:rc::olmes:full",
+    #     "jeopardy:rc::gen2mc",
+    #     "lambada",
+    #     "mbpp:3shot:bpb::none",
+    #     "minerva_math::olmes",
+    #     "mmlu:rc::olmes",
+    #     "mt_mbpp",
+    #     "naturalqs:rc::gen2mc",
+    #     "piqa:rc::olmes:full",
+    #     "sciq::olmo1",                  # no :full because no olmes, fix in eval
+    #     "socialiqa:rc::olmes:full",
+    #     "squad:rc::gen2mc",
+    #     "winogrande:rc::olmes:full",
+    # ],
+    "olmo3:dev:1b:hf": [
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ],
+    "olmo2:paper": [
+        "arc_challenge:mc::olmes",
+        "hellaswag:mc::olmes",
+        "winogrande:mc::olmes",
+        "naturalqs::olmes",
+        "drop::olmes",
+        "agi_eval",
+        "mmlu:mc",
+        "gsm8k::olmo1",
+        "mmlu_pro:mc",
+    ],
+    "olmo2:7b:dev": [
+        "arc_challenge:mc::olmes",
+        "arc_easy:mc::olmes",
+        "hellaswag:mc::olmes",
+        "naturalqs::olmes",
+        "gsm8k::olmes",
+        "mmlu:mc",
+        "core:mc",
+        "gen",
+    ],
+    "olmo2:dev:1b": [
+        "arc_challenge:rc::olmes",
+        "arc_easy:rc::olmes",
+        "hellaswag:rc::olmes",
+        "gsm8k::olmes",
+        "mmlu:rc",
+        "core:rc",
+    ],
+    # these are just for display
+    "olmo3:dev:1b:display": [
+        "arc_challenge:rc::olmes:full",
+        "arc_easy:rc::olmes:full",
+        "basic_skills:rc::olmes",
+        "codex_humaneval:3shot:bpb::none",
+        "coqa:rc::gen2mc",
+        "csqa:rc::olmes:full",
+        "drop:rc::gen2mc",
+        "hellaswag:rc::olmes:full",
+        "jeopardy:rc::gen2mc",
+        "lambada",
+        "mbpp:3shot:bpb::none",
+        "minerva_math::olmes",
+        "mmlu:rc",
+        "mt_mbpp",
+        "naturalqs:rc::gen2mc",
+        "piqa:rc::olmes:full",
+        "sciq::olmo1",                  # no :full because no olmes, fix in eval
+        "socialiqa:rc::olmes:full",
+        "squad:rc::gen2mc",
+        "winogrande:rc::olmes:full",
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ],
 }
+
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
     ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
@@ -514,71 +713,6 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
             if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
         )
     )
-
-
-ALL_DISPLAY_TASKS = {
-    "olmo2:paper": [
-        r"arc_challenge:mc.*",
-        r"hellaswag:mc.*",
-        r"winogrande:mc.*",
-        r"naturalqs.*",
-        r"drop.*",
-        r"agieval.*",
-        r"^gsm8k::olmes$",
-        r"^mmlu:mc$",
-        r"^mmlu_pro:mc$",
-        r"^agi_eval$",
-    ],
-    "olmo2:dev:7b": [
-        r"arc_challenge:mc.*",
-        r"arc_easy:mc.*",
-        r"hellaswag:mc.*",
-        r"naturalqs.*",
-        r"^gsm8k::olmo1$",
-        r"^mmlu:mc$",
-        r"^core:mc$",
-        r"^gen$",
-    ],
-    "olmo2:dev:1b": [
-        r"arc_challenge:rc.*",
-        r"arc_easy:rc.*",
-        r"hellaswag:rc.*",
-        r"^gsm8k::olmo1$",
-        r"^mmlu:rc$",
-        r"^core:rc$",
-    ],
-    "olmo3:dev:1b": [
-        "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
-        "^arc_easy.*olmes",
-        "^basic_skills.*olmes",
-        "^codex_humaneval.*3shot",
-        "^coqa.*gen2mc",
-        "^csqa.*olmes",
-        "^drop.*gen2mc",
-        "^hellaswag.*olmes",
-        "^jeopardy.*gen2mc",
-        "^lambada.*",
-        "^mbpp.*3shot",
-        # "minerva",
-        "^minerva.*olmes$",     # doesn't return average
-        # "mmlu:rc",
-        "^mmlu.*rc.*olmes$",    # doesn't return average
-        "^mt_mbpp.*",           # still returns average
-        "^naturalqs.*gen2mc",
-        "^piqa.*olmes",
-        "^sciq.*olmo1",
-        "^socialiqa.*olmes",
-        "^squad.*gen2mc",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-        "^winogrande.*olmes",
-    ],
-    "helmet:8k": [r"^helmet:8k$"],
-    "helmet:16k": [r"^helmet:16k$"],
-    "helmet:32k": [r"^helmet:32k$"],
-    "helmet:64k": [r"^helmet:64k$"],
-    "helmet:128k": [r"^helmet:128k$"],
-}
 
 
 SHORT_NAMES = {
@@ -595,33 +729,3 @@ OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
-
-# use these tasks to launch oe-eval jobs
-ALL_EVAL_TASKS = {
-    "olmo3:dev:1b:vllm": [
-        "arc_challenge:rc::olmes:full",
-        "arc_easy:rc::olmes:full",
-        "basic_skills:rc::olmes",
-        "codex_humaneval:3shot:bpb::none",
-        "coqa:rc::gen2mc",
-        "csqa:rc::olmes:full",
-        "drop:rc::gen2mc",
-        "hellaswag:rc::olmes:full",
-        "jeopardy:rc::gen2mc",
-        "lambada",
-        "mbpp:3shot:bpb::none",
-        "minerva_math::olmes",
-        "mmlu:rc::olmes",
-        "mt_mbpp",
-        "naturalqs:rc::gen2mc",
-        "piqa:rc::olmes:full",
-        "sciq::olmo1",                  # no :full because no olmes, fix in eval
-        "socialiqa:rc::olmes:full",
-        "squad:rc::gen2mc",
-        "winogrande:rc::olmes:full",
-    ],
-    "olmo3:dev:1b:hf": [
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ]
-}
