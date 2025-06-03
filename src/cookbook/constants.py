@@ -538,6 +538,7 @@ ALL_DISPLAY_TASKS = {
         r"^mmlu:mc$",
         r"^core:mc$",
         r"^gen$",
+        r"olmo2:dev:7b:w_avg"
     ],
     "olmo2:dev:1b": [
         r"arc_challenge:rc.*",
@@ -649,4 +650,58 @@ ALL_EVAL_TASKS = {
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
     ]
+}
+
+WEIGHTED_AVERAGES = {
+    # Weights optimize rank correlation with PC-1 on olmo2:dev:7b (decision accuracy(small, large PC-1) = 0.93)
+    "olmo3:dev:1b": {
+        "arc_challenge:rc::olmes:full": 0.007789936519206661,
+        "arc_easy:rc::olmes:full": 0.03281883238875384,
+        "codex_humaneval:3shot:bpb::none": 0.012272570146713532,
+        "coqa:rc::gen2mc": 0.14075909889025426,
+        "csqa:rc::olmes:full": 0.01817119799416872,
+        "drop:rc::gen2mc": 0.03591665258328764,
+        "hellaswag:rc::olmes:full": 0.05243562841203496,
+        "jeopardy:rc::gen2mc": 0.004885564136107669,
+        "lambada": 0.00202812006410535,
+        "lambada:bpb": 0.019189914401357686,
+        "mbpp:3shot:bpb::none": 0.01203136360719723,
+        "minerva": 0.034862848849393925,
+        "minerva:bpb": 0.012011201499438816,
+        "minerva_math_algebra::olmes": 0.014174192760425298,
+        "minerva_math_algebra:bpb::olmes": 0.008085919422588338,
+        "minerva_math_counting_and_probability::olmes": 0.006618132966681852,
+        "minerva_math_counting_and_probability:bpb::olmes": 0.0001063440027545779,
+        "minerva_math_geometry::olmes": 0.019622010755066126,
+        "minerva_math_geometry:bpb::olmes": 0.005622472157565639,
+        "minerva_math_intermediate_algebra::olmes": 0.014289201153838863,
+        "minerva_math_intermediate_algebra:bpb::olmes": 0.03539914576092408,
+        "minerva_math_number_theory::olmes": 0.025140318281722626,
+        "minerva_math_number_theory:bpb::olmes": 0.004405344034158969,
+        "minerva_math_prealgebra::olmes": 0.022007382598817918,
+        "minerva_math_prealgebra:bpb::olmes": 0.015810591316827983,
+        "minerva_math_precalculus::olmes": 0.021053682326997083,
+        "minerva_math_precalculus:bpb::olmes": 0.0012337268938155052,
+        "mmlu:rc": 0.008982175979216694,
+        "naturalqs:rc::gen2mc": 0.14290392609238564,
+        "piqa:rc::olmes:full": 0.004863581880247438,
+        "sciq::olmo1": 0.01509885116523989,
+        "socialiqa:rc::olmes:full": 0.018947602229047268,
+        "squad:rc::gen2mc": 0.17495549009883052,
+        "winogrande:rc::olmes:full": 0.05550697863082739
+    },
+    # Weights optimize rank correlation with PC-1 on olmo2:dev:7b (decision accuracy(large, large PC-1) = 0.97)
+    "olmo2:dev:7b": {
+        "arc_challenge:mc::olmes": 0.03584543692090886,
+        "arc_easy:mc::olmes": 0.12320284259879709,
+        "core:mc": 0.11497722790996075,
+        "gen": 0.13094051776092872,
+        "gsm8k::olmo1": 0.028636180141420504,
+        "hellaswag:mc::olmes": 0.02926220816911838,
+        "mmlu:mc": 0.11848491833965824,
+        "naturalqs::olmes": 0.22697429283992868,
+        "naturalqs:bpb::gen2mc": 0.0015843899386480732,
+        "naturalqs:bpb::olmes": 0.0007296410786384168,
+        "naturalqs:rc::gen2mc": 0.18936234430199234,
+    }
 }
