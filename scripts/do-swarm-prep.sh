@@ -11,7 +11,7 @@ group_id=8b10a86d # 48
 
 for i in $(seq -f "%04g" 0 47); do
   echo "Converting checkpoint $i..."
-  olmo-cookbook-eval convert "/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-5xC-30m-dense-${group_id}-${i}/step22100" \
+  olmo-cookbook-eval convert "/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-${group_id}-${i}/step22100" \
     -t olmo-core-v2 \
     --use-beaker \
     --beaker-workspace ai2/dolma2
