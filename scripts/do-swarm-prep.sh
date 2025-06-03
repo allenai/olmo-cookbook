@@ -4,8 +4,8 @@ group_id=8b10a86d # 48
 for i in $(seq -f "%04g" 0 47); do
     echo "Syncing checkpoint part-$i..."
     python -m cookbook.remote \
-        s3://ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-$group_id-$i/step22200 \
-        weka://oe-data-default/ai2-llm/checkpoints/ai2-tylerm/5xC-30m-$group_id-$i/step2210 \
+        s3://ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-$group_id-$i/step22200/ \
+        weka://oe-data-default/ai2-llm/checkpoints/ai2-tylerm/5xC-30m-$group_id-$i/step22200 \
         --workspace ai2/dolma2
 done
 
