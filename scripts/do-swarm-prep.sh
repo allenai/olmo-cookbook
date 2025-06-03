@@ -15,7 +15,7 @@ count_jobs() {
 }
 
 # Process all checkpoints with max 8 concurrent jobs
-for i in $(seq -f "%04g" 0 23); do
+for i in $(seq -f "%04g" 24 47); do
     # Wait until we have fewer than 8 jobs running
     while [ $(count_jobs) -ge 8 ]; do
         sleep 5
