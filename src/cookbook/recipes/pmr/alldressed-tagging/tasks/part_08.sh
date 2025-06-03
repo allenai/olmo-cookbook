@@ -56,7 +56,7 @@ mkdir -p "$OUTPUT_DIR"
 echo "Looking for files matching pattern: /mnt/raid0/input/partitioned/chunk___*__*.jsonl.zst"
 for file in /mnt/raid0/input/partitioned/chunk___*__*.jsonl.zst; do
   # Extract the label from the filename
-  label=$(basename "$file" | sed 's/.*__\([^.]*\)\..*//')
+  label=$(basename "$file" | sed 's/.*__\([^.]*\)\..*/\1/')
 
   # Fix typo in label electronics_and_hardare
   label=$(echo "$label" | sed 's/electronics_and_hardare/electronics_and_hardware/g')
