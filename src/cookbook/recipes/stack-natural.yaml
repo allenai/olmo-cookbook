@@ -1,0 +1,87 @@
+name: 1b-5xC-stack-natural
+description: Cookbook 1Bv2-5xC on stack-edu with natural distribution
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: urgent
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+    - domain: stack-edu:C
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/C/*.npy
+      weight: 0.03460056269174912
+    - domain: stack-edu:Cpp
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Cpp/*.npy
+      weight: 0.09156360629059476
+    - domain: stack-edu:CSharp
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/CSharp/*.npy
+      weight: 0.0526455590327234
+    - domain: stack-edu:Go
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Go/*.npy
+      weight: 0.01021994070977727
+    - domain: stack-edu:Java
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Java/*.npy
+      weight: 0.22906693712748255
+    - domain: stack-edu:JavaScript
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/JavaScript/*.npy
+      weight: 0.06493968798335928
+    - domain: stack-edu:Markdown
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Markdown/*.npy
+      weight: 0.21129994976351243
+    - domain: stack-edu:PHP
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/PHP/*.npy
+      weight: 0.054037656133722814
+    - domain: stack-edu:Python
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Python/*.npy
+      weight: 0.1316615352877947
+    - domain: stack-edu:Ruby
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Ruby/*.npy
+      weight: 0.01013357355709978
+    - domain: stack-edu:Rust
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Rust/*.npy
+      weight: 0.010365005141533472
+    - domain: stack-edu:Shell 
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Shell/*.npy
+      weight: 0.018579793390165453
+    - domain: stack-edu:SQL
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/SQL/*.npy
+      weight: 0.0516148475747224
+    - domain: stack-edu:Swift
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Swift/*.npy
+      weight: 0.01103414755816106
+    - domain: stack-edu:TypeScript
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/TypeScript/*.npy
+      weight: 0.018237197757601475
+downstream_evaluators:
+- olmo2_dev_1b
+- codex_humaneval_gold_bpb_0shot
+- codex_mbpp_gold_bpb_0shot
+- basic_skills_coding_rc_5shot
