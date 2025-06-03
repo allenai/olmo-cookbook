@@ -9,13 +9,31 @@ group_id=8b10a86d # 48
 #         --workspace ai2/dolma2
 # done
 
+# Function to count running background jobs
+count_jobs() {
+    jobs -r | wc -l
+}
+
+# Process all checkpoints with max 8 concurrent jobs
 for i in $(seq -f "%04g" 0 23); do
-  echo "Converting checkpoint $i..."
-  olmo-cookbook-eval convert "/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-${group_id}-${i}/step22100" \
-    -t olmo-core-v2 \
-    --use-beaker \
-    --beaker-workspace ai2/dolma2
+    # Wait until we have fewer than 8 jobs running
+    while [ $(count_jobs) -ge 8 ]; do
+        sleep 5
+    done
+
+    echo "Converting checkpoint $i..."
+    {
+        olmo-cookbook-eval convert "/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-${group_id}-${i}/step22100" \
+            -t olmo-core-v2 \
+            --use-beaker \
+            --beaker-workspace ai2/dolma2
+        echo "Completed checkpoint $i"
+    } &
 done
+
+# Wait for all remaining jobs to complete
+wait
+echo "All conversion tasks launched!"
 
 
 # # Generate full range and exclude specific numbers
