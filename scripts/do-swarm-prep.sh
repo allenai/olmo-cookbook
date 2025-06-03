@@ -1,21 +1,21 @@
 # 6d2d4c39
 group_id=8b10a86d # 48
 
-for i in $(seq -f "%04g" 29 47); do
-    echo "Syncing checkpoint part-$i..."
-    python -m cookbook.remote \
-        s3://ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-$group_id-$i/step22100/ \
-        weka://oe-data-default/ai2-llm/checkpoints/ai2-tylerm/5xC-30m-$group_id-$i/step22100 \
-        --workspace ai2/dolma2
-done
-
-# for i in $(seq -f "%04g" 2 47); do
-#   echo "Converting checkpoint $i..."
-#   olmo-cookbook-eval convert "/oe-training-default/ai2-llm/checkpoints/mayeec/olmo2-5xC-30m-dense-${group_id}-${i}/step22100" \
-#     -t olmo-core-v2 \
-#     --use-beaker \
-#     --beaker-workspace ai2/dolma2
+# for i in $(seq -f "%04g" 29 47); do
+#     echo "Syncing checkpoint part-$i..."
+#     python -m cookbook.remote \
+#         s3://ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-$group_id-$i/step22100/ \
+#         weka://oe-data-default/ai2-llm/checkpoints/ai2-tylerm/5xC-30m-$group_id-$i/step22100 \
+#         --workspace ai2/dolma2
 # done
+
+for i in $(seq -f "%04g" 0 47); do
+  echo "Converting checkpoint $i..."
+  olmo-cookbook-eval convert "/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-5xC-30m-dense-${group_id}-${i}/step22100" \
+    -t olmo-core-v2 \
+    --use-beaker \
+    --beaker-workspace ai2/dolma2
+done
 
 # for i in "${INCLUDED[@]}"; do
 #     CHECKPOINT="/oe-data-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-${group_id}-${i}/step22100-hf"
