@@ -559,10 +559,11 @@ ALL_DISPLAY_TASKS = {
         "^jeopardy.*gen2mc",
         "^lambada.*",
         "^mbpp.*3shot",
+        "^medmcqa.*none",
         # "minerva",
         "^minerva.*olmes$",     # doesn't return average
         # "mmlu:rc",
-        "^mmlu.*rc.*olmes$",    # doesn't return average
+        "^mmlu.*olmes$",    # doesn't return average
         "^mt_mbpp.*",           # still returns average
         "^naturalqs.*gen2mc",
         "^piqa.*olmes",
@@ -610,6 +611,7 @@ ALL_EVAL_TASKS = {
         "jeopardy:rc::gen2mc",
         "lambada",
         "mbpp:3shot:bpb::none",
+        "medmcqa:rc::none",
         "minerva_math::olmes",
         "mmlu:rc::olmes",
         "mt_mbpp",
