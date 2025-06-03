@@ -39,7 +39,7 @@ s5cmd cp -sp "$SRC_S3_PREFIX/${X}/*" "/mnt/raid0/input/"
 
 # Step 2: Run the tag operation
 echo "Running tag operation..."
-cargo run --release -- map --input-dir /mnt/raid0/input --output-dir /mnt/raid0/input/annotated/  --config examples/tag_alldressed/tag-docs.yaml  > "/mnt/raid0/tag-docs-${X}.log"
+cargo run --release -- map --input-dir /mnt/raid0/input --output-dir /mnt/raid0/input/annotated/  --config examples/tag_alldressed/tag-docs.yaml  > "/mnt/raid0/logs/tag-docs-${X}.log"
 
 
 # Step 3: Run the partition operation
