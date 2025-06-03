@@ -1,4 +1,4 @@
-template = '''#!/bin/bash
+template = """#!/bin/bash
 
 SRC_S3_PREFIX="s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/sa_minlen500/filtered"
 DST_S3_PREFIX="s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/sa_minlen500/filtered/may31_lr05_ng3_n3M6_ova_combined-v3-partitioned"
@@ -72,7 +72,8 @@ echo "Copying output to S3..."
 s5cmd cp -sp /mnt/raid0/output/partitioned/* "$DST_S3_PREFIX/${X}/"
 s5cmd cp -sp "/mnt/raid0/*.log" $DST_S3_PREFIX/logs/
 
-echo "Processing complete for chunk $X"'''
+echo "Processing complete for chunk $X"
+"""
 
 
 for i in range(32):
