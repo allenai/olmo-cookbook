@@ -10,8 +10,6 @@ else
   echo "Models directory already contains files, skipping download..."
 fi
 
-cd ~/datamap-rs && git checkout undfined/tag-alldressed && git pull
-
 SRC_S3_PREFIX="s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/sa_minlen500/filtered"
 DST_S3_PREFIX="s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/sa_minlen500/filtered/may31_lr05_ng3_n3M6_ova_combined-v3-partitioned"
 
