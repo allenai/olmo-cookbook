@@ -54,11 +54,9 @@ mkdir -p "$OUTPUT_DIR"
 
 # Create directories and move files based on labels
 echo "Looking for files matching pattern: /mnt/raid0/input/partitioned/chunk___*__*.jsonl.zst"
-found_files=0
-
 for file in /mnt/raid0/input/partitioned/chunk___*__*.jsonl.zst; do
   # Extract the label from the filename
-  label=$(basename "$file" | sed 's/chunk___[^_]*__\([^.]*\)\..*//')
+  label=$(basename "$file" | sed 's/.*__\([^.]*\)\..*//')
 
   # Fix typo in label electronics_and_hardare
   label=$(echo "$label" | sed 's/electronics_and_hardare/electronics_and_hardware/g')

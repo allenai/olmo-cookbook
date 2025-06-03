@@ -39,7 +39,7 @@ s5cmd cp -sp "$SRC_S3_PREFIX/${X}/*" "/mnt/raid0/input/"
 
 # Step 2: Run the tag operation
 echo "Running tag operation..."
-cargo run --release -- map --input-dir /mnt/raid0/input --output-dir /mnt/raid0/input/annotated/  --config examples/tag_alldressed/tag-docs.yaml  > "/mnt/raid0/tag-docs-${X}.log"
+cargo run --release -- map --input-dir /mnt/raid0/input --output-dir /mnt/raid0/input/annotated/  --config examples/tag_alldressed/tag-docs.yaml  > "/mnt/raid0/logs/tag-docs-${X}.log"
 
 
 # Step 3: Run the partition operation
@@ -54,11 +54,9 @@ mkdir -p "$OUTPUT_DIR"
 
 # Create directories and move files based on labels
 echo "Looking for files matching pattern: /mnt/raid0/input/partitioned/chunk___*__*.jsonl.zst"
-found_files=0
-
 for file in /mnt/raid0/input/partitioned/chunk___*__*.jsonl.zst; do
   # Extract the label from the filename
-  label=$(basename "$file" | sed 's/chunk___[^_]*__\([^.]*\)\..*//')
+  label=$(basename "$file" | sed 's/.*__\([^.]*\)\..*//')
 
   # Fix typo in label electronics_and_hardare
   label=$(echo "$label" | sed 's/electronics_and_hardare/electronics_and_hardware/g')
