@@ -38,7 +38,7 @@ for num in "${FULL_RANGE[@]}"; do
 done
 
 for i in "${INCLUDED[@]}"; do
-    CHECKPOINT="/oe-data-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-${group_id}-${i}/step22100-hf"
+    CHECKPOINT="/oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo2-pdfs-datadelve-5xC-30m-augusta-2048-${group_id}-${i}/step22100-hf"
 
     echo "Evaluating checkpoint: $CHECKPOINT"
 
