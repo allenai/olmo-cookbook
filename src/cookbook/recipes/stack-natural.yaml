@@ -20,66 +20,66 @@ metrics_config:
   entity: ai2-llm
 dataset:
   sources:
-    - domain: stack-edu:C
+    - name: stack-edu:C
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/C/*.npy
-      weight: 0.03460056269174912
-    - domain: stack-edu:Cpp
+      target_ratio: 0.03460056269174912
+    - name: stack-edu:Cpp
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Cpp/*.npy
-      weight: 0.09156360629059476
-    - domain: stack-edu:CSharp
+      target_ratio: 0.09156360629059476
+    - name: stack-edu:CSharp
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/CSharp/*.npy
-      weight: 0.0526455590327234
-    - domain: stack-edu:Go
+      target_ratio: 0.0526455590327234
+    - name: stack-edu:Go
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Go/*.npy
-      weight: 0.01021994070977727
-    - domain: stack-edu:Java
+      target_ratio: 0.01021994070977727
+    - name: stack-edu:Java
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Java/*.npy
-      weight: 0.22906693712748255
-    - domain: stack-edu:JavaScript
+      target_ratio: 0.22906693712748255
+    - name: stack-edu:JavaScript
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/JavaScript/*.npy
-      weight: 0.06493968798335928
-    - domain: stack-edu:Markdown
+      target_ratio: 0.06493968798335928
+    - name: stack-edu:Markdown
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Markdown/*.npy
-      weight: 0.21129994976351243
-    - domain: stack-edu:PHP
+      target_ratio: 0.21129994976351243
+    - name: stack-edu:PHP
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/PHP/*.npy
-      weight: 0.054037656133722814
-    - domain: stack-edu:Python
+      target_ratio: 0.054037656133722814
+    - name: stack-edu:Python
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Python/*.npy
-      weight: 0.1316615352877947
-    - domain: stack-edu:Ruby
+      target_ratio: 0.1316615352877947
+    - name: stack-edu:Ruby
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Ruby/*.npy
-      weight: 0.01013357355709978
-    - domain: stack-edu:Rust
+      target_ratio: 0.01013357355709978
+    - name: stack-edu:Rust
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Rust/*.npy
-      weight: 0.010365005141533472
-    - domain: stack-edu:Shell 
+      target_ratio: 0.010365005141533472
+    - name: stack-edu:Shell 
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Shell/*.npy
-      weight: 0.018579793390165453
-    - domain: stack-edu:SQL
+      target_ratio: 0.018579793390165453
+    - name: stack-edu:SQL
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/SQL/*.npy
-      weight: 0.0516148475747224
-    - domain: stack-edu:Swift
+      target_ratio: 0.0516148475747224
+    - name: stack-edu:Swift
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Swift/*.npy
-      weight: 0.01103414755816106
-    - domain: stack-edu:TypeScript
+      target_ratio: 0.01103414755816106
+    - name: stack-edu:TypeScript
       paths:
         - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/TypeScript/*.npy
-      weight: 0.018237197757601475
+      target_ratio: 0.018237197757601475
 downstream_evaluators:
 - olmo2_dev_1b
 - codex_humaneval_gold_bpb_0shot
