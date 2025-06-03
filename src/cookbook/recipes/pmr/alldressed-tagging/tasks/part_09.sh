@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Check if /mnt/raid0/models is empty and download artifacts if needed
+if [ ! -d "/mnt/raid0/models" ] || [ -z "$(ls -A /mnt/raid0/models)" ]; then
+  echo "Models directory is empty, downloading artifacts..."
+  mkdir -p "/mnt/raid0/models"
+  s5cmd cp -sp s3://ai2-llm/pretraining-data/sources/WebOrganizer/fasttext/models/Topic/may31_lr05_ng3_n3M6_ova_combined-v3.bin /mnt/raid0/models/
+  s5cmd cp -sp s3://ai2-llm/pretraining-data/sources/dclm/refinedweb/dolma_reformat/pools/fasttext_models/oh_uc_wc_eli5_fasttext_model_bigram_200k.bin /mnt/raid0/models/
+else
+  echo "Models directory already contains files, skipping download..."
+fi
+
 SRC_S3_PREFIX="s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/sa_minlen500/filtered"
 DST_S3_PREFIX="s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/sa_minlen500/filtered/may31_lr05_ng3_n3M6_ova_combined-v3-partitioned"
 
