@@ -50,7 +50,13 @@ source ~/.bashrc
 
 
 # Download all the artifacts needed for tagging
-s5cmd cp s3://ai2-llm/pretraining-data/sources/WebOrganizer/fasttext/models/Topic/may31_lr05_ng3_n3M6_ova_combined-v3.bin .
+s5cmd cp -sp s3://ai2-llm/pretraining-data/sources/WebOrganizer/fasttext/models/Topic/may31_lr05_ng3_n3M6_ova_combined-v3.bin /mnt/raid0/models/
+
+# TODO(undfined): UPDATE THIS WITH ALEX'S S3 PATHS
+
+s5cmd cp -sp s3://ai2-llm/pretraining-data/sources/WebOrganizer/fasttext/models/Topic/may31_lr05_ng3_n3M6_ova_combined-v3.bin /mnt/raid0/models/
+
+s5cmd cp -sp s3://ai2-llm/pretraining-data/sources/WebOrganizer/fasttext/models/Topic/may31_lr05_ng3_n3M6_ova_combined-v3.bin /mnt/raid0/models/
 
 
 sudo yum install git -y
