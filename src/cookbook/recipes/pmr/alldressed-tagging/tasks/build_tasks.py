@@ -1,5 +1,7 @@
 template = """#!/bin/bash
 
+set -e
+
 # Check if /mnt/raid0/models is empty and download artifacts if needed
 if [ ! -d "/mnt/raid0/models" ] || [ -z "$(ls -A /mnt/raid0/models)" ]; then
   echo "Models directory is empty, downloading artifacts..."
