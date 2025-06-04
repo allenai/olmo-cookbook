@@ -1,5 +1,5 @@
-name: 1b-5xC-stack-log-linear
-description: Cookbook 1Bv2-5xC on stack-edu with proposed mix computed using log-linear regression
+name: 1b-5xC-pdf-natural
+description: Cookbook 1Bv2-5xC on s2pdfs v2 with natural distribution
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
@@ -116,7 +116,3 @@ dataset:
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/travel/*.npy
       weight: 0.0019964765641576707
-downstream_evaluators:
-- codex_humaneval_gold_bpb_0shot
-- codex_mbpp_gold_bpb_0shot
-- basic_skills_coding_rc_5shot
