@@ -1,0 +1,122 @@
+name: 1b-5xC-stack-log-linear
+description: Cookbook 1Bv2-5xC on stack-edu with proposed mix computed using log-linear regression
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: urgent
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+    - domain: adult
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/adult/*.npy
+      weight: 0.000283127063134386
+    - domain: art_design
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/art_design/*.npy
+      weight: 0.006646628725016028
+    - domain: crime_law
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/crime_law/*.npy
+      weight: 0.040848728419931014
+    - domain: education_jobs
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/education_jobs/*.npy
+      weight: 0.1273899629469796
+    - domain: entertainment
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/entertainment/*.npy
+      weight: 0.005442431812522176
+    - domain: fashion_beauty
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/fashion_beauty/*.npy
+      weight: 0.0005364340671055952
+    - domain: finance_business
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/finance_business/*.npy
+      weight: 0.055756066758070766
+    - domain: food_dining
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/food_dining/*.npy
+      weight: 0.0021957212758176555
+    - domain: games
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/games/*.npy
+      weight: 0.0022579990986179655
+    - domain: hardware
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/hardware/*.npy
+      weight: 0.0061945168184177534
+    - domain: health
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/health/*.npy
+      weight: 0.11278157539057672
+    - domain: history
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/history/*.npy
+      weight: 0.025460809390109695
+    - domain: home_hobbies
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/home_hobbies/*.npy
+      weight: 0.00346513700488824
+    - domain: industrial
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/industrial/*.npy
+      weight: 0.02572728025343408
+    - domain: literature
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/literature/*.npy
+      weight: 0.030935949700008156
+    - domain: politics
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/politics/*.npy
+      weight: 0.037985186698659267
+    - domain: religion
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/religion/*.npy
+      weight: 0.02354356787186089
+    - domain: science_tech
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/science_tech/*.npy
+      weight: 0.42509452812562226
+    - domain: social_life
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/social_life/*.npy
+      weight: 0.0018858706266466287
+    - domain: software_dev
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/software_dev/*.npy
+      weight: 0.03756850077225305
+    - domain: software
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/software/*.npy
+      weight: 0.007603454204355843
+    - domain: sports_fitness
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/sports_fitness/*.npy
+      weight: 0.0050395840926855525
+    - domain: transportation
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/transportation/*.npy
+      weight: 0.015246332945775662
+    - domain: travel
+      paths:
+        - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/travel/*.npy
+      weight: 0.0019964765641576707
+downstream_evaluators:
+- codex_humaneval_gold_bpb_0shot
+- codex_mbpp_gold_bpb_0shot
+- basic_skills_coding_rc_5shot
