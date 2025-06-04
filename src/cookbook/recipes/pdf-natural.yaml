@@ -20,99 +20,99 @@ metrics_config:
   entity: ai2-llm
 dataset:
   sources:
-    - domain: adult
+    - name: adult
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/adult/*.npy
-      weight: 0.000283127063134386
-    - domain: art_design
+      target_ratio: 0.000283127063134386
+    - name: art_design
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/art_design/*.npy
-      weight: 0.006646628725016028
-    - domain: crime_law
+      target_ratio: 0.006646628725016028
+    - name: crime_law
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/crime_law/*.npy
-      weight: 0.040848728419931014
-    - domain: education_jobs
+      target_ratio: 0.040848728419931014
+    - name: education_jobs
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/education_jobs/*.npy
-      weight: 0.1273899629469796
-    - domain: entertainment
+      target_ratio: 0.1273899629469796
+    - name: entertainment
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/entertainment/*.npy
-      weight: 0.005442431812522176
-    - domain: fashion_beauty
+      target_ratio: 0.005442431812522176
+    - name: fashion_beauty
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/fashion_beauty/*.npy
-      weight: 0.0005364340671055952
-    - domain: finance_business
+      target_ratio: 0.0005364340671055952
+    - name: finance_business
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/finance_business/*.npy
-      weight: 0.055756066758070766
-    - domain: food_dining
+      target_ratio: 0.055756066758070766
+    - name: food_dining
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/food_dining/*.npy
-      weight: 0.0021957212758176555
-    - domain: games
+      target_ratio: 0.0021957212758176555
+    - name: games
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/games/*.npy
-      weight: 0.0022579990986179655
-    - domain: hardware
+      target_ratio: 0.0022579990986179655
+    - name: hardware
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/hardware/*.npy
-      weight: 0.0061945168184177534
-    - domain: health
+      target_ratio: 0.0061945168184177534
+    - name: health
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/health/*.npy
-      weight: 0.11278157539057672
-    - domain: history
+      target_ratio: 0.11278157539057672
+    - name: history
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/history/*.npy
-      weight: 0.025460809390109695
-    - domain: home_hobbies
+      target_ratio: 0.025460809390109695
+    - name: home_hobbies
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/home_hobbies/*.npy
-      weight: 0.00346513700488824
-    - domain: industrial
+      target_ratio: 0.00346513700488824
+    - name: industrial
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/industrial/*.npy
-      weight: 0.02572728025343408
-    - domain: literature
+      target_ratio: 0.02572728025343408
+    - name: literature
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/literature/*.npy
-      weight: 0.030935949700008156
-    - domain: politics
+      target_ratio: 0.030935949700008156
+    - name: politics
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/politics/*.npy
-      weight: 0.037985186698659267
-    - domain: religion
+      target_ratio: 0.037985186698659267
+    - name: religion
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/religion/*.npy
-      weight: 0.02354356787186089
-    - domain: science_tech
+      target_ratio: 0.02354356787186089
+    - name: science_tech
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/science_tech/*.npy
-      weight: 0.42509452812562226
-    - domain: social_life
+      target_ratio: 0.42509452812562226
+    - name: social_life
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/social_life/*.npy
-      weight: 0.0018858706266466287
-    - domain: software_dev
+      target_ratio: 0.0018858706266466287
+    - name: software_dev
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/software_dev/*.npy
-      weight: 0.03756850077225305
-    - domain: software
+      target_ratio: 0.03756850077225305
+    - name: software
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/software/*.npy
-      weight: 0.007603454204355843
-    - domain: sports_fitness
+      target_ratio: 0.007603454204355843
+    - name: sports_fitness
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/sports_fitness/*.npy
-      weight: 0.0050395840926855525
-    - domain: transportation
+      target_ratio: 0.0050395840926855525
+    - name: transportation
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/transportation/*.npy
-      weight: 0.015246332945775662
-    - domain: travel
+      target_ratio: 0.015246332945775662
+    - name: travel
       paths:
         - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/travel/*.npy
-      weight: 0.0019964765641576707
+      target_ratio: 0.0019964765641576707
