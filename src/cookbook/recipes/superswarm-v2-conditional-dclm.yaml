@@ -37,99 +37,99 @@ dataset:
       - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.001980590216
   - name: dclm:adult_content
-    target_ratio: 0.000906562004282648
+    target_ratio: 0.0009065871139616072
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/adult_content/**/*.npy
   - name: dclm:art_and_design
-    target_ratio: 0.009899722412242984
+    target_ratio: 0.009899996611746585
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/art_and_design/**/*.npy
   - name: dclm:crime_and_law
-    target_ratio: 0.02316675896294391
+    target_ratio: 0.02316740062879505
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/crime_and_law/**/*.npy
   - name: dclm:education_and_jobs
-    target_ratio: 0.03396314741156572
+    target_ratio: 0.033964088112503905
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/education_and_jobs/**/*.npy
   - name: dclm:electronics_and_hardware
-    target_ratio: 0.02735327084464774
+    target_ratio: 0.02735402846723301
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/electronics_and_hardware/**/*.npy
   - name: dclm:entertainment
-    target_ratio: 0.07602138299492292
+    target_ratio: 0.07602348861209199
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/entertainment/**/*.npy
   - name: dclm:fashion_and_beauty
-    target_ratio: 0.000100848928752225
+    target_ratio: 0.00010085172203521325
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy
   - name: dclm:finance_and_business
-    target_ratio: 0.03220881077138922
+    target_ratio: 0.032209702881244154
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/finance_and_business/**/*.npy
   - name: dclm:food_and_dining
-    target_ratio: 0.011167616273570532
+    target_ratio: 0.011167925590813088
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/food_and_dining/**/*.npy
   - name: dclm:games
-    target_ratio: 0.05461025975064032
+    target_ratio: 0.054611772329022985
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/games/**/*.npy
   - name: dclm:health
-    target_ratio: 0.07879231319014594
+    target_ratio: 0.07879449555569769
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/health/**/*.npy
   - name: dclm:history_and_geography
-    target_ratio: 0.021464456634591553
+    target_ratio: 0.021465051150589998
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/history_and_geography/**/*.npy
   - name: dclm:home_and_hobbies
-    target_ratio: 0.007309825464563026
+    target_ratio: 0.007310027929887842
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/home_and_hobbies/**/*.npy
   - name: dclm:industrial
-    target_ratio: 0.01247344680805682
+    target_ratio: 0.012473792293796776
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/industrial/**/*.npy
   - name: dclm:literature
-    target_ratio: 0.05405981077747285
+    target_ratio: 0.054061308109687095
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/literature/**/*.npy
   - name: dclm:politics
-    target_ratio: 0.017204605889004395
+    target_ratio: 0.017205082416951137
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/politics/**/*.npy
   - name: dclm:religion
-    target_ratio: 0.01565363105014868
+    target_ratio: 0.015654064619665557
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/religion/**/*.npy
   - name: dclm:science_math_and_technology
-    target_ratio: 0.16651163255175596
+    target_ratio: 0.16651624454036415
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/science_math_and_technology/**/*.npy
   - name: dclm:social_life
-    target_ratio: 0.0036814099623017233
+    target_ratio: 0.003681511928876358
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/social_life/**/*.npy
   - name: dclm:software
-    target_ratio: 0.03751070901299764
+    target_ratio: 0.037511747973219225
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/software/**/*.npy
   - name: dclm:software_development
-    target_ratio: 0.08828975477196396
+    target_ratio: 0.08829220019476708
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/software_development/**/*.npy
   - name: dclm:sports_and_fitness
-    target_ratio: 0.010359298442509898
+    target_ratio: 0.010359585371210754
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/sports_and_fitness/**/*.npy
   - name: dclm:transportation
-    target_ratio: 0.007764386688491052
+    target_ratio: 0.007764601744114543
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/transportation/**/*.npy
   - name: dclm:travel_and_tourism
-    target_ratio: 0.0017404822943744433
+    target_ratio: 0.0017405305017242324
     paths:
       - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/travel_and_tourism/**/*.npy
   - name: s2pdf
