@@ -154,6 +154,9 @@ class MiniFrame:
 
         console.print(table)
 
+    def to_csv(self) -> str:
+        return "\n".join([",".join([col for col in self.columns])] + [",".join([str(v) for v in row.values]) for row in self.rows])
+
     def __getitem__(self, item: Iterable[str]) -> float | None:
         try:
             col, row = item
