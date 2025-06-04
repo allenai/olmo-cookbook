@@ -1,5 +1,5 @@
-name: 1b-5xC-superswarm-v2-natural
-description: Cookbook 1Bv2-5xC on superswarm v2 (fasttext dclm, v2 pdfs) with natural source distribution
+name: 1b-5xC-superswarm-v2-conditional-dclm-natural
+description: Cookbook 1Bv2-5xC on superswarm v2 (fasttext dclm, v2 pdfs) with natural source distribution and conditional DCLM p*
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
