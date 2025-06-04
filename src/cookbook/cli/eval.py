@@ -14,6 +14,7 @@ from cookbook.cli.utils import (
 )
 from cookbook.constants import (
     ALL_DISPLAY_TASKS,
+    ALL_EVAL_TASKS,
     ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
@@ -76,6 +77,11 @@ logger = logging.getLogger(__name__)
     default=None,
     help="Maximum sequence length of the model (olmo-core only)",
 )
+@click.option(
+    "--skip-validation",
+    is_flag=True,
+    help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -103,6 +109,7 @@ def convert_checkpoint(
     env_name: str,
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
+    skip_validation: bool = False,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -131,6 +138,7 @@ def convert_checkpoint(
         unsharded_output_suffix=unsharded_output_suffix,
         use_beaker=use_beaker,
         use_system_python=use_system_python,
+        skip_validation=skip_validation,
     )
 
 
@@ -224,6 +232,7 @@ def convert_checkpoint(
     help="Model backend (hf for Hugging Face, vllm for vLLM)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
+@click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
 @click.option(
     "--oe-eval-commit",
     type=str,
@@ -311,6 +320,7 @@ def evaluate_model(
     batch_size: int,
     dry_run: bool,
     beaker_image: str,
+    beaker_retries: int,
     use_gantry: bool,
     gantry_args: str,
     force_venv: bool,
@@ -339,6 +349,9 @@ def evaluate_model(
         key, value = arg.split("=")
         parsed_model_args[key] = value
 
+    # expand tasks; note must be aliases or task suites in oe-eval
+    tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+    
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
@@ -360,6 +373,7 @@ def evaluate_model(
         batch_size=batch_size,
         dry_run=dry_run,
         beaker_image=beaker_image,
+        beaker_retries=beaker_retries,
         use_gantry=use_gantry,
         gantry_args=gantry_args,
         python_venv_force=force_venv,
@@ -448,7 +462,7 @@ def get_results(
 
     # if a task starts with *, it means it is a named group and we need to expand it
     tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-
+    
     # after that, we check for task patterns
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
@@ -487,7 +501,7 @@ def get_results(
             else:
                 # Expand display tasks
                 requested_tasks.update(ALL_DISPLAY_TASKS.get(task, [task]))
-        
+
         for model, missing_tasks in tables.missing_tasks.items():
             # Only include tasks that were actually requested
             for task in missing_tasks:

@@ -12,7 +12,6 @@ import yaml
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
-    check_beaker_dependencies,
     discover_weka_mount,
     download_tokenizer,
     install_beaker_py,
@@ -49,6 +48,7 @@ def convert_olmo_core_v2(
     huggingface_output_suffix: str = "hf",
     olmo_core_v2_commit_hash: str = OLMO_CORE_V2_COMMIT_HASH,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
+    skip_validation: bool = False,
     env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
@@ -125,6 +125,7 @@ def convert_olmo_core_v2(
             str(max_sequence_length),
             "--huggingface-output-dir",
             huggingface_output_dir,
+            ("--skip-validation" if skip_validation else ""),
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
 
@@ -408,6 +409,7 @@ def run_checkpoint_conversion(
     python_venv_name: str,
     python_venv_force: bool,
     max_sequence_length: Optional[int] = None,
+    skip_validation: bool = False,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -469,6 +471,7 @@ def run_checkpoint_conversion(
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
             (f"--max-sequence-length {max_sequence_length}" if max_sequence_length is not None else ""),
             "--use-system-python",
+            ("--skip-validation" if skip_validation else ""),
         ]
         remote_command_str = " ".join(remote_command)
 
@@ -540,6 +543,7 @@ def run_checkpoint_conversion(
             huggingface_output_suffix=huggingface_output_suffix,
             olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
             transformers_commit_hash=huggingface_transformers_commit_hash,
+            skip_validation=skip_validation,
             env=env,
         )
     else:
