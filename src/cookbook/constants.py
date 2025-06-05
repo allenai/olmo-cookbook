@@ -618,6 +618,14 @@ BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
 # use these tasks to launch oe-eval jobs
 ALL_EVAL_TASKS = {
+    "backfill:tmp:davidh": [
+        "medqa_en:rc::none",
+        "lab_bench_protocolqa",
+        "lab_bench_dbqa",
+        "sciq:rc::olmo3",
+        "qasper_yesno:rc::olmes",
+        "sciriff_yesno:rc::olmes",
+    ],
     "olmo3:dev:1b:vllm": [
         "arc_challenge:rc::olmes:full",
         "arc_easy:rc::olmes:full",
