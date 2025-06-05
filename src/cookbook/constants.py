@@ -716,12 +716,12 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
 
 
 SHORT_NAMES = {
-    r"::olmes$": "",
-    r"^gsm8k::olmo1$": "GSM*",
-    r"^naturalqs": "NQ",
-    r"^(arc\_\w)\w+": r"\1",
-    r"^hellaswag": "HSwag",
-    r"^winogrande": "WinoG",
+    # r"::olmes$": "",
+    # r"^gsm8k::olmo1$": "GSM*",
+    # r"^naturalqs": "NQ",
+    # r"^(arc\_\w)\w+": r"\1",
+    # r"^hellaswag": "HSwag",
+    # r"^winogrande": "WinoG",
 }
 
 
