@@ -1,5 +1,5 @@
-name: 1b-5xC-superswarm-v2-natural
-description: To be used as a reference for regmixer.
+name: 1b-5xC-superswarm-conditional-dclm-log-linear
+description: Computed from superswarm 4252db91 conditioned on DCLM p* (log-linear, unconstrained)
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4

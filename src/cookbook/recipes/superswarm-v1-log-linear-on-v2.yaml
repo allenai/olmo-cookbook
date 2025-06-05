@@ -1,5 +1,5 @@
-name: 1b-5xC-superswarm-v2-natural
-description: To be used as a reference for regmixer.
+name: 1b-5xC-superswarm-v1-log-linear-on-v2
+description: Proposed mix from original superswarm (unconstrained), applied onto v2 dataset (FT DCLM, different s2pdf and pes2o)
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
