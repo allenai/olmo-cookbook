@@ -602,6 +602,14 @@ BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
 # use these tasks to launch oe-eval jobs
 ALL_EVAL_TASKS = {
+    "backfill:tmp:davidh": [
+        "medqa_en:rc::none",
+        "lab_bench_protocolqa",
+        "lab_bench_dbqa",
+        "sciq:rc::olmo3",
+        "qasper_yesno:rc::olmes",
+        "sciriff_yesno:rc::olmes",
+    ],
     "olmo3:dev:1b:vllm": [
         "arc_challenge:rc::olmes:full",
         "arc_easy:rc::olmes:full",
@@ -620,7 +628,7 @@ ALL_EVAL_TASKS = {
         "mt_mbpp",
         "naturalqs:rc::gen2mc",
         "piqa:rc::olmes:full",
-        "sciq::olmo1",                  # no :full because no olmes, fix in eval
+        "sciq:rc::olmo3"
         "socialiqa:rc::olmes:full",
         "squad:rc::gen2mc",
         "winogrande:rc::olmes:full",
