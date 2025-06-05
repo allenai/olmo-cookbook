@@ -1,5 +1,5 @@
-name: 1b-5xC-superswarm-repetition-constraint-4
-description: Superswarm proposed mix using repetition constraints (factor=4)
+name: 1b-5xC-superswarm-repetition-constraint-2
+description: Superswarm proposed mix using repetition constraints (factor=2)
 budget: ai2/oe-data
 workspace: ai2/dolma2
 nodes: 4
