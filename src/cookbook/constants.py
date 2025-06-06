@@ -502,7 +502,7 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
-    "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
+    "mt_mbpp": MULTILINGUAL_MBPP_TASKS
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
@@ -547,6 +547,51 @@ ALL_DISPLAY_TASKS = {
         r"^mmlu:rc$",
         r"^core:rc$",
     ],
+    "olmo3:dev:1b": [
+        "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
+        "^arc_easy.*olmes",
+        "^basic_skills.*olmes",
+        "^codex_humaneval.*3shot",
+        "^coqa.*gen2mc",
+        "^csqa.*olmes",
+        "^drop.*gen2mc",
+        "^hellaswag.*olmes",
+        "^jeopardy.*gen2mc",
+        "^lab_bench.*",
+        "^lambada.*",
+        "^mbpp.*3shot",
+        "^medmcqa.*none",
+        "^medqa.*none",
+        "^minerva.*olmes$",     # doesn't return average
+        # "minerva",
+        "^mmlu.*olmes$",    # doesn't return average
+        # "mmlu:rc",
+        "^mt_mbpp.*",           # still returns average
+        "^naturalqs.*gen2mc",
+        "^piqa.*olmes",
+        "^qasper_yesno.*olmes",
+        "^sciq.*olmo3",
+        "^sciriff_yesno.*olmes",
+        "^socialiqa.*olmes",
+        "^squad.*gen2mc",
+        "^winogrande.*olmes",
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ],
+    "olmo3:dev:1b:mini": [
+        "^arc_challenge:rc.*",
+        "^arc_easy:rc.*",
+        "^codex_humaneval.*3shot",
+        "^hellaswag:rc.*olmes",
+        "^mbpp.*3shot",
+        "^minerva$",
+        "^mt_mbpp$",
+        "^winogrande:rc.*olmes",
+        "basic:rc",
+        "core:rc"
+        "mmlu:bpb",
+        "mmlu:rc",
+    ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
     "helmet:32k": [r"^helmet:32k$"],
@@ -569,3 +614,39 @@ OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
+
+# use these tasks to launch oe-eval jobs
+ALL_EVAL_TASKS = {
+    "olmo3:dev:1b:vllm": [
+        "arc_challenge:rc::olmes:full",
+        "arc_easy:rc::olmes:full",
+        "basic_skills:rc::olmes",
+        "codex_humaneval:3shot:bpb::none",
+        "coqa:rc::gen2mc",
+        "csqa:rc::olmes:full",
+        "drop:rc::gen2mc",
+        "hellaswag:rc::olmes:full",
+        "jeopardy:rc::gen2mc",
+        "lab_bench_dbqa",
+        "lab_bench_protocolqa",
+        "lambada",
+        "mbpp:3shot:bpb::none",
+        "medmcqa:rc::none",
+        "medqa_en:rc::none",
+        "minerva_math::olmes",
+        "mmlu:rc::olmes",
+        "mt_mbpp",
+        "naturalqs:rc::gen2mc",
+        "piqa:rc::olmes:full",
+        "qasper_yesno:rc::olmes",
+        "sciq:rc::olmo3",
+        "sciriff_yesno:rc::olmes",
+        "socialiqa:rc::olmes:full",
+        "squad:rc::gen2mc",
+        "winogrande:rc::olmes:full",
+    ],
+    "olmo3:dev:1b:hf": [
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ]
+}

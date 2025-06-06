@@ -45,7 +45,7 @@ OLMO2_DEV_1B_TASKS = [
 
 TASK_GROUPS: Dict[str, List[str]] = {
     "all": list(list_tasks()),
-    "olmo2_dev_1b": OLMO2_DEV_1B_TASKS,
+    "olmo2_dev_1b": OLMO2_DEV_1B_TASKS
 }
 
 
