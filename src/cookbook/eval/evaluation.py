@@ -62,8 +62,10 @@ def evaluate_checkpoint(
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
     print(f"Using Python virtual environment at {env.name}")
-
+    oe_eval_commit = "632c4972520337e3c4dff7e54c6f46388a8c62cc"
     # Install oe-eval toolkit
+    print(f"Using oe-eval-commit hash {oe_eval_commit}")
+    
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
