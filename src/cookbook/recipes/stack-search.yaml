@@ -24,77 +24,77 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/C/*.npy
     target_ratio: 2.0e-05
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Cpp
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Cpp/*.npy
     target_ratio: 0.05385999999999999
-    repetition_factor: 2
+    repetition_factor: 20
   - name: CSharp
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/CSharp/*.npy
     target_ratio: 0.00291
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Go
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Go/*.npy
     target_ratio: 0.04632
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Java
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Java/*.npy
     target_ratio: 0.25826
-    repetition_factor: 2
+    repetition_factor: 20
   - name: JavaScript
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/JavaScript/*.npy
     target_ratio: 0.00535
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Markdown
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Markdown/*.npy
     target_ratio: 0.2895
-    repetition_factor: 2
+    repetition_factor: 20
   - name: PHP
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/PHP/*.npy
     target_ratio: 0.0006
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Python
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Python/*.npy
     target_ratio: 0.11963
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Ruby
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Ruby/*.npy
     target_ratio: 0.0005899999999999999
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Rust
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Rust/*.npy
     target_ratio: 0.018539999999999997
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Shell
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Shell/*.npy
     target_ratio: 0.08918999999999999
-    repetition_factor: 2
+    repetition_factor: 20
   - name: SQL
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/SQL/*.npy
     target_ratio: 0.01885
-    repetition_factor: 2
+    repetition_factor: 20
   - name: Swift
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Swift/*.npy
     target_ratio: 0.00818
-    repetition_factor: 2
+    repetition_factor: 20
   - name: TypeScript
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/TypeScript/*.npy
     target_ratio: 0.08819999999999999
-    repetition_factor: 2
+    repetition_factor: 20
 downstream_evaluators:
 - codex_humaneval_gold_bpb_0shot
 - codex_mbpp_gold_bpb_0shot
