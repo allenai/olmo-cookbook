@@ -338,35 +338,35 @@ HELMET_SUITES = {
 }
 
 RULER_SUITES = {
-    "ruler__4092::suite": [
-        "niah_s_1__4092::std",
-        "niah_s_2__4092::std",
-        "niah_s_3__4092::std",
-        "niah_mk_1__4092::std",
-        "niah_mk_2__4092::std",
-        "niah_mk_3__4092::std",
-        "fwe__4092::std",
-        "niah_mq__4092::std",
-        "cwe__4092::std",
-        "fwe__4092::std",
-        "vt__4092::std",
-        "qa_1__4092::std",
-        "qa_2__4092::std"
+    "ruler__4096::suite": [
+        "ruler_niah_s_1__4096::std",
+        "ruler_niah_s_2__4096::std",
+        "ruler_niah_s_3__4096::std",
+        "ruler_niah_mk_1__4096::std",
+        "ruler_niah_mk_2__4096::std",
+        "ruler_niah_mk_3__4096::std",
+        "ruler_fwe__4096::std",
+        "ruler_niah_mq__4096::std",
+        "ruler_cwe__4096::std",
+        "ruler_fwe__4096::std",
+        "ruler_vt__4096::std",
+        "ruler_qa_1__4096::std",
+        "ruler_qa_2__4096::std"
         ],
     "ruler__131072::suite": [
-        "niah_s_1__131072::std",
-        "niah_s_2__131072::std",
-        "niah_s_3__131072::std",
-        "niah_mk_1__131072::std",
-        "niah_mk_2__131072::std",
-        "niah_mk_3__131072::std",
-        "fwe__131072::std",
-        "niah_mq__131072::std",
-        "cwe__131072::std",
-        "fwe__131072::std",
-        "vt__131072::std",
-        "qa_1__131072::std",
-        "qa_2__131072::std"
+        "ruler_niah_s_1__131072::std",
+        "ruler_niah_s_2__131072::std",
+        "ruler_niah_s_3__131072::std",
+        "ruler_niah_mk_1__131072::std",
+        "ruler_niah_mk_2__131072::std",
+        "ruler_niah_mk_3__131072::std",
+        "ruler_fwe__131072::std",
+        "ruler_niah_mq__131072::std",
+        "ruler_cwe__131072::std",
+        "ruler_fwe__131072::std",
+        "ruler_vt__131072::std",
+        "ruler_qa_1__131072::std",
+        "ruler_qa_2__131072::std"
         ],
 }
 
@@ -538,8 +538,8 @@ ALL_NAMED_GROUPS = {
     "mt_mbpp": MULTILINGUAL_MBPP_TASKS
 }
 
-for ruler_length in (int(2**i) for i in range(13, 18)):
-    ALL_NAMED_GROUPS[f"helmet:{ruler_length // 2 ** 10}k"] = list(
+for helmet_length in (int(2**i) for i in range(13, 18)):
+    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
         set(
             task
             for group_name, tasks in HELMET_SUITES.items()
@@ -548,8 +548,8 @@ for ruler_length in (int(2**i) for i in range(13, 18)):
         )
     )
 
-for ruler_length in (int(2**i) for i in range(13, 18)):
-    ALL_NAMED_GROUPS[f"helmet:{ruler_length // 2 ** 10}k"] = list(
+for ruler_length in (int(2**i) for i in range(12, 18)):
+    ALL_NAMED_GROUPS[f"ruler:{ruler_length // 2 ** 10}k"] = list(
         set(
             task
             for group_name, tasks in RULER_SUITES.items()
@@ -557,7 +557,6 @@ for ruler_length in (int(2**i) for i in range(13, 18)):
             if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
         )
     )
-
 
 ALL_DISPLAY_TASKS = {
     "olmo2:paper": [
@@ -622,6 +621,12 @@ ALL_DISPLAY_TASKS = {
     "helmet:32k": [r"^helmet:32k$"],
     "helmet:64k": [r"^helmet:64k$"],
     "helmet:128k": [r"^helmet:128k$"],
+    "ruler:4k": [r"^ruler:4k$"],
+    "ruler:8k": [r"^ruler:8k$"],
+    "ruler:16k": [r"^ruler:16k$"],
+    "ruler:32k": [r"^ruler:32k$"],
+    "ruler:64k": [r"^ruler:64k$"],
+    "ruler:128k": [r"^ruler:128k$"],
 }
 
 
@@ -636,7 +641,7 @@ SHORT_NAMES = {
 
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
-OE_EVAL_COMMIT_HASH = None
+OE_EVAL_COMMIT_HASH = "632c4972520337e3c4dff7e54c6f46388a8c62cc"
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
