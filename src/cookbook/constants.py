@@ -544,7 +544,7 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
             task
             for group_name, tasks in HELMET_SUITES.items()
             for task in tasks
-            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("helmet_all")
+            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
         )
     )
 
