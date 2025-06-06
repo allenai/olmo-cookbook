@@ -337,6 +337,39 @@ HELMET_SUITES = {
     "helmet_summ__8192::suite": ["helmet_infbench_sum_eng_6792__8192::std", "helmet_multi_lexsum_7492__8192::std"],
 }
 
+RULER_SUITES = {
+    "ruler__4092::suite": [
+        "niah_s_1__4092::std",
+        "niah_s_2__4092::std",
+        "niah_s_3__4092::std",
+        "niah_mk_1__4092::std",
+        "niah_mk_2__4092::std",
+        "niah_mk_3__4092::std",
+        "fwe__4092::std",
+        "niah_mq__4092::std",
+        "cwe__4092::std",
+        "fwe__4092::std",
+        "vt__4092::std",
+        "qa_1__4092::std",
+        "qa_2__4092::std"
+        ],
+    "ruler__131072::suite": [
+        "niah_s_1__131072::std",
+        "niah_s_2__131072::std",
+        "niah_s_3__131072::std",
+        "niah_mk_1__131072::std",
+        "niah_mk_2__131072::std",
+        "niah_mk_3__131072::std",
+        "fwe__131072::std",
+        "niah_mq__131072::std",
+        "cwe__131072::std",
+        "fwe__131072::std",
+        "vt__131072::std",
+        "qa_1__131072::std",
+        "qa_2__131072::std"
+        ],
+}
+
 ALL_CORE_TASKS = [
     "arc_easy",
     "arc_challenge",
@@ -505,13 +538,23 @@ ALL_NAMED_GROUPS = {
     "mt_mbpp": MULTILINGUAL_MBPP_TASKS
 }
 
-for helmet_length in (int(2**i) for i in range(13, 18)):
-    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
+for ruler_length in (int(2**i) for i in range(13, 18)):
+    ALL_NAMED_GROUPS[f"helmet:{ruler_length // 2 ** 10}k"] = list(
         set(
             task
             for group_name, tasks in HELMET_SUITES.items()
             for task in tasks
-            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
+            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("helmet_all")
+        )
+    )
+
+for ruler_length in (int(2**i) for i in range(13, 18)):
+    ALL_NAMED_GROUPS[f"helmet:{ruler_length // 2 ** 10}k"] = list(
+        set(
+            task
+            for group_name, tasks in RULER_SUITES.items()
+            for task in tasks
+            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
         )
     )
 
@@ -557,40 +600,22 @@ ALL_DISPLAY_TASKS = {
         "^drop.*gen2mc",
         "^hellaswag.*olmes",
         "^jeopardy.*gen2mc",
-        "^lab_bench.*",
         "^lambada.*",
         "^mbpp.*3shot",
         "^medmcqa.*none",
-        "^medqa.*none",
-        "^minerva.*olmes$",     # doesn't return average
         # "minerva",
-        "^mmlu.*olmes$",    # doesn't return average
+        "^minerva.*olmes$",     # doesn't return average
         # "mmlu:rc",
+        "^mmlu.*olmes$",    # doesn't return average
         "^mt_mbpp.*",           # still returns average
         "^naturalqs.*gen2mc",
         "^piqa.*olmes",
-        "^qasper_yesno.*olmes",
-        "^sciq.*olmo3",
-        "^sciriff_yesno.*olmes",
+        "^sciq.*olmo1",
         "^socialiqa.*olmes",
         "^squad.*gen2mc",
-        "^winogrande.*olmes",
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
-    ],
-    "olmo3:dev:1b:mini": [
-        "^arc_challenge:rc.*",
-        "^arc_easy:rc.*",
-        "^codex_humaneval.*3shot",
-        "^hellaswag:rc.*olmes",
-        "^mbpp.*3shot",
-        "^minerva$",
-        "^mt_mbpp$",
-        "^winogrande:rc.*olmes",
-        "basic:rc",
-        "core:rc"
-        "mmlu:bpb",
-        "mmlu:rc",
+        "^winogrande.*olmes",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
@@ -627,20 +652,15 @@ ALL_EVAL_TASKS = {
         "drop:rc::gen2mc",
         "hellaswag:rc::olmes:full",
         "jeopardy:rc::gen2mc",
-        "lab_bench_dbqa",
-        "lab_bench_protocolqa",
         "lambada",
         "mbpp:3shot:bpb::none",
         "medmcqa:rc::none",
-        "medqa_en:rc::none",
         "minerva_math::olmes",
         "mmlu:rc::olmes",
         "mt_mbpp",
         "naturalqs:rc::gen2mc",
         "piqa:rc::olmes:full",
-        "qasper_yesno:rc::olmes",
-        "sciq:rc::olmo3",
-        "sciriff_yesno:rc::olmes",
+        "sciq::olmo1",                  # no :full because no olmes, fix in eval
         "socialiqa:rc::olmes:full",
         "squad:rc::gen2mc",
         "winogrande:rc::olmes:full",
