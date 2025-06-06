@@ -24,10 +24,12 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/C/*.npy
     target_ratio: 0.04287508378669044
+    repetition_factor: 1.2
   - name: Cpp
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Cpp/*.npy
     target_ratio: 0.1113460500988452
+    repetition_factor: 1.2
   - name: CSharp
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/CSharp/*.npy
@@ -36,6 +38,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Go/*.npy
     target_ratio: 0.013073563212971226
+    repetition_factor: 1.2
   - name: Java
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Java/*.npy
@@ -56,6 +59,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Python/*.npy
     target_ratio: 0.18416527791292187
+    repetition_factor: 1.4
   - name: Ruby
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Ruby/*.npy
@@ -63,6 +67,7 @@ dataset:
   - name: Rust
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Rust/*.npy
+    repetition_factor: 1.2
     target_ratio: 0.013012165119030564
   - name: Shell
     paths:
@@ -76,6 +81,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Swift/*.npy
     target_ratio: 0.014040105278969428
+    repetition_factor: 1.2
   - name: TypeScript
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/TypeScript/*.npy
