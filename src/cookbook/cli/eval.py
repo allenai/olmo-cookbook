@@ -410,7 +410,7 @@ def evaluate_model(
 @click.option(
     "-f",
     "--format",
-    type=click.Choice(["json", "table"]),
+    type=click.Choice(["json", "table", "csv"]),
     default="table",
     help="Output results in JSON format",
 )
@@ -514,6 +514,8 @@ def get_results(
         print(json.dumps(results._data))
     elif format == "table":
         results.show()
+    elif format == "csv":
+        print(results.to_csv())
     else:
         raise ValueError(f"Invalid format: {format}")
 
