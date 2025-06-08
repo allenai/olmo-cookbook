@@ -1,0 +1,243 @@
+name: "spring2code-50p-edu-like-3x"
+description: "Baseline for code sources; 50% spring2code, 50% DCLM baseline. Spring2code is selected to be same size distribution as StackEdu, via fasttext classification per PL, but with 3x the data."
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 113_184_153_600
+sequence_length: 4_096
+global_batch_size: 2_097_152
+rank_microbatch_size: 32_768
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/augusta-google-1
+
+
+metrics_config:
+  project: lucas-olmo-cookbook
+  entity: ai2-llm
+  backend: wandb
+
+dataset:
+  sources:
+  - name: C-28pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C/step_final/*.npy
+    target_ratio: 0.0047877611145822315
+  - name: C-60pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C/step_08/*.npy
+    target_ratio: 0.005617743574106704
+  - name: C-61pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C/step_07/*.npy
+    target_ratio: 0.006913213997439808
+  - name: Cpp-24pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C++/step_01/*.npy
+    target_ratio: 0.010819261897088915
+  - name: Cpp-26pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C++/step_00/*.npy
+    target_ratio: 0.0013096482198186091
+  - name: CSharp-3pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C-Sharp/step_final/*.npy
+    target_ratio: 0.0007859022589477618
+  - name: CSharp-27pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C-Sharp/step_04/*.npy
+    target_ratio: 0.0064101636238567
+  - name: CSharp-73pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C-Sharp/step_03/*.npy
+    target_ratio: 0.012181166229526981
+  - name: CSharp-74pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/C-Sharp/step_02/*.npy
+    target_ratio: 0.007057553642005017
+  - name: Go-12pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Go/step_final/*.npy
+    target_ratio: 0.0006004859940361336
+  - name: Go-63pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Go/step_05/*.npy
+    target_ratio: 0.0026117791417977414
+  - name: Go-63pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Go/step_04/*.npy
+    target_ratio: 0.0019064788727033938
+  - name: Java-37pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Java/step_final/*.npy
+    target_ratio: 0.042979782591301814
+  - name: Java-99pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Java/step_02/*.npy
+    target_ratio: 0.07108050997062279
+  - name: Java-99pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Java/step_01/*.npy
+    target_ratio: 0.0008220486756176842
+  - name: JavaScript-40pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/JavaScript/step_final/*.npy
+    target_ratio: 0.012951693295595713
+  - name: JavaScript-63pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/JavaScript/step_05/*.npy
+    target_ratio: 0.007627853838712649
+  - name: JavaScript-90pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/JavaScript/step_04/*.npy
+    target_ratio: 0.008664447942362246
+  - name: JavaScript-90pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/JavaScript/step_03/*.npy
+    target_ratio: 0.003340518461774233
+  - name: Markdown-25pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Markdown/step_final/*.npy
+    target_ratio: 0.02655149688003863
+  - name: Markdown-45pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Markdown/step_02/*.npy
+    target_ratio: 0.02066035721209573
+  - name: Markdown-62pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Markdown/step_01/*.npy
+    target_ratio: 0.018170225566571652
+  - name: Markdown-80pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Markdown/step_00/*.npy
+    target_ratio: 0.019185757081162574
+  - name: PHP-26pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/PHP/step_final/*.npy
+    target_ratio: 0.006946180737373691
+  - name: PHP-49pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/PHP/step_05/*.npy
+    target_ratio: 0.006363408526108328
+  - name: PHP-76pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/PHP/step_04/*.npy
+    target_ratio: 0.007253475824080782
+  - name: PHP-76pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/PHP/step_03/*.npy
+    target_ratio: 0.006513824597173213
+  - name: Python-26pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Python/step_final/*.npy
+    target_ratio: 0.0167154223783692
+  - name: Python-57pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Python/step_02/*.npy
+    target_ratio: 0.02069045453162907
+  - name: Python-75pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Python/step_01/*.npy
+    target_ratio: 0.011635548663825658
+  - name: Python-84pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Python/step_00/*.npy
+    target_ratio: 0.005995461830627632
+  - name: Ruby-26pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Ruby/step_final/*.npy
+    target_ratio: 0.0013046679397693585
+  - name: Ruby-49pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Ruby/step_05/*.npy
+    target_ratio: 0.0012195971534307917
+  - name: Ruby-67pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Ruby/step_04/*.npy
+    target_ratio: 0.0009239744543255702
+  - name: Ruby-87pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Ruby/step_03/*.npy
+    target_ratio: 0.0009931180762802502
+  - name: Ruby-87pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Ruby/step_02/*.npy
+    target_ratio: 0.0006683426674017279
+  - name: Rust-20pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Rust/step_final/*.npy
+    target_ratio: 0.0010455726648071163
+  - name: Rust-62pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Rust/step_01/*.npy
+    target_ratio: 0.0021568344936439897
+  - name: Rust-76pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Rust/step_00/*.npy
+    target_ratio: 0.0007347050401228075
+  - name: Shell-8pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Shell/step_01/*.npy
+    target_ratio: 0.0007366210731599284
+  - name: Shell-11pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Shell/step_00/*.npy
+    target_ratio: 0.00032299062432020436
+  - name: SQL-27pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/SQL/step_final/*.npy
+    target_ratio: 0.006815524656397249
+  - name: SQL-55pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/SQL/step_01/*.npy
+    target_ratio: 0.007383962905505651
+  - name: SQL-60pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/SQL/step_00/*.npy
+    target_ratio: 0.0012069359058232304
+  - name: Swift-8pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Swift/step_final/*.npy
+    target_ratio: 0.0004231179262013492
+  - name: Swift-45pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Swift/step_02/*.npy
+    target_ratio: 0.0020568693426028803
+  - name: Swift-90pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Swift/step_01/*.npy
+    target_ratio: 0.002528355584569951
+  - name: Swift-96pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/Swift/step_00/*.npy
+    target_ratio: 0.00031651117243333373
+  - name: TypeScript-33pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/TypeScript/step_final/*.npy
+    target_ratio: 0.003014777951141649
+  - name: TypeScript-51pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/TypeScript/step_04/*.npy
+    target_ratio: 0.0016211886881579726
+  - name: TypeScript-68pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/TypeScript/step_03/*.npy
+    target_ratio: 0.0016378214441783777
+  - name: TypeScript-97pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/TypeScript/step_02/*.npy
+    target_ratio: 0.002612388448590841
+  - name: TypeScript-97pct
+    paths:
+    - s3://ai2-llm/preprocessed/the-stack-v2/spring2code_v2/minhash_v2_annotated_partitioned/pruned/allenai/dolma2-tokenizer/TypeScript/step_01/*.npy
+    target_ratio: 0.00028415284011630267
+
+
+  - name: dclm-baseline
+    target_ratio: 0.50
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
