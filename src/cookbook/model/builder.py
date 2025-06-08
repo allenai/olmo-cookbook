@@ -280,6 +280,7 @@ class TransformerConfigBuilder:
             ),
             "wandb": WandBCallback(
                 name=self.run_name.strip(),
+                entity=self.wandb_config.entity.strip() if self.wandb_config else "ai2-llm",
                 project=self.wandb_config.project.strip() if self.wandb_config else "olmo-cookbook",
                 group=self.group_id.strip(),
                 cancel_check_interval=10,

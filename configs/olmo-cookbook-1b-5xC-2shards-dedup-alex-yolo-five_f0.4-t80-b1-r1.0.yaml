@@ -9,6 +9,7 @@ nodes: 4
 gpus: 8
 wandb:
   project: "olmo3-data-quality"
+  entity: allenai-team1
 
 dataset:
   sources:

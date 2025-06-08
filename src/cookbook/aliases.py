@@ -40,6 +40,7 @@ class DatasetConfig(BaseModel):
 
 class WandbConfig(BaseModel):
     project: str
+    entity: str
 
 
 class ExperimentConfig(BaseModel, extra="forbid"):
