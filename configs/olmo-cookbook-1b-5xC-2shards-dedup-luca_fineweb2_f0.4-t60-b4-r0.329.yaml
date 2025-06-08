@@ -1,7 +1,7 @@
 name: "olmo-core-1b_v2-6ishxC-2shards-dedup-luca_fineweb2_f0.4-t60-b4-r0.329"
 description: "olmo-cookbook 1Bv2-6ishxC dclm baseline natural (core v2 4096 1.8e-3, 2_097_152 global batch, 32_768 rank microbatch)"
 budget: "ai2/oe-data"
-workspace: "ai2/olmo3-data-quality"
+workspace: "ai2/oe-data"
 cluster: ai2/augusta-google-1
 priority: urgent
 preemptible: true
