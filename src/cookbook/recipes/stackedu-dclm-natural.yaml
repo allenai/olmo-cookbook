@@ -11,8 +11,8 @@ seed: 1337
 model: olmo2_1B_v2
 tokenizer: dolma2
 priority: urgent
-cluster: ai2/augusta-google-1
-weka: false
+cluster: ai2/jupiter-cirrascale-2
+weka: true
 rank_microbatch_size: 32768
 global_batch_size: 2097152
 metrics_config:
