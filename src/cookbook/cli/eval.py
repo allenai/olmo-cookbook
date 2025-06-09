@@ -348,6 +348,13 @@ def evaluate_model(
             continue
         key, value = arg.split("=")
         parsed_model_args[key] = value
+        
+    parsed_gantry_args: dict[str, str] = {}
+    for arg in gantry_args.split(","):
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_gantry_args[key] = value
 
     # expand tasks; note must be aliases or task suites in oe-eval
     tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
@@ -375,7 +382,7 @@ def evaluate_model(
         beaker_image=beaker_image,
         beaker_retries=beaker_retries,
         use_gantry=use_gantry,
-        gantry_args=gantry_args,
+        gantry_args=parsed_gantry_args,
         python_venv_force=force_venv,
         python_venv_name=env_name,
         vllm_memory_utilization=vllm_memory_utilization,
