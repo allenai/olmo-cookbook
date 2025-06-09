@@ -2,7 +2,7 @@ name: 1b-5xC-stack-natural-with-dclm-pstar-50-50
 description: Cookbook 1Bv2-5xC on stack-edu with natural distribution, and DCLM p* with source mix 50/50
 budget: ai2/oe-data
 workspace: ai2/dolma2
-nodes: 4
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 127939584000
