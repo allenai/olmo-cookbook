@@ -371,6 +371,7 @@ ALL_MINERVA_TASKS = [
 
 ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
 
+ALL_GSM_SYMB_TASKS = ["gsm_symbolic::olmo3", "gsm_symbolic:p1::olmo3", "gsm_symbolic:p2::olmo3"]
 
 BASIC_SKILLS = [
     "basic_skills_arithmetic",
@@ -496,6 +497,7 @@ ALL_NAMED_GROUPS = {
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
+    "gsm-symb": ALL_GSM_SYMB_TASKS,
     "code": ALL_CODEX_TASKS,
     "agi_eval": ALL_AGI_EVAL_TASKS,
     "starcoder": STARCODER_CODEX_TASKS,
@@ -592,6 +594,18 @@ ALL_DISPLAY_TASKS = {
         "mmlu:bpb",
         "mmlu:rc",
     ],
+    "olmo3:dev:7b:mini": [
+        "^arc_challenge:mc::olmes:full",
+        "^arc_easy:mc::olmes:full",
+        "^hellaswag:rc.*olmes",
+        "^codex_humaneval:3shot::olmo3",
+        "^mbpp:3shot::olmo3",
+        "^gsm-symb$",
+        "^minerva$",
+        "^mt_mbpp$",
+        "^core:mc$",
+        "^mmlu:mc$",
+    ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
     "helmet:32k": [r"^helmet:32k$"],
@@ -648,5 +662,46 @@ ALL_EVAL_TASKS = {
     "olmo3:dev:1b:hf": [
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
-    ]
+    ],
+    "olmo3:dev:7b:vllm": [
+        "arc_challenge:mc::olmes:full",
+        "arc_easy:mc::olmes:full",
+        "basic_skills:rc::olmes",
+        "codex_humaneval:3shot::olmo3",
+        "coqa::olmes",
+        "coqa:mc::gen2mc",
+        "cruxeval_input:pass@5",
+        "cruxeval_output:pass@5",
+        "csqa:mc::olmes:full",
+        "drop::olmes",
+        "drop:mc::gen2mc",
+        "gsm_symbolic::olmo3",
+        "gsm_symbolic:p1::olmo3",
+        "gsm_symbolic:p2::olmo3",
+        "gsm8k::olmes",
+        "hellaswag:rc::olmes:full",
+        "jeopardy::olmes",
+        "jeopardy:mc::gen2mc",
+        "lab_bench_dbqa:mc",
+        "lab_bench_protocolqa:mc",
+        "lambada",
+        "mbpp:3shot::olmo3",
+        "medmcqa:mc::none",
+        "medqa_en:mc::none",
+        "minerva_math::olmes",
+        "mmlu:mc::olmes",
+        "mt_mbpp",
+        "naturalqs::olmes",
+        "naturalqs:mc::gen2mc",
+        "piqa:mc::olmes:full",
+        "sciq:mc::olmo3",
+        "socialiqa:mc::olmes:full",
+        "squad::olmes",
+        "squad:mc::gen2mc",
+        "winogrande:rc::olmes:full",
+    ],
+    "olmo3:dev:7b:hf": [
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ],
 }
