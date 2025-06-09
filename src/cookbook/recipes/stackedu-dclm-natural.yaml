@@ -1,0 +1,122 @@
+name: 1b-5xC-stack-natural-with-dclm-pstar-75-25
+description: Cookbook 1Bv2-5xC on stack-edu with natural distribution, and DCLM p* with source mix 75/25
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: urgent
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+    - name: stack-edu
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+      target_ratio: 0.25
+    - name: dclm:adult_content
+      weight: 0.000858088357799288
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/adult_content/**/*.npy
+    - name: dclm:art_and_design
+      weight: 0.009372805255086615
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/art_and_design/**/*.npy
+    - name: dclm:crime_and_law
+      weight: 0.021926122406725635
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/crime_and_law/**/*.npy
+    - name: dclm:education_and_jobs
+      weight: 0.032157593046947486
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/education_and_jobs/**/*.npy
+    - name: dclm:electronics_and_hardware
+      weight: 0.025893086205091044
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/electronics_and_hardware/**/*.npy
+    - name: dclm:entertainment
+      weight: 0.07198856432291906
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/entertainment/**/*.npy
+    - name: dclm:fashion_and_beauty
+      weight: 9.5502497373121e-05
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy
+    - name: dclm:finance_and_business
+      weight: 0.03050270334859006
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/finance_and_business/**/*.npy
+    - name: dclm:food_and_dining
+      weight: 0.010564619331062751
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/food_and_dining/**/*.npy
+    - name: dclm:games
+      weight: 0.05168463524700494
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/games/**/*.npy
+    - name: dclm:health
+      weight: 0.07456637504198976
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/health/**/*.npy
+    - name: dclm:history_and_geography
+      weight: 0.02032391734855592
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/history_and_geography/**/*.npy
+    - name: dclm:home_and_hobbies
+      weight: 0.006919850915662348
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/home_and_hobbies/**/*.npy
+    - name: dclm:industrial
+      weight: 0.011809326274688923
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/industrial/**/*.npy
+    - name: dclm:literature
+      weight: 0.05118846955984717
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/literature/**/*.npy
+    - name: dclm:politics
+      weight: 0.016277747111887262
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/politics/**/*.npy
+    - name: dclm:religion
+      weight: 0.01482390254007682
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/religion/**/*.npy
+    - name: dclm:science_math_and_technology
+      weight: 0.15769058127743116
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/science_math_and_technology/**/*.npy
+    - name: dclm:social_life
+      weight: 0.003484711169661277
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/social_life/**/*.npy
+    - name: dclm:software
+      weight: 0.03550424034769607
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/software/**/*.npy
+    - name: dclm:software_development
+      weight: 0.08356606823029486
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/software_development/**/*.npy
+    - name: dclm:sports_and_fitness
+      weight: 0.009804105451322619
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/sports_and_fitness/**/*.npy
+    - name: dclm:transportation
+      weight: 0.007348957083652553
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/transportation/**/*.npy
+    - name: dclm:travel_and_tourism
+      weight: 0.001648027628633286
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/travel_and_tourism/**/*.npy
