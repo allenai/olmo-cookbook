@@ -667,7 +667,7 @@ ALL_EVAL_TASKS = {
         "arc_challenge:mc::olmes:full",
         "arc_easy:mc::olmes:full",
         "basic_skills:rc::olmes",
-        "codex_humaneval:3shot::olmo3",
+        "codex_humaneval::olmo3",
         "coqa::olmes",
         "coqa:mc::gen2mc",
         "cruxeval_input:pass@5",
