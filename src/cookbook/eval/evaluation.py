@@ -63,13 +63,11 @@ def evaluate_checkpoint(
     print(f"Using Python virtual environment at {env.name}")
 
     # Install oe-eval toolkit
-    #oe_eval_dir = install_oe_eval(
-    #    env=env,
-    #    commit_hash=oe_eval_commit,
-    #    is_editable=use_gantry,
-    #)
-
-    oe_eval_dir = "/tmp/tmpr3e8xys1"
+    oe_eval_dir = install_oe_eval(
+        env=env,
+        commit_hash=oe_eval_commit,
+        is_editable=use_gantry,
+    )
 
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
