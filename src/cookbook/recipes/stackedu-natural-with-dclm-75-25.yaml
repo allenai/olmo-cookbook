@@ -1,0 +1,30 @@
+name: 1b-5xC-stack-natural-with-dclm-75-25
+description: Cookbook 1Bv2-5xC on stack-edu with natural distribution, and DCLM natural with source mix 75/25
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: urgent
+cluster: ai2/jupiter-cirrascale-2
+weka: true
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+    - name: stack-edu
+      paths:
+        - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+      target_ratio: 0.25
+    - name: dclm
+      target_ratio: 0.75
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/**/*.npy
