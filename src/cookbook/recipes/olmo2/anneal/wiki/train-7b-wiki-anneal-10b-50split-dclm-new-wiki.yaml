@@ -1,5 +1,5 @@
-name: "olmo2-7b_10b-anneal_50split_dclm_old_wiki"
-description: "OLMo2 7b anneal to 10B Tokens using old wiki + dclm baseline"
+name: "olmo2-7b_10b-anneal_50split_dclm_new_wiki"
+description: "OLMo2 7b anneal to 10B Tokens using new wiki + dclm baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
