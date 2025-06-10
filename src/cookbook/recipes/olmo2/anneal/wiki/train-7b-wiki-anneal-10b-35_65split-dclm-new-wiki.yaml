@@ -1,5 +1,5 @@
-name: "olmo2-7b_10b-anneal_50split_dclm_old_wiki"
-description: "OLMo2 7b anneal to 10B Tokens using old wiki + dclm baseline"
+name: "olmo2-7b_10b-anneal_35_65_split_dclm_new_wiki"
+description: "OLMo2 7b anneal to 10B Tokens using new wiki + dclm baseline"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
@@ -25,11 +25,10 @@ load_state: true
 dataset:
   sources:
   - name: dclm-baseline-olmo2
-    target_ratio: 0.5
+    target_ratio: 0.65
     paths:
     - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/part-0*-*.npy
-  - name: oldwiki
-    target_ratio: 0.5
+  - name: newwiki
+    target_ratio: 0.35
     paths:
-    - s3://ai2-llm/preprocessed/olmo-mix/danyh-compiled-v1_7/documents/wiki/allenai/dolma2-tokenizer/*.npy
-
+    - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy
