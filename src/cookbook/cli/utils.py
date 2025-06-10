@@ -384,19 +384,14 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, branch_nam
         # Execute clone
         subprocess.run(cmd, check=True)
 
-        if commit_hash or branch_name:
-            # Change directory to the cloned repo
-            os.chdir(tmp_dir)
-            
-            if commit_hash and branch_name:
-                subprocess.run(shlex.split(f"git fetch origin {commit_hash}:refs/remotes/origin/{branch_name}"), check=True)
-                subprocess.run(shlex.split(f"git checkout -b temp-checkout {commit_hash}"), check=True)
-            elif commit_hash:
-                subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
-                subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
-            elif branch_name:
-                subprocess.run(shlex.split(f"git fetch origin {branch_name}:refs/remotes/origin/{branch_name}"), check=True)
-                subprocess.run(shlex.split(f"git checkout -b {branch_name} origin/{branch_name}"), check=True)
+        if commit_hash:
+            os.chdir(tmp_dir) # Change directory to the cloned repo
+            subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
+            subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
+        elif branch_name:
+            os.chdir(tmp_dir) # Change directory to the cloned repo
+            subprocess.run(shlex.split(f"git fetch origin {branch_name}:refs/remotes/origin/{branch_name}"), check=True)
+            subprocess.run(shlex.split(f"git checkout -b {branch_name} origin/{branch_name}"), check=True)
 
         return tmp_dir
 
