@@ -592,6 +592,8 @@ ALL_DISPLAY_TASKS = {
         "core:rc"
         "mmlu:bpb",
         "mmlu:rc",
+        "olmo3:dev:1b:w_avg",
+        "olmo3:dev:7b:w_avg",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
@@ -618,14 +620,6 @@ BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
 # use these tasks to launch oe-eval jobs
 ALL_EVAL_TASKS = {
-    "backfill:tmp:davidh": [
-        "medqa_en:rc::none",
-        "lab_bench_protocolqa",
-        "lab_bench_dbqa",
-        "sciq:rc::olmo3",
-        "qasper_yesno:rc::olmes",
-        "sciriff_yesno:rc::olmes",
-    ],
     "olmo3:dev:1b:vllm": [
         "arc_challenge:rc::olmes:full",
         "arc_easy:rc::olmes:full",
