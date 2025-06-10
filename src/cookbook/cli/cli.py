@@ -16,6 +16,7 @@ from yaspin import yaspin
 from cookbook.aliases import ExperimentConfig, LaunchGroup, validate_sources
 from cookbook.cli.core import estimate_batch_size
 from cookbook.cli.eval import convert_checkpoint, evaluate_model
+from cookbook.cli.report import compute_macro_avg_weights
 from cookbook.utils.config import (
     build_train_config,
     config_from_path,
@@ -379,7 +380,7 @@ def prepare_user_workspace(
 
 cli.command()(evaluate_model)
 cli.command()(convert_checkpoint)
-
+cli.command("compute-weights")(compute_macro_avg_weights)
 
 if __name__ == "__main__":
     cli({})
