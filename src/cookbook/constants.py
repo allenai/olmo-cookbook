@@ -463,24 +463,24 @@ FIM_TASKS = [
     "codex_humanevalfim_random:temp0.2",
 ]
 
-MULTILINGUAL_MBPP_TASKS = [
-    "mt_mbpp_v2fix:bash",
-    "mt_mbpp_v2fix:c",
-    "mt_mbpp_v2fix:cpp",
-    "mt_mbpp_v2fix:csharp",
-    "mt_mbpp_v2fix:go",
-    "mt_mbpp_v2fix:haskell",
-    "mt_mbpp_v2fix:java",
-    "mt_mbpp_v2fix:javascript",
-    "mt_mbpp_v2fix:matlab",
-    "mt_mbpp_v2fix:php",
-    "mt_mbpp_v2fix:python",
-    "mt_mbpp_v2fix:r",
-    "mt_mbpp_v2fix:ruby",
-    "mt_mbpp_v2fix:rust",
-    "mt_mbpp_v2fix:scala",
-    "mt_mbpp_v2fix:swift",
-    "mt_mbpp_v2fix:typescript",
+MULTILINGUAL_MBPP_LANGUAGES = [
+    "bash",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "haskell",
+    "java",
+    "javascript",
+    "matlab",
+    "php",
+    "python",
+    "r",
+    "ruby",
+    "rust",
+    "scala",
+    "swift",
+    "typescript",
 ]
 
 # named groups are things you should able to average; they
@@ -504,7 +504,8 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
-    "mt_mbpp_v2fix": MULTILINGUAL_MBPP_TASKS
+    "mt_mbpp": [f"mt_mbpp:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
+    "mt_mbpp_v2fix": [f"mt_mbpp_v2fix:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
