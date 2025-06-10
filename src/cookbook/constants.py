@@ -482,6 +482,26 @@ MULTILINGUAL_MBPP_TASKS = [
     "mt_mbpp:typescript",
 ]
 
+MULTILINGUAL_MBPP_TASKS_WITH_FIX= [
+    "mt_mbpp_v2fix:bash",
+    "mt_mbpp_v2fix:c",
+    "mt_mbpp_v2fix:cpp",
+    "mt_mbpp_v2fix:csharp",
+    "mt_mbpp_v2fix:go",
+    "mt_mbpp_v2fix:haskell",
+    "mt_mbpp_v2fix:java",
+    "mt_mbpp_v2fix:javascript",
+    "mt_mbpp_v2fix:matlab",
+    "mt_mbpp_v2fix:php",
+    "mt_mbpp_v2fix:python",
+    "mt_mbpp_v2fix:r",
+    "mt_mbpp_v2fix:ruby",
+    "mt_mbpp_v2fix:rust",
+    "mt_mbpp_v2fix:scala",
+    "mt_mbpp_v2fix:swift",
+    "mt_mbpp_v2fix:typescript",
+]
+
 
 OLMO3_DEV_1B_TASKS_VLLM = [
      # Arc tasks
@@ -620,6 +640,7 @@ ALL_NAMED_GROUPS = {
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
     "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
+    "mt_mbpp_v2fix": MULTILINGUAL_MBPP_TASKS_WITH_FIX,
     "olmo3:dev:1b:vllm" : OLMO3_DEV_1B_TASKS_VLLM,
     # "olmo3:dev:1b:vllm": [
     #     "arc_challenge:rc::olmes:full",
