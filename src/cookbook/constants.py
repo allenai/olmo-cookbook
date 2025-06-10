@@ -464,23 +464,23 @@ FIM_TASKS = [
 ]
 
 MULTILINGUAL_MBPP_TASKS = [
-    "mt_mbpp:bash",
-    "mt_mbpp:c",
-    "mt_mbpp:cpp",
-    "mt_mbpp:csharp",
-    "mt_mbpp:go",
-    "mt_mbpp:haskell",
-    "mt_mbpp:java",
-    "mt_mbpp:javascript",
-    "mt_mbpp:matlab",
-    "mt_mbpp:php",
-    "mt_mbpp:python",
-    "mt_mbpp:r",
-    "mt_mbpp:ruby",
-    "mt_mbpp:rust",
-    "mt_mbpp:scala",
-    "mt_mbpp:swift",
-    "mt_mbpp:typescript",
+    "mt_mbpp_v2fix:bash",
+    "mt_mbpp_v2fix:c",
+    "mt_mbpp_v2fix:cpp",
+    "mt_mbpp_v2fix:csharp",
+    "mt_mbpp_v2fix:go",
+    "mt_mbpp_v2fix:haskell",
+    "mt_mbpp_v2fix:java",
+    "mt_mbpp_v2fix:javascript",
+    "mt_mbpp_v2fix:matlab",
+    "mt_mbpp_v2fix:php",
+    "mt_mbpp_v2fix:python",
+    "mt_mbpp_v2fix:r",
+    "mt_mbpp_v2fix:ruby",
+    "mt_mbpp_v2fix:rust",
+    "mt_mbpp_v2fix:scala",
+    "mt_mbpp_v2fix:swift",
+    "mt_mbpp_v2fix:typescript",
 ]
 
 # named groups are things you should able to average; they
@@ -504,7 +504,7 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
-    "mt_mbpp": MULTILINGUAL_MBPP_TASKS
+    "mt_mbpp_v2fix": MULTILINGUAL_MBPP_TASKS
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
@@ -568,7 +568,7 @@ ALL_DISPLAY_TASKS = {
         # "minerva",
         "^mmlu.*olmes$",    # doesn't return average
         # "mmlu:rc",
-        "^mt_mbpp.*",           # still returns average
+        "^mt_mbpp_v2fix.*",           # still returns average
         "^naturalqs.*gen2mc",
         "^piqa.*olmes",
         "^qasper_yesno.*olmes",
@@ -587,7 +587,7 @@ ALL_DISPLAY_TASKS = {
         "^hellaswag:rc.*olmes",
         "^mbpp.*3shot",
         "^minerva$",
-        "^mt_mbpp$",
+        "^mt_mbpp_v2fix$",
         "^winogrande:rc.*olmes",
         "basic:rc",
         "core:rc"
@@ -602,7 +602,7 @@ ALL_DISPLAY_TASKS = {
         "^mbpp:3shot::olmo3",
         "^gsm-symb$",
         "^minerva$",
-        "^mt_mbpp$",
+        "^mt_mbpp_v2fix$",
         "^core:mc$",
         "^mmlu:mc$",
     ],
@@ -649,7 +649,7 @@ ALL_EVAL_TASKS = {
         "medqa_en:rc::none",
         "minerva_math::olmes",
         "mmlu:rc::olmes",
-        "mt_mbpp",
+        "mt_mbpp_v2fix",
         "naturalqs:rc::gen2mc",
         "piqa:rc::olmes:full",
         "qasper_yesno:rc::olmes",
@@ -690,7 +690,7 @@ ALL_EVAL_TASKS = {
         "medqa_en:mc::none",
         "minerva_math::olmes",
         "mmlu:mc::olmes",
-        "mt_mbpp",
+        "mt_mbpp_v2fix",
         "naturalqs::olmes",
         "naturalqs:mc::gen2mc",
         "piqa:mc::olmes:full",
