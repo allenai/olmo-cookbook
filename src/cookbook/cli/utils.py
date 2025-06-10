@@ -385,11 +385,13 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, branch_nam
         subprocess.run(cmd, check=True)
 
         if commit_hash:
-            os.chdir(tmp_dir) # Change directory to the cloned repo
+            # Change directory to the cloned repo
+            os.chdir(tmp_dir)
             subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
             subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
         elif branch_name:
-            os.chdir(tmp_dir) # Change directory to the cloned repo
+            # Change directory to the cloned repo
+            os.chdir(tmp_dir)
             subprocess.run(shlex.split(f"git fetch origin {branch_name}:refs/remotes/origin/{branch_name}"), check=True)
             subprocess.run(shlex.split(f"git checkout -b {branch_name} origin/{branch_name}"), check=True)
 
