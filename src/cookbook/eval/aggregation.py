@@ -18,6 +18,25 @@ def results_to_ndarray(results, all_models):
     return tasks, np.array(scores)
 
 
+def remove_incomplete_tasks(tasks, results_np, partial=False):
+    # Remove any rows in results_small_np that contain None values
+    valid_rows = ~np.any(np.equal(results_np, None), axis=1)
+    invalid_task_indices = np.where(~valid_rows)[0]
+    if len(invalid_task_indices) > 0:
+        if partial:
+            print(f"Removing tasks with partial/empty results (None): {[tasks[i] for i in invalid_task_indices]}")
+            tasks = [t for i, t in enumerate(tasks) if i not in invalid_task_indices]
+            results_np = results_np[valid_rows]
+            results_np = np.array(results_np, dtype=np.float64) # ensure float dtype
+            if results_np.ndim == 1:
+                # ensure we are still using a 2d nparray
+                results_np = results_np.reshape(1, -1)
+        else:
+            raise RuntimeError('Some tasks have missing data')
+        
+    return tasks, results_np
+
+
 def compute_pca(data):
     # Compute eigenvalues
     data_centered = data - np.mean(data, axis=0) # Center the data

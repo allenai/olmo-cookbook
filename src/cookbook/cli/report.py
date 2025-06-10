@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.table import Table
 
 from cookbook.cli.eval import get_results
-from cookbook.eval.aggregation import compute_pca, compute_kendall_tau, grid_search_optimizer, neg_kendall_tau, results_to_ndarray
+from cookbook.eval.aggregation import compute_pca, compute_kendall_tau, grid_search_optimizer, neg_kendall_tau, remove_incomplete_tasks, results_to_ndarray
 
 @click.option(
     "-d", "--dashboard", type=str, required=True, help="Set dashboard name"
@@ -83,16 +83,9 @@ def compute_macro_avg_weights(
     large_tasks, results_large_np = results_to_ndarray(results_large, all_models) # (task, model)
 
     # Remove any rows in results_small_np that contain None values
-    valid_rows = ~np.any(np.equal(results_small_np, None), axis=1)
-    invalid_task_indices = np.where(~valid_rows)[0]
-    if len(invalid_task_indices) > 0:
-        if partial:
-            print(f"Removing tasks with None values: {[small_tasks[i] for i in invalid_task_indices]}")
-            small_tasks = [t for i, t in enumerate(small_tasks) if i not in invalid_task_indices]
-            results_small_np = results_small_np[valid_rows]
-        else:
-            raise RuntimeError('Some tasks have missing data')
-
+    small_tasks, results_small_np = remove_incomplete_tasks(small_tasks, results_small_np, partial=partial)
+    large_tasks, results_large_np = remove_incomplete_tasks(large_tasks, results_large_np, partial=partial)
+    
     # Compute simple macro-average
     results_large_macro_avg = np.mean(results_large_np, axis=0) # (model,)
 
