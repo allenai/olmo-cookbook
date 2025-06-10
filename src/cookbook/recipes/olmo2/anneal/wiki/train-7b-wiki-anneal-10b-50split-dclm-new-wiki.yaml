@@ -1,0 +1,34 @@
+name: "olmo2-7b_10b-anneal_50split_dclm_old_wiki"
+description: "OLMo2 7b anneal to 10B Tokens using old wiki + dclm baseline"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 2048
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+annealing:
+  enabled: true
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
+load_path: gs://ai2-llm/checkpoints/jakep/olmo2-7b_10b-anneal_s2pdf_base30b_plus-dclm-c705058f/step4000/
+load_state: true
+dataset:
+  sources:
+  - name: dclm-baseline-olmo2
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/part-0*-*.npy
+  - name: newwiki
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy
