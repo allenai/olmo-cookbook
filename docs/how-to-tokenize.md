@@ -25,7 +25,7 @@ export AWS_DEFAULT_REGION="us-east-1"
 Create a cluster on EC2 where we will run tokenization; we will use one `i4i.x32large` instance.
 
 ```bash
-export cluster_name="YOUR_CLUSTER_NAME"
+cluster_name="YOUR_CLUSTER_NAME"
 poormanray create -n $cluster_name -t i4i.x32large --number 1
 ```
 
