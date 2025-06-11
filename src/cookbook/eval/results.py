@@ -116,8 +116,12 @@ def make_dashboard_table(
             continue
 
         for row in tasks_table.rows:
-            filtered_scores = [s for s in row.values if s is not None]
-            average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+            scores = row.values
+            if all(score is not None for score in scores):
+                average = (sum(scores) / len(scores)) if scores else 0.0
+            else:
+                average = None
+            
             tables.averages.add(col=group_name, row=row.name, val=average)
 
     # Add averages from task patterns (e.g., olmo3:dev:7b:math)

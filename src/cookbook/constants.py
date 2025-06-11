@@ -375,6 +375,12 @@ ALL_MINERVA_TASKS = [
     "minerva_math_precalculus::olmes",
 ]
 
+ALL_GSM_SYMB_TASKS = [
+    "gsm_symbolic::olmo3",
+    "gsm_symbolic:p1::olmo3",
+    "gsm_symbolic:p2::olmo3",
+]
+
 ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
 
 
@@ -508,6 +514,7 @@ ALL_NAMED_GROUPS = {
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
+    "gsm-symb": ALL_GSM_SYMB_TASKS,
     "code": ALL_CODEX_TASKS,
     "agi_eval": ALL_AGI_EVAL_TASKS,
     "starcoder": STARCODER_CODEX_TASKS,
@@ -639,7 +646,7 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:1b:macro:bpb": [
         # Core OLMES
-        "^arc:bpb$",
+        "^arc:bpb::full$",
         "^mmlu:bpb$",
         "^csqa:bpb::olmes:full",
         "^hellaswag:bpb::olmes:full",
@@ -675,37 +682,53 @@ ALL_DISPLAY_TASKS = {
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
     ],
-    "olmo3:dev:1b:main": [
-        "olmo3:dev:1b:macro:bpb",
-        "olmo3:dev:1b:macro:bpb:w_avg",
-        "olmo3:dev:1b:math:bpb",
-        "olmo3:dev:1b:math:bpb:w_avg",
-        "olmo3:dev:1b:code:bpb",
-        "olmo3:dev:1b:code:bpb:w_avg",
-        "^arc:(rc|bpb)::olmes:full$",
-        "^hellaswag:rc::olmes:full",
-        "basic:rc",
-        "^mt_mbpp_v2fix$",
-        "^mmlu:(rc|bpb)$",
-        "core:rc"
-        "codex_humaneval:3shot:bpb::none",
-        "mbpp:3shot:bpb::none",
-        "^minerva$",
-    ],
-    "olmo3:dev:7b:math": [
+    "olmo3:dev:7b:macro:math": [
         # Math
         "gsm8k::olmes",
         "^gsm-symb$",
         "^minerva$",
     ],
-    "olmo3:dev:7b:code": [
+    "olmo3:dev:7b:macro:code": [
         # Code
         "codex_humaneval:3shot::olmo3",
         "cruxeval_input:pass@5$",
         "cruxeval_output:pass@5$",
         "mbpp:3shot::olmo3",
     ],
-    "olmo3:dev:7b:micro": [
+    "olmo3:dev:7b:macro:qa": [
+        # Core OLMES
+        "^arc:mc::full$",
+        "^mmlu:mc$",
+        "csqa:mc::olmes:full",
+        "hellaswag:rc::olmes:full",
+        "piqa:mc::olmes:full",
+        "socialiqa:mc::olmes:full",
+        "winogrande:rc::olmes:full",
+
+        # Gen OLMES
+        "drop::olmes",
+        "jeopardy::olmes",
+        "naturalqs::olmes",
+        "squad::olmes",
+        "coqa::olmes",
+
+        # Gen2MC OLMES
+        "coqa:mc::gen2mc",
+        "drop:mc::gen2mc",
+        "jeopardy:mc::gen2mc",
+        "naturalqs:mc::gen2mc",
+        "squad:mc::gen2mc",
+
+        # New OLMo 3
+        "^basic:rc$",
+        "lab_bench_dbqa:mc", # swap to mc?
+        "lab_bench_protocolqa:mc", # swap to mc?
+        "lambada$",
+        "medmcqa:mc::none",
+        "medqa_en:mc::none",
+        "sciq:mc::olmo3",
+    ],
+    "olmo3:dev:7b:micro:qa": [
         # Core OLMES
         "^mmlu.*:mc.*$",
         "arc_challenge:mc::olmes:full",
@@ -730,19 +753,6 @@ ALL_DISPLAY_TASKS = {
         "naturalqs:mc::gen2mc",
         "squad:mc::gen2mc",
 
-        # Code
-        "codex_humaneval:3shot::olmo3",
-        "cruxeval_input:pass@5$",
-        "cruxeval_output:pass@5$",
-        "mbpp:3shot::olmo3",
-
-        # Math
-        "^minerva[^:]*::olmes",
-        "gsm_symbolic::olmo3",
-        "gsm_symbolic:p1::olmo3",
-        "gsm_symbolic:p2::olmo3",
-        "gsm8k::olmes",
-
         # New OLMo 3
         "basic_skills_[^:]*::olmes",
         "lab_bench_dbqa:mc", # swap to mc?
@@ -752,61 +762,20 @@ ALL_DISPLAY_TASKS = {
         "medqa_en:mc::none",
         "sciq:mc::olmo3",
     ],
-    "olmo3:dev:7b:macro": [
-        # Core OLMES
-        "^arc:mc::full$",
-        "^mmlu:mc$",
-        "csqa:mc::olmes:full",
-        "hellaswag:rc::olmes:full",
-        "piqa:mc::olmes:full",
-        "socialiqa:mc::olmes:full",
-        "winogrande:rc::olmes:full",
-
-        # Gen OLMES
-        "drop::olmes",
-        "jeopardy::olmes",
-        "naturalqs::olmes",
-        "squad::olmes",
-        "coqa::olmes",
-
-        # Gen2MC OLMES
-        "coqa:mc::gen2mc",
-        "drop:mc::gen2mc",
-        "jeopardy:mc::gen2mc",
-        "naturalqs:mc::gen2mc",
-        "squad:mc::gen2mc",
-
+    "olmo3:dev:7b:micro:math": [
+        # Math
+        "^minerva[^:]*::olmes",
+        "gsm_symbolic::olmo3",
+        "gsm_symbolic:p1::olmo3",
+        "gsm_symbolic:p2::olmo3",
+        "gsm8k::olmes",
+    ],
+    "olmo3:dev:7b:micro:code": [
         # Code
         "codex_humaneval:3shot::olmo3",
         "cruxeval_input:pass@5$",
         "cruxeval_output:pass@5$",
         "mbpp:3shot::olmo3",
-
-        # Math
-        "gsm8k::olmes",
-        "^gsm-symb$",
-        "^minerva$",
-
-        # New OLMo 3
-        "^basic:rc$",
-        "lab_bench_dbqa:mc", # swap to mc?
-        "lab_bench_protocolqa:mc", # swap to mc?
-        "lambada$",
-        "medmcqa:mc::none",
-        "medqa_en:mc::none",
-        "sciq:mc::olmo3",
-    ],
-    "olmo3:dev:7b:main": [
-        "olmo3:dev:7b:macro:w_avg",
-        "olmo3:dev:7b:macro",
-        "olmo3:dev:7b:math",
-        "olmo3:dev:7b:code",
-        "^arc:mc::full$",
-        "^mmlu:mc$",
-        "codex_humaneval:3shot::olmo3",
-        "mbpp:3shot::olmo3",
-        "gsm8k::olmes",
-        "^minerva$",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
@@ -815,9 +784,51 @@ ALL_DISPLAY_TASKS = {
     "helmet:128k": [r"^helmet:128k$"],
 }
 
+ALL_DISPLAY_TASKS.update({
+    "olmo3:dev:1b:main": [
+        "^olmo3:dev:1b:macro:bpb$",
+        "^olmo3:dev:1b:macro:bpb:w_avg$",
+        "^olmo3:dev:1b:math:bpb$",
+        "^olmo3:dev:1b:code:bpb$",
+        "^arc:(rc|bpb)::olmes:full$",
+        "^hellaswag:rc::olmes:full",
+        "basic:rc",
+        "^mt_mbpp_v2fix$",
+        "^mmlu:(rc|bpb)$",
+        "core:rc"
+        "codex_humaneval:3shot:bpb::none",
+        "mbpp:3shot:bpb::none",
+        "^minerva$",
+    ],
+    "olmo3:dev:7b:macro": \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:qa"],
+    "olmo3:dev:7b:micro": \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:math"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:code"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:qa"],
+    "olmo3:dev:7b:math": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"],
+    "olmo3:dev:7b:code": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code"],
+    "olmo3:dev:7b:main": [
+        "^olmo3:dev:7b:macro:w_avg$",
+        "^olmo3:dev:7b:macro$",
+        "^olmo3:dev:7b:math$",
+        "^olmo3:dev:7b:code$",
+        "^arc:mc::full$",
+        "^mmlu:mc$",
+        "^codex_humaneval:3shot::olmo3$",
+        "^mbpp:3shot::olmo3$",
+        "^gsm8k::olmes$",
+        "^gsm-symb$",
+        "^minerva$",
+    ],
+})
+
 
 SHORT_NAMES = {
     r"::olmes$": "",
+    r"::olmes:full$": "",
     r"^gsm8k::olmo1$": "GSM*",
     r"^naturalqs": "NQ",
     r"^(arc\_\w)\w+": r"\1",
@@ -825,7 +836,9 @@ SHORT_NAMES = {
     r"^winogrande": "WinoG",
     r"^codex_humaneval": "humaneval",
     r"::olmo3$": "",
-    r":3shot$": "",
+    r"::none$": "",
+    r":3shot": "",
+    r"::full$": "",
 }
 
 
