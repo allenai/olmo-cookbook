@@ -96,7 +96,7 @@ uv run dolma tokens \
     --tokenizer.pad_token_id 100277 \
     --no-tokenizer.segment_before_tokenization \
     --tokenizer.encode_special_tokens \
-    --processes $(python -c "import multiprocessing; print(multiprocessing.cpu_count())") \
+    --processes $(python3 -c "import multiprocessing; print(multiprocessing.cpu_count())") \
     --max_size 4_000_000_000 \
     --sample_ring_prop \
     --dtype uint32
