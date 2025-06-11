@@ -130,8 +130,12 @@ def make_dashboard_table(
             continue
 
         for row in tasks_table.rows:
-            filtered_scores = [s for s in row.values if s is not None]
-            average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+            if all(score is not None for score in row.values):
+                # filtered_scores = [s for s in row.values if s is not None]
+                average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+            else:
+                average = None
+            
             tables.averages.add(col=group_name, row=row.name, val=average)
 
     # Add weighted averages
@@ -140,16 +144,21 @@ def make_dashboard_table(
             # Get scores if they exist
             scores = []
             for metric in weights:
-                if metric in tables.metrics.columns:
+                if metric in tables.metrics.columns and row.name in tables.metrics._data[metric]:
                     score = tables.metrics._data[metric][row.name]
-                else:
+                elif metric in tables.averages and row.name in tables.averages._data[metric]:
                     score = tables.averages._data[metric][row.name]
+                else:
+                    score = None
                 scores.append(score)
             
             # Only compute if we have all scores (no None values)
             if all(score is not None for score in scores):
                 # Compute weighted average
                 weighted_avg = sum(score * weight for score, weight in zip(scores, weights.values()))
-                tables.averages.add(col=group_name, row=row.name, val=weighted_avg)
+            else:
+                weighted_avg = None
+            
+            tables.averages.add(col=group_name, row=row.name, val=weighted_avg)
 
     return tables
