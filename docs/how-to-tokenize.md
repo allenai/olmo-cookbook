@@ -13,6 +13,13 @@ cd olmo-cookbook
 pip install -e .
 ```
 
+Ensure your AWS environment variables are set:
+```bash
+export AWS_ACCESS_KEY_ID="[your key]"
+export AWS_SECRET_ACCESS_KEY="[your secret]"
+export AWS_DEFAULT_REGION="us-east-1"
+```
+
 ## Step 1: create a cluster
 
 Create a cluster on EC2 where we will run tokenization; we will use one `i4i.x32large` instance.
