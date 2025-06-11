@@ -553,52 +553,105 @@ ALL_DISPLAY_TASKS = {
         r"^mmlu:rc$",
         r"^core:rc$",
     ],
-    "olmo3:dev:1b": [
-        "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
-        "^arc_easy.*olmes",
-        "^basic_skills.*olmes",
-        "^codex_humaneval.*3shot",
-        "^coqa.*gen2mc",
-        "^csqa.*olmes",
-        "^drop.*gen2mc",
-        "^hellaswag.*olmes",
-        "^jeopardy.*gen2mc",
+    "olmo3:dev:1b:math": [
+        # Math
+        "^minerva.*:bpb::olmes$",
+    ],
+    "olmo3:dev:1b:code": [
+        # Code
+        "^codex_humaneval:3shot:bpb::olmo3",
+        "^mbpp:3shot:bpb::olmo3",
+        "^mt_mbpp_v2fix.*:bpb$",
+    ],
+    "olmo3:dev:1b:micro": [
+        # Core OLMES
+        "^arc_challenge:(bpb|rc)::olmes:full$",
+        "^arc_easy:(bpb|rc)::olmes:full$",
+        "^csqa:(bpb|rc)::olmes:full",
+        "^hellaswag:(bpb|rc)::olmes:full",
+        "^mmlu.*:(bpb|rc)::olmes$",
+        "^winogrande:(bpb|rc)::olmes:full",
+        "^socialiqa:(bpb|rc)::olmes:full",
+        "^piqa:(bpb|rc)::olmes:full",
+
+        # Gen OLMES
+        "^coqa:rc::gen2mc$",
+        "^drop:rc::gen2mc$",
+        "^jeopardy:rc::gen2mc$",
+        "^naturalqs:rc::gen2mc$",
+        "^squad:rc::gen2mc$",
+
+        # Math
+        "^minerva.*:bpb::olmes$",
+
+        # Code
+        "^codex_humaneval:3shot:bpb::olmo3",
+        "^mbpp:3shot:bpb::olmo3",
+        "^mt_mbpp_v2fix.*:bpb$",
+
+        # New OLMo 3
+        "^sciq:(bpb|rc)::olmo3",
+        "^qasper_yesno.*olmes",
+        "^basic_skills.*:(bpb|rc)::olmes",
         "^lab_bench.*",
         "^lambada.*",
-        "^mbpp.*3shot",
         "^medmcqa.*none",
         "^medqa.*none",
-        "^minerva.*olmes$",     # doesn't return average
-        # "minerva",
-        "^mmlu.*olmes$",    # doesn't return average
-        # "mmlu:rc",
-        "^mt_mbpp.*",           # still returns average
-        "^naturalqs.*gen2mc",
-        "^piqa.*olmes",
-        "^qasper_yesno.*olmes",
-        "^sciq.*olmo3",
         "^sciriff_yesno.*olmes",
-        "^socialiqa.*olmes",
-        "^squad.*gen2mc",
-        "^winogrande.*olmes",
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
     ],
-    "olmo3:dev:1b:mini": [
-        "^arc_challenge:rc.*",
-        "^arc_easy:rc.*",
+    "olmo3:dev:1b:macro": [
+        # Core OLMES
+        "^arc:(bpb|rc)$",
+        "^mmlu:(bpb|rc)$",
+        "^csqa:(bpb|rc)::olmes:full",
+        "^hellaswag:(bpb|rc)::olmes:full",
+        "^winogrande:(bpb|rc)::olmes:full",
+        "^socialiqa:(bpb|rc)::olmes:full",
+        "^piqa:(bpb|rc)::olmes:full",
+
+        # Gen OLMES
+        "^coqa:rc::gen2mc$",
+        "^drop:rc::gen2mc$",
+        "^jeopardy:rc::gen2mc$",
+        "^naturalqs:rc::gen2mc$",
+        "^squad:rc::gen2mc$",
+
+        # Math
+        "^minerva:bpb::olmes$",
+
+        # Code
+        "^codex_humaneval:3shot:bpb::olmo3",
+        "^mbpp:3shot:bpb::olmo3",
+        "^mt_mbpp_v2fix$",
+
+        # New OLMo 3
+        "^sciq:(bpb|rc)::olmo3",
+        "^qasper_yesno.*olmes",
+        "^basic_skills:(bpb|rc)::olmes",
+        "^lab_bench.*",
+        "^lambada.*",
+        "^medmcqa.*none",
+        "^medqa.*none",
+        "^sciriff_yesno.*olmes",
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
+    ],
+    "olmo3:dev:1b:main": [
+        "olmo3:dev:1b:macro:w_avg",
+        "olmo3:dev:1b:math",
+        "olmo3:dev:1b:code",
+        "olmo3:dev:1b:micro",
+        "^arc:(rc|bpb)$",
         "^hellaswag:rc.*olmes",
-        "^codex_humaneval::olmo3$",
-        # "^mbpp:3shot::olmo3$",
-        "^minerva$",
-        "^mt_mbpp$",
-        "^winogrande:rc.*olmes",
         "basic:rc",
+        "^mt_mbpp_v2fix$",
+        "^mmlu:(rc|bpb)$",
         "core:rc"
-        "mmlu:bpb",
-        "mmlu:rc",
-        # "olmo3:dev:1b:w_avg",
-        # "olmo3:dev:7b:w_avg",
+        "codex_humaneval:3shot:bpb::olmo3",
+        "mbpp:3shot:bpb::olmo3",
+        "^minerva$",
     ],
     "olmo3:dev:7b:math": [
         # Math
@@ -611,7 +664,7 @@ ALL_DISPLAY_TASKS = {
         "codex_humaneval:3shot::olmo3",
         "cruxeval_input:pass@5$",
         "cruxeval_output:pass@5$",
-        "^mt_mbpp$",
+        "^mt_mbpp_v2fix$",
         "mbpp:3shot::olmo3",
     ],
     "olmo3:dev:7b:micro": [
@@ -640,7 +693,7 @@ ALL_DISPLAY_TASKS = {
         "squad:mc::gen2mc",
 
         # Code
-        "^mt_mbpp.*:bpb$",
+        "^mt_mbpp_v2fix.*:bpb$",
         "codex_humaneval:3shot::olmo3",
         "cruxeval_input:pass@5",
         "cruxeval_output:pass@5",
@@ -690,7 +743,7 @@ ALL_DISPLAY_TASKS = {
         "codex_humaneval:3shot::olmo3",
         "cruxeval_input:pass@5$",
         "cruxeval_output:pass@5$",
-        "^mt_mbpp$",
+        "^mt_mbpp_v2fix$",
         "mbpp:3shot::olmo3",
 
         # Math
