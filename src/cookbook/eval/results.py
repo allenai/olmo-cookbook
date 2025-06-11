@@ -110,12 +110,7 @@ def make_dashboard_table(
     }
 
     for group_name, tasks in expanded_named_groups.items():
-        print(group_name, tasks)
-
         tasks_table = tables.metrics.keep_cols(*tasks)
-        
-        print(list(tasks_table.rows))
-
         if len(tasks_table) == 0:
             # no need to keep averages for groups that have no models evaluated against their tasks
             continue
