@@ -181,7 +181,7 @@ WEIGHTED_AVERAGES = {
     #     --tasks-dev-target olmo3:dev:7b:macro \
     #     --dashboard olmo-3-baseline -P
     "olmo3:dev:7b:macro:w_avg": {
-        "arc:mc": 0.02753973414155245,
+        "arc:mc::full": 0.02753973414155245,
         "basic:rc": 0.025394627602338623,
         "codex_humaneval:3shot::olmo3": 0.049170080954526706,
         "coqa::olmes": 0.027535499706089452,

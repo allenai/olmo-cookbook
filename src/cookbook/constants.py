@@ -497,6 +497,10 @@ ALL_NAMED_GROUPS = {
     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
     "arc:rc": [f"{task}:rc::olmes" for task in ARC_TASKS],
     "arc:mc": [f"{task}:mc::olmes" for task in ARC_TASKS],
+    "core:rc::full": [f"{task}:rc::olmes:full" for task in ALL_CORE_TASKS],
+    "core:mc::full": [f"{task}:mc::olmes:full" for task in ALL_CORE_TASKS],
+    "arc:rc::full": [f"{task}:rc::olmes:full" for task in ARC_TASKS],
+    "arc:mc::full": [f"{task}:mc::olmes:full" for task in ARC_TASKS],
     "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
     "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
     "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
@@ -567,8 +571,8 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:1b:qa:rc": [
         # Core OLMES
-        "^arc:rc$",
-        "^mmlu:rc$",
+        "^arc:rc:full$",
+        "^mmlu:rc:full$",
         # "^mmlu.*:rc::olmes$", # only macro avg
         "^csqa:rc::olmes:full",
         "^hellaswag:rc::olmes:full",
@@ -750,7 +754,7 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:7b:macro": [
         # Core OLMES
-        "^arc:mc$",
+        "^arc:mc::full$",
         "^mmlu:mc$",
         "csqa:mc::olmes:full",
         "hellaswag:rc::olmes:full",
@@ -797,7 +801,7 @@ ALL_DISPLAY_TASKS = {
         "olmo3:dev:7b:macro",
         "olmo3:dev:7b:math",
         "olmo3:dev:7b:code",
-        "^arc:mc$",
+        "^arc:mc::full$",
         "^mmlu:mc$",
         "codex_humaneval:3shot::olmo3",
         "mbpp:3shot::olmo3",

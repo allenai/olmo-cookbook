@@ -110,7 +110,12 @@ def make_dashboard_table(
     }
 
     for group_name, tasks in expanded_named_groups.items():
+        print(group_name, tasks)
+
         tasks_table = tables.metrics.keep_cols(*tasks)
+        
+        print(list(tasks_table.rows))
+
         if len(tasks_table) == 0:
             # no need to keep averages for groups that have no models evaluated against their tasks
             continue
@@ -139,14 +144,14 @@ def make_dashboard_table(
             tables.averages.add(col=group_name, row=row.name, val=average)
 
     # Add weighted averages
-    for group_name, weights in WEIGHTED_AVERAGES.items():
+    for group_name, tasks in WEIGHTED_AVERAGES.items():
         for row in tables.metrics.rows:
             # Get scores if they exist
             scores = []
-            for metric in weights:
+            for metric in tasks:
                 if metric in tables.metrics.columns and row.name in tables.metrics._data[metric]:
                     score = tables.metrics._data[metric][row.name]
-                elif metric in tables.averages and row.name in tables.averages._data[metric]:
+                elif metric in tables.averages.columns and row.name in tables.averages._data[metric]:
                     score = tables.averages._data[metric][row.name]
                 else:
                     score = None
@@ -155,8 +160,12 @@ def make_dashboard_table(
             # Only compute if we have all scores (no None values)
             if all(score is not None for score in scores):
                 # Compute weighted average
-                weighted_avg = sum(score * weight for score, weight in zip(scores, weights.values()))
+                weighted_avg = sum(score * weight for score, weight in zip(scores, tasks.values()))
             else:
+                # Print missing tasks for this model
+                missing_tasks = [task for task, score in zip(tasks.keys(), scores) if score is None]
+                # print(list(tables.averages.columns))
+                # print(f"==== Model {row.name} missing tasks: {missing_tasks}")
                 weighted_avg = None
             
             tables.averages.add(col=group_name, row=row.name, val=weighted_avg)
