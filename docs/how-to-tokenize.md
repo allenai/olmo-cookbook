@@ -18,7 +18,7 @@ pip install -e .
 Create a cluster on EC2 where we will run tokenization; we will use one `i4i.x32large` instance.
 
 ```bash
-poormanray create -n cluster-name -i i4i.x32large --number 1
+poormanray create -n cluster-name -t i4i.x32large --number 1
 ```
 
 Then run two setup commands to setup storage and toolkit:
