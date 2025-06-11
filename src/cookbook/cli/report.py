@@ -1,4 +1,5 @@
 import json
+import logging
 import numpy as np
 
 import click
@@ -7,6 +8,9 @@ from rich.table import Table
 
 from cookbook.cli.eval import get_results
 from cookbook.eval.aggregation import compute_pca, compute_kendall_tau, grid_search_optimizer, neg_kendall_tau, remove_incomplete_tasks, results_to_ndarray
+
+logger = logging.getLogger(__name__)
+
 
 @click.option(
     "-d", "--dashboard", type=str, required=True, help="Set dashboard name"
@@ -98,7 +102,7 @@ def compute_macro_avg_weights(
     # Rescale so each PC's weights sum to 1
     rescaled_weights = weights / weights.sum(axis=0)
 
-    print(f'Fit PC-1 to explain {explained_variance_ratio[0]*100:.2f}% of variance')
+    logger.info(f'Fit PC-1 to explain {explained_variance_ratio[0]*100:.2f}% of variance')
     
     # Print weights of PCs
     table = Table()
@@ -114,6 +118,13 @@ def compute_macro_avg_weights(
     console = Console()
     console.print(table)
 
+    # Check for BPB: if any are BPB tasks, reverse the target direction to agree
+    small_has_bpb = any(':bpb' in task for task in small_tasks)
+    if small_has_bpb:
+        assert all(':bpb' in task for task in small_tasks), \
+            f"All tasks must agree in direction. If there is one BPB task, they must all be BPB: {small_tasks}"
+        results_large_pc_1 = -results_large_pc_1
+
     # Compute optimal weights with grid search
     w_init = np.ones(results_small_np.shape[0]) / results_small_np.shape[0]
     w_optimal, _ = grid_search_optimizer(neg_kendall_tau, w_init, results_small_np, results_large_pc_1)
@@ -122,7 +133,7 @@ def compute_macro_avg_weights(
     small_uniform_macro_avg = np.mean(results_small_np, axis=0) # (model,)
     results_small_weighted_avg = np.sum(w_optimal[:, None] * results_small_np, axis=0) # (model,)
 
-    print("Computed weights of small-scale tasks to predict PC-1:")
+    logger.info("Computed weights of small-scale tasks to predict PC-1:")
 
     # Print optimal weights to maximize corr(small scale, PC-1)
     table = Table()
@@ -155,10 +166,10 @@ def compute_macro_avg_weights(
 
     # Compute kendal tau of (baseline) simple macro avg
     decision_acc, kendall_tau = compute_kendall_tau(small_uniform_macro_avg, results_large_pc_1)
-    print("Uniform small-scale macro avg: ", f"\n\tDecision accuracy: {decision_acc:.2f}", f"\n\tKendall Tau: {kendall_tau:.2f}")
+    logger.info("Uniform small-scale macro avg: " + f"\n\tDecision accuracy: {decision_acc:.2f}" + f"\n\tKendall Tau: {kendall_tau:.2f}")
     
     decision_acc, kendall_tau = compute_kendall_tau(results_small_weighted_avg, results_large_pc_1)
-    print("Weighted small-scale avg: ", f"\n\tDecision accuracy: {decision_acc:.2f}", f"\n\tKendall Tau: {kendall_tau:.2f}")
+    logger.info("Weighted small-scale avg: " + f"\n\tDecision accuracy: {decision_acc:.2f}" + f"\n\tKendall Tau: {kendall_tau:.2f}")
     
     print()
 

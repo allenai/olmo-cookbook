@@ -1,7 +1,9 @@
 from itertools import product
+import logging
 import numpy as np
 from tqdm import tqdm
 
+logger = logging.getLogger(__name__)
 
 def results_to_ndarray(results, all_models):
     """ Convert to numpy arrays ensuring consistent model ordering """
@@ -24,7 +26,7 @@ def remove_incomplete_tasks(tasks, results_np, partial=False):
     invalid_task_indices = np.where(~valid_rows)[0]
     if len(invalid_task_indices) > 0:
         if partial:
-            print(f"Removing tasks with partial/empty results (None): {[tasks[i] for i in invalid_task_indices]}")
+            logger.warning(f"Removing tasks with partial/empty results (None): {[tasks[i] for i in invalid_task_indices]}")
             tasks = [t for i, t in enumerate(tasks) if i not in invalid_task_indices]
             results_np = results_np[valid_rows]
             results_np = np.array(results_np, dtype=np.float64) # ensure float dtype
