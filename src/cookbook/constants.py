@@ -819,6 +819,9 @@ SHORT_NAMES = {
     r"^(arc\_\w)\w+": r"\1",
     r"^hellaswag": "HSwag",
     r"^winogrande": "WinoG",
+    r"^codex_humaneval": "humaneval",
+    r"::olmo3$": "",
+    r":3shot$": "",
 }
 
 
