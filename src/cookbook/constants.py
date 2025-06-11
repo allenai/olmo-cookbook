@@ -815,6 +815,7 @@ ALL_DISPLAY_TASKS.update({
         "^olmo3:dev:7b:macro$",
         "^olmo3:dev:7b:math$",
         "^olmo3:dev:7b:code$",
+        "^olmo3:dev:7b:qa$",
         "^arc:mc::full$",
         "^mmlu:mc$",
         "^codex_humaneval:3shot::olmo3$",

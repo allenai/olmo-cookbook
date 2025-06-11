@@ -170,8 +170,6 @@ def compute_macro_avg_weights(
     
     decision_acc, kendall_tau = compute_kendall_tau(results_small_weighted_avg, results_large_pc_1)
     logger.info("Weighted small-scale avg: " + f"\n\tDecision accuracy: {decision_acc:.2f}" + f"\n\tKendall Tau: {kendall_tau:.2f}")
-    
-    print()
 
     # Output the "small" fitted task weights
     print(json.dumps(dict(sorted(zip(small_tasks, w_optimal.tolist())))))
