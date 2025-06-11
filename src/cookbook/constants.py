@@ -600,6 +600,20 @@ ALL_DISPLAY_TASKS = {
         # "olmo3:dev:1b:w_avg",
         # "olmo3:dev:7b:w_avg",
     ],
+    "olmo3:dev:7b:math": [
+        # Math
+        "gsm8k::olmes",
+        "^gsm-symb$",
+        "^minerva$",
+    ],
+    "olmo3:dev:7b:code": [
+        # Code
+        "codex_humaneval:3shot::olmo3",
+        "cruxeval_input:pass@5$",
+        "cruxeval_output:pass@5$",
+        "^mt_mbpp$",
+        "mbpp:3shot::olmo3",
+    ],
     "olmo3:dev:7b:micro": [
         # Core OLMES
         "^mmlu.*:mc.*$",
@@ -649,15 +663,9 @@ ALL_DISPLAY_TASKS = {
         "sciq:mc::olmo3",
     ],
     "olmo3:dev:7b:macro": [
-        # Aggregate tasks
-        "^gsm-symb$",
-        "^arc:mc$",
-        "^minerva$",
-        "^mt_mbpp$",
-        "^mmlu:mc$",
-        "^basic:rc$",
-
         # Core OLMES
+        "^arc:mc$",
+        "^mmlu:mc$",
         "csqa:mc::olmes:full",
         "hellaswag:rc::olmes:full",
         "piqa:mc::olmes:full",
@@ -682,18 +690,34 @@ ALL_DISPLAY_TASKS = {
         "codex_humaneval:3shot::olmo3",
         "cruxeval_input:pass@5$",
         "cruxeval_output:pass@5$",
+        "^mt_mbpp$",
         "mbpp:3shot::olmo3",
 
         # Math
         "gsm8k::olmes",
+        "^gsm-symb$",
+        "^minerva$",
 
         # New OLMo 3
+        "^basic:rc$",
         "lab_bench_dbqa:mc",
         "lab_bench_protocolqa:mc",
         "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
         "sciq:mc::olmo3",
+    ],
+    "olmo3:dev:7b:main": [
+        "olmo3:dev:7b:macro:w_avg",
+        "olmo3:dev:7b:math",
+        "olmo3:dev:7b:code",
+        "olmo3:dev:7b:macro",
+        "^arc:mc$",
+        "^mmlu:mc$",
+        "codex_humaneval:3shot::olmo3",
+        "mbpp:3shot::olmo3",
+        "gsm8k::olmes",
+        "^minerva$",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
@@ -756,7 +780,7 @@ ALL_EVAL_TASKS = {
 
 WEIGHTED_AVERAGES = {
     # Weights optimize rank correlation with PC-1 on olmo3:dev:7b:micro (decision accuracy(small, large PC-1) = 0.94)
-    "olmo3:dev:1b:micro": {
+    "olmo3:dev:1b:micro:w_avg": {
         "arc_challenge:mc::olmes:full": 0.005185283952900656,
         "arc_easy:mc::olmes:full": 0.009786261526033721,
         "basic_skills_arithmetic:bpb::olmes": 0.00382801653291223,
@@ -898,7 +922,7 @@ WEIGHTED_AVERAGES = {
         "winogrande:rc::olmes:full": 0.0025289336792038,
     },
     # Weights optimize rank correlation with PC-1 on olmo3:dev:7b:macro (decision accuracy(large, large PC-1) = 0.99)
-    "olmo3:dev:7b:macro": {
+    "olmo3:dev:7b:macro:w_avg": {
         "arc:mc": 0.016588595891097534,
         "basic:rc": 0.06904287033616378,
         "codex_humaneval:3shot::olmo3": 0.03613252795645661,

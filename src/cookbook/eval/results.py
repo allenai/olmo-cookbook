@@ -2,7 +2,7 @@ import logging
 import re
 from typing import NamedTuple
 
-from cookbook.constants import ALL_NAMED_GROUPS, WEIGHTED_AVERAGES
+from cookbook.constants import ALL_DISPLAY_TASKS, ALL_NAMED_GROUPS, WEIGHTED_AVERAGES
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.eval.miniframe import MiniFrame
 
@@ -120,6 +120,20 @@ def make_dashboard_table(
             average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
             tables.averages.add(col=group_name, row=row.name, val=average)
 
+    # Add averages from task patterns (e.g., olmo3:dev:7b:math)
+    for group_name, tasks in ALL_DISPLAY_TASKS.items():
+        task_patterns = [re.compile(task) for task in tasks]
+        
+        tasks_table = (tables.averages + tables.metrics).keep_cols(*task_patterns)
+        if len(tasks_table) == 0:
+            # no need to keep averages for groups that have no models evaluated against their tasks
+            continue
+
+        for row in tasks_table.rows:
+            filtered_scores = [s for s in row.values if s is not None]
+            average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+            tables.averages.add(col=group_name, row=row.name, val=average)
+
     # Add weighted averages
     for group_name, weights in WEIGHTED_AVERAGES.items():
         for row in tables.metrics.rows:
@@ -136,6 +150,6 @@ def make_dashboard_table(
             if all(score is not None for score in scores):
                 # Compute weighted average
                 weighted_avg = sum(score * weight for score, weight in zip(scores, weights.values()))
-                tables.averages.add(col=f"{group_name}:w_avg", row=row.name, val=weighted_avg)
+                tables.averages.add(col=group_name, row=row.name, val=weighted_avg)
 
     return tables

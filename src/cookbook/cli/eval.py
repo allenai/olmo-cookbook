@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import json
 import logging
 import re
@@ -23,6 +24,7 @@ from cookbook.constants import (
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
+    WEIGHTED_AVERAGES,
 )
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
@@ -487,6 +489,11 @@ def get_results(
     except StopIteration:
         # if no columns are left, we don't need to sort
         pass
+
+    # Sort columns alphabetically, with display tasks at the beginning
+    display_task_keys = set(ALL_DISPLAY_TASKS.keys()) | set(WEIGHTED_AVERAGES.keys())
+    sorted_items = sorted(results._data.items(), key=lambda x: (x[0] not in display_task_keys, x[0]))
+    results._data = OrderedDict(sorted_items)
 
     if tables.missing_tasks:
         for model, missing_tasks in tables.missing_tasks.items():
