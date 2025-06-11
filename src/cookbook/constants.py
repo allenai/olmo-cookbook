@@ -551,7 +551,7 @@ ALL_DISPLAY_TASKS = {
         r"^core:rc$",
     ],
     "olmo3:dev:1b": [
-        "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
+        "^arc_challenge.*olmes",  # should return mc, rc, bpb variants, full or not
         "^arc_easy.*olmes",
         "^basic_skills.*olmes",
         "^codex_humaneval.*3shot",
@@ -565,11 +565,11 @@ ALL_DISPLAY_TASKS = {
         "^mbpp.*3shot",
         "^medmcqa.*none",
         "^medqa.*none",
-        "^minerva.*olmes$",     # doesn't return average
+        "^minerva.*olmes$",  # doesn't return average
         # "minerva",
-        "^mmlu.*olmes$",    # doesn't return average
+        "^mmlu.*olmes$",  # doesn't return average
         # "mmlu:rc",
-        "^mt_mbpp_v2fix.*",           # still returns average
+        "^mt_mbpp_v2fix.*",  # still returns average
         "^naturalqs.*gen2mc",
         "^piqa.*olmes",
         "^qasper_yesno.*olmes",
@@ -591,8 +591,7 @@ ALL_DISPLAY_TASKS = {
         "^mt_mbpp_v2fix$",
         "^winogrande:rc.*olmes",
         "basic:rc",
-        "core:rc"
-        "mmlu:bpb",
+        "core:rc" "mmlu:bpb",
         "mmlu:rc",
     ],
     "olmo3:dev:7b:mini": [

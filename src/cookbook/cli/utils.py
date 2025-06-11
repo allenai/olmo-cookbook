@@ -184,15 +184,21 @@ def install_oe_eval(
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
 
-    print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
-    cmd = [
-        env.pip,
-        "install",
-        ("--no-deps" if no_dependencies else ""),
-        "--editable" if is_editable else "",
-        ".",
-    ]
-    subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=oe_eval_dir, env=env.path())
+    # Check if oe-eval is already installed
+    check_result = subprocess.run(shlex.split(f"{env.pip} show oe-eval"), capture_output=True, env=env.path())
+
+    if check_result.returncode == 0:
+        print("OE-Eval is already installed, skipping installation...")
+    else:
+        print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
+        cmd = [
+            env.pip,
+            "install",
+            ("--no-deps" if no_dependencies else ""),
+            "--editable" if is_editable else "",
+            ".",
+        ]
+        subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=oe_eval_dir, env=env.path())
 
     return oe_eval_dir
 

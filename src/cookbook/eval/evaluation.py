@@ -57,6 +57,7 @@ def evaluate_checkpoint(
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    push_datalake: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -153,8 +154,9 @@ def evaluate_checkpoint(
     flags.append(f"--gpus {num_gpus}")
 
     # datalake parameters (mostly have to push there + tags)
-    flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
-    flags.append("--push-datalake")
+    if push_datalake:
+        flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
+        flags.append("--push-datalake")
 
     # figure out model args based on cli
     model_args = {
