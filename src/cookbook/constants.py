@@ -840,9 +840,10 @@ ALL_DISPLAY_TASKS.update({
     "olmo3:dev:1b:macro:rc": ALL_DISPLAY_TASKS["olmo3:dev:1b:qa:rc"],
     "olmo3:dev:7b:math": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"],
     "olmo3:dev:7b:code": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code"],
+    "olmo3:dev:7b:qa": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:qa"],
     "olmo3:dev:7b:main": [
         "^olmo3:dev:7b:macro:w_avg$",
-        "^olmo3:dev:7b:macro$",
+        "^olmo3:dev:7b:qa$",
         "^olmo3:dev:7b:math$",
         "^olmo3:dev:7b:code$",
         "^olmo3:dev:7b:qa$",
