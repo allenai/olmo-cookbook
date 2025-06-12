@@ -1,4 +1,4 @@
-pname: "olmo2-1b-5xC-mjmix-alex"
+name: "olmo2-1b-5xC-mjmix-alex"
 description: "OLMo2 1b@5xC, mixing experiments | mixing_type: alex "
 budget: "ai2/oe-training"
 workspace: "ai2/olmo3-webdata"
