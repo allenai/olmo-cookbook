@@ -512,6 +512,7 @@ ALL_NAMED_GROUPS = {
     "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+    "gen-no-gsm": [task for task in ALL_GEN_TASKS if task != "gsm8k::olmo1"],
     "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
     "gsm-symb": ALL_GSM_SYMB_TASKS,
@@ -854,6 +855,7 @@ ALL_DISPLAY_TASKS.update({
         "^gsm-symb$",
         "^minerva$",
         "^basic:rc$",
+        "^gen-no-gsm$",
     ],
 })
 
