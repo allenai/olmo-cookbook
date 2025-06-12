@@ -390,6 +390,7 @@ MANUAL_PRIOR = {
         "mbpp:3shot:bpb::none": [0.1, 0.5],
         "mmlu:bpb": [0.2, 0.5],
         "arc:rc:full": [0.1, 0.5],
+        "drop:bpb::gen2mc": [0, 0.1],
     },
     "olmo3:dev:7b:macro": {
         "codex_humaneval:3shot::olmo3": [0.05, 0.5],
