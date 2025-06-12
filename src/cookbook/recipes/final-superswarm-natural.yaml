@@ -1,0 +1,50 @@
+name: 1b-5xC-final-superswarm-natural
+description: Cookbook 1Bv2-5xC on final superswarm (pes2o/s2pdf final) with natural (manual prior) source distribution
+budget: ai2/oe-data
+workspace: ai2/dolma2
+nodes: 8
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: urgent
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+  - name: finemath-3plus
+    paths:
+      - s3://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.006734006734
+  - name: arxiv
+    paths:
+      - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/arxiv/train/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.003961180432
+  - name: wikipedia
+    paths:
+      - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.001980590216
+  - name: dclm
+    paths:
+          - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/**/*.npy
+    target_ratio: 0.7922360864
+  - name: s2pdf
+    paths:
+          - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/**/*.npy
+    target_ratio: 0.1584472173
+  - name: stack-edu
+    paths:
+      - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/*/*.npy
+    target_ratio: 0.0247573777
+  - name: pes2o
+    paths:
+      - s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/**/*.npy
+    target_ratio: 0.0118835413
