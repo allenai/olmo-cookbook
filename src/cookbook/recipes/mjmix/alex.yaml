@@ -7,6 +7,7 @@ gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000 # 1279395840 nonembed params x 20 x 5
 sequence_length: 4096
+processes: 4
 seed: 1337
 model: "olmo2_1B_v2"
 tokenizer: "dolma2"
