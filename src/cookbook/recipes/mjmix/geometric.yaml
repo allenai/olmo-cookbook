@@ -2,7 +2,7 @@ name: "olmo2-1b-5xC-mjmix-geometric"
 description: "OLMo2 1b@5xC, mixing experiments | mixing_type: geometric "
 budget: "ai2/oe-training"
 workspace: "ai2/olmo3-webdata"
-nodes: 16
+nodes: 32
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000 # 1279395840 nonembed params x 20 x 5
@@ -13,7 +13,7 @@ tokenizer: "dolma2"
 priority: urgent
 eval_interval: 250
 global_batch_size: 4194304
-rank_microbatch_size: 32768
+rank_microbatch_size: 16384
 learning_rate: 1.8e-3
 cluster: ai2/augusta-google-1
 dataset:
