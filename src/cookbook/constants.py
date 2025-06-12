@@ -578,9 +578,36 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:1b:qa:rc": [
         # Core OLMES
-        "^arc:rc:full$",
-        "^mmlu:rc:full$",
-        # "^mmlu.*:rc::olmes$", # only macro avg
+        "^arc:rc::full$",
+        "^mmlu:rc$",
+        "^csqa:rc::olmes:full",
+        "^hellaswag:rc::olmes:full",
+        "^winogrande:rc::olmes:full",
+        "^socialiqa:rc::olmes:full",
+        "^piqa:rc::olmes:full",
+
+        # Gen OLMES
+        "^coqa:rc::gen2mc$",
+        "^drop:rc::gen2mc$",
+        "^jeopardy:rc::gen2mc$",
+        "^naturalqs:rc::gen2mc$",
+        "^squad:rc::gen2mc$",
+
+        # New OLMo 3
+        "^sciq:rc::olmo3",
+        "^qasper_yesno:rc::olmes",
+        "^basic_skills:rc::olmes",
+        "^lab_bench_dbqa$",
+        "^lab_bench_protocolqa$",
+        "^lambada:rc",
+        "^medmcqa:rc::none",
+        "^medqa:rc::none",
+        "^sciriff_yesno:rc::olmes",
+    ],
+    "olmo3:dev:1b:micro:rc": [
+        # Core OLMES
+        "^arc:rc::full$",
+        "^mmlu.*:rc::olmes$", # only micro avg
         "^csqa:rc::olmes:full",
         "^hellaswag:rc::olmes:full",
         "^winogrande:rc::olmes:full",
@@ -808,6 +835,7 @@ ALL_DISPLAY_TASKS.update({
         ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:math"] + \
         ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:code"] + \
         ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:qa"],
+    "olmo3:dev:1b:macro:rc": ALL_DISPLAY_TASKS["olmo3:dev:1b:qa:rc"],
     "olmo3:dev:7b:math": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"],
     "olmo3:dev:7b:code": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code"],
     "olmo3:dev:7b:main": [

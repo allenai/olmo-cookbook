@@ -8,6 +8,7 @@ from rich.table import Table
 
 from cookbook.cli.eval import get_results
 from cookbook.eval.aggregation import compute_pca, compute_kendall_tau, grid_search_optimizer, neg_kendall_tau, remove_incomplete_tasks, results_to_ndarray
+from cookbook.utils.average_weights import MANUAL_PRIOR
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,23 @@ def compute_macro_avg_weights(
     console = Console()
     console.print(table)
 
+    # Get manually defined bounds
+    bounds = None
+    if len(tasks_dev_small) == 1 and tasks_dev_small[0] in MANUAL_PRIOR:
+        bounds = MANUAL_PRIOR[tasks_dev_small[0]]
+            
+        logger.info(f'Full task set: {small_tasks}')
+        logger.info(f'Fitting with manually defined bounds: {bounds}')
+
+        # Convert bounds dict to numpy array of shape (small_tasks, 2)
+        bounds_array = np.array([(0, 1)] * len(small_tasks), dtype=np.float32)
+        for i, task in enumerate(small_tasks):
+            if task in bounds:
+                bounds_array[i] = bounds[task]
+        bounds = bounds_array
+
+        logger.info(f'Bounds np.array: {bounds}')
+
     # Check for BPB: if any are BPB tasks, reverse the target direction to agree
     small_has_bpb = any(':bpb' in task for task in small_tasks)
     if small_has_bpb:
@@ -127,7 +145,7 @@ def compute_macro_avg_weights(
 
     # Compute optimal weights with grid search
     w_init = np.ones(results_small_np.shape[0]) / results_small_np.shape[0]
-    w_optimal, _ = grid_search_optimizer(neg_kendall_tau, w_init, results_small_np, results_large_pc_1)
+    w_optimal, _ = grid_search_optimizer(neg_kendall_tau, w_init, results_small_np, results_large_pc_1, bounds=bounds)
 
     # Compute new weighted avg
     small_uniform_macro_avg = np.mean(results_small_np, axis=0) # (model,)

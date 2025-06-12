@@ -6,6 +6,128 @@ Weights are fit to optimize rank correlation with PC-1 on the --tasks-dev-target
 
 WEIGHTED_AVERAGES = {
     # olmo-cookbook compute-weights \
+    #     --tasks-dev-small olmo3:dev:1b:macro:rc \
+    #     --tasks-dev-target olmo3:dev:7b:micro \
+    #     --dashboard olmo-3-baseline -P
+    "olmo3:dev:1b:macro:rc:w_avg": {
+        "arc:rc::full": 0.15636558701895611,
+        "coqa:rc::gen2mc": 0.017431157577026464,
+        "csqa:rc::olmes:full": 0.0174391870179538,
+        "drop:rc::gen2mc": 0.2219235074591158,
+        "hellaswag:rc::olmes:full": 0.012576789402743928,
+        "jeopardy:rc::gen2mc": 0.012500273914595012,
+        "lab_bench_dbqa": 0.031610236151033075,
+        "lab_bench_protocolqa": 0.0006264975642724046,
+        "medmcqa:rc::none": 0.056887333283218315,
+        "mmlu:rc": 0.3373099205061045,
+        "naturalqs:rc::gen2mc": 0.001784683758872751,
+        "piqa:rc::olmes:full": 0.016064902980663657,
+        "socialiqa:rc::olmes:full": 0.058349079688022845,
+        "squad:rc::gen2mc": 0.038419696679133725,
+        "winogrande:rc::olmes:full": 0.020711146998287473,
+    },
+    # olmo-cookbook compute-weights \
+    #     --tasks-dev-small olmo3:dev:1b:micro:rc \
+    #     --tasks-dev-target olmo3:dev:7b:micro \
+    #     --dashboard olmo-3-baseline -P
+    "olmo3:dev:1b:micro:rc:w_avg": {
+        "arc:rc::full": 0.008797814491317004,
+        "coqa:rc::gen2mc": 0.007728275721376411,
+        "csqa:rc::olmes:full": 0.02291206005917082,
+        "drop:rc::gen2mc": 0.017202885260556144,
+        "hellaswag:rc::olmes:full": 0.005994975059766831,
+        "jeopardy:rc::gen2mc": 0.01745334205686385,
+        "lab_bench_dbqa": 0.017572063144243717,
+        "lab_bench_protocolqa": 0.008606833954314386,
+        "medmcqa:rc::none": 0.0094006759960794,
+        "mmlu_abstract_algebra:rc::olmes": 0.002120981797156597,
+        "mmlu_anatomy:rc::olmes": 0.005737649712371782,
+        "mmlu_astronomy:rc::olmes": 0.03179406296373593,
+        "mmlu_business_ethics:rc::olmes": 0.0022835754529588526,
+        "mmlu_clinical_knowledge:rc::olmes": 0.0020708176870735786,
+        "mmlu_college_biology:rc::olmes": 0.0008916528061140045,
+        "mmlu_college_chemistry:rc::olmes": 9.155455855517962e-05,
+        "mmlu_college_computer_science:rc::olmes": 0.008233972790313225,
+        "mmlu_college_mathematics:rc::olmes": 0.020122674060070896,
+        "mmlu_college_medicine:rc::olmes": 0.0010955025987122566,
+        "mmlu_college_physics:rc::olmes": 0.03373916584543533,
+        "mmlu_computer_security:rc::olmes": 0.0038734358461089712,
+        "mmlu_conceptual_physics:rc::olmes": 0.016732107311277278,
+        "mmlu_econometrics:rc::olmes": 0.0018534053728114994,
+        "mmlu_electrical_engineering:rc::olmes": 0.004092287677353737,
+        "mmlu_elementary_mathematics:rc::olmes": 0.02048175582413836,
+        "mmlu_formal_logic:rc::olmes": 0.011957222638293704,
+        "mmlu_global_facts:rc::olmes": 0.01000116921275839,
+        "mmlu_high_school_biology:rc::olmes": 0.003473373838605454,
+        "mmlu_high_school_chemistry:rc::olmes": 0.0010702165473203404,
+        "mmlu_high_school_computer_science:rc::olmes": 0.027083074741733115,
+        "mmlu_high_school_european_history:rc::olmes": 0.015838848616066218,
+        "mmlu_high_school_geography:rc::olmes": 0.014910404531154673,
+        "mmlu_high_school_government_and_politics:rc::olmes": 0.008965880432270085,
+        "mmlu_high_school_macroeconomics:rc::olmes": 0.019554959861025442,
+        "mmlu_high_school_mathematics:rc::olmes": 0.13150747377332675,
+        "mmlu_high_school_microeconomics:rc::olmes": 0.021692898238787523,
+        "mmlu_high_school_physics:rc::olmes": 0.0031445337771405556,
+        "mmlu_high_school_psychology:rc::olmes": 0.0015658458376160648,
+        "mmlu_high_school_statistics:rc::olmes": 0.0272684715240589,
+        "mmlu_high_school_us_history:rc::olmes": 0.003225593266223907,
+        "mmlu_high_school_world_history:rc::olmes": 0.0058826376208329775,
+        "mmlu_human_aging:rc::olmes": 0.03700927487906425,
+        "mmlu_human_sexuality:rc::olmes": 0.007144733649711107,
+        "mmlu_international_law:rc::olmes": 0.002835616652827022,
+        "mmlu_jurisprudence:rc::olmes": 0.03672121071300694,
+        "mmlu_logical_fallacies:rc::olmes": 0.023797703516173746,
+        "mmlu_machine_learning:rc::olmes": 0.0030556560724415882,
+        "mmlu_management:rc::olmes": 0.003355518754952685,
+        "mmlu_marketing:rc::olmes": 0.005927503915019833,
+        "mmlu_medical_genetics:rc::olmes": 0.0065302878342048554,
+        "mmlu_miscellaneous:rc::olmes": 0.006633396590845175,
+        "mmlu_moral_disputes:rc::olmes": 0.007994825714304205,
+        "mmlu_moral_scenarios:rc::olmes": 0.08192680216241961,
+        "mmlu_nutrition:rc::olmes": 0.003042891324608145,
+        "mmlu_philosophy:rc::olmes": 0.01947203998440123,
+        "mmlu_prehistory:rc::olmes": 0.006273327901071644,
+        "mmlu_professional_accounting:rc::olmes": 0.01266668226096625,
+        "mmlu_professional_law:rc::olmes": 0.01255294195332644,
+        "mmlu_professional_medicine:rc::olmes": 0.0020308885703014005,
+        "mmlu_professional_psychology:rc::olmes": 0.032221270073652115,
+        "mmlu_public_relations:rc::olmes": 0.0020603365138861006,
+        "mmlu_security_studies:rc::olmes": 0.004774168092239327,
+        "mmlu_sociology:rc::olmes": 0.00886374991572171,
+        "mmlu_us_foreign_policy:rc::olmes": 0.00019788941050034845,
+        "mmlu_virology:rc::olmes": 0.028552832674717452,
+        "mmlu_world_religions:rc::olmes": 0.014381288466263728,
+        "naturalqs:rc::gen2mc": 0.001465772299986713,
+        "piqa:rc::olmes:full": 0.0006469953240058733,
+        "socialiqa:rc::olmes:full": 0.00802694001337345,
+        "squad:rc::gen2mc": 0.010554327326975851,
+        "winogrande:rc::olmes:full": 0.031256994933940886,
+    },
+    # olmo-cookbook compute-weights \
+    #     --tasks-dev-small olmo3:dev:1b:macro:bpb \
+    #     --tasks-dev-target olmo3:dev:7b:macro \
+    #     --dashboard olmo-3-baseline -P
+    "olmo3:dev:1b:macro:bpb:w_avg": {
+        "arc:bpb::full": 0.007432696579003527,
+        "codex_humaneval:3shot:bpb::none": 0.11164372299995005,
+        "coqa:bpb::gen2mc": 0.039077957619086806,
+        "csqa:bpb::olmes:full": 0.0634738151249363,
+        "drop:bpb::gen2mc": 0.1780219434956499,
+        "hellaswag:bpb::olmes:full": 0.059885417209609985,
+        "jeopardy:bpb::gen2mc": 0.0049741358436264085,
+        "lab_bench_dbqa:bpb": 0.018567073398582778,
+        "lab_bench_protocolqa:bpb": 0.027555796040518096,
+        "lambada:bpb": 0.007517324252832587,
+        "mbpp:3shot:bpb::none": 0.11307904208688783,
+        "medmcqa:bpb::none": 0.07299316171369184,
+        "mmlu:bpb": 0.21278154141147937,
+        "naturalqs:bpb::gen2mc": 0.007382548296859934,
+        "piqa:bpb::olmes:full": 0.014596715980697887,
+        "socialiqa:bpb::olmes:full": 0.03726218689837656,
+        "squad:bpb::gen2mc": 0.02045608224672027,
+        "winogrande:bpb::olmes:full": 0.0032988388014899258,
+    },
+    # olmo-cookbook compute-weights \
     #     --tasks-dev-small olmo3:dev:1b:micro:bpb \
     #     --tasks-dev-target olmo3:dev:7b:micro \
     #     --dashboard olmo-3-baseline -P
@@ -117,61 +239,38 @@ WEIGHTED_AVERAGES = {
         "winogrande:bpb::olmes:full": 8.895219435553339e-05,
     },
     # olmo-cookbook compute-weights \
-    #     --tasks-dev-small olmo3:dev:1b:macro:bpb \
-    #     --tasks-dev-target olmo3:dev:7b:macro \
-    #     --dashboard olmo-3-baseline -P
-    "olmo3:dev:1b:macro:bpb:w_avg": {
-        "codex_humaneval:3shot:bpb::none": 0.014126000163522818,
-        "coqa:bpb::gen2mc": 0.032171168871277286,
-        "csqa:bpb::olmes:full": 0.005933061892211778,
-        "drop:bpb::gen2mc": 0.31134192128112576,
-        "hellaswag:bpb::olmes:full": 0.03425290011396938,
-        "jeopardy:bpb::gen2mc": 0.046497415934567195,
-        "lab_bench_dbqa:bpb": 0.01986798213412343,
-        "lab_bench_protocolqa:bpb": 0.03786351879635187,
-        "lambada:bpb": 0.09653305992001528,
-        "mbpp:3shot:bpb::none": 0.18397388768796274,
-        "medmcqa:bpb::none": 0.06302713890367868,
-        "mmlu:bpb": 0.00826975948170866,
-        "naturalqs:bpb::gen2mc": 0.0027356055313584597,
-        "piqa:bpb::olmes:full": 0.07317983995931955,
-        "socialiqa:bpb::olmes:full": 0.02415271095276176,
-        "squad:bpb::gen2mc": 0.03413505168414939,
-        "winogrande:bpb::olmes:full": 0.011938976691896084,
-    },
-    # olmo-cookbook compute-weights \
     #     --tasks-dev-target olmo3:dev:7b:macro \
     #     --dashboard olmo-3-baseline -P
     "olmo3:dev:7b:macro:w_avg": {
-        "arc:mc::full": 0.009838632203060162,
-        "basic:rc": 0.012848080588689604,
-        "codex_humaneval:3shot::olmo3": 0.023710578996421667,
-        "coqa::olmes": 0.010941992911136353,
-        "coqa:mc::gen2mc": 0.06964865539797274,
-        "cruxeval_input:pass@5": 0.04376730679949997,
-        "cruxeval_output:pass@5": 0.019792674772641787,
-        "csqa:mc::olmes:full": 0.09236953506322737,
-        "drop::olmes": 0.03001857902747629,
-        "drop:mc::gen2mc": 0.030286684015927857,
-        "gsm-symb": 0.049879931713535525,
-        "gsm8k::olmes": 0.06837222662092575,
-        "hellaswag:rc::olmes:full": 0.029650244172261822,
-        "jeopardy::olmes": 0.055112889646136067,
-        "jeopardy:mc::gen2mc": 0.01586221866860934,
-        "lambada": 0.024781800272939032,
-        "mbpp:3shot::olmo3": 0.03912672215745163,
-        "medmcqa:mc::none": 0.030073922675917394,
-        "medqa_en:mc::none": 0.003459270840976149,
-        "minerva": 0.0005969570179483949,
-        "mmlu:mc": 0.09387548463200011,
-        "naturalqs::olmes": 0.02257272410589692,
-        "naturalqs:mc::gen2mc": 0.06721626156736052,
-        "piqa:mc::olmes:full": 0.05623848197944744,
-        "sciq:mc::olmo3": 0.012849014661742401,
-        "socialiqa:mc::olmes:full": 0.027896801857258686,
-        "squad::olmes": 0.036545011577536986,
-        "squad:mc::gen2mc": 0.006863038043261612,
-        "winogrande:rc::olmes:full": 0.015804278012740317,
+        "arc:mc::full": 0.015473383469915806,
+        "basic:rc": 0.026087110095063835,
+        "codex_humaneval:3shot::olmo3": 0.050721742788123116,
+        "coqa::olmes": 0.028259641369511077,
+        "coqa:mc::gen2mc": 0.05256028272636436,
+        "cruxeval_input:pass@5": 0.019711756109696724,
+        "cruxeval_output:pass@5": 0.004046902863963933,
+        "csqa:mc::olmes:full": 0.047825412038840526,
+        "drop::olmes": 0.10497794379393241,
+        "drop:mc::gen2mc": 0.012941446297807808,
+        "gsm-symb": 0.01514602367285424,
+        "gsm8k::olmes": 0.06324380242732966,
+        "hellaswag:rc::olmes:full": 0.005150769454392643,
+        "jeopardy::olmes": 0.03521501857550169,
+        "jeopardy:mc::gen2mc": 0.014091749802980651,
+        "lambada": 0.0011709447916942108,
+        "mbpp:3shot::olmo3": 0.051681846086787,
+        "medmcqa:mc::none": 0.0027161719970252773,
+        "medqa_en:mc::none": 0.02070134064833692,
+        "minerva": 0.11521151449075422,
+        "mmlu:mc": 0.10283968296212243,
+        "naturalqs::olmes": 0.03572308628168784,
+        "naturalqs:mc::gen2mc": 0.0034575846290450882,
+        "piqa:mc::olmes:full": 0.0533569775912057,
+        "sciq:mc::olmo3": 0.03989676560786533,
+        "socialiqa:mc::olmes:full": 0.04654005336850668,
+        "squad::olmes": 0.0016648441747766961,
+        "squad:mc::gen2mc": 0.02017513251483939,
+        "winogrande:rc::olmes:full": 0.009411069369074827,
     },
     # olmo-cookbook compute-weights \
     #     --tasks-dev-target olmo3:dev:7b:micro \
@@ -272,12 +371,31 @@ WEIGHTED_AVERAGES = {
         "squad:mc::gen2mc": 0.0014037231432681922,
         "winogrande:rc::olmes:full": 0.013943962449095128,
     },
-    # olmo-cookbook compute-weights \
-    #     --tasks-dev-target olmo3:dev:7b:math \
-    #     --dashboard olmo-3-baseline -P
-    # "olmo3:dev:7b:math:w_avg": {},
-    # olmo-cookbook compute-weights \
-    #     --tasks-dev-target olmo3:dev:7b:code \
-    #     --dashboard olmo-3-baseline -P
-    # "olmo3:dev:7b:code:w_avg": {},
+}
+
+
+"""
+When for some weight sets, we manually define a [min, max] we want the fitted weights to be within.
+
+For example, in "olmo3:dev:1b:macro:rc" we want "mmlu:bpb" to be at least 20% of the weighted score, and at most 50% of the weighted score.
+"""
+MANUAL_PRIOR = {
+    "olmo3:dev:1b:macro:rc": {
+        "arc:rc::full": [0.1, 0.5],
+        "mmlu:rc": [0.2, 0.5],
+    },
+    "olmo3:dev:1b:macro:bpb": {
+        "codex_humaneval:3shot:bpb::none": [0.1, 0.5],
+        "hellaswag:bpb::olmes:full": [0.05, 0.5],
+        "mbpp:3shot:bpb::none": [0.1, 0.5],
+        "mmlu:bpb": [0.2, 0.5],
+        "arc:rc:full": [0.1, 0.5],
+    },
+    "olmo3:dev:7b:macro": {
+        "codex_humaneval:3shot::olmo3": [0.05, 0.5],
+        "gsm8k::olmes": [0.05, 0.5],
+        "mbpp:3shot::olmo3": [0.05, 0.5],
+        "minerva": [0.1, 0.5],
+        "mmlu:mc": [0.1, 0.5],
+    },
 }

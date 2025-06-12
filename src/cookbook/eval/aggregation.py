@@ -91,13 +91,67 @@ def generate_simplex_grid(n, steps):
     return np.array(raw) / steps
 
 
-def grid_search_optimizer(objective_fn, w_init, results_small, results_large, n_samples=50_000, steps=100, _type="approximate"):
+# hit_and_run_dirichlet
+def hit_and_run_dirichlet(n_samples, alpha, bounds, burn_in=100, thinning=10):
+    """ Approximate bounded dirichlet sampler. Exact sampling w/ bounds is intractable """
+    n = len(alpha)
+    bounds = np.array(bounds)
+    a, b = bounds[:, 0], bounds[:, 1]
+    
+    # Start at a valid point inside the simplex and bounds
+    while True:
+        x = np.random.dirichlet(alpha)
+        if np.all((x >= a) & (x <= b)):
+            break
+
+    samples = []
+
+    def get_line_limits(x, d, a, b):
+        t_min, t_max = -np.inf, np.inf
+        for i in range(len(d)):
+            if d[i] != 0:
+                t0 = (a[i] - x[i]) / d[i]
+                t1 = (b[i] - x[i]) / d[i]
+                t_lo, t_hi = min(t0, t1), max(t0, t1)
+                t_min = max(t_min, t_lo)
+                t_max = min(t_max, t_hi)
+            elif not (a[i] <= x[i] <= b[i]):
+                return None
+        return (t_min, t_max) if t_min <= t_max else None
+
+    total_steps = burn_in + n_samples * thinning
+    for _ in range(total_steps):
+        d = np.random.randn(n)
+        d -= np.mean(d)
+        d /= np.linalg.norm(d)
+        limits = get_line_limits(x, d, a, b)
+        if limits is None:
+            continue
+        t = np.random.uniform(*limits)
+        x_new = x + t * d
+        x_new /= np.sum(x_new)
+        if np.all((x_new >= a) & (x_new <= b)):
+            x = x_new
+            if _ >= burn_in and (_ - burn_in) % thinning == 0:
+                samples.append(x.copy())
+
+    samples = np.array(samples)
+    
+    assert np.allclose(samples.sum(axis=1), 1, atol=1e-8)
+    assert np.all(samples >= a - 1e-10)
+    assert np.all(samples <= b + 1e-10)
+
+    return samples
+
+
+def grid_search_optimizer(objective_fn, w_init, results_small, results_large, n_samples=50_000, steps=100, _type="approximate", bounds=None):
     """ Simple grid search over weights between tasks """
     n = len(w_init)
     if _type == "approximate":
-        # approximate sampling (faster)
-        samples = np.random.dirichlet(np.ones(n), size=n_samples) 
+        samples = hit_and_run_dirichlet(n_samples, np.ones(n), bounds)
     elif _type == "grid":
+        if bounds is not None:
+            raise NotImplementedError()
         samples = generate_simplex_grid(n, steps)
     else:
         raise ValueError(_type)
