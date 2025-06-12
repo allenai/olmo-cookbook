@@ -813,11 +813,11 @@ ALL_DISPLAY_TASKS = {
 
 ALL_DISPLAY_TASKS.update({
     "olmo3:dev:1b:main": [
-        "^olmo3:dev:1b:macro:bpb$",
+        # "^olmo3:dev:1b:macro:bpb$",
         "^olmo3:dev:1b:macro:bpb:w_avg$",
         "^olmo3:dev:1b:math:bpb$",
         "^olmo3:dev:1b:code:bpb$",
-        "^olmo3:dev:1b:macro:rc$",
+        # "^olmo3:dev:1b:macro:rc$",
         "^olmo3:dev:1b:macro:rc:w_avg$",
         "^arc:(rc|bpb)::olmes:full$",
         "^hellaswag:rc::olmes:full",
@@ -846,7 +846,6 @@ ALL_DISPLAY_TASKS.update({
         "^olmo3:dev:7b:qa$",
         "^olmo3:dev:7b:math$",
         "^olmo3:dev:7b:code$",
-        "^olmo3:dev:7b:qa$",
         "^arc:mc::full$",
         "^mmlu:mc$",
         "^codex_humaneval:3shot::olmo3$",
@@ -854,6 +853,7 @@ ALL_DISPLAY_TASKS.update({
         "^gsm8k::olmes$",
         "^gsm-symb$",
         "^minerva$",
+        "^basic:rc$",
     ],
 })
 

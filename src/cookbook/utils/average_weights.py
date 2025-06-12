@@ -105,7 +105,7 @@ WEIGHTED_AVERAGES = {
     },
     # olmo-cookbook compute-weights \
     #     --tasks-dev-small olmo3:dev:1b:macro:bpb \
-    #     --tasks-dev-target olmo3:dev:7b:macro \
+    #     --tasks-dev-target olmo3:dev:7b:micro \
     #     --dashboard olmo-3-baseline -P
     "olmo3:dev:1b:macro:bpb:w_avg": {
         "arc:bpb::full": 0.007432696579003527,
@@ -383,6 +383,8 @@ MANUAL_PRIOR = {
     "olmo3:dev:1b:macro:rc": {
         "arc:rc::full": [0.1, 0.5],
         "mmlu:rc": [0.2, 0.5],
+        "drop:rc::gen2mc": [0, 0.1],
+        "lab_bench_dbqa": [0, 0.05],
     },
     "olmo3:dev:1b:macro:bpb": {
         "codex_humaneval:3shot:bpb::none": [0.1, 0.5],
