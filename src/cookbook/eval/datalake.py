@@ -169,16 +169,7 @@ class FindExperiments(BaseDatalakeItem):
         # Sort records by created date (newest first)
         all_records.sort(key=lambda x: x.created, reverse=True)
 
-        # Filter to keep only the newest experiment for each (model_name, task_name) pair
-        unique_records = {}
-        for record in all_records:
-            key = (record.model_name, record.task_name)
-            if key not in unique_records:
-                unique_records[key] = record
-
-        records = list(unique_records.values())
-
-        return records
+        return all_records
 
 
 @dataclass
