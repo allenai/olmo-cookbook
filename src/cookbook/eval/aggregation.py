@@ -91,7 +91,6 @@ def generate_simplex_grid(n, steps):
     return np.array(raw) / steps
 
 
-# hit_and_run_dirichlet
 def hit_and_run_dirichlet(n_samples, alpha, bounds, burn_in=100, thinning=10):
     """ Approximate bounded dirichlet sampler. Exact sampling w/ bounds is intractable """
     n = len(alpha)
