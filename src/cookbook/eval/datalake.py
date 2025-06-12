@@ -147,7 +147,7 @@ class FindExperiments(BaseDatalakeItem):
     _endpoint: ClassVar[str] = "bluelake/find-experiments/"
 
     @classmethod
-    def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000) -> list[Self]:
+    def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000, filter_unique=False) -> list[Self]:
 
         # make sure at least one of dashboard or model_name is provided
         assert dashboard or model_name, "Either dashboard or model_name must be provided"
@@ -169,14 +169,18 @@ class FindExperiments(BaseDatalakeItem):
         # Sort records by created date (newest first)
         all_records.sort(key=lambda x: x.created, reverse=True)
 
-        # Filter to keep only the newest experiment for each (model_name, task_name) pair
-        unique_records = {}
-        for record in all_records:
-            key = (record.model_name, record.task_name)
-            if key not in unique_records:
-                unique_records[key] = record
+        if filter_unique:
+            # Filter to keep only the newest experiment for each (model_name, task_name) pair
+            # If there are different aliases with the same task name (e.g., gsm_symbolic:p1 and gsm_symbolic:p2), these will be filtered
+            unique_records = {}
+            for record in all_records:
+                key = (record.model_name, record.task_name)
+                if key not in unique_records:
+                    unique_records[key] = record
 
-        records = list(unique_records.values())
+            records = list(unique_records.values())
+        else:
+            records = all_records
 
         return records
 
