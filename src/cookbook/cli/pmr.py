@@ -865,7 +865,7 @@ class Session:
     def connect(self) -> paramiko.SSHClient:
         client = self.make_ssh_client()
         if self.private_key_path:
-            private_key = paramiko.RSAKey.from_private_key_file(self.private_key_path)
+            private_key = paramiko.Ed25519Key.from_private_key_file(self.private_key_path)
             client.connect(self.instance.public_ip_address, username=self.user, pkey=private_key)
         else:
             client.connect(self.instance.public_ip_address, username=self.user)
