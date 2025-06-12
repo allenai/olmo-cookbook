@@ -238,7 +238,10 @@ class MetricsAll(BaseDatalakeItem):
 
     @property
     def model_name(self) -> str | None:
-        return self.model_config.get("model", None)
+        name = self.model_config.get("model", None)
+        revision_name = '-' + self.model_config['revision'] if 'revision' in self.model_config and self.model_config['revision'] is not None else ''
+        model_name = name + revision_name
+        return model_name
 
     @property
     def is_aggregate(self) -> bool:

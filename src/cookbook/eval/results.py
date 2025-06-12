@@ -87,16 +87,13 @@ def make_dashboard_table(
         # we add primary metric after checking that we have a model name
         assert metric.model_name is not None
 
-        revision_name = '-' + metric.model_config['revision'] if 'revision' in metric.model_config and metric.model_config['revision'] is not None else ''
-        model_name = metric.model_name + revision_name
-
         # add primary score
-        tables.metrics.add(col=metric.alias, row=model_name, val=metric.metrics.primary_score)
+        tables.metrics.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
 
         # add bpb if available and selected
         if metric.metrics.bpb is not None:
             if (bpb_alias := make_bpb_name(metric.alias)) is not None:
-                tables.metrics.add(col=bpb_alias, row=model_name, val=metric.metrics.bpb)
+                tables.metrics.add(col=bpb_alias, row=metric.model_name, val=metric.metrics.bpb)
                 bpb_to_og_metric_name_map[bpb_alias] = metric.alias
 
     for model_row in tables.metrics.rows:
