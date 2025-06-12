@@ -88,6 +88,17 @@ olmo-cookbook-eval results \
 
 2. **BPB vs RC vs MC?** This is still debated among team, but the eventual goal should be to move toward BPB that we trust for our experiments, and monitoring MC (or our final target end task format) on 7B+ runs for metric breakthrough moments & final scores.
 
+### RC vs. MC
+
+For 7B+ runs, our development evals replace multiple-choice RC evals with MC evals. 
+
+Summarizing our conversation with the team, we considered three options for calculating both, and aggregating the results:
+
+1. Calculate `max(rc, mc)` -- This isn't desirable. Imagine two ablations -- one consistently has a very high RC and the other a very high MC. This is not a behavior we want from our metric
+2. Calculate `avg(rc, mc)` -- This isn't desirable. At the small scale (when models get random-chance MC) we are artificially penalizing performance. At the large scale, (when models get lower RC than MC, because RC does not allow the model to see distractor options and therefore is a slightly more difficult task config) we are artificially penalizing performance.
+3. Keep `mc` only -- We choose this. There is agreement that MC is a better task format, and that the issues caused by aggregation are not worth the benefit of accounting for two task formats.
+
+Additionally, we observed empircally that the MC tasks better ranked models w.r.t. training compute. For more discussion, see [Figure 1 of the OLMES paper](https://arxiv.org/pdf/2406.08446?page=7).
 
 ## TODOs
 
