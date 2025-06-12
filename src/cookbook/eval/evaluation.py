@@ -157,6 +157,8 @@ def evaluate_checkpoint(
     if push_datalake:
         flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
         flags.append("--push-datalake")
+    else:
+        flags.append("--no-push-datalake")
 
     # figure out model args based on cli
     model_args = {
