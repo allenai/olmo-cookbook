@@ -1,7 +1,7 @@
 name: "olmo2-1b-5xC-mjmix-mayee"
 description: "OLMo2 1b@5xC, mixing experiments | mixing_type: mayee "
 budget: "ai2/oe-training"
-workspace: "ai2/learn2code"
+workspace: "ai2/olmo3-webdata"
 nodes: 16
 gpus: 8
 preemptible: true
