@@ -817,6 +817,8 @@ ALL_DISPLAY_TASKS.update({
         "^olmo3:dev:1b:macro:bpb:w_avg$",
         "^olmo3:dev:1b:math:bpb$",
         "^olmo3:dev:1b:code:bpb$",
+        "^olmo3:dev:1b:macro:rc$",
+        "^olmo3:dev:1b:macro:rc:w_avg$",
         "^arc:(rc|bpb)::olmes:full$",
         "^hellaswag:rc::olmes:full",
         "basic:rc",
