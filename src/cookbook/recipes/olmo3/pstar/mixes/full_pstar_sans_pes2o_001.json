@@ -1,0 +1,262 @@
+[
+  {
+    "domain": "finemath-3plus",
+    "weight": 0.025632598618344855
+  },
+  {
+    "domain": "arxiv",
+    "weight": 0.008380356540993005
+  },
+  {
+    "domain": "wikipedia",
+    "weight": 0.000420956899073695
+  },
+  {
+    "domain": "dclm:adult_content",
+    "weight": 0.0008703858838659088
+  },
+  {
+    "domain": "dclm:art_and_design",
+    "weight": 0.009507056015825832
+  },
+  {
+    "domain": "dclm:crime_and_law",
+    "weight": 0.022240137297894
+  },
+  {
+    "domain": "dclm:education_and_jobs",
+    "weight": 0.032618407527618514
+  },
+  {
+    "domain": "dclm:electronics_and_hardware",
+    "weight": 0.026264406055802827
+  },
+  {
+    "domain": "dclm:entertainment",
+    "weight": 0.07302015456598306
+  },
+  {
+    "domain": "dclm:fashion_and_beauty",
+    "weight": 0.00009687214863854006
+  },
+  {
+    "domain": "dclm:finance_and_business",
+    "weight": 0.030940076623468746
+  },
+  {
+    "domain": "dclm:food_and_dining",
+    "weight": 0.01071594468094915
+  },
+  {
+    "domain": "dclm:games",
+    "weight": 0.05242501067399995
+  },
+  {
+    "domain": "dclm:health",
+    "weight": 0.07563231847952068
+  },
+  {
+    "domain": "dclm:history_and_geography",
+    "weight": 0.020615104007302794
+  },
+  {
+    "domain": "dclm:home_and_hobbies",
+    "weight": 0.007019021064663075
+  },
+  {
+    "domain": "dclm:industrial",
+    "weight": 0.011978498728073715
+  },
+  {
+    "domain": "dclm:literature",
+    "weight": 0.051923081993522426
+  },
+  {
+    "domain": "dclm:politics",
+    "weight": 0.01651097827928883
+  },
+  {
+    "domain": "dclm:religion",
+    "weight": 0.015036337950831766
+  },
+  {
+    "domain": "dclm:science_math_and_technology",
+    "weight": 0.15994893649946636
+  },
+  {
+    "domain": "dclm:social_life",
+    "weight": 0.003534663962043686
+  },
+  {
+    "domain": "dclm:software",
+    "weight": 0.036012918896623806
+  },
+  {
+    "domain": "dclm:software_development",
+    "weight": 0.08476216554652103
+  },
+  {
+    "domain": "dclm:sports_and_fitness",
+    "weight": 0.009944724889036306
+  },
+  {
+    "domain": "dclm:transportation",
+    "weight": 0.007454283582993562
+  },
+  {
+    "domain": "dclm:travel_and_tourism",
+    "weight": 0.001671945636987095
+  },
+  {
+    "domain": "s2pdf:adult_content",
+    "weight": 0.000013656805397641686
+  },
+  {
+    "domain": "s2pdf:art_and_design",
+    "weight": 0.00012905869509434242
+  },
+  {
+    "domain": "s2pdf:crime_and_law",
+    "weight": 0.002085558701063316
+  },
+  {
+    "domain": "s2pdf:education_and_jobs",
+    "weight": 0.007061796639946074
+  },
+  {
+    "domain": "s2pdf:electronics_and_hardware",
+    "weight": 0.0007314343088823648
+  },
+  {
+    "domain": "s2pdf:entertainment",
+    "weight": 0.00029631056701127635
+  },
+  {
+    "domain": "s2pdf:finance_and_business",
+    "weight": 0.0018648314830041952
+  },
+  {
+    "domain": "s2pdf:food_and_dining",
+    "weight": 0.000008727236067066969
+  },
+  {
+    "domain": "s2pdf:games",
+    "weight": 0.00003200649654976033
+  },
+  {
+    "domain": "s2pdf:health",
+    "weight": 0.01609506529016987
+  },
+  {
+    "domain": "s2pdf:history_and_geography",
+    "weight": 0.0006773228076978507
+  },
+  {
+    "domain": "s2pdf:home_and_hobbies",
+    "weight": 0.00011111582862659044
+  },
+  {
+    "domain": "s2pdf:industrial",
+    "weight": 0.007229451502439688
+  },
+  {
+    "domain": "s2pdf:literature",
+    "weight": 0.0012261378632816568
+  },
+  {
+    "domain": "s2pdf:politics",
+    "weight": 0.002471377064893659
+  },
+  {
+    "domain": "s2pdf:religion",
+    "weight": 0.0006838906159962675
+  },
+  {
+    "domain": "s2pdf:science_math_and_technology",
+    "weight": 0.08092998554267956
+  },
+  {
+    "domain": "s2pdf:social_life",
+    "weight": 0.00002914996808842655
+  },
+  {
+    "domain": "s2pdf:software",
+    "weight": 0.0016390686421097805
+  },
+  {
+    "domain": "s2pdf:software_development",
+    "weight": 0.01175014844398986
+  },
+  {
+    "domain": "s2pdf:sports_and_fitness",
+    "weight": 0.0004864816925547135
+  },
+  {
+    "domain": "s2pdf:transportation",
+    "weight": 0.00030174364823306244
+  },
+  {
+    "domain": "s2pdf:travel_and_tourism",
+    "weight": 0.000013725566072547
+  },
+  {
+    "domain": "stack-edu:C",
+    "weight": 0.0027957867728398916
+  },
+  {
+    "domain": "stack-edu:CSharp",
+    "weight": 0.00423771003797486
+  },
+  {
+    "domain": "stack-edu:Cpp",
+    "weight": 0.008269372003488616
+  },
+  {
+    "domain": "stack-edu:Go",
+    "weight": 0.0009061865675598896
+  },
+  {
+    "domain": "stack-edu:Java",
+    "weight": 0.011013278264166842
+  },
+  {
+    "domain": "stack-edu:JavaScript",
+    "weight": 0.006007401509298881
+  },
+  {
+    "domain": "stack-edu:Markdown",
+    "weight": 0.011475228653988562
+  },
+  {
+    "domain": "stack-edu:PHP",
+    "weight": 0.004184371481659462
+  },
+  {
+    "domain": "stack-edu:Python",
+    "weight": 0.01261342778854117
+  },
+  {
+    "domain": "stack-edu:Ruby",
+    "weight": 0.0009059598959593656
+  },
+  {
+    "domain": "stack-edu:Rust",
+    "weight": 0.0009670676675476695
+  },
+  {
+    "domain": "stack-edu:SQL",
+    "weight": 0.0012576995088838924
+  },
+  {
+    "domain": "stack-edu:Shell",
+    "weight": 0.001761213263493027
+  },
+  {
+    "domain": "stack-edu:Swift",
+    "weight": 0.0009778306066844988
+  },
+  {
+    "domain": "stack-edu:TypeScript",
+    "weight": 0.001582550659966618
+  }
+]
