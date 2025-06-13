@@ -44,7 +44,7 @@ class MixtureBuilder:
             if len(schemes) > 1:
                 raise ValueError(f"All paths for source {source.name} must have the same scheme. Found: {schemes}")
 
-            scheme = schemes.pop()
+            scheme = schemes.pop() if schemes else "s3"  # Default to 's3'
 
             expanded = paths + expand_globs(self.cached_fs.get(scheme, self.cached_fs["s3"]), globs)
             source_configs.append(
