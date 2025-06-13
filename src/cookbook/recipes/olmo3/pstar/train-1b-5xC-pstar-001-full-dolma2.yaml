@@ -2,7 +2,7 @@ name: "olmo3-1b-5xC-full-pstar-001-hlr-dolma2"
 description: "OLMo3 1b@5xC full p* mix"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
-nodes: 16
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 127_939_584_000
