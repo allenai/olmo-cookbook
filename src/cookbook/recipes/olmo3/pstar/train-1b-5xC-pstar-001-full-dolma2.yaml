@@ -300,11 +300,11 @@ dataset:
       repetition_factor: 5.0
       paths:
         - "s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/entertainment/**/*.npy"
-    - name: s2pdf_fashion_and_beauty
-      target_ratio: 0.0
-      repetition_factor: 5.0
-      paths:
-        - "s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy"
+    # - name: s2pdf_fashion_and_beauty
+    #   target_ratio: 0.0
+    #   repetition_factor: 5.0
+    #   paths:
+    #     - "s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy"
     - name: s2pdf_finance_and_business
       target_ratio: 0.0018435718914506468
       repetition_factor: 5.0
