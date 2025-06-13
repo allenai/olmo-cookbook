@@ -494,6 +494,26 @@ MULTILINGUAL_MBPP_TASKS = [
     "mt_mbpp:typescript",
 ]
 
+MULTILINGUAL_MBPP_TASKS_V2 = [
+    "mt_mbpp_v2fix:bash",
+    "mt_mbpp_v2fix:c",
+    "mt_mbpp_v2fix:cpp",
+    "mt_mbpp_v2fix:csharp",
+    "mt_mbpp_v2fix:go",
+    "mt_mbpp_v2fix:haskell",
+    "mt_mbpp_v2fix:java",
+    "mt_mbpp_v2fix:javascript",
+    "mt_mbpp_v2fix:matlab",
+    "mt_mbpp_v2fix:php",
+    "mt_mbpp_v2fix:python",
+    "mt_mbpp_v2fix:r",
+    "mt_mbpp_v2fix:ruby",
+    "mt_mbpp_v2fix:rust",
+    "mt_mbpp_v2fix:scala",
+    "mt_mbpp_v2fix:swift",
+    "mt_mbpp_v2fix:typescript",
+]
+
 # named groups are things you should able to average; they
 # should just contain aliases
 ALL_NAMED_GROUPS = {
@@ -522,7 +542,8 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
-    "mt_mbpp": MULTILINGUAL_MBPP_TASKS
+    "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
+    "mt_mbpp_v2fix": MULTILINGUAL_MBPP_TASKS_V2
 }
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
@@ -820,14 +841,14 @@ ALL_DISPLAY_TASKS.update({
         "^olmo3:dev:1b:code:bpb$",
         # "^olmo3:dev:1b:macro:rc$",
         "^olmo3:dev:1b:macro:rc:w_avg$",
-        "^arc:(rc|bpb)::olmes:full$",
+        "^arc",
         "^hellaswag:rc::olmes:full",
         "basic:rc",
         "^mt_mbpp_v2fix$",
         "^mmlu:(rc|bpb)$",
         "core:rc"
-        "codex_humaneval:3shot:bpb::none",
-        "mbpp:3shot:bpb::none",
+        "humaneval:bpb",
+        "mbpp:bpb",
         "^minerva:bpb$",
     ],
     "olmo3:dev:7b:macro": \
