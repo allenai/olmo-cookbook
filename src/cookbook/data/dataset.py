@@ -39,6 +39,9 @@ class MixtureBuilder:
             globs = [path for path in source.paths if "*" in path]
             paths = [path for path in source.paths if path not in globs]
 
+            if not paths and not globs:
+                raise ValueError(f"Source {source.name} must have at least one valid path or glob.")
+
             # Check if all paths have the same URL scheme
             schemes = {urlparse(path).scheme for path in paths + globs}
             if len(schemes) > 1:
