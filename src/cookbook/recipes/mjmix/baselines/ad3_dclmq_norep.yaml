@@ -1,0 +1,26 @@
+name: "olmo2-1b-5xC-mjmix-baseline-ad3_dclmqc_norep"
+description: "OLMo2 1b@5xC, mixing baseline experiments | baseline: all dressed 3 -> dclm qc filter -> no repeats "
+budget: "ai2/oe-training"
+workspace: "ai2/olmo3-webdata"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127_939_584_000 # 1279395840 nonembed params x 20 x 5
+sequence_length: 4096
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+global_batch_size: 4194304
+rank_microbatch_size: 16384
+learning_rate: 1.8e-3
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+    - name: alldressed3_dclmqc_norep
+      target_ratio: 1.0
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/smoketest_06052025/tokens/ad3_subsample_0.20_dclmqc_tokens/*.npy"
+
