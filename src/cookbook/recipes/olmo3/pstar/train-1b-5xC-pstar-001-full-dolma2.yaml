@@ -80,11 +80,11 @@ dataset:
       repetition_factor: 5.0
       paths:
         - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/environmental-science/**/*.npy"
-    - name: pes2o_geography
-      target_ratio: 0.0
-      repetition_factor: 5.0
-      paths:
-        - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/geography/**/*.npy"
+    # - name: pes2o_geography
+    #   target_ratio: 0.0
+    #   repetition_factor: 5.0
+    #   paths:
+    #     - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/geography/**/*.npy"
     - name: pes2o_geology
       target_ratio: 0.000039831108832885
       repetition_factor: 5.0
@@ -100,11 +100,11 @@ dataset:
       repetition_factor: 5.0
       paths:
         - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/law/**/*.npy"
-    - name: pes2o_linguistics
-      target_ratio: 0.0
-      repetition_factor: 5.0
-      paths:
-        - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/linguistics/**/*.npy"
+    # - name: pes2o_linguistics
+    #   target_ratio: 0.0
+    #   repetition_factor: 5.0
+    #   paths:
+    #     - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/linguistics/**/*.npy"
     - name: pes2o_materials-science
       target_ratio: 0.0004607075043111136
       repetition_factor: 5.0
