@@ -828,7 +828,7 @@ ALL_DISPLAY_TASKS.update({
         "core:rc"
         "codex_humaneval:3shot:bpb::none",
         "mbpp:3shot:bpb::none",
-        "^minerva$",
+        "^minerva:bpb$",
     ],
     "olmo3:dev:7b:macro": \
         ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"] + \
