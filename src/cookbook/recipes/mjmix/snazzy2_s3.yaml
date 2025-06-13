@@ -1,0 +1,1025 @@
+name: "olmo2-1b-5xC-mjmix-snazzy2"
+description: "OLMo2 1b@5xC, mixing experiments | mixing_type: snazzy2"
+budget: "ai2/oe-training"
+workspace: "ai2/learn2code"
+nodes: 16
+gpus: 8
+preemptible: true
+max_tokens: 127_939_584_000 # 1279395840 nonembed params x 20 x 5
+sequence_length: 4096
+seed: 1337
+model: "olmo2_1B_v2"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+global_batch_size: 4194304
+rank_microbatch_size: 32768
+learning_rate: 1.8e-3
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+    - name: adult_content_vigintile_0013
+      target_ratio: 6.426399635176281e-09
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0013/*.npy"
+    - name: adult_content_vigintile_0014
+      target_ratio: 5.0347716867864205e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0014/*.npy"
+    - name: adult_content_vigintile_0015
+      target_ratio: 4.289692072088161e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0015/*.npy"
+    - name: adult_content_vigintile_0016
+      target_ratio: 5.552215535697809e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0016/*.npy"
+    - name: adult_content_vigintile_0017
+      target_ratio: 9.442790048780327e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0017/*.npy"
+    - name: adult_content_vigintile_0018
+      target_ratio: 0.0009053840921453375
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0018/*.npy"
+    - name: adult_content_vigintile_0020
+      target_ratio: 0.00013826785835221398
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/adult_content/vigintile_0020/*.npy"
+    - name: art_and_design_vigintile_0012
+      target_ratio: 3.5936494398497354e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0012/*.npy"
+    - name: art_and_design_vigintile_0013
+      target_ratio: 2.0706537940855118e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0013/*.npy"
+    - name: art_and_design_vigintile_0014
+      target_ratio: 1.1232101939158151e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0014/*.npy"
+    - name: art_and_design_vigintile_0015
+      target_ratio: 6.295874774858678e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0015/*.npy"
+    - name: art_and_design_vigintile_0016
+      target_ratio: 3.9601007964577276e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0016/*.npy"
+    - name: art_and_design_vigintile_0017
+      target_ratio: 0.0002817336705490593
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0017/*.npy"
+    - name: art_and_design_vigintile_0018
+      target_ratio: 0.0023317776216757024
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0018/*.npy"
+    - name: art_and_design_vigintile_0020
+      target_ratio: 0.009836299280810465
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/art_and_design/vigintile_0020/*.npy"
+    - name: crime_and_law_vigintile_0011
+      target_ratio: 4.185843278353245e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0011/*.npy"
+    - name: crime_and_law_vigintile_0012
+      target_ratio: 2.134823971690667e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0012/*.npy"
+    - name: crime_and_law_vigintile_0013
+      target_ratio: 9.446028768068969e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0013/*.npy"
+    - name: crime_and_law_vigintile_0014
+      target_ratio: 4.298378523946291e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0014/*.npy"
+    - name: crime_and_law_vigintile_0015
+      target_ratio: 2.1321564601424097e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0015/*.npy"
+    - name: crime_and_law_vigintile_0016
+      target_ratio: 0.00012075625876992712
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0016/*.npy"
+    - name: crime_and_law_vigintile_0017
+      target_ratio: 0.0007639148734400276
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0017/*.npy"
+    - name: crime_and_law_vigintile_0018
+      target_ratio: 0.0052571241342087354
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0018/*.npy"
+    - name: crime_and_law_vigintile_0020
+      target_ratio: 0.023066214715696132
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/crime_and_law/vigintile_0020/*.npy"
+    - name: education_and_jobs_vigintile_0011
+      target_ratio: 9.451720050691412e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0011/*.npy"
+    - name: education_and_jobs_vigintile_0012
+      target_ratio: 4.83766369688993e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0012/*.npy"
+    - name: education_and_jobs_vigintile_0013
+      target_ratio: 2.197564632076475e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0013/*.npy"
+    - name: education_and_jobs_vigintile_0014
+      target_ratio: 1.0289354518323043e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0014/*.npy"
+    - name: education_and_jobs_vigintile_0015
+      target_ratio: 5.315090658660358e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0015/*.npy"
+    - name: education_and_jobs_vigintile_0016
+      target_ratio: 0.0002850013980885681
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0016/*.npy"
+    - name: education_and_jobs_vigintile_0017
+      target_ratio: 0.001560696178497113
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0017/*.npy"
+    - name: education_and_jobs_vigintile_0018
+      target_ratio: 0.008676781955639009
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0018/*.npy"
+    - name: education_and_jobs_vigintile_0020
+      target_ratio: 0.03228809507149861
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/education_and_jobs/vigintile_0020/*.npy"
+    - name: electronics_and_hardware_vigintile_0011
+      target_ratio: 3.1023790198895667e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0011/*.npy"
+    - name: electronics_and_hardware_vigintile_0012
+      target_ratio: 1.067534055947655e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0012/*.npy"
+    - name: electronics_and_hardware_vigintile_0013
+      target_ratio: 3.0165455163881442e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0013/*.npy"
+    - name: electronics_and_hardware_vigintile_0014
+      target_ratio: 8.79647224294731e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0014/*.npy"
+    - name: electronics_and_hardware_vigintile_0015
+      target_ratio: 0.0002690834027947479
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0015/*.npy"
+    - name: electronics_and_hardware_vigintile_0016
+      target_ratio: 0.0008903030485636272
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0016/*.npy"
+    - name: electronics_and_hardware_vigintile_0017
+      target_ratio: 0.002921017484582319
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0017/*.npy"
+    - name: electronics_and_hardware_vigintile_0018
+      target_ratio: 0.009242444704926328
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0018/*.npy"
+    - name: electronics_and_hardware_vigintile_0020
+      target_ratio: 0.02106935840612427
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/electronics_and_hardware/vigintile_0020/*.npy"
+    - name: entertainment_vigintile_0012
+      target_ratio: 2.2138991801392083e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0012/*.npy"
+    - name: entertainment_vigintile_0013
+      target_ratio: 9.989598063667084e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0013/*.npy"
+    - name: entertainment_vigintile_0014
+      target_ratio: 3.8786229928783184e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0014/*.npy"
+    - name: entertainment_vigintile_0015
+      target_ratio: 0.00015797288638549998
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0015/*.npy"
+    - name: entertainment_vigintile_0016
+      target_ratio: 0.0007102612047307536
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0016/*.npy"
+    - name: entertainment_vigintile_0017
+      target_ratio: 0.0034303438141588594
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0017/*.npy"
+    - name: entertainment_vigintile_0018
+      target_ratio: 0.017688986879686838
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0018/*.npy"
+    - name: entertainment_vigintile_0020
+      target_ratio: 0.07394619792966371
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/entertainment/vigintile_0020/*.npy"
+    - name: fashion_and_beauty_vigintile_0012
+      target_ratio: 3.660934789702306e-10
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0012/*.npy"
+    - name: fashion_and_beauty_vigintile_0013
+      target_ratio: 2.0229348941204933e-09
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0013/*.npy"
+    - name: fashion_and_beauty_vigintile_0014
+      target_ratio: 9.771105272205864e-09
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0014/*.npy"
+    - name: fashion_and_beauty_vigintile_0015
+      target_ratio: 5.3782218583543094e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0015/*.npy"
+    - name: fashion_and_beauty_vigintile_0016
+      target_ratio: 3.718712544685021e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0016/*.npy"
+    - name: fashion_and_beauty_vigintile_0017
+      target_ratio: 3.318411066549549e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0017/*.npy"
+    - name: fashion_and_beauty_vigintile_0018
+      target_ratio: 2.307395214702836e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0018/*.npy"
+    - name: fashion_and_beauty_vigintile_0020
+      target_ratio: 0.00010050648628300296
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/fashion_and_beauty/vigintile_0020/*.npy"
+    - name: finance_and_business_vigintile_0011
+      target_ratio: 1.0243939374371832e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0011/*.npy"
+    - name: finance_and_business_vigintile_0012
+      target_ratio: 5.794062187762954e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0012/*.npy"
+    - name: finance_and_business_vigintile_0013
+      target_ratio: 2.9751014373966254e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0013/*.npy"
+    - name: finance_and_business_vigintile_0014
+      target_ratio: 1.4663931947243145e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0014/*.npy"
+    - name: finance_and_business_vigintile_0015
+      target_ratio: 7.619139971277262e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0015/*.npy"
+    - name: finance_and_business_vigintile_0016
+      target_ratio: 0.00039879514253138564
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0016/*.npy"
+    - name: finance_and_business_vigintile_0017
+      target_ratio: 0.0019559628538072834
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0017/*.npy"
+    - name: finance_and_business_vigintile_0018
+      target_ratio: 0.008676044911128706
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0018/*.npy"
+    - name: finance_and_business_vigintile_0020
+      target_ratio: 0.029544955930651186
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/finance_and_business/vigintile_0020/*.npy"
+    - name: food_and_dining_vigintile_0011
+      target_ratio: 3.1725520337962415e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0011/*.npy"
+    - name: food_and_dining_vigintile_0012
+      target_ratio: 1.64778746623078e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0012/*.npy"
+    - name: food_and_dining_vigintile_0013
+      target_ratio: 7.663515511183388e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0013/*.npy"
+    - name: food_and_dining_vigintile_0014
+      target_ratio: 3.763656177465947e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0014/*.npy"
+    - name: food_and_dining_vigintile_0015
+      target_ratio: 2.0695598679501736e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0015/*.npy"
+    - name: food_and_dining_vigintile_0016
+      target_ratio: 0.00011824824924469653
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0016/*.npy"
+    - name: food_and_dining_vigintile_0017
+      target_ratio: 0.0006702343307311868
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0017/*.npy"
+    - name: food_and_dining_vigintile_0018
+      target_ratio: 0.0031025467811275683
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0018/*.npy"
+    - name: food_and_dining_vigintile_0020
+      target_ratio: 0.010169707630872726
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/food_and_dining/vigintile_0020/*.npy"
+    - name: games_vigintile_0012
+      target_ratio: 4.117420216451364e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0012/*.npy"
+    - name: games_vigintile_0013
+      target_ratio: 0.00013486175546763976
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0013/*.npy"
+    - name: games_vigintile_0014
+      target_ratio: 0.00035759517848743587
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0014/*.npy"
+    - name: games_vigintile_0015
+      target_ratio: 0.0009089607289577634
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0015/*.npy"
+    - name: games_vigintile_0016
+      target_ratio: 0.002324870850065377
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0016/*.npy"
+    - name: games_vigintile_0017
+      target_ratio: 0.0062693188766110184
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0017/*.npy"
+    - name: games_vigintile_0018
+      target_ratio: 0.018205919451067903
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0018/*.npy"
+    - name: games_vigintile_0020
+      target_ratio: 0.04067014596125433
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/games/vigintile_0020/*.npy"
+    - name: health_vigintile_0011
+      target_ratio: 2.926892450857692e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0011/*.npy"
+    - name: health_vigintile_0012
+      target_ratio: 1.172180065025204e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0012/*.npy"
+    - name: health_vigintile_0013
+      target_ratio: 4.0061808962918796e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0013/*.npy"
+    - name: health_vigintile_0014
+      target_ratio: 0.0001398740311842657
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0014/*.npy"
+    - name: health_vigintile_0015
+      target_ratio: 0.0004895384989121349
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0015/*.npy"
+    - name: health_vigintile_0016
+      target_ratio: 0.0018356957308074057
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0016/*.npy"
+    - name: health_vigintile_0017
+      target_ratio: 0.0071593090159078185
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0017/*.npy"
+    - name: health_vigintile_0018
+      target_ratio: 0.027421104221369626
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0018/*.npy"
+    - name: health_vigintile_0020
+      target_ratio: 0.06232160140071633
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/health/vigintile_0020/*.npy"
+    - name: history_and_geography_vigintile_0013
+      target_ratio: 7.797253920193098e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0013/*.npy"
+    - name: history_and_geography_vigintile_0014
+      target_ratio: 4.375187125741404e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0014/*.npy"
+    - name: history_and_geography_vigintile_0015
+      target_ratio: 2.3069676634514862e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0015/*.npy"
+    - name: history_and_geography_vigintile_0016
+      target_ratio: 0.00013487721015610098
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0016/*.npy"
+    - name: history_and_geography_vigintile_0017
+      target_ratio: 0.0009525225404795156
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0017/*.npy"
+    - name: history_and_geography_vigintile_0018
+      target_ratio: 0.006614964902032014
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0018/*.npy"
+    - name: history_and_geography_vigintile_0020
+      target_ratio: 0.019367967226094435
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/history_and_geography/vigintile_0020/*.npy"
+    - name: home_and_hobbies_vigintile_0012
+      target_ratio: 3.054153896732959e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0012/*.npy"
+    - name: home_and_hobbies_vigintile_0013
+      target_ratio: 1.6693981294628003e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0013/*.npy"
+    - name: home_and_hobbies_vigintile_0014
+      target_ratio: 8.2197857605265e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0014/*.npy"
+    - name: home_and_hobbies_vigintile_0015
+      target_ratio: 4.527252329313502e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0015/*.npy"
+    - name: home_and_hobbies_vigintile_0016
+      target_ratio: 3.0240478940199195e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0016/*.npy"
+    - name: home_and_hobbies_vigintile_0017
+      target_ratio: 0.0002388489932813189
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0017/*.npy"
+    - name: home_and_hobbies_vigintile_0018
+      target_ratio: 0.0016418154878010533
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0018/*.npy"
+    - name: home_and_hobbies_vigintile_0020
+      target_ratio: 0.007310016209876072
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/home_and_hobbies/vigintile_0020/*.npy"
+    - name: industrial_vigintile_0011
+      target_ratio: 5.5758327670401984e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0011/*.npy"
+    - name: industrial_vigintile_0012
+      target_ratio: 2.759642626153025e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0012/*.npy"
+    - name: industrial_vigintile_0013
+      target_ratio: 1.1595054845992617e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0013/*.npy"
+    - name: industrial_vigintile_0014
+      target_ratio: 5.05410906070702e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0014/*.npy"
+    - name: industrial_vigintile_0015
+      target_ratio: 2.3380661870441487e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0015/*.npy"
+    - name: industrial_vigintile_0016
+      target_ratio: 0.0001177810420559573
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0016/*.npy"
+    - name: industrial_vigintile_0017
+      target_ratio: 0.0006289574047603918
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0017/*.npy"
+    - name: industrial_vigintile_0018
+      target_ratio: 0.0031318841075157586
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0018/*.npy"
+    - name: industrial_vigintile_0020
+      target_ratio: 0.01183721980346896
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/industrial/vigintile_0020/*.npy"
+    - name: literature_vigintile_0013
+      target_ratio: 1.0944950029795162e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0013/*.npy"
+    - name: literature_vigintile_0014
+      target_ratio: 4.306848730870972e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0014/*.npy"
+    - name: literature_vigintile_0015
+      target_ratio: 0.00014914159522060353
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0015/*.npy"
+    - name: literature_vigintile_0016
+      target_ratio: 0.0005571001636737356
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0016/*.npy"
+    - name: literature_vigintile_0017
+      target_ratio: 0.0026610301423590074
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0017/*.npy"
+    - name: literature_vigintile_0018
+      target_ratio: 0.016063233731855902
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0018/*.npy"
+    - name: literature_vigintile_0020
+      target_ratio: 0.04876677368400712
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/literature/vigintile_0020/*.npy"
+    - name: politics_vigintile_0011
+      target_ratio: 3.144540926402106e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0011/*.npy"
+    - name: politics_vigintile_0012
+      target_ratio: 1.7246711876655366e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0012/*.npy"
+    - name: politics_vigintile_0013
+      target_ratio: 8.228472964188999e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0013/*.npy"
+    - name: politics_vigintile_0014
+      target_ratio: 4.154038169776773e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0014/*.npy"
+    - name: politics_vigintile_0015
+      target_ratio: 2.2353298349768394e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0015/*.npy"
+    - name: politics_vigintile_0016
+      target_ratio: 0.00012479446743157824
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0016/*.npy"
+    - name: politics_vigintile_0017
+      target_ratio: 0.0007543740745624461
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0017/*.npy"
+    - name: politics_vigintile_0018
+      target_ratio: 0.004383962693492192
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0018/*.npy"
+    - name: politics_vigintile_0020
+      target_ratio: 0.016412997479747768
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/politics/vigintile_0020/*.npy"
+    - name: religion_vigintile_0013
+      target_ratio: 1.0293539465204958e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0013/*.npy"
+    - name: religion_vigintile_0014
+      target_ratio: 7.782128177553705e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0014/*.npy"
+    - name: religion_vigintile_0015
+      target_ratio: 5.439432438124776e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0015/*.npy"
+    - name: religion_vigintile_0016
+      target_ratio: 4.1968511204650526e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0016/*.npy"
+    - name: religion_vigintile_0017
+      target_ratio: 0.0003743787975858903
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0017/*.npy"
+    - name: religion_vigintile_0018
+      target_ratio: 0.0035735719790556623
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0018/*.npy"
+    - name: religion_vigintile_0020
+      target_ratio: 0.01576896350707676
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/religion/vigintile_0020/*.npy"
+    - name: science_math_and_technology_vigintile_0012
+      target_ratio: 0.0024195515011790373
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0012/*.npy"
+    - name: science_math_and_technology_vigintile_0013
+      target_ratio: 0.0053038855496582845
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0013/*.npy"
+    - name: science_math_and_technology_vigintile_0014
+      target_ratio: 0.009106602158417389
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0014/*.npy"
+    - name: science_math_and_technology_vigintile_0015
+      target_ratio: 0.014997576510987713
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0015/*.npy"
+    - name: science_math_and_technology_vigintile_0016
+      target_ratio: 0.02484412489852514
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0016/*.npy"
+    - name: science_math_and_technology_vigintile_0017
+      target_ratio: 0.0412439317429624
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0017/*.npy"
+    - name: science_math_and_technology_vigintile_0018
+      target_ratio: 0.060151391724331205
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0018/*.npy"
+    - name: science_math_and_technology_vigintile_0020
+      target_ratio: 0.05218704430846739
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/science_math_and_technology/vigintile_0020/*.npy"
+    - name: social_life_vigintile_0012
+      target_ratio: 1.3261153084384506e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0012/*.npy"
+    - name: social_life_vigintile_0013
+      target_ratio: 7.45988080010051e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0013/*.npy"
+    - name: social_life_vigintile_0014
+      target_ratio: 3.8563683441941864e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0014/*.npy"
+    - name: social_life_vigintile_0015
+      target_ratio: 2.151035292897032e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0015/*.npy"
+    - name: social_life_vigintile_0016
+      target_ratio: 1.441678165820574e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0016/*.npy"
+    - name: social_life_vigintile_0017
+      target_ratio: 0.00010781909399483564
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0017/*.npy"
+    - name: social_life_vigintile_0018
+      target_ratio: 0.000785733657355309
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0018/*.npy"
+    - name: social_life_vigintile_0020
+      target_ratio: 0.0037356874925179935
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/social_life/vigintile_0020/*.npy"
+    - name: software_vigintile_0011
+      target_ratio: 3.00229372402495e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0011/*.npy"
+    - name: software_vigintile_0012
+      target_ratio: 8.978416340184473e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0012/*.npy"
+    - name: software_vigintile_0013
+      target_ratio: 0.0002161765320723922
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0013/*.npy"
+    - name: software_vigintile_0014
+      target_ratio: 0.0005375133543086539
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0014/*.npy"
+    - name: software_vigintile_0015
+      target_ratio: 0.0012659751022885434
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0015/*.npy"
+    - name: software_vigintile_0016
+      target_ratio: 0.002987018137278147
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0016/*.npy"
+    - name: software_vigintile_0017
+      target_ratio: 0.006671035047889381
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0017/*.npy"
+    - name: software_vigintile_0018
+      target_ratio: 0.014184440993138791
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0018/*.npy"
+    - name: software_vigintile_0020
+      target_ratio: 0.021357020868186666
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software/vigintile_0020/*.npy"
+    - name: software_development_vigintile_0012
+      target_ratio: 0.0027756062619417833
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0012/*.npy"
+    - name: software_development_vigintile_0013
+      target_ratio: 0.005526947732726677
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0013/*.npy"
+    - name: software_development_vigintile_0014
+      target_ratio: 0.008169951562811103
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0014/*.npy"
+    - name: software_development_vigintile_0015
+      target_ratio: 0.011373653869576636
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0015/*.npy"
+    - name: software_development_vigintile_0016
+      target_ratio: 0.01546854211541881
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0016/*.npy"
+    - name: software_development_vigintile_0017
+      target_ratio: 0.020438060986920432
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0017/*.npy"
+    - name: software_development_vigintile_0018
+      target_ratio: 0.025333346101120043
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0018/*.npy"
+    - name: software_development_vigintile_0020
+      target_ratio: 0.022335315689591427
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/software_development/vigintile_0020/*.npy"
+    - name: sports_and_fitness_vigintile_0011
+      target_ratio: 2.866630397072174e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0011/*.npy"
+    - name: sports_and_fitness_vigintile_0012
+      target_ratio: 1.6152994461354863e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0012/*.npy"
+    - name: sports_and_fitness_vigintile_0013
+      target_ratio: 7.681739695976697e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0013/*.npy"
+    - name: sports_and_fitness_vigintile_0014
+      target_ratio: 3.7375482249828697e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0014/*.npy"
+    - name: sports_and_fitness_vigintile_0015
+      target_ratio: 1.9152780281244418e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0015/*.npy"
+    - name: sports_and_fitness_vigintile_0016
+      target_ratio: 0.00010211733422212746
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0016/*.npy"
+    - name: sports_and_fitness_vigintile_0017
+      target_ratio: 0.0005437152701465152
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0017/*.npy"
+    - name: sports_and_fitness_vigintile_0018
+      target_ratio: 0.0027429121966679065
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0018/*.npy"
+    - name: sports_and_fitness_vigintile_0020
+      target_ratio: 0.009659547098084642
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/sports_and_fitness/vigintile_0020/*.npy"
+    - name: transportation_vigintile_0011
+      target_ratio: 2.1126804743374393e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0011/*.npy"
+    - name: transportation_vigintile_0012
+      target_ratio: 1.0589867428393868e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0012/*.npy"
+    - name: transportation_vigintile_0013
+      target_ratio: 4.579489725862755e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0013/*.npy"
+    - name: transportation_vigintile_0014
+      target_ratio: 2.044367215682488e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0014/*.npy"
+    - name: transportation_vigintile_0015
+      target_ratio: 1.0035340377170364e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0015/*.npy"
+    - name: transportation_vigintile_0016
+      target_ratio: 5.4306106943660495e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0016/*.npy"
+    - name: transportation_vigintile_0017
+      target_ratio: 0.0003160885072797817
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0017/*.npy"
+    - name: transportation_vigintile_0018
+      target_ratio: 0.001827290904705917
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0018/*.npy"
+    - name: transportation_vigintile_0020
+      target_ratio: 0.00758825924031572
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/transportation/vigintile_0020/*.npy"
+    - name: travel_and_tourism_vigintile_0010
+      target_ratio: 2.3527875994648714e-09
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0010/*.npy"
+    - name: travel_and_tourism_vigintile_0011
+      target_ratio: 1.0485924437199506e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0011/*.npy"
+    - name: travel_and_tourism_vigintile_0012
+      target_ratio: 4.028422149556707e-08
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0012/*.npy"
+    - name: travel_and_tourism_vigintile_0013
+      target_ratio: 1.5598998596538135e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0013/*.npy"
+    - name: travel_and_tourism_vigintile_0014
+      target_ratio: 6.377171173341925e-07
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0014/*.npy"
+    - name: travel_and_tourism_vigintile_0015
+      target_ratio: 2.9866087654288768e-06
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0015/*.npy"
+    - name: travel_and_tourism_vigintile_0016
+      target_ratio: 1.504251279626125e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0016/*.npy"
+    - name: travel_and_tourism_vigintile_0017
+      target_ratio: 8.654749086352573e-05
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0017/*.npy"
+    - name: travel_and_tourism_vigintile_0018
+      target_ratio: 0.0004693682510673262
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0018/*.npy"
+    - name: travel_and_tourism_vigintile_0020
+      target_ratio: 0.0016225784775492954
+      repetition_factor: 10.0
+      paths:
+        - "s3://ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3_subsamples/vigintile_subsamples_0.035/tokens/travel_and_tourism/vigintile_0020/*.npy"
