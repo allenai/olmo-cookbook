@@ -140,11 +140,11 @@ dataset:
       repetition_factor: 5.0
       paths:
         - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/psychology/**/*.npy"
-    - name: pes2o_sociology
-      target_ratio: 0.0
-      repetition_factor: 5.0
-      paths:
-        - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/sociology/**/*.npy"
+    # - name: pes2o_sociology
+    #   target_ratio: 0.0
+    #   repetition_factor: 5.0
+    #   paths:
+    #     - "s3://ai2-llm/preprocessed/olmo3-final/s2orc/allenai/dolma2-tokenizer/sociology/**/*.npy"
     - name: wikipedia
       target_ratio: 0.0004161560262896992
       repetition_factor: 5.0
