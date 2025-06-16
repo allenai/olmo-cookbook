@@ -19,7 +19,7 @@ metrics_config:
   entity: ai2-llm
   backend: wandb
 
-eval_interval: 250
+eval_interval: 1000
 learning_rate: 1.8e-3
 cluster: ai2/augusta-google-1
 downstream_evaluators:
