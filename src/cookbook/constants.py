@@ -653,6 +653,15 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
         )
     )
 
+for ruler_length in (int(2**i) for i in range(12, 18)):
+    ALL_NAMED_GROUPS[f"ruler:{ruler_length // 2 ** 10}k"] = list(
+        set(
+            task
+            for group_name, tasks in RULER_SUITES.items()
+            for task in tasks
+            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
+        )
+    )
 
 ALL_DISPLAY_TASKS = {
     "olmo2:paper": [
