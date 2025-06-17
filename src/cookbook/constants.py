@@ -682,7 +682,6 @@ ALL_EVAL_TASKS = {
         "drop::xlarge",
         "drop:mc::gen2mc",
         "ds1000:3shot::olmo3",
-        "ds1000:3shot:bpb::olmo3",
         "gsm_symbolic::olmo3",
         "gsm_symbolic:p1::olmo3",
         "gsm_symbolic:p2::olmo3",
