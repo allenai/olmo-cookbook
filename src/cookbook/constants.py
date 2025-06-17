@@ -641,7 +641,7 @@ SHORT_NAMES = {
 
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
-OE_EVAL_COMMIT_HASH = "632c4972520337e3c4dff7e54c6f46388a8c62cc"
+OE_EVAL_COMMIT_HASH = None
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
