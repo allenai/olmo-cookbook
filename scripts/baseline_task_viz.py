@@ -3,9 +3,7 @@
 plot_tasks.py  –  Compute-vs-Metric visualiser.
 
 • Macro-averages families:
-      mmlu_*, basic_skills_*, minerva_math_*, mt_mbpp_*
-      – For mt_mbpp:<subtask>:<metric>  ⭢  mt_mbpp:<metric>
-      – For mt_mbpp:<subtask>          ⭢  mt_mbpp
+      mmlu_*, basic_skills_*, minerva_math_*
 
 • NaN / null scores dropped per-task (model kept on others).
 
@@ -58,7 +56,7 @@ MARKERS = {
     "Qwen2.5-7B": "D", "Llama-3-8B": "v", "Llama-3.1-8B": "P",
 }
 
-FAMILY_PREFIXES = ("mmlu_", "basic_skills_", "minerva_math_", "mt_mbpp_")
+FAMILY_PREFIXES = ("mmlu_", "basic_skills_", "minerva_math_")
 
 # ------------------------------------------------------------------ #
 def load_json(fp: Path) -> dict:
@@ -75,12 +73,7 @@ def macro_average(tasks: dict) -> dict:
             if task.startswith(pref):
                 remainder = task[len(pref):]            # after “family_”
                 parts = remainder.split(":")
-                # Decide metric suffix
-                if pref == "mt_mbpp_":
-                    # mt_mbpp:<subtask>[:<metric>] – drop subtask
-                    metric = ":".join(parts[1:]) if len(parts) > 1 else ""
-                else:
-                    metric = ":".join(parts[1:]) if len(parts) > 1 else ""
+                metric = ":".join(parts[1:]) if len(parts) > 1 else ""
                 base = pref[:-1]                        # strip trailing "_"
                 key  = base if metric == "" else f"{base}:{metric}"
                 break
