@@ -353,7 +353,7 @@ def evaluate_model(
     for arg in gantry_args.split(","):
         if not (arg := arg.strip()):
             continue
-        key, value = arg.split("=")
+        key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
 
     # expand tasks; note must be aliases or task suites in oe-eval
