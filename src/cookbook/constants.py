@@ -347,7 +347,6 @@ RULER_SUITES = {
         "ruler_niah_mk_3__4096",
         "ruler_niah_mv__4096",
         "ruler_niah_mq__4096",
-
     ],
     "ruler_multi_hop_tracing__4096::suite": [
         "ruler_vt__4096",
@@ -369,7 +368,6 @@ RULER_SUITES = {
         "ruler_niah_mk_3__8192",
         "ruler_niah_mv__8192",
         "ruler_niah_mq__8192",
-
     ],
     "ruler_multi_hop_tracing__8192::suite": [
         "ruler_vt__8192",
@@ -391,7 +389,6 @@ RULER_SUITES = {
         "ruler_niah_mk_3__16384",
         "ruler_niah_mv__16384",
         "ruler_niah_mq__16384",
-
     ],
     "ruler_multi_hop_tracing__16384::suite": [
         "ruler_vt__16384",
@@ -413,7 +410,6 @@ RULER_SUITES = {
         "ruler_niah_mk_3__32768",
         "ruler_niah_mv__32768",
         "ruler_niah_mq__32768",
-
     ],
     "ruler_multi_hop_tracing__32768::suite": [
         "ruler_vt__32768",
@@ -435,7 +431,6 @@ RULER_SUITES = {
         "ruler_niah_mk_3__65536",
         "ruler_niah_mv__65536",
         "ruler_niah_mq__65536",
-
     ],
     "ruler_multi_hop_tracing__65536::suite": [
         "ruler_vt__65536",
@@ -457,7 +452,6 @@ RULER_SUITES = {
         "ruler_niah_mk_3__131072",
         "ruler_niah_mv__131072",
         "ruler_niah_mq__131072",
-
     ],
     "ruler_multi_hop_tracing__131072::suite": [
         "ruler_vt__131072",
