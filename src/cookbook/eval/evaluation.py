@@ -32,6 +32,7 @@ def evaluate_checkpoint(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    revision: str,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -240,6 +241,10 @@ def evaluate_checkpoint(
             # set beaker image
             if beaker_image:
                 local_flags.append(f"--beaker-image {beaker_image}")
+
+            # set revision
+            if revision:
+                local_flags.append(f"--revision {revision}")
 
             # set gantry
             if use_gantry:
