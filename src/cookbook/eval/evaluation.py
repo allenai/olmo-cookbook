@@ -63,7 +63,6 @@ def evaluate_checkpoint(
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
     print(f"Using Python virtual environment at {env.name}")
     # Install oe-eval toolkit
-    
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
