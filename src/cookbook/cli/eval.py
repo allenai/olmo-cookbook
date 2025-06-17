@@ -231,6 +231,7 @@ def convert_checkpoint(
     help="Model backend (hf for Hugging Face, vllm for vLLM)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
+@click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
 @click.option(
     "--oe-eval-commit",
     type=str,
@@ -318,6 +319,7 @@ def evaluate_model(
     batch_size: int,
     dry_run: bool,
     beaker_image: str,
+    beaker_retries: int,
     use_gantry: bool,
     gantry_args: str,
     force_venv: bool,
@@ -367,6 +369,7 @@ def evaluate_model(
         batch_size=batch_size,
         dry_run=dry_run,
         beaker_image=beaker_image,
+        beaker_retries=beaker_retries,
         use_gantry=use_gantry,
         gantry_args=gantry_args,
         python_venv_force=force_venv,
@@ -403,7 +406,7 @@ def evaluate_model(
 @click.option(
     "-f",
     "--format",
-    type=click.Choice(["json", "table"]),
+    type=click.Choice(["json", "table", "csv"]),
     default="table",
     help="Output results in JSON format",
 )
@@ -508,6 +511,8 @@ def get_results(
         print(json.dumps(results._data))
     elif format == "table":
         results.show()
+    elif format == "csv":
+        print(results.to_csv())
     else:
         raise ValueError(f"Invalid format: {format}")
 
