@@ -45,6 +45,7 @@ def evaluate_checkpoint(
     extra_args: str,
     batch_size: int,
     dry_run: bool,
+    skip_install: bool,
     beaker_image: str,
     beaker_retries: int,
     use_gantry: bool,
@@ -70,7 +71,7 @@ def evaluate_checkpoint(
         env=env,
         commit_hash=oe_eval_commit,
         commit_branch=oe_eval_branch,
-        is_editable=use_gantry,
+    is_editable=use_gantry,
     )
 
     # this is where we store all fixed flags to pass to oe-eval
