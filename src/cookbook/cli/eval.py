@@ -49,6 +49,7 @@ logger = logging.getLogger(__name__)
 )
 @click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
+@click.option("--huggingface-transformers-commit-branch", type=str, default=None)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
 @click.option("--beaker-workspace", type=str, default="ai2/oe-data", help="Beaker workspace")
@@ -112,6 +113,7 @@ def convert_checkpoint(
     olmo_core_v2_commit_hash: str,
     huggingface_transformers_git_url: str,
     huggingface_transformers_commit_hash: str,
+    huggingface_transformers_commit_branch: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_system_python: bool,
@@ -137,6 +139,7 @@ def convert_checkpoint(
         huggingface_tokenizer=huggingface_tokenizer,
         huggingface_transformers_git_url=huggingface_transformers_git_url,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
+        huggingface_transformers_commit_branch=huggingface_transformers_commit_branch,
         input_dir=input_dir.rstrip("/"),
         max_sequence_length=max_sequence_length,
         olmo_core_commit_hash=olmo_core_commit_hash,

@@ -47,6 +47,7 @@ def convert_olmo_core_v2(
     olmo_core_v2_commit_hash: str = OLMO_CORE_V2_COMMIT_HASH,
     transformers_git_url: Optional[str] = None,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
+    transformers_commit_branch: Optional[str] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
     env: Optional[PythonEnv] = None,
@@ -80,7 +81,7 @@ def convert_olmo_core_v2(
         olmo_code_dir = install_olmo_core(env=env, commit_hash=olmo_core_v2_commit_hash)
         directories_to_clean_up.append(olmo_code_dir)
 
-        huggingface_code_dir = install_transformers(transformers_commit_hash, env, git_url=transformers_git_url)
+        huggingface_code_dir = install_transformers(transformers_commit_hash, transformers_commit_branch, env, git_url=transformers_git_url)
         directories_to_clean_up.append(huggingface_code_dir)
 
         tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
@@ -161,6 +162,7 @@ def convert_olmo_core(
     olmo_commit_hash: str = OLMO_CORE_COMMIT_HASH,
     transformers_git_url: Optional[str] = None,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
+    transformers_commit_branch: Optional[str] = None,
     env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
@@ -177,7 +179,7 @@ def convert_olmo_core(
         olmo_code_dir = install_olmo_core(env=env, commit_hash=olmo_commit_hash)
         directories_to_clean_up.append(olmo_code_dir)
 
-        huggingface_code_dir = install_transformers(transformers_commit_hash, env, git_url=transformers_git_url)
+        huggingface_code_dir = install_transformers(transformers_commit_hash, transformers_commit_branch, env, git_url=transformers_git_url)
         directories_to_clean_up.append(huggingface_code_dir)
 
         tokenizer_dir = download_tokenizer(huggingface_tokenizer, env)
@@ -233,6 +235,7 @@ def convert_olmoe(
     olmo_commit_hash: Optional[str] = None,
     transformers_git_url: Optional[str] = None,
     transformers_commit_hash: Optional[str] = None,
+    transformers_commit_branch: Optional[str] = None,
     env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
@@ -249,7 +252,7 @@ def convert_olmoe(
         olmo_code_dir = install_olmo(olmo_commit_hash, env)
         directories_to_clean_up.append(olmo_code_dir)
 
-        huggingface_code_dir = install_transformers(transformers_commit_hash, env, git_url=transformers_git_url)
+        huggingface_code_dir = install_transformers(transformers_commit_hash, transformers_commit_branch, env, git_url=transformers_git_url)
         directories_to_clean_up.append(huggingface_code_dir)
 
         model_dir = os.path.join(input_dir, "model")
@@ -315,6 +318,7 @@ def convert_olmo2(
     olmo_commit_hash: str = OLMO2_COMMIT_HASH,
     transformers_git_url: Optional[str] = None,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
+    transformers_commit_branch: Optional[str] = None,
     env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
@@ -330,7 +334,7 @@ def convert_olmo2(
         olmo_code_dir = install_olmo(olmo_commit_hash, env)
         directories_to_clean_up.append(olmo_code_dir)
 
-        huggingface_code_dir = install_transformers(transformers_commit_hash, env, git_url=transformers_git_url)
+        huggingface_code_dir = install_transformers(transformers_commit_hash, transformers_commit_branch, env, git_url=transformers_git_url)
         directories_to_clean_up.append(huggingface_code_dir)
 
         model_dir = os.path.join(input_dir, "model")
@@ -407,6 +411,7 @@ def run_checkpoint_conversion(
     olmo_core_v2_commit_hash: str,
     huggingface_transformers_git_url: Optional[str],
     huggingface_transformers_commit_hash: str,
+    huggingface_transformers_commit_branch: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
     use_beaker: bool,
@@ -477,6 +482,7 @@ def run_checkpoint_conversion(
             f"--olmo-core-v2-commit-hash {olmo_core_v2_commit_hash}",
             f"--huggingface-transformers-git-url {huggingface_transformers_git_url}",
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
+            f"--huggingface-transformers-commit-branch {huggingface_transformers_commit_branch}",
             (f"--max-sequence-length {max_sequence_length}" if max_sequence_length is not None else ""),
             "--use-system-python",
             ("--skip-validation" if skip_validation else ""),
@@ -517,6 +523,7 @@ def run_checkpoint_conversion(
             olmo_commit_hash=olmoe_commit_hash,
             transformers_git_url=huggingface_transformers_git_url,
             transformers_commit_hash=huggingface_transformers_commit_hash,
+            transformers_commit_branch=huggingface_transformers_commit_branch,
             env=env,
         )
     elif olmo_type == "olmo2":
@@ -530,6 +537,7 @@ def run_checkpoint_conversion(
             olmo_commit_hash=olmo2_commit_hash,
             transformers_git_url=huggingface_transformers_git_url,
             transformers_commit_hash=huggingface_transformers_commit_hash,
+            transformers_commit_branch=huggingface_transformers_commit_branch,
             env=env,
         )
     elif olmo_type == "olmo-core":
