@@ -130,7 +130,13 @@ def convert_olmo_core_v2(
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
 
-        subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path(), capture_output=True)
+        try:
+            subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path(), capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            print("Output", e.output)
+            print("Stderr", e.stderr)
+            raise e
+
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
 
         # change type of model to bfloat16 if it is float32
