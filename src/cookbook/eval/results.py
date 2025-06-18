@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import re
 from typing import NamedTuple
@@ -64,6 +65,19 @@ def make_dashboard_table(
     # keep track of bpb metrics names; we need these to warn users if a metric is missing,
     # but we wanna report the original metric name in the warning.
     bpb_to_og_metric_name_map: dict[str, str] = {}
+    
+    # Filter to keep only the newest metric for each (model_name, alias) pair
+    unique_metrics = {}
+    for metric in metrics:
+        key = (metric.model_name, metric.alias)
+        if key in unique_metrics:
+            metric_dt = datetime.fromisoformat(metric.current_date.replace(" UTC", "+00:00"))
+            existing_dt = datetime.fromisoformat(unique_metrics[key].current_date.replace(" UTC", "+00:00"))
+            if metric_dt > existing_dt:
+                unique_metrics[key] = metric
+        else:
+            unique_metrics[key] = metric
+    metrics = list(unique_metrics.values())
 
     for metric in metrics:
         if metric.is_aggregate:
