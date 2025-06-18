@@ -176,13 +176,14 @@ def install_oe_eval(
     env: Optional[PythonEnv] = None,
     no_dependencies: bool = True,
     is_editable: bool = False,
+    branch: Optional[str] = None,
 ) -> str:
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
 
-    oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
+    oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash=commit_hash, branch=branch)
 
     print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
     cmd = [
@@ -362,7 +363,10 @@ def make_eval_run_name(checkpoint_path: str, add_bos_token: bool, name_suffix: s
     )
 
 
-def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
+def clone_repository(git_url: str, commit_hash: Optional[str] = None, branch: Optional[str] = None) -> str:
+    if commit_hash and branch:
+        raise ValueError("branch and commit_hash cannot both be provided")
+
     # current directory
     current_dir = os.getcwd()
 
@@ -374,6 +378,9 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
 
         # Base clone command with minimal history
         cmd = shlex.split(f"git clone --depth 1 {git_url}")
+
+        if branch:
+            cmd += shlex.split(f"--branch '{branch}'")
 
         if commit_hash:
             cmd.append("--no-checkout")
@@ -491,11 +498,14 @@ def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = No
     return tokenizer_dir
 
 
-def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = None) -> str:
+def install_transformers(
+    commit_hash: Optional[str], env: Optional[PythonEnv] = None, git_url: Optional[str] = None
+) -> str:
     env = env or PythonEnv.null()
+    git_url = git_url or TRANSFORMERS_GIT_URL
 
     # Clone the repository
-    transformers_dir = clone_repository(TRANSFORMERS_GIT_URL, commit_hash)
+    transformers_dir = clone_repository(git_url, commit_hash)
 
     # Install the package
     print(f"Installing the correct version of Transformers ({commit_hash}) from {transformers_dir}...")

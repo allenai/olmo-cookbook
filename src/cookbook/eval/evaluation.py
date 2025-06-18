@@ -25,6 +25,7 @@ from cookbook.constants import (
 
 def evaluate_checkpoint(
     oe_eval_commit: str,
+    oe_eval_branch: Optional[str],
     checkpoint_path: str,
     aws_access_key_id: str,
     aws_secret_access_key: str,
@@ -67,6 +68,7 @@ def evaluate_checkpoint(
         env=env,
         commit_hash=oe_eval_commit,
         is_editable=use_gantry,
+        branch=oe_eval_branch,
     )
 
     # this is where we store all fixed flags to pass to oe-eval
