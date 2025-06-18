@@ -73,6 +73,22 @@ def evaluate_checkpoint(
             branch_name=oe_eval_branch,
             is_editable=use_gantry,
         )
+    else:
+        result = subprocess.run(
+            [env.pip, "show", "oe-eval"],
+            capture_output=True,
+            text=True
+        )
+
+        oe_eval_dir = None
+        for line in result.stdout.splitlines():
+            if line.startswith("Editable project location:"):
+                oe_eval_dir = line.split(":", 1)[1].strip()
+                break
+
+        if oe_eval_dir is None:
+            raise FileExistsError(f'Could not find oe-eval installation. Try without "--skip-install"')
+    
 
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
