@@ -43,6 +43,7 @@ def evaluate_checkpoint(
     extra_args: str,
     batch_size: int,
     dry_run: bool,
+    skip_install: bool,
     beaker_image: str,
     beaker_retries: int,
     use_gantry: bool,
@@ -63,11 +64,27 @@ def evaluate_checkpoint(
     print(f"Using Python virtual environment at {env.name}")
 
     # Install oe-eval toolkit
-    oe_eval_dir = install_oe_eval(
-        env=env,
-        commit_hash=oe_eval_commit,
-        is_editable=use_gantry,
-    )
+    if not skip_install:
+        oe_eval_dir = install_oe_eval(
+            env=env,
+            commit_hash=oe_eval_commit,
+            is_editable=use_gantry,
+        )
+    else:
+        result = subprocess.run(
+            [env.pip, "show", "oe-eval"],
+            capture_output=True,
+            text=True
+        )
+
+        oe_eval_dir = None
+        for line in result.stdout.splitlines():
+            if line.startswith("Editable project location:"):
+                oe_eval_dir = line.split(":", 1)[1].strip()
+                break
+
+        if oe_eval_dir is None:
+            raise FileExistsError(f'Could not find oe-eval installation. Try without "--skip-install"')
 
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
