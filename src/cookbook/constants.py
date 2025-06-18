@@ -18,6 +18,7 @@ OLMO2_UNSHARD_SCRIPT = "scripts/unshard.py"
 OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
 OLMO_CORE_V2_COMMIT_HASH = "1662d0d4f3e628ebb68591e311cce68737c094c4"
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
+OLMO_CORE_CONVERT_DTYPES = ["float32", "bfloat16", "float16"]
 
 DEFAULT_OLMOE_TOKENIZER = "allenai/eleuther-ai-gpt-neox-20b-pii-special"
 DEFAULT_OLMO2_TOKENIZER = "allenai/dolma2-tokenizer"
