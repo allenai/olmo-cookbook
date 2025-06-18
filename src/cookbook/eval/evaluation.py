@@ -67,7 +67,7 @@ def evaluate_checkpoint(
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
-        branch_name=oe_eval_branch,
+        commit_branch=oe_eval_branch,
         is_editable=use_gantry,
     )
 

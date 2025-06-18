@@ -173,7 +173,7 @@ def install_beaker_py(
 
 def install_oe_eval(
     commit_hash: Optional[str],
-    branch_name: Optional[str],
+    commit_branch: Optional[str],
     env: Optional[PythonEnv] = None,
     no_dependencies: bool = True,
     is_editable: bool = False,
@@ -183,7 +183,7 @@ def install_oe_eval(
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
 
-    oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash, branch_name)
+    oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash, commit_branch)
 
     print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
     cmd = [
@@ -363,7 +363,7 @@ def make_eval_run_name(checkpoint_path: str, add_bos_token: bool, name_suffix: s
     )
 
 
-def clone_repository(git_url: str, commit_hash: Optional[str] = None, branch_name: Optional[str] = None) -> str:
+def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_branch: Optional[str] = None) -> str:
     # current directory
     current_dir = os.getcwd()
 
@@ -384,16 +384,17 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, branch_nam
         # Execute clone
         subprocess.run(cmd, check=True)
 
+        if commit_branch:
+            # Change directory to the cloned repo
+            os.chdir(tmp_dir)
+            subprocess.run(shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True)
+            subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
+
         if commit_hash:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
             subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
             subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
-        elif branch_name:
-            # Change directory to the cloned repo
-            os.chdir(tmp_dir)
-            subprocess.run(shlex.split(f"git fetch origin {branch_name}:refs/remotes/origin/{branch_name}"), check=True)
-            subprocess.run(shlex.split(f"git checkout -b {branch_name} origin/{branch_name}"), check=True)
 
         return tmp_dir
 
