@@ -131,7 +131,14 @@ def convert_olmo_core_v2(
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
 
         try:
-            subprocess.run(shlex.split(" ".join(cmd)), check=True, cwd=olmo_code_dir, env=env.path(), capture_output=True, text=True)
+            subprocess.run(
+                shlex.split(" ".join(cmd)),
+                check=True,
+                cwd=olmo_code_dir,
+                env=env.path(),
+                capture_output=True,
+                text=True,
+            )
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Conversion failed with output: {e.output}") from e
 

@@ -498,7 +498,9 @@ def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = No
     return tokenizer_dir
 
 
-def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = None, git_url: Optional[str] = None) -> str:
+def install_transformers(
+    commit_hash: Optional[str], env: Optional[PythonEnv] = None, git_url: Optional[str] = None
+) -> str:
     env = env or PythonEnv.null()
     git_url = git_url or TRANSFORMERS_GIT_URL
 
