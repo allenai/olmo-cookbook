@@ -234,6 +234,12 @@ def convert_checkpoint(
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
 @click.option(
+    "--oe-eval-branch",
+    type=str,
+    default=None,
+    help="Branch of the oe-eval toolkit to use; if not provided, use main",
+)
+@click.option(
     "--oe-eval-commit",
     type=str,
     default=None,
@@ -306,6 +312,7 @@ def convert_checkpoint(
     help="Suffix to add to the run name",
 )
 def evaluate_model(
+    oe_eval_branch: str,
     oe_eval_commit: str,
     checkpoint_path: str,
     aws_access_key_id: str,
@@ -367,6 +374,7 @@ def evaluate_model(
     tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
     
     evaluate_checkpoint(
+        oe_eval_branch=oe_eval_branch,
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
         aws_access_key_id=aws_access_key_id,
