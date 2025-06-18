@@ -245,6 +245,7 @@ def convert_checkpoint(
     help="Model backend (hf for Hugging Face, vllm for vLLM)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
+@click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
 @click.option(
     "--oe-eval-commit",
     type=str,
@@ -339,6 +340,7 @@ def evaluate_model(
     batch_size: int,
     dry_run: bool,
     beaker_image: str,
+    beaker_retries: int,
     use_gantry: bool,
     gantry_args: str,
     force_venv: bool,
@@ -366,6 +368,13 @@ def evaluate_model(
             continue
         key, value = arg.split("=")
         parsed_model_args[key] = value
+        
+    parsed_gantry_args: dict[str, str] = {}
+    for arg in gantry_args.split(","):
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=", 1)
+        parsed_gantry_args[key] = value
 
     # expand tasks; note must be aliases or task suites in oe-eval
     tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
@@ -392,8 +401,9 @@ def evaluate_model(
         batch_size=batch_size,
         dry_run=dry_run,
         beaker_image=beaker_image,
+        beaker_retries=beaker_retries,
         use_gantry=use_gantry,
-        gantry_args=gantry_args,
+        gantry_args=parsed_gantry_args,
         python_venv_force=force_venv,
         python_venv_name=env_name,
         vllm_memory_utilization=vllm_memory_utilization,
@@ -428,7 +438,7 @@ def evaluate_model(
 @click.option(
     "-f",
     "--format",
-    type=click.Choice(["json", "table"]),
+    type=click.Choice(["json", "table", "csv"]),
     default="table",
     help="Output results in JSON format",
 )
@@ -532,6 +542,8 @@ def get_results(
         print(json.dumps(results._data))
     elif format == "table":
         results.show()
+    elif format == "csv":
+        print(results.to_csv())
     else:
         raise ValueError(f"Invalid format: {format}")
 

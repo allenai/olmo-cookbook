@@ -45,6 +45,7 @@ def evaluate_checkpoint(
     batch_size: int,
     dry_run: bool,
     beaker_image: str,
+    beaker_retries: int,
     use_gantry: bool,
     gantry_args: str | dict,
     python_venv_name: str,
@@ -75,6 +76,11 @@ def evaluate_checkpoint(
 
     # clusters_to_exclude
     clusters_to_exclude: set[str] = set()
+
+    # processing gantry args
+    if isinstance(gantry_args, str):
+        # load gantry args using json
+        gantry_args = json.loads(gantry_args.strip() or "{}")
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -118,7 +124,7 @@ def evaluate_checkpoint(
                 env=env,  # pyright: ignore
             )
             flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
-            flags.append("--gantry-args '{\"hf_token\":true}'")
+            gantry_args = {"hf_token": "true", **gantry_args}
         else:
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
@@ -241,10 +247,8 @@ def evaluate_checkpoint(
             if use_gantry:
                 local_flags.append("--use-gantry")
 
-            # processing gantry args
-            if isinstance(gantry_args, str):
-                # load gantry args using json
-                gantry_args = json.loads(gantry_args.strip() or "{}")
+            if beaker_retries > 0:
+                local_flags.append(f"--beaker-retries {beaker_retries}")
 
             assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
 
