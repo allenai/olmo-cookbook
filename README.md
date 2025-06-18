@@ -88,21 +88,6 @@ olmo-cookbook-eval convert \
   --use-beaker
 ```
 
-#### For MoE models
-
-```shell
-olmo-cookbook-eval convert \
-  "/oe-training-default/ai2-llm/checkpoints/shanea/OLMo3-moe-integrationtest-2/step79605" \
-  --huggingface-output-suffix hf \
-  --dtype bfloat16 \
-  --olmo-core-v2-commit-hash shanea/olmoe2-v2 \
-  --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
-  --huggingface-transformers-commit-hash shanea/olmoe2-v2 \
-  --beaker-workspace ai2/olmo-3-evals \
-  --beaker-priority normal \
-  -t olmo-core-v2 \
-  --use-beaker
-```
 
 ### Run Evaluation
 
@@ -135,35 +120,6 @@ olmo-cookbook-eval evaluate \
   --num-gpus 1
   --model-backend vllm
   --dashboard peteish32
-```
-
-For MoE models:
-
-```shell
-olmo-cookbook-eval evaluate \
-  /oe-training-default/ai2-llm/checkpoints/shanea/OLMo3-moe-integrationtest-2/step79605-hf \
-  --tasks core:mc --tasks mmlu:mc --tasks mmlu:rc --tasks gen \
-  --cluster aus80g \
-  --num-gpus 2 \
-  --model-backend hf \
-  --name-suffix hf \
-  --workspace ai2/olmo-3-evals \
-  --priority normal \
-  --oe-eval-commit shanea/olmoe2-hf \
-  --use-gantry
-```
-
-```shell
-olmo-cookbook-eval evaluate \
-  /oe-training-default/ai2-llm/checkpoints/shanea/OLMo3-moe-integrationtest-2/step79605-hf \
-  --tasks core:mc --tasks mmlu:mc --tasks mmlu:rc --tasks gen \
-  --cluster aus80g \
-  --num-gpus 2 \
-  --model-backend vllm \
-  --workspace ai2/olmo-3-evals \
-  --priority normal \
-  --oe-eval-commit shanea/olmoe-vllm \
-  --use-gantry
 ```
 
 ### Get results
