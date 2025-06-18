@@ -313,5 +313,3 @@ All PMR CLI commands support the following options:
 | `--detach/--no-detach` | `-d/-nd` | `--no-detach` | Whether to detach after command execution |
 | `--command` | `-c` | None | Command to execute on instances |
 | `--script` | `-s` | None | Path to script file or directory to execute |
-
-Note that you can provide either `--command` or `--script`, but not both. When using `--script` with a directory path, all executable files in that directory will be distributed across the instances.
