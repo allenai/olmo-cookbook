@@ -233,6 +233,7 @@ def convert_checkpoint(
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
+@click.option("--skip-install", is_flag=True, default=False, help="Skip install for oe-eval-internal")
 @click.option(
     "--oe-eval-branch",
     type=str,
@@ -332,6 +333,7 @@ def evaluate_model(
     remote_output_prefix: str,
     extra_args: str,
     batch_size: int,
+    skip_install: bool,
     dry_run: bool,
     beaker_image: str,
     beaker_retries: int,
@@ -394,6 +396,7 @@ def evaluate_model(
         remote_output_prefix=remote_output_prefix,
         extra_args=extra_args,
         batch_size=batch_size,
+        skip_install=skip_install,
         dry_run=dry_run,
         beaker_image=beaker_image,
         beaker_retries=beaker_retries,
