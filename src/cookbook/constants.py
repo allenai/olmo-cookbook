@@ -474,6 +474,11 @@ FIM_TASKS = [
     "codex_humanevalfim_random:temp0.2",
 ]
 
+CRUX_EVAL_TASKS = [
+    "cruxeval_input:pass@5",
+    "cruxeval_output:pass@5",
+]
+
 MULTILINGUAL_MBPP_TASKS = [
     "mt_mbpp:bash",
     "mt_mbpp:c",
@@ -544,6 +549,7 @@ ALL_NAMED_GROUPS = {
     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
     "fim": FIM_TASKS,
+    "crux-eval": CRUX_EVAL_TASKS,
     "mt_mbpp": MULTILINGUAL_MBPP_TASKS,
     "mt_mbpp_v2fix": MULTILINGUAL_MBPP_TASKS_V2
 }
@@ -741,27 +747,31 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:7b:macro:code": [
         # Code
+        "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3",
-        "cruxeval_input:pass@5$",
-        "cruxeval_output:pass@5$",
+        "fim$",
+        "crux-eval$",
+        "deepseek_leetcode::olmo3",
+        "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3",
+        "multipl_e:6lang::olmo3",
     ],
     "olmo3:dev:7b:macro:qa": [
         # Core OLMES
-        "^arc:mc::full$",
+        "^arc:mc::xlarge$",
         "^mmlu:mc$",
-        "csqa:mc::olmes:full",
-        "hellaswag:rc::olmes:full",
-        "piqa:mc::olmes:full",
-        "socialiqa:mc::olmes:full",
-        "winogrande:rc::olmes:full",
+        "csqa:mc::xlarge",
+        "hellaswag:rc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
+        "winogrande:rc::xlarge",
 
         # Gen OLMES
-        "drop::olmes",
-        "jeopardy::olmes",
-        "naturalqs::olmes",
-        "squad::olmes",
-        "coqa::olmes",
+        "drop::xlarge",
+        "jeopardy::xlarge",
+        "naturalqs::xlarge",
+        "squad::xlarge",
+        "coqa::xlarge",
 
         # Gen2MC OLMES
         "coqa:mc::gen2mc",
@@ -772,8 +782,8 @@ ALL_DISPLAY_TASKS = {
 
         # New OLMo 3
         "^basic:rc$",
-        "lab_bench_dbqa:mc", # swap to mc?
-        "lab_bench_protocolqa:mc", # swap to mc?
+        # "lab_bench_dbqa:mc", # too noisy to include in macro-average
+        # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
         "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
@@ -782,20 +792,20 @@ ALL_DISPLAY_TASKS = {
     "olmo3:dev:7b:micro:qa": [
         # Core OLMES
         "^mmlu.*:mc.*$",
-        "arc_challenge:mc::olmes:full",
-        "arc_easy:mc::olmes:full",
-        "csqa:mc::olmes:full",
-        "hellaswag:rc::olmes:full",
-        "piqa:mc::olmes:full",
-        "socialiqa:mc::olmes:full",
-        "winogrande:rc::olmes:full",
+        "arc_challenge:mc::xlarge",
+        "arc_easy:mc::xlarge",
+        "csqa:mc::xlarge",
+        "hellaswag:rc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
+        "winogrande:rc::xlarge",
 
         # Gen OLMES
-        "coqa::olmes",
-        "drop::olmes",
-        "jeopardy::olmes",
-        "naturalqs::olmes",
-        "squad::olmes",
+        "drop::xlarge",
+        "jeopardy::xlarge",
+        "naturalqs::xlarge",
+        "squad::xlarge",
+        "coqa::xlarge",
 
         # Gen2MC OLMES
         "coqa:mc::gen2mc",
@@ -806,8 +816,8 @@ ALL_DISPLAY_TASKS = {
 
         # New OLMo 3
         "basic_skills_[^:]*::olmes",
-        "lab_bench_dbqa:mc", # swap to mc?
-        "lab_bench_protocolqa:mc", # swap to mc?
+        # "lab_bench_dbqa:mc", # too noisy to include in macro-average
+        # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
         "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
@@ -823,10 +833,14 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:7b:micro:code": [
         # Code
+        "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3",
-        "cruxeval_input:pass@5$",
-        "cruxeval_output:pass@5$",
+        "codex_humanevalfim_.*:temp0.2$",
+        "cruxeval_.*:pass@5$",
+        "deepseek_leetcode::olmo3",
+        "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3",
+        "multipl_e_.*:[^:]*$",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
@@ -874,6 +888,7 @@ ALL_DISPLAY_TASKS.update({
         "^mmlu:mc$",
         "^codex_humaneval:3shot::olmo3$",
         "^mbpp:3shot::olmo3$",
+        "^multipl_e:6lang::olmo3$",
         "^gsm8k::olmes$",
         "^gsm-symb$",
         "^minerva$",
