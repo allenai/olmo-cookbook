@@ -1,8 +1,8 @@
-name: "davidg-7b_10b-anneal_sponge-63-dclm-50split"
-description: "OLMo2 7b anneal to 10B Tokens for sponge-63 data+ dclm"
+name: "davidg-7b_10b-anneal_sponge-STEM-63-dclm-50split"
+description: "OLMo2 7b anneal to 10B Tokens for 50% dclm 50% sponge-63m Science math tech software filtered"
 budget: "ai2/oe-training"
 workspace: "ai2/dolma2"
-nodes: 1
+nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
@@ -24,10 +24,11 @@ load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model
 load_state: false
 dataset:
   sources:
-  - name: sponge-63
+  - name: sponge-STEM-63
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/sponge/alldressed_63/allenai/dolma2-tokenizer/*/*.npy
+    - s3://ai2-llm/preprocessed/sponge/alldressed_63/allenai/dolma2-tokenizer/science_math_and_technology/*.npy
+    - s3://ai2-llm/preprocessed/sponge/alldressed_63/allenai/dolma2-tokenizer/software_development/*.npy
   - name: dclm-baseline-olmo2
     target_ratio: 0.5
     paths:
