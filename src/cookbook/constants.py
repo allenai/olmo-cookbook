@@ -527,6 +527,8 @@ ALL_NAMED_GROUPS = {
     "core:mc::full": [f"{task}:mc::olmes:full" for task in ALL_CORE_TASKS],
     "arc:rc::full": [f"{task}:rc::olmes:full" for task in ARC_TASKS],
     "arc:mc::full": [f"{task}:mc::olmes:full" for task in ARC_TASKS],
+    "arc:rc::xlarge": [f"{task}:rc::xlarge" for task in ARC_TASKS],
+    "arc:mc::xlarge": [f"{task}:mc::xlarge" for task in ARC_TASKS],
     "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
     "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
     "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
