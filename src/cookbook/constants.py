@@ -787,7 +787,7 @@ ALL_DISPLAY_TASKS = {
         "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
-        "sciq:mc::olmo3",
+        "sciq:mc::xlarge",
     ],
     "olmo3:dev:7b:micro:qa": [
         # Core OLMES
@@ -821,7 +821,7 @@ ALL_DISPLAY_TASKS = {
         "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
-        "sciq:mc::olmo3",
+        "sciq:mc::xlarge",
     ],
     "olmo3:dev:7b:micro:math": [
         # Math
