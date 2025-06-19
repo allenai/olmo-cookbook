@@ -476,6 +476,27 @@ def get_results(
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
 
+    # (Temporary) remove these from missing tasks so we can see the real missing task set
+    tasks_to_remove = [
+        "bigcodebench::none",
+        "bigcodebench_hard::none",
+        "codex_humaneval:temp0.8", 
+        "codex_humanevalplus:temp0.8",
+        "mbpp::none",
+        "mbppplus::none",
+        "mbpp:3shot::none",
+        "gsm_symbolic:p1::none", 
+        "gsm_symbolic:p2::none", 
+    ]
+    # Create a list of models to remove first to avoid modifying dict during iteration
+    models_to_remove = []
+    for model in tables.missing_tasks:
+        tables.missing_tasks[model] = [task for task in tables.missing_tasks[model] if task not in tasks_to_remove] # remove tasks
+        if len(tables.missing_tasks[model]) == 0:
+            models_to_remove.append(model) # remove models that now have no missing tasks
+    for model in models_to_remove:
+        del tables.missing_tasks[model]
+
     if len(models) > 0:
         results = results.keep_rows(*[re.compile(m) for m in models])
 
