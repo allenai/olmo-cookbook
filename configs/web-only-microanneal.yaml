@@ -1,11 +1,11 @@
-name: "olmo2-7b_10b-anneal_web-only"
-description: "OLMo2 7b anneal to 10B Tokens on web data only (baseline)"
+name: "olmo2-7b_5b-anneal_web-only"
+description: "OLMo2 7b anneal to 5B Tokens on web data only (baseline)"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
-preemptible: false
-max_tokens: 10_000_000_000
+preemptible: true
+max_tokens: 5_000_000_000
 global_batch_size: 2097152
 sequence_length: 2048
 seed: 1337
@@ -27,4 +27,4 @@ dataset:
   - name: dclm # 108.43B tokens
     target_ratio: 1.0
     paths:
-    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
