@@ -27,4 +27,4 @@ dataset:
   - name: dclm # 108.43B tokens
     target_ratio: 1.0
     paths:
-    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy

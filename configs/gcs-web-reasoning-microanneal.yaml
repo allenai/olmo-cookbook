@@ -1,5 +1,5 @@
-name: "olmo2-7b_5b-anneal_web-only"
-description: "OLMo2 7b anneal to 5B Tokens on web data only (baseline)"
+name: "olmo2-7b_5b-anneal_web-reasoning"
+description: "OLMo2 7b anneal to 5B Tokens on web data + reasoning data"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
@@ -25,6 +25,10 @@ load_state: false
 dataset:
   sources:
   - name: dclm # 108.43B tokens
-    target_ratio: 1.0
+    target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
+  - name: reasoning # 11.12B tokens
+    target_ratio: 0.5
+    paths:
+    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
