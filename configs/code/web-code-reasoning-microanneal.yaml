@@ -27,12 +27,12 @@ dataset:
   - name: dclm # 108.43B tokens
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
   - name: code # 11.12B tokens
     target_ratio: 0.4
     paths:
-    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
   - name: reasoning # 11.12B tokens
     target_ratio: 0.1
     paths:
-    - s3://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy

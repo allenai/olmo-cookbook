@@ -1,5 +1,5 @@
-name: "olmo2-7b_10b-anneal_web-math-reasoning"
-description: "OLMo2 7b anneal to 10B Tokens on web + math + reasoning data"
+name: "olmo2-7b_10b-anneal_web-reddit"
+description: "OLMo2 7b anneal to 10B Tokens on web data + reddit data"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
@@ -28,11 +28,7 @@ dataset:
     target_ratio: 0.5
     paths:
     - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
-  - name: math # 11.12B tokens
-    target_ratio: 0.4
+  - name: reddit # 11.12B tokens
+    target_ratio: 0.5
     paths:
-    - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
-  - name: reasoning # 11.12B tokens
-    target_ratio: 0.1
-    paths:
-    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
