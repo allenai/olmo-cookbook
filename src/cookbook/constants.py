@@ -365,6 +365,14 @@ ALL_GEN_TASKS = [
     "gsm8k::olmo1",
 ]
 
+ALL_GEN_XLARGE_TASKS = [
+    "coqa::xlarge",
+    "squad::xlarge",
+    "jeopardy::xlarge",
+    "naturalqs::xlarge",
+    "drop::xlarge",
+]
+
 ALL_MINERVA_TASKS = [
     "minerva_math_algebra::olmes",
     "minerva_math_counting_and_probability::olmes",
@@ -540,6 +548,7 @@ ALL_NAMED_GROUPS = {
     "gen": ALL_GEN_TASKS,
     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
     "gen-no-gsm": [task for task in ALL_GEN_TASKS if task != "gsm8k::olmo1"],
+    "gen::xlarge": [task for task in ALL_GEN_XLARGE_TASKS],
     "minerva": ALL_MINERVA_TASKS,
     "math": ALL_MATH_TASKS,
     "gsm-symb": ALL_GSM_SYMB_TASKS,
@@ -884,7 +893,7 @@ ALL_DISPLAY_TASKS.update({
         "^olmo3:dev:7b:qa$",
         "^olmo3:dev:7b:math$",
         "^olmo3:dev:7b:code$",
-        "^arc:mc::full$",
+        "^arc:mc::xlarge$",
         "^mmlu:mc$",
         "^codex_humaneval:3shot::olmo3$",
         "^mbpp:3shot::olmo3$",
@@ -893,7 +902,7 @@ ALL_DISPLAY_TASKS.update({
         "^gsm-symb$",
         "^minerva$",
         "^basic:rc$",
-        "^gen-no-gsm$",
+        "^gen::xlarge$",
     ],
 })
 
