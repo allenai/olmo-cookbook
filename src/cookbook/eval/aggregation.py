@@ -91,11 +91,15 @@ def generate_simplex_grid(n, steps):
     return np.array(raw) / steps
 
 
-def hit_and_run_dirichlet(n_samples, alpha, bounds, burn_in=100, thinning=10):
+def hit_and_run_dirichlet(n_samples, alpha, bounds=None, burn_in=100, thinning=10):
     """ Approximate bounded dirichlet sampler. Exact sampling w/ bounds is intractable """
     n = len(alpha)
-    bounds = np.array(bounds)
-    a, b = bounds[:, 0], bounds[:, 1]
+    if bounds is None:
+        a = np.zeros(n)
+        b = np.ones(n)
+    else:
+        bounds = np.array(bounds)
+        a, b = bounds[:, 0], bounds[:, 1]
     
     # Start at a valid point inside the simplex and bounds
     while True:
