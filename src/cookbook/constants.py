@@ -790,7 +790,7 @@ ALL_DISPLAY_TASKS = {
         "squad:mc::gen2mc",
 
         # New OLMo 3
-        "^basic:rc$",
+        "^basic:mc$",
         # "lab_bench_dbqa:mc", # too noisy to include in macro-average
         # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
         "lambada$",
@@ -800,7 +800,7 @@ ALL_DISPLAY_TASKS = {
     ],
     "olmo3:dev:7b:micro:qa": [
         # Core OLMES
-        "^mmlu.*:mc.*$",
+        "^mmlu_.*:mc.*$",
         "arc_challenge:mc::xlarge",
         "arc_easy:mc::xlarge",
         "csqa:mc::xlarge",
@@ -824,7 +824,8 @@ ALL_DISPLAY_TASKS = {
         "squad:mc::gen2mc",
 
         # New OLMo 3
-        "basic_skills_[^:]*::olmes",
+        "^basic_skills_.*:mc::olmes$", # mc only
+        "^basic_skills_.*:rc::olmes$", # rc only
         # "lab_bench_dbqa:mc", # too noisy to include in macro-average
         # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
         "lambada$",
