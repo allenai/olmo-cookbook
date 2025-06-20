@@ -438,7 +438,9 @@ def run_checkpoint_conversion(
         print("Installing beaker and gantry clients...")
         install_beaker_py(env=env)
 
-        assert input_dir.startswith("/"), "Input directory must be fully specified"
+        assert (
+            input_dir.startswith("/") or input_dir.startswith("gs://") or input_dir.startswith("s3://")
+        ), "Input directory must be fully specified"
         if unsharded_output_dir:
             assert unsharded_output_dir.startswith("/"), "Unsharded output directory must be fully specified"
         if huggingface_output_dir:
