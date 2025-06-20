@@ -101,19 +101,6 @@ def convert_olmo_core_v2(
             shutil.copy(src, os.path.join(huggingface_output_dir, file))
         print(f"Copied tokenizer files to {huggingface_output_dir}.")
 
-        # check if input_dir contains a "config.yaml" file. if it does not, check if it contains a
-        # "config.json" file. if it does, re-save it as a "config.yaml" file.
-        config_file = os.path.join(input_dir, "config.yaml")
-        if not os.path.exists(config_file):
-            config_json_file = os.path.join(input_dir, "config.json")
-            if not os.path.exists(config_json_file):
-                raise FileNotFoundError(f"Could not find 'config.yaml' or 'config.json' in {input_dir}")
-
-            print("Converting 'config.json' to 'config.yaml'...")
-            with open(config_json_file, "r") as json_file, open(config_file, "w") as yaml_file:
-                config = json.load(json_file)
-                yaml.dump(config, yaml_file)
-
         print("Converting OLMo core V2 weights to Huggingface format...")
         os.makedirs(huggingface_output_dir, exist_ok=True)
         cmd = [
