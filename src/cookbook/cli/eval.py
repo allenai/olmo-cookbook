@@ -50,6 +50,7 @@ logger = logging.getLogger(__name__)
 @click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
+@click.option("--gcs-credentials-file", type=str, default=None, help="Json file of GCS credentials")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
 @click.option("--beaker-workspace", type=str, default="ai2/oe-data", help="Beaker workspace")
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
@@ -104,6 +105,7 @@ def convert_checkpoint(
     huggingface_output_suffix: str,
     huggingface_token: Optional[str],
     huggingface_tokenizer: Optional[str],
+    gcs_credentials_file: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
@@ -135,6 +137,7 @@ def convert_checkpoint(
         huggingface_output_suffix=huggingface_output_suffix,
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
+        gcs_credentials_file=gcs_credentials_file,
         huggingface_transformers_git_url=huggingface_transformers_git_url,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
@@ -368,7 +371,7 @@ def evaluate_model(
             continue
         key, value = arg.split("=")
         parsed_model_args[key] = value
-        
+
     parsed_gantry_args: dict[str, str] = {}
     for arg in gantry_args.split(","):
         if not (arg := arg.strip()):
@@ -378,7 +381,7 @@ def evaluate_model(
 
     # expand tasks; note must be aliases or task suites in oe-eval
     tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
+
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         oe_eval_branch=oe_eval_branch,
@@ -417,9 +420,7 @@ def evaluate_model(
     )
 
 
-@click.option(
-    "-d", "--dashboard", type=str, required=True, help="Set dashboard name"
-)
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
 @click.option(
     "-m",
     "--models",
@@ -490,7 +491,7 @@ def get_results(
 
     # if a task starts with *, it means it is a named group and we need to expand it
     tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
+
     # after that, we check for task patterns
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (tables.averages + tables.metrics).keep_cols(*task_patterns)

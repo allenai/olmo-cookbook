@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import shlex
 import shutil
 import subprocess
@@ -10,8 +11,10 @@ import yaml
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
+    check_if_secret_exists_in_beaker_workspace,
     discover_weka_mount,
     download_tokenizer,
+    get_beaker_user,
     install_beaker_py,
     install_olmo,
     install_olmo_core,
@@ -397,6 +400,7 @@ def run_checkpoint_conversion(
     huggingface_output_suffix: str,
     huggingface_token: Optional[str],
     huggingface_tokenizer: Optional[str],
+    gcs_credentials_file: Optional[str],
     input_dir: str,
     olmo2_commit_hash: str,
     olmo_type: str,
@@ -458,10 +462,33 @@ def run_checkpoint_conversion(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
+        if gcs_credentials_file is not None:
+            assert Path(gcs_credentials_file).is_file(), "Invalid GCS credentials file"
+            secret_name = add_secret_to_beaker_workspace(
+                secret_name="GCS_CREDENTIALS",
+                secret_value=Path(gcs_credentials_file).read_text(),
+                workspace=beaker_workspace,
+                env=env,  # type: ignore
+            )
+
+        gcs_secret_name = None
+        if check_if_secret_exists_in_beaker_workspace(
+            secret_name="GCS_CREDENTIALS",
+            workspace=beaker_workspace,
+        ):
+            gcs_secret_name = f"{get_beaker_user()}_GCS_CREDENTIALS"
+            if gcs_secret_name:
+                gantry_flags.append(f"--env-secret GCS_CREDENTIALS={gcs_secret_name}")
+
         for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
             gantry_flags.append(f"--cluster {cluster}")
 
         remote_command = [
+            (
+                "mkdir -p ~/.google && printenv GCS_CREDENTIALS > ~/.google/credentials.json & export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.google/credentials.json &&"
+                if gcs_secret_name
+                else ""
+            ),
             "pip install uv && uv pip install . --system &&",
             "olmo-cookbook-eval convert",
             f"{input_dir}",
