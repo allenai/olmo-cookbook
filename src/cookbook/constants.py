@@ -638,6 +638,7 @@ ALL_EVAL_TASKS = {
         "core_9mcqa::olmes", # evaluates both mc and rc
         "mmlu:mc::olmes",
         "mmlu:rc::olmes",
+        "triviaqa::olmes"
     ],
     "olmo3:dev:1b:vllm": [
         "arc_challenge:rc::olmes:full",
