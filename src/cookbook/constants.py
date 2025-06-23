@@ -521,13 +521,17 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
 
 ALL_DISPLAY_TASKS = {
     "olmo2:paper": [
+        r"arc_challenge:rc.*",
         r"arc_challenge:mc.*",
+        r"hellaswag:rc.*",
         r"hellaswag:mc.*",
+        r"winogrande:rc.*",
         r"winogrande:mc.*",
         r"naturalqs.*",
         r"drop.*",
         r"agieval.*",
         r"^gsm8k::olmes$",
+        r"^mmlu:rc$",
         r"^mmlu:mc$",
         r"^mmlu_pro:mc$",
         r"^agi_eval$",
@@ -632,6 +636,13 @@ BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
 # use these tasks to launch oe-eval jobs
 ALL_EVAL_TASKS = {
+    "olmo2:paper": [
+        "olmo_2_heldout::olmes",
+        "olmo_2_generative::olmes",
+        "core_9mcqa::olmes", # evaluates both mc and rc
+        "mmlu:mc::olmes",
+        "mmlu:rc::olmes",
+    ],
     "olmo3:dev:1b:vllm": [
         "arc_challenge:rc::olmes:full",
         "arc_easy:rc::olmes:full",
