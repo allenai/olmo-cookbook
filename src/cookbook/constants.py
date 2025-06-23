@@ -483,146 +483,139 @@ MULTILINGUAL_MBPP_LANGUAGES = [
     "typescript",
 ]
 
-# named groups are things you should able to average; they
-# should just contain aliases
-ALL_NAMED_GROUPS = {
-    "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
-    "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
-    "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
-    "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
-    "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
-    "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
-    "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
-    "gen": ALL_GEN_TASKS,
-    "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
-    "minerva": ALL_MINERVA_TASKS,
-    "math": ALL_MATH_TASKS,
-    "gsm-symb": ALL_GSM_SYMB_TASKS,
-    "code": ALL_CODEX_TASKS,
-    "agi_eval": ALL_AGI_EVAL_TASKS,
-    "starcoder": STARCODER_CODEX_TASKS,
-    "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
-    "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    "fim": FIM_TASKS,
-    "mt_mbpp": [f"mt_mbpp:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
-    "mt_mbpp_v2fix": [f"mt_mbpp_v2fix:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
-}
+# # named groups are things you should able to average; they
+# # should just contain aliases
+# ALL_NAMED_GROUPS = {
+#     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
+#     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
+#     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
+#     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
+#     "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
+#     "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
+#     "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
+#     "gen": ALL_GEN_TASKS,
+#     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+#     "minerva": ALL_MINERVA_TASKS,
+#     "math": ALL_MATH_TASKS,
+#     "gsm-symb": ALL_GSM_SYMB_TASKS,
+#     "code": ALL_CODEX_TASKS,
+#     "agi_eval": ALL_AGI_EVAL_TASKS,
+#     "starcoder": STARCODER_CODEX_TASKS,
+#     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
+#     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+#     "fim": FIM_TASKS,
+#     "mt_mbpp": [f"mt_mbpp:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
+#     "mt_mbpp_v2fix": [f"mt_mbpp_v2fix:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
+# }
 
-for helmet_length in (int(2**i) for i in range(13, 18)):
-    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
-        set(
-            task
-            for group_name, tasks in HELMET_SUITES.items()
-            for task in tasks
-            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
-        )
-    )
-
-
-ALL_DISPLAY_TASKS = {
-    "olmo2:paper": [
-        r"arc_challenge:mc.*",
-        r"hellaswag:mc.*",
-        r"winogrande:mc.*",
-        r"naturalqs.*",
-        r"drop.*",
-        r"agieval.*",
-        r"^gsm8k::olmes$",
-        r"^mmlu:mc$",
-        r"^mmlu_pro:mc$",
-        r"^agi_eval$",
-    ],
-    "olmo2:dev:7b": [
-        r"arc_challenge:mc.*",
-        r"arc_easy:mc.*",
-        r"hellaswag:mc.*",
-        r"naturalqs.*",
-        r"^gsm8k::olmo1$",
-        r"^mmlu:mc$",
-        r"^core:mc$",
-        r"^gen$",
-    ],
-    "olmo2:dev:1b": [
-        r"arc_challenge:rc.*",
-        r"arc_easy:rc.*",
-        r"hellaswag:rc.*",
-        r"^gsm8k::olmo1$",
-        r"^mmlu:rc$",
-        r"^core:rc$",
-    ],
-    "olmo3:dev:1b": [
-        "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
-        "^arc_easy.*olmes",
-        "^basic_skills.*olmes",
-        "^codex_humaneval.*3shot",
-        "^coqa.*gen2mc",
-        "^csqa.*olmes",
-        "^drop.*gen2mc",
-        "^hellaswag.*olmes",
-        "^jeopardy.*gen2mc",
-        "^lab_bench.*",
-        "^lambada.*",
-        "^mbpp.*3shot",
-        "^medmcqa.*none",
-        "^medqa.*none",
-        "^minerva.*olmes$",     # doesn't return average
-        # "minerva",
-        "^mmlu.*olmes$",    # doesn't return average
-        # "mmlu:rc",
-        "^mt_mbpp_v2fix.*",           # still returns average
-        "^naturalqs.*gen2mc",
-        "^piqa.*olmes",
-        "^qasper_yesno.*olmes",
-        "^sciq.*olmo3",
-        "^sciriff_yesno.*olmes",
-        "^socialiqa.*olmes",
-        "^squad.*gen2mc",
-        "^winogrande.*olmes",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ],
-    "olmo3:dev:1b:mini": [
-        "^arc_challenge:rc.*",
-        "^arc_easy:rc.*",
-        "^codex_humaneval.*3shot",
-        "^hellaswag:rc.*olmes",
-        "^mbpp.*3shot",
-        "^minerva$",
-        "^mt_mbpp_v2fix$",
-        "^winogrande:rc.*olmes",
-        "basic:rc",
-        "core:rc"
-        "mmlu:bpb",
-        "mmlu:rc",
-    ],
-    "olmo3:dev:7b:mini": [
-        "^arc_challenge:mc::olmes:full",
-        "^arc_easy:mc::olmes:full",
-        "^hellaswag:rc.*olmes",
-        "^codex_humaneval::olmo3",
-        "^mbpp:3shot::olmo3",
-        "^gsm-symb$",
-        "^minerva$",
-        "^mt_mbpp_v2fix$",
-        "^core:mc$",
-        "^mmlu:mc$",
-    ],
-    "helmet:8k": [r"^helmet:8k$"],
-    "helmet:16k": [r"^helmet:16k$"],
-    "helmet:32k": [r"^helmet:32k$"],
-    "helmet:64k": [r"^helmet:64k$"],
-    "helmet:128k": [r"^helmet:128k$"],
-}
+# for helmet_length in (int(2**i) for i in range(13, 18)):
+#     ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
+#         set(
+#             task
+#             for group_name, tasks in HELMET_SUITES.items()
+#             for task in tasks
+#             if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
+#         )
+#     )
 
 
-SHORT_NAMES = {
-    r"::olmes$": "",
-    r"^gsm8k::olmo1$": "GSM*",
-    r"^naturalqs": "NQ",
-    r"^(arc\_\w)\w+": r"\1",
-    r"^hellaswag": "HSwag",
-    r"^winogrande": "WinoG",
-}
+# ALL_DISPLAY_TASKS = {
+#     "olmo2:paper": [
+#         r"arc_challenge:mc.*",
+#         r"hellaswag:mc.*",
+#         r"winogrande:mc.*",
+#         r"naturalqs.*",
+#         r"drop.*",
+#         r"agieval.*",
+#         r"^gsm8k::olmes$",
+#         r"^mmlu:mc$",
+#         r"^mmlu_pro:mc$",
+#         r"^agi_eval$",
+#     ],
+#     "olmo2:dev:7b": [
+#         r"arc_challenge:mc.*",
+#         r"arc_easy:mc.*",
+#         r"hellaswag:mc.*",
+#         r"naturalqs.*",
+#         r"^gsm8k::olmo1$",
+#         r"^mmlu:mc$",
+#         r"^core:mc$",
+#         r"^gen$",
+#     ],
+#     "olmo2:dev:1b": [
+#         r"arc_challenge:rc.*",
+#         r"arc_easy:rc.*",
+#         r"hellaswag:rc.*",
+#         r"^gsm8k::olmo1$",
+#         r"^mmlu:rc$",
+#         r"^core:rc$",
+#     ],
+#     "olmo3:dev:1b": [
+#         "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
+#         "^arc_easy.*olmes",
+#         "^basic_skills.*olmes",
+#         "^codex_humaneval.*3shot",
+#         "^coqa.*gen2mc",
+#         "^csqa.*olmes",
+#         "^drop.*gen2mc",
+#         "^hellaswag.*olmes",
+#         "^jeopardy.*gen2mc",
+#         "^lab_bench.*",
+#         "^lambada.*",
+#         "^mbpp.*3shot",
+#         "^medmcqa.*none",
+#         "^medqa.*none",
+#         "^minerva.*olmes$",     # doesn't return average
+#         # "minerva",
+#         "^mmlu.*olmes$",    # doesn't return average
+#         # "mmlu:rc",
+#         "^mt_mbpp_v2fix.*",           # still returns average
+#         "^naturalqs.*gen2mc",
+#         "^piqa.*olmes",
+#         "^qasper_yesno.*olmes",
+#         "^sciq.*olmo3",
+#         "^sciriff_yesno.*olmes",
+#         "^socialiqa.*olmes",
+#         "^squad.*gen2mc",
+#         "^winogrande.*olmes",
+#         "ultrachat_masked_ppl",
+#         "wildchat_masked_ppl",
+#     ],
+#     "olmo3:dev:1b:mini": [
+#         "^arc_challenge:rc.*",
+#         "^arc_easy:rc.*",
+#         "^codex_humaneval.*3shot",
+#         "^hellaswag:rc.*olmes",
+#         "^mbpp.*3shot",
+#         "^minerva$",
+#         "^mt_mbpp_v2fix$",
+#         "^winogrande:rc.*olmes",
+#         "basic:rc",
+#         "core:rc"
+#         "mmlu:bpb",
+#         "mmlu:rc",
+#     ],
+#     "olmo3:dev:7b:mini": [
+#         "^arc_challenge:mc::olmes:full",
+#         "^arc_easy:mc::olmes:full",
+#         "^hellaswag:rc.*olmes",
+#         "^codex_humaneval::olmo3",
+#         "^mbpp:3shot::olmo3",
+#         "^gsm-symb$",
+#         "^minerva$",
+#         "^mt_mbpp_v2fix$",
+#         "^core:mc$",
+#         "^mmlu:mc$",
+#     ],
+#     "helmet:8k": [r"^helmet:8k$"],
+#     "helmet:16k": [r"^helmet:16k$"],
+#     "helmet:32k": [r"^helmet:32k$"],
+#     "helmet:64k": [r"^helmet:64k$"],
+#     "helmet:128k": [r"^helmet:128k$"],
+# }
+
+
+SHORT_NAMES = {}
 
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
