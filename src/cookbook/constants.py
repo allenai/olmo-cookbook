@@ -521,15 +521,12 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
 
 ALL_DISPLAY_TASKS = {
     "olmo2:paper": [
-        r"arc_challenge:rc.*",
-        r"arc_challenge:mc.*",
-        r"hellaswag:rc.*",
-        r"hellaswag:mc.*",
-        r"winogrande:rc.*",
-        r"winogrande:mc.*",
-        r"naturalqs.*",
-        r"drop.*",
-        r"agieval.*",
+        r"arc_challenge:(rc|mc)::olmes$",
+        r"hellaswag:(rc|mc)::olmes$",
+        r"winogrande:(rc|mc)::olmes$",
+        r"naturalqs::olmes$",
+        r"drop::olmes$",
+        r"agieval.*::olmes$",
         r"^gsm8k::olmes$",
         r"^mmlu:rc$",
         r"^mmlu:mc$",
