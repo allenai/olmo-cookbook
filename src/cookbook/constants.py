@@ -632,6 +632,13 @@ BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
 # use these tasks to launch oe-eval jobs
 ALL_EVAL_TASKS = {
+    "olmo2:paper:vllm": [
+        "olmo_2_heldout::olmes",
+        "olmo_2_generative::olmes",
+        "core_9mcqa::olmes", # evaluates both mc and rc
+        "mmlu:mc::olmes",
+        "mmlu:rc::olmes",
+    ],
     "olmo3:dev:1b:vllm": [
         "arc_challenge:rc::olmes:full",
         "arc_easy:rc::olmes:full",
