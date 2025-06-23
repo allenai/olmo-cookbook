@@ -147,9 +147,9 @@ def hit_and_run_dirichlet(n_samples, alpha, bounds=None, burn_in=100, thinning=1
     return samples
 
 
-def grid_search_optimizer(objective_fn, w_init, results_small, results_large, n_samples=50_000, steps=100, _type="approximate", bounds=None):
-    """ Simple grid search over weights between tasks """
-    n = len(w_init)
+def grid_search_optimizer(objective_fn, results_small, results_large, n_samples=50_000, steps=100, _type="approximate", bounds=None, disable=False):
+    """ Simple grid search over weights between tasks """    
+    n = results_small.shape[0]
     if _type == "approximate":
         samples = hit_and_run_dirichlet(n_samples, np.ones(n), bounds)
     elif _type == "grid":
@@ -162,10 +162,12 @@ def grid_search_optimizer(objective_fn, w_init, results_small, results_large, n_
     best_val = float('inf')
     best_w = None
 
-    for w in tqdm(samples, desc="Running samples"):
+    all_vals = []
+    for w in tqdm(samples, desc="Running samples", disable=disable):
         val = objective_fn(w, results_small, results_large)
+        all_vals += [(w, val)]
         if val < best_val:
             best_val = val
             best_w = w
 
-    return np.array(best_w), best_val
+    return np.array(best_w), best_val, all_vals
