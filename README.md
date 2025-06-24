@@ -15,7 +15,7 @@ pip install -e .[all]
 
 2) Set up your environment
 
-```
+```shell
 gcloud auth application-default login
 gcloud auth application-default set-quota-project ai2-allennlp
 export GOOGLE_CLOUD_PROJECT=ai2-allennlp
