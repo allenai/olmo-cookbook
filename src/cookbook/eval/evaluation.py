@@ -57,6 +57,7 @@ def evaluate_checkpoint(
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    num_shots: int | None,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -76,9 +77,7 @@ def evaluate_checkpoint(
     clusters_to_exclude: set[str] = set()
 
     # processing gantry args
-    if isinstance(gantry_args, str):
-        # load gantry args using json
-        gantry_args = json.loads(gantry_args.strip() or "{}")
+    gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -122,7 +121,7 @@ def evaluate_checkpoint(
                 env=env,  # pyright: ignore
             )
             flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
-            gantry_args = {"hf_token": "true", **gantry_args}
+            gantry_args_dict = {"hf_token": "true", **gantry_args_dict}
         else:
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
@@ -137,6 +136,7 @@ def evaluate_checkpoint(
     run_name = make_eval_run_name(
         checkpoint_path=checkpoint_path,
         add_bos_token=add_bos_token,
+        num_shots=num_shots,
         name_suffix=name_suffix.strip(),
     )
 
@@ -155,6 +155,11 @@ def evaluate_checkpoint(
     # datalake parameters (mostly have to push there + tags)
     flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
     flags.append("--push-datalake")
+
+    # override number of shots; by default, the number of shots is part of task definition in oe-eval
+    # changing number of shots will result in a new run name, similar to how we do it for BOS token.
+    if num_shots is not None:
+        flags.append(f"--num-shots {num_shots}")
 
     # figure out model args based on cli
     model_args = {
@@ -248,13 +253,11 @@ def evaluate_checkpoint(
             if beaker_retries > 0:
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
-            assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
-
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args}
+            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
 
             # finally append gantry args
-            local_flags.append(f"--gantry-args '{json.dumps(gantry_args)}'")
+            local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
 
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
