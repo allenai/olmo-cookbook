@@ -1,7 +1,7 @@
 name: "olmo2-1b_10b-anneal_dclm-natural"
 description: "OLMo2 1b anneal to 10B tokens, DCLM natural"
 budget: "ai2/oe-data"
-workspace: "ai2/oe-data"
+workspace: "ai2/dolma2"
 nodes: 4
 gpus: 8
 preemptible: true
