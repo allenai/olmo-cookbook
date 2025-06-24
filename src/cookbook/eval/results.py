@@ -2,7 +2,7 @@ import logging
 import re
 from typing import NamedTuple
 
-from cookbook.constants import ALL_DISPLAY_TASKS, ALL_NAMED_GROUPS
+from cookbook.constants import ALL_NAMED_GROUPS
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.eval.miniframe import MiniFrame
 
@@ -116,29 +116,8 @@ def make_dashboard_table(
             continue
 
         for row in tasks_table.rows:
-            scores = row.values
-            if all(score is not None for score in scores):
-                average = (sum(scores) / len(scores)) if scores else 0.0
-            else:
-                average = None
-
-            tables.averages.add(col=group_name, row=row.name, val=average)
-
-    # Add averages from task patterns (e.g., olmo3:dev:7b:math)
-    for group_name, tasks in ALL_DISPLAY_TASKS.items():
-        task_patterns = [re.compile(task) for task in tasks]
-
-        tasks_table = (tables.averages + tables.metrics).keep_cols(*task_patterns)
-        if len(tasks_table) == 0:
-            # no need to keep averages for groups that have no models evaluated against their tasks
-            continue
-
-        for row in tasks_table.rows:
-            scores = row.values
-            if all(score is not None for score in scores):
-                average = (sum(scores) / len(scores)) if scores else 0.0
-            else:
-                average = None
+            filtered_scores = [s for s in row.values if s is not None]
+            average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
             tables.averages.add(col=group_name, row=row.name, val=average)
 
     return tables
