@@ -1,5 +1,5 @@
 name: "davidg-7b_10b-anneal_sponge-dclm_eli5_top-63-dclm-50split"
-description: "OLMo2 7b anneal to 10B Tokens for 50% dclm 50% sponge-63 dclm-oh-eli5 90% filtered"
+description: "OLMo2 7b anneal to 10B Tokens for 50% dclm 50% sponge-63 dclm-oh-eli5 60% filtered"
 budget: "ai2/oe-training"
 workspace: "ai2/dolma2"
 nodes: 4
@@ -27,7 +27,7 @@ dataset:
   - name: sponge-STEM-63
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_90%_filter/allenai/dolma2-tokenizer/*/*.npy
+    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_filter/allenai/dolma2-tokenizer/*/*.npy
   - name: dclm-baseline-olmo2
     target_ratio: 0.5
     paths:
