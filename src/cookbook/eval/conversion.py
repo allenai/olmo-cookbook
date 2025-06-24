@@ -51,6 +51,7 @@ def convert_olmo_core_v2(
     transformers_git_url: Optional[str] = None,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
     skip_validation: bool = False,
+    debug_validation: bool = False,
     dtype: Optional[str] = None,
     env: Optional[PythonEnv] = None,
 ):
@@ -116,6 +117,7 @@ def convert_olmo_core_v2(
             "--huggingface-output-dir",
             huggingface_output_dir,
             ("--skip-validation" if skip_validation else ""),
+            ("--debug" if debug_validation else ""),
             (f"--dtype {dtype}" if dtype else ""),
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
@@ -417,6 +419,7 @@ def run_checkpoint_conversion(
     python_venv_force: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    debug_validation: bool = False,
     dtype: Optional[str] = None,
 ):
     env = (
@@ -507,6 +510,7 @@ def run_checkpoint_conversion(
             (f"--max-sequence-length {max_sequence_length}" if max_sequence_length is not None else ""),
             "--use-system-python",
             ("--skip-validation" if skip_validation else ""),
+            ("--debug-validation" if debug_validation else ""),
             (f"--dtype {dtype}" if dtype else ""),
         ]
         remote_command_str = " ".join(remote_command)
@@ -584,6 +588,7 @@ def run_checkpoint_conversion(
             transformers_git_url=huggingface_transformers_git_url,
             transformers_commit_hash=huggingface_transformers_commit_hash,
             skip_validation=skip_validation,
+            debug_validation=debug_validation,
             dtype=dtype,
             env=env,
         )

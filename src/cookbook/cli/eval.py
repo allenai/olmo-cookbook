@@ -87,6 +87,11 @@ logger = logging.getLogger(__name__)
     help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
 )
 @click.option(
+    "--debug-validation",
+    is_flag=True,
+    help="If converting OLMo Core v2 checkpoint, show debug logs of the validation of the model after conversion.",
+)
+@click.option(
     "--dtype",
     type=click.Choice(OLMO_CORE_CONVERT_DTYPES),
     default=None,
@@ -122,6 +127,7 @@ def convert_checkpoint(
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    debug_validation: bool = False,
     dtype: Optional[str] = None,
 ):
     run_checkpoint_conversion(
@@ -154,6 +160,7 @@ def convert_checkpoint(
         use_beaker=use_beaker,
         use_system_python=use_system_python,
         skip_validation=skip_validation,
+        debug_validation=debug_validation,
         dtype=dtype,
     )
 
