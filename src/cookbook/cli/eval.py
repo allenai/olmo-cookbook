@@ -299,6 +299,12 @@ def convert_checkpoint(
     default="",
     help="Suffix to add to the run name",
 )
+@click.option(
+    "--num-shots",
+    type=int,
+    default=None,
+    help="Number of shots to use for evaluation; by default, the number of shots is part of task def in oe-eval",
+)
 def evaluate_model(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -333,6 +339,7 @@ def evaluate_model(
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    num_shots: int | None,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -349,9 +356,16 @@ def evaluate_model(
         key, value = arg.split("=")
         parsed_model_args[key] = value
 
+    parsed_gantry_args: dict[str, str] = {}
+    for arg in gantry_args.split(","):
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=", 1)
+        parsed_gantry_args[key] = value
+
     # expand tasks; note must be aliases or task suites in oe-eval
     tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
+
     evaluate_checkpoint(
         oe_eval_commit=oe_eval_commit,
         checkpoint_path=checkpoint_path,
@@ -375,7 +389,7 @@ def evaluate_model(
         beaker_image=beaker_image,
         beaker_retries=beaker_retries,
         use_gantry=use_gantry,
-        gantry_args=gantry_args,
+        gantry_args=parsed_gantry_args,
         python_venv_force=force_venv,
         python_venv_name=env_name,
         vllm_memory_utilization=vllm_memory_utilization,
@@ -386,12 +400,11 @@ def evaluate_model(
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
+        num_shots=num_shots,
     )
 
 
-@click.option(
-    "-d", "--dashboard", type=str, required=True, help="Set dashboard name"
-)
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
 @click.option(
     "-m",
     "--models",
@@ -462,7 +475,7 @@ def get_results(
 
     # if a task starts with *, it means it is a named group and we need to expand it
     tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
+
     # after that, we check for task patterns
     task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
     results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
