@@ -754,26 +754,25 @@ ALL_DISPLAY_TASKS = {
         "^gsm-symb$",
         "^minerva$",
     ],
-    "olmo3:dev:7b:macro:code": [
+    "olmo3:dev:7b:macro:code_gen": [
         # Code
         "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3",
-        "fim$",
-        "crux-eval$",
+        # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
         "deepseek_leetcode::olmo3",
         "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3",
         "multipl_e:6lang::olmo3",
     ],
-    "olmo3:dev:7b:macro:qa": [
-        # Core OLMES
-        "^arc:mc::xlarge$",
-        "^mmlu:mc$",
-        "csqa:mc::xlarge",
+    "olmo3:dev:7b:macro:code_fim": [
+        # Code
+        "fim$",
+    ],
+    "olmo3:dev:7b:macro:gen": [
         "hellaswag:rc::xlarge",
-        "piqa:mc::xlarge",
-        "socialiqa:mc::xlarge",
         "winogrande:rc::xlarge",
+        "lambada$",
+        "^basic:rc$",
 
         # Gen OLMES
         "drop::xlarge",
@@ -781,6 +780,14 @@ ALL_DISPLAY_TASKS = {
         "naturalqs::xlarge",
         "squad::xlarge",
         "coqa::xlarge",
+    ],
+    "olmo3:dev:7b:macro:mcqa": [
+        # Core OLMES
+        "^arc:mc::xlarge$",
+        "^mmlu:mc$",
+        "csqa:mc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
 
         # Gen2MC OLMES
         "coqa:mc::gen2mc",
@@ -793,20 +800,12 @@ ALL_DISPLAY_TASKS = {
         "^basic:mc$",
         # "lab_bench_dbqa:mc", # too noisy to include in macro-average
         # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
-        "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
         "sciq:mc::xlarge",
     ],
-    "olmo3:dev:7b:micro:qa": [
-        # Core OLMES
-        "^mmlu_.*:mc.*$",
-        "arc_challenge:mc::xlarge",
-        "arc_easy:mc::xlarge",
-        "csqa:mc::xlarge",
+    "olmo3:dev:7b:micro:gen": [
         "hellaswag:rc::xlarge",
-        "piqa:mc::xlarge",
-        "socialiqa:mc::xlarge",
         "winogrande:rc::xlarge",
 
         # Gen OLMES
@@ -815,6 +814,19 @@ ALL_DISPLAY_TASKS = {
         "naturalqs::xlarge",
         "squad::xlarge",
         "coqa::xlarge",
+
+        # New OLMo 3
+        "^basic_skills_.*:rc::olmes$", # rc only
+        "lambada$",
+    ],
+    "olmo3:dev:7b:micro:mcqa": [
+        # Core OLMES
+        "^mmlu_.*:mc.*$",
+        "arc_challenge:mc::xlarge",
+        "arc_easy:mc::xlarge",
+        "csqa:mc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
 
         # Gen2MC OLMES
         "coqa:mc::gen2mc",
@@ -825,10 +837,8 @@ ALL_DISPLAY_TASKS = {
 
         # New OLMo 3
         "^basic_skills_.*:mc::olmes$", # mc only
-        "^basic_skills_.*:rc::olmes$", # rc only
         # "lab_bench_dbqa:mc", # too noisy to include in macro-average
         # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
-        "lambada$",
         "medmcqa:mc::none",
         "medqa_en:mc::none",
         "sciq:mc::xlarge",
@@ -841,16 +851,18 @@ ALL_DISPLAY_TASKS = {
         "gsm_symbolic:p2::olmo3",
         "gsm8k::olmes",
     ],
-    "olmo3:dev:7b:micro:code": [
+    "olmo3:dev:7b:micro:code_gen": [
         # Code
         "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3",
-        "codex_humanevalfim_.*:temp0.2$",
-        "cruxeval_.*:pass@5$",
+        # "cruxeval_.*:pass@5$",
         "deepseek_leetcode::olmo3",
         "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3",
         "multipl_e_.*:[^:]*$",
+    ],
+    "olmo3:dev:7b:micro:code_fim": [
+        "codex_humanevalfim_.*:temp0.2$",
     ],
     "helmet:8k": [r"^helmet:8k$"],
     "helmet:16k": [r"^helmet:16k$"],
@@ -879,21 +891,29 @@ ALL_DISPLAY_TASKS.update({
     ],
     "olmo3:dev:7b:macro": \
         ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"] + \
-        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code"] + \
-        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:qa"],
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code_gen"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code_fim"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:mcqa"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:gen"],
     "olmo3:dev:7b:micro": \
         ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:math"] + \
-        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:code"] + \
-        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:qa"],
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:code_gen"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:code_fim"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:mcqa"] + \
+        ALL_DISPLAY_TASKS["olmo3:dev:7b:micro:gen"] ,
     "olmo3:dev:1b:macro:rc": ALL_DISPLAY_TASKS["olmo3:dev:1b:qa:rc"],
     "olmo3:dev:7b:math": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:math"],
-    "olmo3:dev:7b:code": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code"],
-    "olmo3:dev:7b:qa": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:qa"],
+    "olmo3:dev:7b:code_gen": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code_gen"],
+    "olmo3:dev:7b:code_fim": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:code_fim"],
+    "olmo3:dev:7b:mcqa": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:mcqa"],
+    "olmo3:dev:7b:gen": ALL_DISPLAY_TASKS["olmo3:dev:7b:macro:gen"],
     "olmo3:dev:7b:main": [
         "^olmo3:dev:7b:macro:w_avg$",
-        "^olmo3:dev:7b:qa$",
+        "^olmo3:dev:7b:mcqa$",
+        "^olmo3:dev:7b:gen$",
         "^olmo3:dev:7b:math$",
-        "^olmo3:dev:7b:code$",
+        "^olmo3:dev:7b:code_gen$",
+        "^olmo3:dev:7b:code_fim$",
         "^arc:mc::xlarge$",
         "^mmlu:mc$",
         "^codex_humaneval:3shot::olmo3$",
@@ -904,6 +924,7 @@ ALL_DISPLAY_TASKS.update({
         "^minerva$",
         "^basic:rc$",
         "^gen::xlarge$",
+        "crux-eval$",
     ],
 })
 
