@@ -26,7 +26,8 @@ dataset:
   - name: fim-stackedu-natural-50pct
     target_ratio: 0.5
     paths:
-    -  gs://ai2-llm/preprocessed/stackedu-fim/allenai/dolma2-tokenizer-U10F0F0/**/*.npy
+      # NOTE THE TYPE IN THE PATH U10F0F(0)
+    - gs://ai2-llm/preprocessed/stack-edu-fim/allenai/dolma2-tokenizer-U10F0F/**/*.npy
   - name: dclm-baseline-olmo2
     target_ratio: 0.5
     paths:
