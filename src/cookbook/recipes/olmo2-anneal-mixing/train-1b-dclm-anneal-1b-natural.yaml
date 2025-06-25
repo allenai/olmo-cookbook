@@ -7,7 +7,7 @@ gpus: 8
 preemptible: true
 max_tokens: 1_000_000_000
 global_batch_size: 1048576
-sequence_length: 2048
+sequence_length: 4096
 seed: 1337
 model: "olmo2_1B"
 tokenizer: "dolma2"
@@ -20,7 +20,7 @@ warmup_steps: 0
 annealing:
   enabled: true
   initial_lr: 0.000074487 # See https://wandb.ai/ai2-llm/olmo-small/runs/75xu6sg6/overview
-load_path: gs://ai2-llm/checkpoints/OLMo-small/peteish1/step1907359
+load_path: gs://ai2-llm/checkpoints/mayeec/olmo2-0425-1b-stage1-step1907359/
 load_state: false
 dataset:
   sources:
