@@ -15,6 +15,12 @@ pip install -e .[all]
 
 2) Set up your environment
 
+```shell
+gcloud auth application-default login
+gcloud auth application-default set-quota-project ai2-allennlp
+export GOOGLE_CLOUD_PROJECT=ai2-allennlp
+```
+
 Optional: (Only if you are using Weka storage for token files)
 ```shell
   export WEKA_ENDPOINT_URL=<weka-endpoint-url>
