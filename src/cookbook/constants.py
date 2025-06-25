@@ -483,8 +483,18 @@ MULTILINGUAL_MBPP_LANGUAGES = [
     "typescript",
 ]
 
-# # named groups are things you should able to average; they
-# # should just contain aliases
+
+OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
+OE_EVAL_COMMIT_HASH = None
+OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
+BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
+
+
+# # # # # # # # # # # # # LEGACY NAMED GROUPS # # # # # # # # # # # # #
+# The following named/display groups are preserved as reference only. #
+# Do NOT uncomment them, use new named_tasks.py instead.              #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 # ALL_NAMED_GROUPS = {
 #     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
 #     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
@@ -617,105 +627,114 @@ MULTILINGUAL_MBPP_LANGUAGES = [
 # }
 
 
-SHORT_NAMES = {}
+# SHORT_NAMES = {
+#      r"::olmes$": "",
+#      r"::olmes:full$": "",
+#      r"^gsm8k::olmo1$": "GSM*",
+#      r"^naturalqs": "NQ",
+#      r"^(arc\_\w)\w+": r"\1",
+#      r"^hellaswag": "HSwag",
 
 
-OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
-OE_EVAL_COMMIT_HASH = None
-OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
-BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
+#      r"^winogrande": "WinoG",
+#      r"^codex_humaneval": "humaneval",
+#      r"::olmo3$": "",
+#      r"::none$": "",
+#      r":3shot": "",
+#      r"::full$": "",
+#  }
 
-# use these tasks to launch oe-eval jobs
-ALL_EVAL_TASKS = {
-    "olmo2:paper": [
-        "olmo_2_heldout::olmes",
-        "olmo_2_generative::olmes",
-        "core_9mcqa::olmes", # evaluates both mc and rc
-        "mmlu:mc::olmes",
-        "mmlu:rc::olmes",
-        "triviaqa::olmes"
-    ],
-    "olmo3:dev:1b:vllm": [
-        "arc_challenge:rc::olmes:full",
-        "arc_easy:rc::olmes:full",
-        "basic_skills:rc::olmes",
-        "codex_humaneval:3shot:bpb::none",
-        "coqa:rc::gen2mc",
-        "csqa:rc::olmes:full",
-        "drop:rc::gen2mc",
-        "hellaswag:rc::olmes:full",
-        "jeopardy:rc::gen2mc",
-        "lab_bench_dbqa",
-        "lab_bench_protocolqa",
-        "lambada",
-        "mbpp:3shot:bpb::none",
-        "medmcqa:rc::none",
-        "medqa_en:rc::none",
-        "minerva_math::olmes",
-        "mmlu:rc::olmes",
-        "mt_mbpp_v2fix",
-        "naturalqs:rc::gen2mc",
-        "piqa:rc::olmes:full",
-        "qasper_yesno:rc::olmes",
-        "sciq:rc::olmo3",
-        "sciriff_yesno:rc::olmes",
-        "socialiqa:rc::olmes:full",
-        "squad:rc::gen2mc",
-        "winogrande:rc::olmes:full",
-    ],
-    "olmo3:dev:1b:hf": [
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ],
-    "olmo3:dev:7b:vllm": [
-        "arc_challenge:mc::xlarge",
-        "arc_easy:mc::xlarge",
-        "basic_skills:rc::olmes",
-        "bigcodebench:3shot::olmo3",
-        "codex_humaneval:3shot::olmo3",
-        "codex_humanevalfim_multi:temp0.2",
-        "codex_humanevalfim_random:temp0.2",
-        "codex_humanevalfim_single:temp0.2",
-        "coqa::xlarge",
-        "coqa:mc::gen2mc",
-        "cruxeval_input:pass@5",
-        "cruxeval_output:pass@5",
-        "csqa:mc::xlarge",
-        "deepseek_leetcode::olmo3",
-        "drop::xlarge",
-        "drop:mc::gen2mc",
-        "ds1000:3shot::olmo3",
-        "gsm_symbolic::olmo3",
-        "gsm_symbolic:p1::olmo3",
-        "gsm_symbolic:p2::olmo3",
-        "gsm8k::olmes",
-        "hellaswag:rc::xlarge",
-        "jeopardy::xlarge",
-        "jeopardy:mc::gen2mc",
-        "lab_bench_dbqa:mc",
-        "lab_bench_protocolqa:mc",
-        "lambada",
-        "mbpp:3shot::olmo3",
-        "medmcqa:mc::none",
-        "medqa_en:mc::none",
-        "minerva_math::olmes",
-        "mmlu:mc::olmes",
-        "mt_mbpp_v2fix",
-        "multipl_e:6lang::olmo3",
-        "naturalqs::xlarge",
-        "naturalqs:mc::gen2mc",
-        "openbookqa:mc::xlarge",
-        "piqa:mc::xlarge",
-        "qasper_yesno:mc::olmes",
-        "sciq:mc::xlarge",
-        "sciriff_yesno:mc::olmes",
-        "socialiqa:mc::xlarge",
-        "squad::xlarge",
-        "squad:mc::gen2mc",
-        "winogrande:rc::xlarge",
-    ],
-    "olmo3:dev:7b:hf": [
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ],
-}
+
+# ALL_EVAL_TASKS = {
+#     "olmo2:paper": [
+#         "olmo_2_heldout::olmes",
+#         "olmo_2_generative::olmes",
+#         "core_9mcqa::olmes", # evaluates both mc and rc
+#         "mmlu:mc::olmes",
+#         "mmlu:rc::olmes",
+#         "triviaqa::olmes"
+#     ],
+#     "olmo3:dev:1b:vllm": [
+#         "arc_challenge:rc::olmes:full",
+#         "arc_easy:rc::olmes:full",
+#         "basic_skills:rc::olmes",
+#         "codex_humaneval:3shot:bpb::none",
+#         "coqa:rc::gen2mc",
+#         "csqa:rc::olmes:full",
+#         "drop:rc::gen2mc",
+#         "hellaswag:rc::olmes:full",
+#         "jeopardy:rc::gen2mc",
+#         "lab_bench_dbqa",
+#         "lab_bench_protocolqa",
+#         "lambada",
+#         "mbpp:3shot:bpb::none",
+#         "medmcqa:rc::none",
+#         "medqa_en:rc::none",
+#         "minerva_math::olmes",
+#         "mmlu:rc::olmes",
+#         "mt_mbpp_v2fix",
+#         "naturalqs:rc::gen2mc",
+#         "piqa:rc::olmes:full",
+#         "qasper_yesno:rc::olmes",
+#         "sciq:rc::olmo3",
+#         "sciriff_yesno:rc::olmes",
+#         "socialiqa:rc::olmes:full",
+#         "squad:rc::gen2mc",
+#         "winogrande:rc::olmes:full",
+#     ],
+#     "olmo3:dev:1b:hf": [
+#         "ultrachat_masked_ppl",
+#         "wildchat_masked_ppl",
+#     ],
+#     "olmo3:dev:7b:vllm": [
+#         "arc_challenge:mc::xlarge",
+#         "arc_easy:mc::xlarge",
+#         "basic_skills:rc::olmes",
+#         "bigcodebench:3shot::olmo3",
+#         "codex_humaneval:3shot::olmo3",
+#         "codex_humanevalfim_multi:temp0.2",
+#         "codex_humanevalfim_random:temp0.2",
+#         "codex_humanevalfim_single:temp0.2",
+#         "coqa::xlarge",
+#         "coqa:mc::gen2mc",
+#         "cruxeval_input:pass@5",
+#         "cruxeval_output:pass@5",
+#         "csqa:mc::xlarge",
+#         "deepseek_leetcode::olmo3",
+#         "drop::xlarge",
+#         "drop:mc::gen2mc",
+#         "ds1000:3shot::olmo3",
+#         "gsm_symbolic::olmo3",
+#         "gsm_symbolic:p1::olmo3",
+#         "gsm_symbolic:p2::olmo3",
+#         "gsm8k::olmes",
+#         "hellaswag:rc::xlarge",
+#         "jeopardy::xlarge",
+#         "jeopardy:mc::gen2mc",
+#         "lab_bench_dbqa:mc",
+#         "lab_bench_protocolqa:mc",
+#         "lambada",
+#         "mbpp:3shot::olmo3",
+#         "medmcqa:mc::none",
+#         "medqa_en:mc::none",
+#         "minerva_math::olmes",
+#         "mmlu:mc::olmes",
+#         "mt_mbpp_v2fix",
+#         "multipl_e:6lang::olmo3",
+#         "naturalqs::xlarge",
+#         "naturalqs:mc::gen2mc",
+#         "openbookqa:mc::xlarge",
+#         "piqa:mc::xlarge",
+#         "qasper_yesno:mc::olmes",
+#         "sciq:mc::xlarge",
+#         "sciriff_yesno:mc::olmes",
+#         "socialiqa:mc::xlarge",
+#         "squad::xlarge",
+#         "squad:mc::gen2mc",
+#         "winogrande:rc::xlarge",
+#     ],
+#     "olmo3:dev:7b:hf": [
+#         "ultrachat_masked_ppl",
+#         "wildchat_masked_ppl",
+#     ],
+# }
