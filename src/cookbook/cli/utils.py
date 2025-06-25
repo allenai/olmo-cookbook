@@ -195,19 +195,34 @@ def install_oe_eval(
             oe_eval_dir = line.split(":", 1)[1].strip()
             break
 
-    if oe_eval_dir:
+    if bool(oe_eval_dir and os.path.exists(oe_eval_dir)):
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=oe_eval_dir,
             capture_output=True,
             text=True
         )
+        installed_commit = result.stdout.strip() # current commit
 
-        installed_commit = result.stdout.strip()
+        if commit_hash is None:
+            branch = commit_branch or "HEAD"
+            result = subprocess.run(
+                ["git", "ls-remote", "origin", branch],
+                cwd=oe_eval_dir,
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0 or not result.stdout:
+                return None
+            remote_commit = result.stdout.split()[0] # remote HEAD commit on particular (or main) branch
 
-        if installed_commit == commit_hash:
-            print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
-            return oe_eval_dir
+            if installed_commit == remote_commit:
+                print(f"Current commit matches remote {branch} in {oe_eval_dir}")
+                return oe_eval_dir
+        else:
+            if installed_commit == commit_hash:
+                print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
+                return oe_eval_dir
 
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash, commit_branch)
 
