@@ -154,9 +154,49 @@ class CoreRCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:rc::olmes" for task in constants.ALL_CORE_TASKS]
 
 
+@NamedTasksGroupRegistry.register("core:mc::full")
+class CoreMCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:mc::olmes::full" for task in constants.ALL_CORE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("core:rc::full")
+class CoreRCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:rc::olmes::full" for task in constants.ALL_CORE_TASKS]
+
+
 @NamedTasksGroupRegistry.register("core:mc")
 class CoreMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:mc::olmes" for task in constants.ALL_CORE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:rc")
+class MMLURCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:rc::olmes" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:mc")
+class MMLURCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:mc::olmes" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:rc::full")
+class MMLURCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:rc::olmes:full" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:mc::full")
+class MMLURCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:mc::olmes:full" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:rc::xlarge")
+class MMLURCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:rc::xlarge" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:mc::xlarge")
+class MMLURCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:mc::xlarge" for category in constants.ARC_TASKS]
 
 
 @NamedTasksGroupRegistry.register("basic:rc")
@@ -183,6 +223,18 @@ class GenGroup(BaseAverageNamedTasksGroup):
 class GenNoJpGroup(BaseNamedTasksGroup):
     # this is legacy, no need to average it
     tasks = [task for task in constants.ALL_GEN_TASKS if task != "jeopardy::olmes"]
+
+
+@NamedTasksGroupRegistry.register("gen-no-gsm")
+class GenNoJpGroup(BaseNamedTasksGroup):
+    # this is legacy, no need to average it
+    tasks = [task for task in constants.ALL_GEN_TASKS if task != "gsm8k::olmo1"]
+
+
+@NamedTasksGroupRegistry.register("gen::xlarge")
+class GenNoJpGroup(BaseNamedTasksGroup):
+    # this is legacy, no need to average it
+    tasks = [task for task in constants.ALL_GEN_XLARGE_TASKS]
 
 
 @NamedTasksGroupRegistry.register("minerva")
@@ -230,15 +282,20 @@ class FimGroup(BaseNamedTasksGroup):
     tasks = [task for task in constants.FIM_TASKS]
 
 
+@NamedTasksGroupRegistry.register("crux-eval")
+class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
+    tasks = [task for task in constants.CRUX_EVAL_TASKS]
+
+
 @NamedTasksGroupRegistry.register("mt_mbpp")
 class MtMbppGroup(BaseNamedTasksGroup):
     # this is legacy, no need to average it
-    tasks = [f"mt_mbpp:{language}" for language in constants.MULTILINGUAL_MBPP_LANGUAGES]
+    tasks = [task for task in constants.MULTILINGUAL_MBPP_TASKS]
 
 
 @NamedTasksGroupRegistry.register("mt_mbpp_v2fix")
 class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
-    tasks = [f"mt_mbpp_v2fix:{language}" for language in constants.MULTILINGUAL_MBPP_LANGUAGES]
+    tasks = [task for task in constants.MULTILINGUAL_MBPP_TASKS_V2]
 
 
 def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
@@ -265,12 +322,18 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
 @NamedTasksGroupRegistry.register("olmo2:paper")
 class Olmo2PaperGroup(BaseNamedTasksGroup):
     tasks = [
-        re.compile(r"arc_challenge:mc.*"),
-        re.compile(r"hellaswag:mc.*"),
-        re.compile(r"winogrande:mc.*"),
-        re.compile(r"naturalqs.*"),
-        re.compile(r"drop.*"),
-        re.compile(r"agieval.*"),
+        re.compile(r"arc_challenge:(rc|mc)::olmes$"),
+        re.compile(r"hellaswag:(rc|mc)::olmes$"),
+        re.compile(r"winogrande:(rc|mc)::olmes$"),
+        re.compile(r"naturalqs::olmes$"),
+        re.compile(r"drop::olmes$"),
+        re.compile(r"agieval.*::olmes$"),
+        re.compile(r"^gsm8k::olmes$"),
+        re.compile(r"^mmlu:rc$"),
+        re.compile(r"^mmlu:mc$"),
+        re.compile(r"^mmlu_pro:mc$"),
+        re.compile(r"^agi_eval$"),
+        re.compile(r"^triviaqa::olmes$"),
     ]
 
 

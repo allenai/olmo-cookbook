@@ -349,6 +349,11 @@ ALL_CORE_TASKS = [
     "winogrande",
 ]
 
+ARC_TASKS = [
+    "arc_easy",
+    "arc_challenge",
+]
+
 
 ALL_GEN_TASKS = [
     "coqa::olmes",
@@ -357,6 +362,14 @@ ALL_GEN_TASKS = [
     "naturalqs::olmes",
     "drop::olmes",
     "gsm8k::olmo1",
+]
+
+ALL_GEN_XLARGE_TASKS = [
+    "coqa::xlarge",
+    "squad::xlarge",
+    "jeopardy::xlarge",
+    "naturalqs::xlarge",
+    "drop::xlarge",
 ]
 
 ALL_MINERVA_TASKS = [
@@ -369,9 +382,13 @@ ALL_MINERVA_TASKS = [
     "minerva_math_precalculus::olmes",
 ]
 
-ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
+ALL_GSM_SYMB_TASKS = [
+    "gsm_symbolic::olmo3", 
+    "gsm_symbolic:p1::olmo3",
+    "gsm_symbolic:p2::olmo3"
+]
 
-ALL_GSM_SYMB_TASKS = ["gsm_symbolic::olmo3", "gsm_symbolic:p1::olmo3", "gsm_symbolic:p2::olmo3"]
+ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
 
 BASIC_SKILLS = [
     "basic_skills_arithmetic",
@@ -463,24 +480,50 @@ FIM_TASKS = [
     "codex_humanevalfim_random:temp0.2",
 ]
 
-MULTILINGUAL_MBPP_LANGUAGES = [
-    "bash",
-    "c",
-    "cpp",
-    "csharp",
-    "go",
-    "haskell",
-    "java",
-    "javascript",
-    "matlab",
-    "php",
-    "python",
-    "r",
-    "ruby",
-    "rust",
-    "scala",
-    "swift",
-    "typescript",
+
+CRUX_EVAL_TASKS = [
+    "cruxeval_input:pass@5",
+    "cruxeval_output:pass@5",
+]
+
+MULTILINGUAL_MBPP_TASKS = [
+    "mt_mbpp:bash",
+    "mt_mbpp:c",
+    "mt_mbpp:cpp",
+    "mt_mbpp:csharp",
+    "mt_mbpp:go",
+    "mt_mbpp:haskell",
+    "mt_mbpp:java",
+    "mt_mbpp:javascript",
+    "mt_mbpp:matlab",
+    "mt_mbpp:php",
+    "mt_mbpp:python",
+    "mt_mbpp:r",
+    "mt_mbpp:ruby",
+    "mt_mbpp:rust",
+    "mt_mbpp:scala",
+    "mt_mbpp:swift",
+    "mt_mbpp:typescript",
+]
+
+MULTILINGUAL_MBPP_TASKS_V2 = [
+    "mt_mbpp_v2fix:bash",
+    "mt_mbpp_v2fix:c",
+    "mt_mbpp_v2fix:cpp",
+    "mt_mbpp_v2fix:csharp",
+    "mt_mbpp_v2fix:go",
+    "mt_mbpp_v2fix:haskell",
+    "mt_mbpp_v2fix:java",
+    "mt_mbpp_v2fix:javascript",
+    "mt_mbpp_v2fix:matlab",
+    "mt_mbpp_v2fix:php",
+    "mt_mbpp_v2fix:python",
+    "mt_mbpp_v2fix:r",
+    "mt_mbpp_v2fix:ruby",
+    "mt_mbpp_v2fix:rust",
+    "mt_mbpp_v2fix:scala",
+    "mt_mbpp_v2fix:swift",
+    "mt_mbpp_v2fix:typescript",
 ]
 
 
