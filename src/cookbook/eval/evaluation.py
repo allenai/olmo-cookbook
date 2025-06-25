@@ -6,6 +6,7 @@ from copy import deepcopy
 from hashlib import md5
 from typing import Optional
 from urllib.parse import urlparse
+from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     PythonEnv,
@@ -180,12 +181,15 @@ def evaluate_checkpoint(
 
     # these are all the tasks we want to run; note that we can't run regex patterns here,
     # they have to be actual strings
-    all_tasks = sorted(
+    all_tasks = sorted(list(set(
         task
         for task_group in tasks
         for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
         if isinstance(task, str)
-    )
+    )))
+
+    print('Launching evals on the following tasks:')
+    pprint(all_tasks)
 
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}

@@ -351,7 +351,7 @@ class MinervaBpbGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev1bMathBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Math
-        re.compile(r"^minerva.*:bpb::olmes$"),
+        MinervaBpbGroup(),
     ]
 
 
@@ -359,9 +359,9 @@ class Olmo3Dev1bMathBpbGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev1bCodeBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Code
-        re.compile(r"^codex_humaneval:3shot:bpb::none"),
-        re.compile(r"^mbpp:3shot:bpb::none"),
-        re.compile(r"^mt_mbpp_v2fix.*:bpb$"),
+        "codex_humaneval:3shot:bpb::none",
+        "mbpp:3shot:bpb::none",
+        MtMbppV2fixGroup(),
     ]
 
 
@@ -369,31 +369,31 @@ class Olmo3Dev1bCodeBpbGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Core OLMES
-        re.compile(r"^arc:rc::full$"),
-        re.compile(r"^mmlu:rc$"),
-        re.compile(r"^csqa:rc::olmes:full"),
-        re.compile(r"^hellaswag:rc::olmes:full"),
-        re.compile(r"^winogrande:rc::olmes:full"),
-        re.compile(r"^socialiqa:rc::olmes:full"),
-        re.compile(r"^piqa:rc::olmes:full"),
+        "arc:rc::full",
+        MMLURCGroup(),
+        "csqa:rc::olmes:full",
+        "hellaswag:rc::olmes:full",
+        "winogrande:rc::olmes:full",
+        "socialiqa:rc::olmes:full",
+        "piqa:rc::olmes:full",
 
         # Gen OLMES
-        re.compile(r"^coqa:rc::gen2mc$"),
-        re.compile(r"^drop:rc::gen2mc$"),
-        re.compile(r"^jeopardy:rc::gen2mc$"),
-        re.compile(r"^naturalqs:rc::gen2mc$"),
-        re.compile(r"^squad:rc::gen2mc$"),
+        "coqa:rc::gen2mc",
+        "drop:rc::gen2mc",
+        "jeopardy:rc::gen2mc",
+        "naturalqs:rc::gen2mc",
+        "squad:rc::gen2mc",
 
         # New OLMo 3
-        re.compile(r"^sciq:rc::olmo3"),
-        re.compile(r"^qasper_yesno:rc::olmes"),
-        re.compile(r"^basic_skills:rc::olmes"),
-        re.compile(r"^lab_bench_dbqa$"),
-        re.compile(r"^lab_bench_protocolqa$"),
-        re.compile(r"^lambada:rc"),
-        re.compile(r"^medmcqa:rc::none"),
-        re.compile(r"^medqa:rc::none"),
-        re.compile(r"^sciriff_yesno:rc::olmes"),
+        "sciq:rc::olmo3",
+        "qasper_yesno:rc::olmes",
+        "basic_skills:rc::olmes",
+        "lab_bench_dbqa",
+        "lab_bench_protocolqa",
+        "lambada:rc",
+        "medmcqa:rc::none",
+        "medqa:rc::none",
+        "sciriff_yesno:rc::olmes",
     ]
 
 
@@ -401,41 +401,39 @@ class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev1bMacroBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Core OLMES
-        re.compile(r"^arc:bpb::full$"),
-        re.compile(r"^mmlu:bpb$"),
-        re.compile(r"^csqa:bpb::olmes:full"),
-        re.compile(r"^hellaswag:bpb::olmes:full"),
-        re.compile(r"^winogrande:bpb::olmes:full"),
-        re.compile(r"^socialiqa:bpb::olmes:full"),
-        re.compile(r"^piqa:bpb::olmes:full"),
+        "arc:bpb::full$",
+        "mmlu:bpb$",
+        "csqa:bpb::olmes:full",
+        "hellaswag:bpb::olmes:full",
+        "winogrande:bpb::olmes:full",
+        "socialiqa:bpb::olmes:full",
+        "piqa:bpb::olmes:full",
 
         # Gen OLMES
-        re.compile(r"^coqa:bpb::gen2mc$"),
-        re.compile(r"^drop:bpb::gen2mc$"),
-        re.compile(r"^jeopardy:bpb::gen2mc$"),
-        re.compile(r"^naturalqs:bpb::gen2mc$"),
-        re.compile(r"^squad:bpb::gen2mc$"),
+        "coqa:bpb::gen2mc",
+        "drop:bpb::gen2mc",
+        "jeopardy:bpb::gen2mc",
+        "naturalqs:bpb::gen2mc",
+        "squad:bpb::gen2mc",
 
         # Math
-        re.compile(r"^minerva:bpb::olmes$"),
+        MinervaBpbGroup(),
 
         # Code
-        re.compile(r"^codex_humaneval:3shot:bpb::none"),
-        re.compile(r"^mbpp:3shot:bpb::none"),
-        re.compile(r"^mt_mbpp_v2fix$"),
+        Olmo3Dev1bCodeBpbGroup(),
 
         # New OLMo 3
-        re.compile(r"^sciq:bpb::olmo3"),
-        re.compile(r"^qasper_yesno:bpb::olmes"),
-        re.compile(r"^basic_skills:bpb::olmes"),
-        re.compile(r"^lab_bench_dbqa:bpb$"),
-        re.compile(r"^lab_bench_protocolqa:bpb$"),
-        re.compile(r"^lambada:bpb"),
-        re.compile(r"^medmcqa:bpb::none"),
-        re.compile(r"^medqa:bpb::none"),
-        re.compile(r"^sciriff_yesno:bpb::olmes"),
-        re.compile(r"ultrachat_masked_ppl"),
-        re.compile(r"wildchat_masked_ppl"),
+        "sciq:bpb::olmo3",
+        "qasper_yesno:bpb::olmes",
+        "basic_skills:bpb::olmes",
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:bpb::none",
+        "medqa:bpb::none",
+        "sciriff_yesno:bpb::olmes",
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
     ]
 
 
@@ -443,9 +441,9 @@ class Olmo3Dev1bMacroBpbGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev7bMacroMathGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Math
-        re.compile(r"gsm8k::olmes"),
-        re.compile(r"^gsm-symb$"),
-        re.compile(r"^minerva$"),
+        "gsm8k::olmes",
+        GsmSymbGroup(),
+        MinervaGroup(),
     ]
 
 
@@ -453,13 +451,13 @@ class Olmo3Dev7bMacroMathGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev7bMacroCodeGenGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Code
-        re.compile(r"bigcodebench:3shot::olmo3"),
-        re.compile(r"codex_humaneval:3shot::olmo3"),
+        "bigcodebench:3shot::olmo3",
+        "codex_humaneval:3shot::olmo3",
+        "deepseek_leetcode::olmo3",
+        "ds1000:3shot::olmo3",
+        "mbpp:3shot::olmo3",
+        "multipl_e:6lang::olmo3",
         # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
-        re.compile(r"deepseek_leetcode::olmo3"),
-        re.compile(r"ds1000:3shot::olmo3"),
-        re.compile(r"mbpp:3shot::olmo3"),
-        re.compile(r"multipl_e:6lang::olmo3"),
     ]
 
 
@@ -467,24 +465,24 @@ class Olmo3Dev7bMacroCodeGenGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev7bMacroCodeFimGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Code
-        re.compile(r"fim$"),
+        FimGroup(),
     ]
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:macro:gen")
 class Olmo3Dev7bMacroGenGroup(BaseAverageNamedTasksGroup):
     tasks = [
-        re.compile(r"hellaswag:rc::xlarge"),
-        re.compile(r"winogrande:rc::xlarge"),
-        re.compile(r"lambada$"),
-        re.compile(r"^basic:rc$"),
+        "hellaswag:rc::xlarge",
+        "winogrande:rc::xlarge",
+        "lambada",
+        BasicRCGroup(),
 
         # Gen OLMES
-        re.compile(r"drop::xlarge"),
-        re.compile(r"jeopardy::xlarge"),
-        re.compile(r"naturalqs::xlarge"),
-        re.compile(r"squad::xlarge"),
-        re.compile(r"coqa::xlarge"),
+        "drop::xlarge",
+        "jeopardy::xlarge",
+        "naturalqs::xlarge",
+        "squad::xlarge",
+        "coqa::xlarge",
     ]
 
 
@@ -492,28 +490,26 @@ class Olmo3Dev7bMacroGenGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev7bMacroMcqaGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Core OLMES
-        # re.compile(r"^arc:mc::xlarge$"),
         ARCMCXlargeGroup(),
-        # re.compile(r"^mmlu:mc$"),
         MMLUMCGroup(),
-        re.compile(r"csqa:mc::xlarge"),
-        re.compile(r"piqa:mc::xlarge"),
-        re.compile(r"socialiqa:mc::xlarge"),
+        "csqa:mc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
 
         # Gen2MC OLMES
-        re.compile(r"coqa:mc::gen2mc"),
-        re.compile(r"drop:mc::gen2mc"),
-        re.compile(r"jeopardy:mc::gen2mc"),
-        re.compile(r"naturalqs:mc::gen2mc"),
-        re.compile(r"squad:mc::gen2mc"),
+        "coqa:mc::gen2mc",
+        "drop:mc::gen2mc",
+        "jeopardy:mc::gen2mc",
+        "naturalqs:mc::gen2mc",
+        "squad:mc::gen2mc",
 
         # New OLMo 3
         BasicRCGroup(),
-        # re.compile(r"lab_bench_dbqa:mc"), # too noisy to include in macro-average
-        # re.compile(r"lab_bench_protocolqa:mc"), # too noisy to include in macro-average
-        re.compile(r"medmcqa:mc::none"),
-        re.compile(r"medqa_en:mc::none"),
-        re.compile(r"sciq:mc::xlarge"),
+        # "lab_bench_dbqa:mc", # too noisy to include in macro-average
+        # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
+        "medmcqa:mc::none",
+        "medqa_en:mc::none",
+        "sciq:mc::xlarge",
     ]
 
 
@@ -525,27 +521,30 @@ class Olmo3Dev7bMacroMcqaGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo2:paper")
 class Olmo2PaperGroup(BaseAverageNamedTasksGroup):
     tasks = [
-        re.compile(r"arc_challenge:(rc|mc)::olmes$"),
-        re.compile(r"hellaswag:(rc|mc)::olmes$"),
-        re.compile(r"winogrande:(rc|mc)::olmes$"),
-        re.compile(r"naturalqs::olmes$"),
-        re.compile(r"drop::olmes$"),
-        re.compile(r"agieval.*::olmes$"),
-        re.compile(r"^gsm8k::olmes$"),
+        "arc_challenge:rc::olmes",
+        "arc_challenge:mc::olmes",
+        "hellaswag:rc::olmes",
+        "hellaswag:mc::olmes",
+        "winogrande:rc::olmes",
+        "winogrande:mc::olmes",
+        "naturalqs::olmes",
+        "drop::olmes",
+        "agieval.*::olmes",
+        "gsm8k::olmes",
         CoreMCGroup(),
         MMLUProMCGroup(),
-        re.compile(r"^agi_eval$"),
+        "triviaqa::olmes"
     ]
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:7b")
 class Olmo2Dev7bGroup(BaseAverageNamedTasksGroup):
     tasks = [
-        re.compile(r"arc_challenge:mc.*"),
-        re.compile(r"arc_easy:mc.*"),
-        re.compile(r"hellaswag:mc.*"),
-        re.compile(r"naturalqs.*"),
-        re.compile(r"^gsm8k::olmo1$"),
+        "arc_challenge:mc::olmes",
+        "arc_easy:mc::olmes",
+        "hellaswag:mc::olmes",
+        "naturalqs::olmes",
+        "^gsm8k::olmo1",
         MMLUMCGroup(),
         CoreMCGroup(),
         GenGroup(),
@@ -555,10 +554,10 @@ class Olmo2Dev7bGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo2:dev:1b")
 class Olmo2Dev1bGroup(BaseAverageNamedTasksGroup):
     tasks = [
-        re.compile(r"arc_challenge:rc.*"),
-        re.compile(r"arc_easy:rc.*"),
-        re.compile(r"hellaswag:rc.*"),
-        re.compile(r"^gsm8k::olmo1$"),
+        "arc_challenge:rc::olmes",
+        "arc_easy:rc::olmes",
+        "hellaswag:rc::olmes",
+        "gsm8k::olmo1",
         MMLURCGroup(),
         CoreRCGroup(),
     ]
@@ -572,14 +571,14 @@ class Olmo3Dev1bMainGroup(BaseAverageNamedTasksGroup):
         Olmo3Dev1bCodeBpbGroup(),
         Olmo3Dev1bQaRcGroup(),
         ARCRCFullGroup(),
-        re.compile(r"^hellaswag:rc::olmes:full"),
+        "hellaswag:rc::olmes:full",
         BasicRCGroup(),
         MtMbppV2fixGroup(),
         MMLURCGroup(),
         MMLUBpbGroup(),
         CoreRCGroup(),
-        re.compile(r"codex_humaneval:3shot:bpb::none"),
-        re.compile(r"mbpp:3shot:bpb::none"),
+        "codex_humaneval:3shot:bpb::none",
+        "mbpp:3shot:bpb::none",
         MinervaBpbGroup()
     ]
 
@@ -595,11 +594,11 @@ class Olmo3Dev7bMainGroup(BaseAverageNamedTasksGroup):
         Olmo3Dev7bMacroGenGroup(),
         ARCMCXlargeGroup(),
         MMLUMCGroup(),
-        re.compile(r"^codex_humaneval:3shot::olmo3$"),
-        re.compile(r"^mbpp:3shot::olmo3$"),
+        "codex_humaneval:3shot::olmo3",
+        "mbpp:3shot::olmo3",
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
-        re.compile(r"^gsm8k::olmes$"),
+        "gsm8k::olmes",
         GsmSymbGroup(),
         MinervaGroup(),
         BasicRCGroup(),
