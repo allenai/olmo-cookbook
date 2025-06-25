@@ -2,11 +2,11 @@ name: "olmo2-1b_1b-anneal_dclm-natural"
 description: "OLMo2 1b anneal to 1B tokens, DCLM natural"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
-nodes: 4
+nodes: 1
 gpus: 8
 preemptible: true
 max_tokens: 1_000_000_000
-global_batch_size: 1048576
+global_batch_size: 2097152
 sequence_length: 4096
 seed: 1337
 model: "olmo2_1B"
@@ -14,7 +14,7 @@ tokenizer: "dolma2"
 priority: high
 eval_interval: 250
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 8192
+rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
 annealing:
