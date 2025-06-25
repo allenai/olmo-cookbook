@@ -183,6 +183,32 @@ def install_oe_eval(
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
 
+    result = subprocess.run(
+        [env.pip, "show", "oe-eval"],
+        capture_output=True,
+        text=True
+    )
+
+    oe_eval_dir = None
+    for line in result.stdout.splitlines():
+        if line.startswith("Editable project location:"):
+            oe_eval_dir = line.split(":", 1)[1].strip()
+            break
+
+    if oe_eval_dir:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=oe_eval_dir,
+            capture_output=True,
+            text=True
+        )
+
+        installed_commit = result.stdout.strip()
+
+        if installed_commit == commit_hash:
+            print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
+            return oe_eval_dir
+
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash, commit_branch)
 
     print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
