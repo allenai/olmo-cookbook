@@ -396,7 +396,7 @@ class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
         "lab_bench_protocolqa",
         "lambada",
         "medmcqa:rc::none",
-        "medqa:rc::none",
+        "medqa_en:rc::none",
         "sciriff_yesno:rc::olmes",
     ]
 
@@ -434,7 +434,7 @@ class Olmo3Dev1bBpbGroup(BaseAverageNamedTasksGroup):
         "lab_bench_protocolqa:bpb",
         "lambada:bpb",
         "medmcqa:bpb::none",
-        "medqa:bpb::none",
+        "medqa_en:bpb::none",
         "sciriff_yesno:bpb::olmes",
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
