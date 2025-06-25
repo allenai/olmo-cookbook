@@ -25,6 +25,7 @@ from cookbook.constants import (
 
 def evaluate_checkpoint(
     oe_eval_commit: str,
+    oe_eval_branch: str,
     checkpoint_path: str,
     aws_access_key_id: str,
     aws_secret_access_key: str,
@@ -67,6 +68,7 @@ def evaluate_checkpoint(
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
+        commit_branch=oe_eval_branch,
         is_editable=use_gantry,
     )
 
