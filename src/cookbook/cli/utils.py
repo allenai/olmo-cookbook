@@ -183,6 +183,7 @@ def install_oe_eval(
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
 
+    # Get current installation location, if exists
     result = subprocess.run(
         [env.pip, "show", "oe-eval"],
         capture_output=True,
@@ -196,15 +197,17 @@ def install_oe_eval(
             break
 
     if bool(oe_eval_dir and os.path.exists(oe_eval_dir)):
+        # Get local commit hash
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=oe_eval_dir,
             capture_output=True,
             text=True
         )
-        installed_commit = result.stdout.strip() # current commit
+        installed_commit = result.stdout.strip()
 
         if commit_hash is None:
+            # Chich if commit matches remote hash (branch or HEAD)
             branch = commit_branch or "HEAD"
             result = subprocess.run(
                 ["git", "ls-remote", "origin", branch],
@@ -214,12 +217,13 @@ def install_oe_eval(
             )
             if result.returncode != 0 or not result.stdout:
                 return None
-            remote_commit = result.stdout.split()[0] # remote HEAD commit on particular (or main) branch
+            remote_commit = result.stdout.split()[0]
 
             if installed_commit == remote_commit:
                 print(f"Current commit matches remote {branch} in {oe_eval_dir}")
                 return oe_eval_dir
         else:
+            # Check if commit matches user-specified commit
             if installed_commit == commit_hash:
                 print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
                 return oe_eval_dir
