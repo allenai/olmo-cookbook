@@ -7,6 +7,7 @@ from typing import Optional
 import click
 from rich.console import Console
 from rich.table import Table
+from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -502,6 +503,8 @@ def get_results(
 
     # then iterate over named groups...
     for named_group in named_groups:
+        pprint(named_group.tasks)
+
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
         combined_table = named_group.combine(metrics_table)

@@ -526,6 +526,23 @@ MULTILINGUAL_MBPP_TASKS_V2 = [
     "mt_mbpp_v2fix:typescript",
 ]
 
+MULTIPL_E_HE_TASKS = [
+    'multipl_e_humaneval:cpp::olmo3', 
+    'multipl_e_humaneval:java::olmo3', 
+    'multipl_e_humaneval:js::olmo3', 
+    'multipl_e_humaneval:php::olmo3', 
+    'multipl_e_humaneval:rs::olmo3', 
+    'multipl_e_humaneval:sh::olmo3', 
+]
+
+MULTIPL_E_MBPP_TASKS = [
+    'multipl_e_mbpp:cpp::olmo3', 
+    'multipl_e_mbpp:java::olmo3', 
+    'multipl_e_mbpp:js::olmo3', 
+    'multipl_e_mbpp:php::olmo3', 
+    'multipl_e_mbpp:rs::olmo3',
+]
+
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
