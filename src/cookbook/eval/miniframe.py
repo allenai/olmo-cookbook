@@ -7,8 +7,6 @@ from typing import Callable, Generator, Iterable, NamedTuple
 from rich.console import Console
 from rich.table import Table
 
-from cookbook.constants import SHORT_NAMES
-
 
 class Row(NamedTuple):
     name: str
@@ -141,10 +139,6 @@ class MiniFrame:
 
         table.add_column("")  # this is the column for the row name
         for col in self.columns:
-            # we shorten the column name if it is in the SHORT_NAMES dict
-            for pattern, replacement in SHORT_NAMES.items():
-                col = re.sub(pattern, replacement, col)
-
             # we add column and center the text
             table.add_column(col, justify="center")
 
