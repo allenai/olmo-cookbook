@@ -1,8 +1,9 @@
-from abc import ABC
+from functools import cached_property
 import re
-from typing import Callable, ClassVar, Generic, Iterable, Type, TypeVar, Union
+from typing import Callable, ClassVar, Type, TypeVar, Union
 
 from cookbook import constants
+from cookbook.eval.miniframe import MiniFrame
 
 
 T = TypeVar("T", bound=Type["BaseNamedTasksGroup"])
@@ -24,76 +25,71 @@ class NamedTasksGroupRegistry:
 
     @classmethod
     def register(cls, task_name: str) -> Callable[[T], T]:
-        def decorator(task: T, _task_name: str = task_name) -> T:
-            cls._named_tasks[_task_name] = task
+
+        # instantiate the singleton instance here; it won't get instantiated
+        # twice cuz it's a singleton, after all.
+        instance = cls()
+
+        def decorator(task: T, _task_name: str = task_name, _instance: "NamedTasksGroupRegistry" = instance) -> T:
+            # add to the registry
+            _instance._named_tasks[_task_name] = task
+
+            # a little bit of a Python crime, but when registering a group,
+            # we replace the class name with the task name for the `.name` property.
+            task.name = _task_name  # pyright: ignore
             return task
 
         return decorator
 
     @classmethod
-    def get(cls, task_name: str) -> Type["BaseNamedTasksGroup"]:
+    def names(cls) -> list[str]:
+        return list(cls._named_tasks.keys())
+
+    @classmethod
+    def exists(cls, task_name: str) -> bool:
+        return task_name in cls._named_tasks
+
+    @classmethod
+    def get(cls, task_name: str) -> "BaseNamedTasksGroup":
         assert cls._instance is not None, "NamedTasksGroupRegistry is not initialized"
 
         if task_name not in cls._named_tasks:
             raise ValueError(f"Task {task_name} not found")
-        return cls._named_tasks[task_name]
+        return cls._named_tasks[task_name]()
 
 
-class BaseNamedTasksGroup(ABC):
+class BaseNamedTasksGroup:
     """
     Base class for named tasks.
 
     Subclasses should define the `tasks` class variable.
     """
-
     # external, to be defined by subclasses
-    tasks: ClassVar[list[str | re.Pattern | "BaseNamedTasksGroup"]] = []
+    tasks: ClassVar[list[Union[str, re.Pattern, "BaseNamedTasksGroup"]]] = []
 
-    def __init__(self):
-        assert isinstance(self.tasks, list), "tasks must be a list"
-        assert len(self.tasks) > 0, "tasks must not be empty"
+    @property
+    def name(self) -> str:
+        return self.__class__.__name__
 
-        # expand any groups in the tasks list
-        i = 0
-        while i < len(self.tasks):
-            task = self.tasks[i]
+    @cached_property
+    def expanded_tasks(self) -> list[Union[str, re.Pattern]]:
+        """
+        Return the list of tasks in this group, expanding any nested named groups.
+        """
+        expanded_tasks: list[Union[str, re.Pattern]] = []
+        for task in self.tasks:
             if isinstance(task, BaseNamedTasksGroup):
-                self.tasks.pop(i)
-                for sub_task in task.tasks[::-1]:
-                    self.tasks.insert(i, sub_task)
+                expanded_tasks.extend(task.expanded_tasks)
             else:
-                i += 1
+                expanded_tasks.append(task)
+        return expanded_tasks
 
-    def filter(self, task_names: Iterable[str]) -> list[str]:
-        """
-        Given a list of task names, filters it to the ones that are in the group.
-        """
-        known_tasks_names = []
-        for received_task_name in task_names:
-            for known_task_name in self.tasks:
-                if not isinstance(known_task_name, (str, re.Pattern)):
-                    # check if expansion during init went wrong
-                    raise RuntimeError(
-                        f"Tasks are str or re.Pattern after init {known_task_name} is {type(known_task_name)}! "
-                        "This should not happen, please report this bug."
-                    )
-                elif isinstance(known_task_name, str) and known_task_name == received_task_name:
-                    # we are dealing with a simple string, so we can just compare them
-                    known_tasks_names.append(known_task_name)
-                    break
+    def __repr__(self) -> str:
+        tasks_repr = ",".join(str(task) if isinstance(task, str) else repr(task) for task in self.tasks)
+        return f"{self.__class__.__name__}({tasks_repr})"
 
-                elif isinstance(known_task_name, re.Pattern) and known_task_name.search(received_task_name):
-                    # search for a match anywhere in the received task name
-                    known_tasks_names.append(known_task_name)
-                    break
 
-        return known_tasks_names
-
-    def get(self) -> list[str]:
-        """Return the list of tasks that are strings"""
-        return [task for task in self.tasks if isinstance(task, str)]
-
-    def combine(self, tasks_metrics_dict: dict[str, float]) -> float | None:
+    def combine(self, results: MiniFrame) -> MiniFrame | None:
         """
         Combine the metrics of the tasks in the group into a single score.
         If this function returns None, it means that this group of metrics is not supposed to be averaged.
@@ -106,11 +102,27 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
     Base class for named tasks groups that are supposed to be averaged.
     """
 
-    def combine(self, tasks_metrics_dict: dict[str, float]) -> float | None:
-        filtered_names = self.filter(tasks_metrics_dict.keys())
-        if len(filtered_names) == 0:
+    def combine(self, results: MiniFrame) -> MiniFrame | None:
+        filtered_rows = results.keep_cols(*self.expanded_tasks)
+        if len(filtered_rows) == 0:
             return None
-        return sum(tasks_metrics_dict[name] for name in filtered_names) / len(filtered_names)
+
+        combined_table = MiniFrame(title=results.title)
+
+        # each row here is a model
+        for row in filtered_rows.rows:
+
+            # we compute the average of the scores for this model; we set the average to None if
+            # there are missing scores or if there are no scores at all.
+            average: float | None = None
+            if len(row.values) > 0 and all(s is not None for s in row.values):
+                filtered_scores = [s for s in row.values if s is not None]
+                average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+
+            # we add the average to the combined table
+            combined_table.add(col=self.name, row=row.name, val=average)
+
+        return combined_table
 
 
 # # # # # # # # # # # # # # # # NAMED TASK GROUPS # # # # # # # # # # # # # # # # #

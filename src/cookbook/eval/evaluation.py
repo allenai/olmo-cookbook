@@ -15,12 +15,12 @@ from cookbook.cli.utils import (
     make_eval_run_name,
 )
 from cookbook.constants import (
-    ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
     FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 
 def evaluate_checkpoint(
     oe_eval_commit: str,
@@ -169,9 +169,11 @@ def evaluate_checkpoint(
     flags.append(f"--model-args '{model_args_str}'")
     flags.append(f"--model-type {model_backend}")
 
-    # these are all the tasks we want to run
+    # these are all the tasks we want to run; note that we can't run regex patterns here,
+    # they have to be actual strings
     all_tasks = sorted(
-        set(task for task_group in tasks for task in ALL_NAMED_GROUPS.get(task_group, [task_group]))
+        task for task_group in tasks for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+        if isinstance(task, str)
     )
 
     # we need to partition tasks based on whether they are mc, gen, or rc
