@@ -282,6 +282,12 @@ def convert_checkpoint(
     help="Extra arguments to pass to the model",
 )
 @click.option(
+    "--revision",
+    type=str,
+    default=None,
+    help="Revision of model in HF hub",
+)
+@click.option(
     "--fim-tokens",
     type=click.Choice(list(FIM_TOKENS.keys())),
     default=None,
@@ -321,6 +327,7 @@ def evaluate_model(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    revision: str,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -383,6 +390,7 @@ def evaluate_model(
         cluster=cluster,
         huggingface_secret=huggingface_secret,
         add_bos_token=add_bos_token,
+        revision=revision,
         budget=budget,
         priority=priority,
         num_gpus=num_gpus,
