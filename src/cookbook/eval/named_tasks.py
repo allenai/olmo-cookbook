@@ -401,8 +401,8 @@ class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:1b:macro:bpb")
-class Olmo3Dev1bMacroBpbGroup(BaseAverageNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:bpb")
+class Olmo3Dev1bBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Core OLMES
         "arc:bpb::full$",
@@ -441,8 +441,8 @@ class Olmo3Dev1bMacroBpbGroup(BaseAverageNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:macro:math")
-class Olmo3Dev7bMacroMathGroup(BaseAverageNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math")
+class Olmo3Dev7bMathGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Math
         "gsm8k::olmes",
@@ -451,8 +451,8 @@ class Olmo3Dev7bMacroMathGroup(BaseAverageNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:macro:code_gen")
-class Olmo3Dev7bMacroCodeGenGroup(BaseAverageNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen")
+class Olmo3Dev7bCodeGenGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Code
         "bigcodebench:3shot::olmo3",
@@ -460,21 +460,22 @@ class Olmo3Dev7bMacroCodeGenGroup(BaseAverageNamedTasksGroup):
         "deepseek_leetcode::olmo3",
         "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3",
-        "multipl_e:6lang::olmo3",
+        MultiPlEHEGroup(),
+        MultiPlEMBPPGroup(),
         # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:macro:code_fim")
-class Olmo3Dev7bMacroCodeFimGroup(BaseAverageNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_fim")
+class Olmo3Dev7bCodeFimGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Code
         FimGroup(),
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:macro:gen")
-class Olmo3Dev7bMacroGenGroup(BaseAverageNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:gen")
+class Olmo3Dev7bGenGroup(BaseAverageNamedTasksGroup):
     tasks = [
         "hellaswag:rc::xlarge",
         "winogrande:rc::xlarge",
@@ -490,8 +491,8 @@ class Olmo3Dev7bMacroGenGroup(BaseAverageNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:macro:mcqa")
-class Olmo3Dev7bMacroMcqaGroup(BaseAverageNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa")
+class Olmo3Dev7bMcqaGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Core OLMES
         ARCMCXlargeGroup(),
@@ -591,11 +592,11 @@ class Olmo3Dev1bMainGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev7bMainGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # re.compile(r"^olmo3:dev:7b:macro:w_avg$"),
-        Olmo3Dev7bMacroMcqaGroup(),
-        Olmo3Dev7bMacroMathGroup(),
-        Olmo3Dev7bMacroCodeGenGroup(),
-        Olmo3Dev7bMacroCodeFimGroup(),
-        Olmo3Dev7bMacroGenGroup(),
+        Olmo3Dev7bMcqaGroup(),
+        Olmo3Dev7bMathGroup(),
+        Olmo3Dev7bCodeGenGroup(),
+        Olmo3Dev7bCodeFimGroup(),
+        Olmo3Dev7bGenGroup(),
         ARCMCXlargeGroup(),
         MMLUMCGroup(),
         "codex_humaneval:3shot::olmo3",
