@@ -373,7 +373,7 @@ class Olmo3Dev1bCodeBpbGroup(BaseAverageNamedTasksGroup):
 class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
     tasks = [
         # Core OLMES
-        "arc:rc::full",
+        ARCRCFullGroup(),
         MMLURCGroup(),
         "csqa:rc::olmes:full",
         "hellaswag:rc::olmes:full",
@@ -394,7 +394,7 @@ class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
         "basic_skills:rc::olmes",
         "lab_bench_dbqa",
         "lab_bench_protocolqa",
-        "lambada:rc",
+        "lambada",
         "medmcqa:rc::none",
         "medqa:rc::none",
         "sciriff_yesno:rc::olmes",

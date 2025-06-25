@@ -191,6 +191,16 @@ def evaluate_checkpoint(
     print('Launching evals on the following tasks:')
     pprint(all_tasks)
 
+    # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
+    EXCLUDE_FROM_LAUNCH = [
+        r'^mmlu_.*:bpb::olmes$',
+        r'^lambada:bpb$'
+    ]
+    all_tasks = [
+        task for task in all_tasks
+        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
+    ]
+
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
     for task in all_tasks:
