@@ -462,19 +462,17 @@ def get_results(
     skip_on_fail: bool,
 ) -> None:
 
+    # compile tasks names into regex patterns (if possible)
+    compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
+
     # we partition between single tasks and named groups; we also keep a set of all tasks names,
     # which we will use later to print any missing tasks.
     named_groups: list[BaseNamedTasksGroup] = []
-    single_tasks: list[str] = []
-    columns_filter_tasks: list[str | re.Pattern] = []
-    for task in tasks:
-        if NamedTasksGroupRegistry.exists(task):
-            named_group = NamedTasksGroupRegistry.get(task)
-            named_groups.append(named_group)
-            columns_filter_tasks.extend(named_group.expanded_tasks)
-        else:
-            single_tasks.append(task)
-            columns_filter_tasks.append(task)
+    columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
+    for compiled_task in compiled_tasks:
+        matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
+        named_groups.extend(matching_groups)
+        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
     metrics_table, missing_tasks = make_dashboard_table(
@@ -484,7 +482,7 @@ def get_results(
     )
 
     # start by filtering in all the single tasks
-    results = metrics_table.keep_cols(*single_tasks)
+    results = metrics_table.keep_cols(*compiled_tasks)
 
     # then iterate over named groups...
     for named_group in named_groups:

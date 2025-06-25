@@ -93,7 +93,7 @@ def make_dashboard_table(
 def print_missing_tasks(
     missing_tasks: dict[str, list[str]],
     rows_filter_models: list[str | re.Pattern],
-    columns_filter_tasks: list[str | re.Pattern]
+    columns_filter_tasks: list[str | re.Pattern],
 ) -> None:
 
     # go through the missing models and tasks and print them out
@@ -106,7 +106,8 @@ def print_missing_tasks(
 
         # filter the missing tasks to only include the tasks that were requested
         model_missing_tasks = {
-            task for task in missing_task
+            task
+            for task in missing_task
             if any(t.search(task) if isinstance(t, re.Pattern) else t == task for t in columns_filter_tasks)
         }
         if not model_missing_tasks:

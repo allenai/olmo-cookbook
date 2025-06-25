@@ -22,6 +22,7 @@ from cookbook.constants import (
 )
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 
+
 def evaluate_checkpoint(
     oe_eval_commit: str,
     checkpoint_path: str,
@@ -177,7 +178,9 @@ def evaluate_checkpoint(
     # these are all the tasks we want to run; note that we can't run regex patterns here,
     # they have to be actual strings
     all_tasks = sorted(
-        task for task_group in tasks for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+        task
+        for task_group in tasks
+        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
         if isinstance(task, str)
     )
 

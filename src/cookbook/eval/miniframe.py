@@ -161,7 +161,10 @@ class MiniFrame:
         # Data rows with formatted values
         rows = []
         for row in self.rows:
-            formatted_values = [f"{v * 100:.2f}" if v is not None else "-" for v in [row.values[list(self.columns).index(col)] for col in columns]]
+            formatted_values = [
+                f"{v * 100:.2f}" if v is not None else "-"
+                for v in [row.values[list(self.columns).index(col)] for col in columns]
+            ]
             rows.append(",".join([row.name] + formatted_values))
         return "\n".join([header] + rows)
 

@@ -47,7 +47,16 @@ class NamedTasksGroupRegistry:
 
     @classmethod
     def exists(cls, task_name: str) -> bool:
-        return task_name in cls._named_tasks
+        return any(cls.search(task_name))
+
+    @classmethod
+    def search(cls, task_name: str | re.Pattern) -> list[str]:
+        """Return all tasks that match the given pattern."""
+        return [
+            task
+            for task in cls._named_tasks.keys()
+            if (task_name.search(task) if isinstance(task_name, re.Pattern) else task_name == task)
+        ]
 
     @classmethod
     def get(cls, task_name: str) -> "BaseNamedTasksGroup":
@@ -64,6 +73,7 @@ class BaseNamedTasksGroup:
 
     Subclasses should define the `tasks` class variable.
     """
+
     # external, to be defined by subclasses
     tasks: ClassVar[list[Union[str, re.Pattern, "BaseNamedTasksGroup"]]] = []
 
@@ -87,7 +97,6 @@ class BaseNamedTasksGroup:
     def __repr__(self) -> str:
         tasks_repr = ",".join(str(task) if isinstance(task, str) else repr(task) for task in self.tasks)
         return f"{self.__class__.__name__}({tasks_repr})"
-
 
     def combine(self, results: MiniFrame) -> MiniFrame | None:
         """
