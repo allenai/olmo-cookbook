@@ -373,13 +373,13 @@ ALL_GEN_XLARGE_TASKS = [
 ]
 
 ALL_MINERVA_TASKS = [
-    "minerva_math_algebra::olmes",
-    "minerva_math_counting_and_probability::olmes",
-    "minerva_math_geometry::olmes",
-    "minerva_math_intermediate_algebra::olmes",
-    "minerva_math_number_theory::olmes",
-    "minerva_math_prealgebra::olmes",
-    "minerva_math_precalculus::olmes",
+    "minerva_math_algebra",
+    "minerva_math_counting_and_probability",
+    "minerva_math_geometry",
+    "minerva_math_intermediate_algebra",
+    "minerva_math_number_theory",
+    "minerva_math_prealgebra",
+    "minerva_math_precalculus",
 ]
 
 ALL_GSM_SYMB_TASKS = [
@@ -387,8 +387,6 @@ ALL_GSM_SYMB_TASKS = [
     "gsm_symbolic:p1::olmo3",
     "gsm_symbolic:p2::olmo3"
 ]
-
-ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
 
 BASIC_SKILLS = [
     "basic_skills_arithmetic",

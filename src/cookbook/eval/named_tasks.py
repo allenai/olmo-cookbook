@@ -256,12 +256,16 @@ class GenXlargeGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("minerva")
 class MinervaGroup(BaseAverageNamedTasksGroup):
-    tasks = [task for task in constants.ALL_MINERVA_TASKS]
+    tasks = [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
-    tasks = [task for task in constants.ALL_MATH_TASKS]
+    tasks = [
+        "gsm8k::olmo1", 
+        "gsm8k::olmes",
+        [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
+    ]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb")
@@ -343,7 +347,7 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
 
 @NamedTasksGroupRegistry.register("minerva:bpb")
 class MinervaBpbGroup(BaseAverageNamedTasksGroup):
-    tasks = [re.compile(r"^minerva.*:bpb::olmes$")]
+    tasks = [f"{subtask}:bpb::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
 # Task macro averages
