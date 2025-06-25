@@ -15,12 +15,12 @@ from cookbook.cli.utils import (
     make_eval_run_name,
 )
 from cookbook.constants import (
-    ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
     FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 
 
 def evaluate_checkpoint(
@@ -178,9 +178,13 @@ def evaluate_checkpoint(
     flags.append(f"--model-args '{model_args_str}'")
     flags.append(f"--model-type {model_backend}")
 
-    # these are all the tasks we want to run
+    # these are all the tasks we want to run; note that we can't run regex patterns here,
+    # they have to be actual strings
     all_tasks = sorted(
-        set(task for task_group in tasks for task in ALL_NAMED_GROUPS.get(task_group, [task_group]))
+        task
+        for task_group in tasks
+        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+        if isinstance(task, str)
     )
 
     # we need to partition tasks based on whether they are mc, gen, or rc
@@ -190,6 +194,9 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
+        #     # these tasks don't work with vllm, so we run them on huggingface
+        #     partitioned_tasks.setdefault("hf", []).append(task)
         else:
             partitioned_tasks.setdefault("gen", []).append(task)
 

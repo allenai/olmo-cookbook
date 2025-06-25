@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import sys
 from typing import Optional
 
 import click
@@ -13,9 +14,6 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
-    ALL_DISPLAY_TASKS,
-    ALL_EVAL_TASKS,
-    ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
@@ -24,10 +22,11 @@ from cookbook.constants import (
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.results import make_dashboard_table
+from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +160,7 @@ def convert_checkpoint(
     multiple=True,
     help=(
         "Set specific tasks or tasks groups. Can be specified multiple times. "
-        f"Tasks groups are: {', '.join(ALL_NAMED_GROUPS)}"
+        f"Tasks groups are: {', '.join(NamedTasksGroupRegistry.names())}"
     ),
 )
 @click.option(
@@ -377,9 +376,6 @@ def evaluate_model(
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
 
-    # expand tasks; note must be aliases or task suites in oe-eval
-    tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
         oe_eval_commit=oe_eval_commit,
@@ -470,11 +466,6 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
-@click.option(
-    "--missing-pairs",
-    is_flag=True,
-    help="Return only missing model-task pairs in JSON format",
-)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -485,20 +476,65 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-    missing_pairs: bool,
 ) -> None:
-    tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
-    # if a task starts with *, it means it is a named group and we need to expand it
-    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
+    # compile tasks names into regex patterns (if possible)
+    compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
-    # after that, we check for task patterns
-    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
-    results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
+    # we partition between single tasks and named groups; we also keep a set of all tasks names,
+    # which we will use later to print any missing tasks.
+    named_groups: list[BaseNamedTasksGroup] = []
+    columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
+    for compiled_task in compiled_tasks:
+        matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
+        named_groups.extend(matching_groups)
+        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
+    # we get the metrics table from the datalake
+    metrics_table, missing_tasks = make_dashboard_table(
+        dashboard=dashboard,
+        force=force,
+        skip_on_fail=skip_on_fail,
+    )
+
+    # start by filtering in all the single tasks
+    results = metrics_table.keep_cols(*compiled_tasks)
+
+    # then iterate over named groups...
+    for named_group in named_groups:
+        # ...and try to combine them into a single score. Note we are giving it the full metrics table,
+        # not the one after filtering to single tasks.
+        combined_table = named_group.combine(metrics_table)
+
+        if combined_table is not None:
+            # we manage to combine! lets put the combined score at the front
+            results = combined_table + results
+        else:
+            # this cannot be combined. let's add each metric as a column. make sure not
+            # to include duplicates.
+            named_group_table = metrics_table.keep_cols(*named_group.expanded_tasks)
+            existing_columns = set(results.columns)
+            named_group_table_only_new_columns = named_group_table.keep_cols(
+                *(c for c in named_group_table.columns if c not in existing_columns)
+            )
+
+            # we add the new columns to the end of the table
+            results = results + named_group_table_only_new_columns
+
+    # we filtered tasks, but the user might want to display only some models
+    rows_filter_models: list[str | re.Pattern] = []
     if len(models) > 0:
-        results = results.keep_rows(*[re.compile(m) for m in models])
+        # okay we filter models too! do the same regex trick as above
+        rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
+        results = results.keep_rows(*rows_filter_models)
 
+    # we gotta let the user know if there are any missing tasks
+    print_missing_tasks(
+        missing_tasks=missing_tasks,
+        rows_filter_models=rows_filter_models,
+        columns_filter_tasks=columns_filter_tasks,
+    )
+    # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(
             by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
@@ -510,35 +546,7 @@ def get_results(
         # if no columns are left, we don't need to sort
         pass
 
-    if tables.missing_tasks:
-        for model, missing_tasks in tables.missing_tasks.items():
-            logger.warning(
-                "\t😱 Model \033[1m%s\033[0m is missing \033[1m%d tasks\033[0m:\t%s",
-                model,
-                len(missing_tasks),
-                ", ".join(missing_tasks),
-            )
-
-    if missing_pairs:
-        missing_pairs_list = []
-        # Convert requested tasks to a set for efficient lookup
-        requested_tasks = set()
-        for task in tasks:
-            if task.startswith("*"):
-                # Expand named groups
-                requested_tasks.update(ALL_NAMED_GROUPS.get(task.lstrip("*"), []))
-            else:
-                # Expand display tasks
-                requested_tasks.update(ALL_DISPLAY_TASKS.get(task, [task]))
-
-        for model, missing_tasks in tables.missing_tasks.items():
-            # Only include tasks that were actually requested
-            for task in missing_tasks:
-                if task in requested_tasks:
-                    missing_pairs_list.append({"model": model, "task": task})
-        print(json.dumps(missing_pairs_list))
-        return
-
+    # output according to format requested by the user
     if format == "json":
         print(json.dumps(results._data))
     elif format == "table":
@@ -576,25 +584,70 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
-@click.argument("subset_type", type=str)
-@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
-def list_tasks(subset_type: str, task: list[str] | None):
-    valid_tasks = [re.compile(t) for t in task] if task else []
+@click.option("-t", "--task", type=str, multiple=True, help="Tasks to filter by")
+def list_tasks(task: list[str] | None):
+    valid_tasks = [re.compile(t) if re.escape(t) != t else t for t in task] if task else []
 
-    table = Table(title=f"Listing {subset_type.capitalize()} tasks")
+    # first, we write a helper function to compare tasks; this is necessary because both valid tasks and
+    # tasks in a group can be either strings or regex patterns.
+    def _compare_tasks(task_target: str | re.Pattern, task_source: str | re.Pattern) -> bool:
+        if isinstance(task_source, re.Pattern):
+            if isinstance(task_target, re.Pattern):
+                return task_source == task_target
+            else:
+                return task_source.search(task_target) is not None
+        elif isinstance(task_target, re.Pattern):
+            return task_target.search(task_source) is not None
+        else:
+            return task_target == task_source
+
+    table = Table(title=f"Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")
 
-    assert subset_type in ["display", "named"], f"Invalid task type: {subset_type}"
+    for group_name in NamedTasksGroupRegistry.names():
+        task_group = NamedTasksGroupRegistry.get(group_name)
 
-    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == "display" else ALL_NAMED_GROUPS).items():
-        if len(valid_tasks) > 0:
-            valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
-            valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
-            if not valid_task_in_key and not valid_task_in_names:
-                continue
-        table.add_row(task_group, "\n".join(task_names), f"{len(task_names):,}")
+        # there are three option on what to print here:
+        # 1. some of the tasks in the group are in valid tasks: we print the name of the group, and those tasks
+        # 2. the group_name name is in valid tasks: we print the name of the group, and all tasks in the group
+        # 3. none of the tasks in the group are in valid tasks: we skip the group
+        # 4. the valid tasks is empty: we print the name of the group, and all tasks in the group
+
+        # first shortcut; if valid tasks is empty, we print all tasks in the group
+        if len(valid_tasks) == 0:
+            table.add_row(
+                group_name,
+                "\n".join(str(t) for t in task_group.expanded_tasks),
+                f"{len(task_group.expanded_tasks):,}",
+            )
+            continue
+
+        # another shortcut; if any of valid names matches group name, we print all tasks in the group
+        if any(v.search(group_name) if isinstance(v, re.Pattern) else v == group_name for v in valid_tasks):
+            table.add_row(
+                group_name,
+                "\n".join(str(t) for t in task_group.expanded_tasks),
+                f"{len(task_group.expanded_tasks):,}",
+            )
+            continue
+
+        # okay, if we are here, means that the group name is not in valid tasks; but there might be some tasks
+        # that are, so we need to check that.
+
+        matching_tasks_from_group: list[str | re.Pattern] = []
+        for task_item in task_group.expanded_tasks:
+            for valid_task in valid_tasks:
+                if _compare_tasks(task_item, valid_task):
+                    matching_tasks_from_group.append(task_item)
+
+        if len(matching_tasks_from_group) > 0:
+            table.add_row(
+                group_name,
+                "\n".join(str(t) for t in matching_tasks_from_group),
+                f"{len(matching_tasks_from_group):,}/{len(task_group.expanded_tasks):,}",
+            )
 
     console = Console()
     console.print(table)
@@ -606,7 +659,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
     experiments = FindExperiments.run(model_name=model)
     valid_tasks = [re.compile(t) for t in task] if task else []
 
-    table = Table()
+    table = Table(title=f"Listing experiments for model {model}")
     table.add_column("Experiment ID")
     table.add_column("Model Name")
     table.add_column("Task Name")
