@@ -111,21 +111,60 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
     """
 
     def combine(self, results: MiniFrame) -> MiniFrame | None:
+        filtered_rows = results.keep_cols(*self.expanded_tasks)
+        if len(filtered_rows) == 0:
+            return None
+
+        combined_table = MiniFrame(title=results.title)
+
+        # each row here is a model
+        for row in filtered_rows.rows:
+            # we compute the average of the scores for this model; we set the average to None if
+            # there are missing scores or if there are no scores at all.
+            average: float | None = None
+            if len(row.values) > 0 and all(s is not None for s in row.values):
+                filtered_scores = [s for s in row.values if s is not None]
+                average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+
+            # we add the average to the combined table
+            combined_table.add(col=self.name, row=row.name, val=average)
+
+        return combined_table
+
+
+class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
+    """
+    Base class for named tasks groups that include averages of other task groups (e.g., a macro average over all QA tasks, which includes MMLU)
+    """
+
+    def combine(self, results: MiniFrame) -> MiniFrame | None:
         out_table = MiniFrame(title=results.title)
 
-        leaf_tasks = []
-        for named_group in self.tasks:
-            # If a child is a task, compute the macro-average for the task
-            if isinstance(named_group, BaseNamedTasksGroup):
-                combined_table = named_group.combine(results)
-                if combined_table is not None:
-                    combined_table = combined_table.keep_cols(*[named_group.name])
-                    # we manage to combine! lets put the combined score at the front
-                    out_table = combined_table + out_table
-            else:
-                leaf_tasks += [named_group]
+        # get task groups (e.g., MMLURCGroup())
+        named_group_children: list[BaseAverageNamedTasksGroup] = [
+            task for task in self.tasks if isinstance(task, BaseAverageNamedTasksGroup) 
+        ]
 
-        filtered_rows = results.keep_cols(*leaf_tasks)
+        # get individual tasks (e.g., "arc_challenge:rc::olmes")
+        task_children = [
+            task for task in self.tasks if not isinstance(task, BaseAverageNamedTasksGroup) 
+        ]
+
+        # calculate the averages for all child task groups
+        for named_group in named_group_children:
+            combined_table = named_group.combine(results)
+            if combined_table is not None:
+                # If the named group is able to average all scores, add it!
+                combined_table = combined_table.keep_cols(*[named_group.name])
+                out_table = combined_table + out_table
+
+        # get the aliases for all task groups
+        all_tasks = \
+            task_children + \
+            [named_group.name for named_group in named_group_children]
+
+        # now get a table of the child tasks and macro averages calculated!
+        filtered_rows = results.keep_cols(*all_tasks)
         out_table = filtered_rows + out_table
 
         if len(out_table) == 0:
@@ -309,7 +348,7 @@ class MultiPlEMBPPGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("fim")
-class FimGroup(BaseNamedTasksGroup):
+class FimGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.FIM_TASKS]
 
 
@@ -319,7 +358,7 @@ class CruxEvalGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("mt_mbpp")
-class MtMbppGroup(BaseNamedTasksGroup):
+class MtMbppGroup(BaseAverageNamedTasksGroup):
     # this is legacy, no need to average it
     tasks = [task for task in constants.MULTILINGUAL_MBPP_TASKS]
 
@@ -352,7 +391,7 @@ class MinervaBpbGroup(BaseAverageNamedTasksGroup):
 
 # Task macro averages
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:math:bpb")
-class Olmo3Dev1bMathBpbGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev1bMathBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Math
         MinervaBpbGroup(),
@@ -360,7 +399,7 @@ class Olmo3Dev1bMathBpbGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:code:bpb")
-class Olmo3Dev1bCodeBpbGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev1bCodeBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Code
         "codex_humaneval:3shot:bpb::none",
@@ -370,7 +409,7 @@ class Olmo3Dev1bCodeBpbGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:rc")
-class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Core OLMES
         ARCRCFullGroup(),
@@ -402,7 +441,7 @@ class Olmo3Dev1bQaRcGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:bpb")
-class Olmo3Dev1bBpbGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Core OLMES
         "arc:bpb::full$",
@@ -442,7 +481,7 @@ class Olmo3Dev1bBpbGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math")
-class Olmo3Dev7bMathGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev7bMathGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Math
         "gsm8k::olmes",
@@ -452,7 +491,7 @@ class Olmo3Dev7bMathGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen")
-class Olmo3Dev7bCodeGenGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Code
         "bigcodebench:3shot::olmo3",
@@ -467,7 +506,7 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:code_fim")
-class Olmo3Dev7bCodeFimGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev7bCodeFimGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Code
         FimGroup(),
@@ -475,7 +514,7 @@ class Olmo3Dev7bCodeFimGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:gen")
-class Olmo3Dev7bGenGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev7bGenGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         "hellaswag:rc::xlarge",
         "winogrande:rc::xlarge",
@@ -492,7 +531,7 @@ class Olmo3Dev7bGenGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa")
-class Olmo3Dev7bMcqaGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev7bMcqaGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Core OLMES
         ARCMCXlargeGroup(),
@@ -524,7 +563,7 @@ class Olmo3Dev7bMcqaGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:paper")
-class Olmo2PaperGroup(BaseAverageNamedTasksGroup):
+class Olmo2PaperGroup(BaseNamedTasksGroup):
     tasks = [
         "arc_challenge:rc::olmes",
         "arc_challenge:mc::olmes",
@@ -543,7 +582,7 @@ class Olmo2PaperGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:7b")
-class Olmo2Dev7bGroup(BaseAverageNamedTasksGroup):
+class Olmo2Dev7bGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         "arc_challenge:mc::olmes",
         "arc_easy:mc::olmes",
@@ -557,7 +596,7 @@ class Olmo2Dev7bGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:1b")
-class Olmo2Dev1bGroup(BaseAverageNamedTasksGroup):
+class Olmo2Dev1bGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         "arc_challenge:rc::olmes",
         "arc_easy:rc::olmes",
@@ -569,7 +608,7 @@ class Olmo2Dev1bGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:main")
-class Olmo3Dev1bMainGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev1bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # re.compile(r"^olmo3:dev:1b:macro:w_avg$"),
         Olmo3Dev1bMathBpbGroup(),
@@ -589,7 +628,7 @@ class Olmo3Dev1bMainGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:main")
-class Olmo3Dev7bMainGroup(BaseAverageNamedTasksGroup):
+class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # re.compile(r"^olmo3:dev:7b:macro:w_avg$"),
         Olmo3Dev7bMcqaGroup(),
