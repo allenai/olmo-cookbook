@@ -1,0 +1,32 @@
+name: "olmo2-microanneal-nemotron-hq-synth-distill"
+description: "OLMo2 7B microanneal to 10B Tokens on Nemotron CC data, quality=high, kind=synthetic, kind2=distill"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 4096
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 1_000
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+downstream_evaluators:
+  - olmo2_dev_1b
+annealing:
+  enabled: true
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
+load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model_and_optim/
+load_state: false
+dataset:
+  sources:
+  - name: nemotron-cc
+    target_ratio: 1.0
+    paths:
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=synthetic/kind2=distill/*.npy
