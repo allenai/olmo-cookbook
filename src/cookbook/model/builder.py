@@ -563,7 +563,7 @@ class TransformerConfigBuilder:
             raise e
 
         if scheduler_class == WSD.__name__:
-            scheduler = CosWithWarmup(**scheduler_config)
+            scheduler = WSD(**scheduler_config)
         elif scheduler_class == CosWithWarmup.__name__:
             scheduler = CosWithWarmup(**scheduler_config)
         else:
