@@ -70,7 +70,6 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
-from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
