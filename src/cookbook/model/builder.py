@@ -22,13 +22,17 @@ from olmo_core.float8 import Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
-    CosWithWarmup,
     OptimConfig,
     OptimGroupOverride,
-    Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim.scheduler import (
+    WSD,
+    CosWithWarmup,
+    CosWithWarmupAndLinearDecay,
+    LinearWithWarmup,
+    Scheduler,
+)
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BeakerCallback,
