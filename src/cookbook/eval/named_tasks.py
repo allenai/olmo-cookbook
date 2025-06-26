@@ -319,7 +319,7 @@ class CodeGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("agi_eval")
 class AgiEvalGroup(BaseAverageNamedTasksGroup):
-    tasks = [task for task in constants.ALL_AGI_EVAL_TASKS]
+    tasks = [f"{task}:1shot::olmes" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("starcoder")

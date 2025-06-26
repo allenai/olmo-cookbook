@@ -397,16 +397,46 @@ BASIC_SKILLS = [
     "basic_skills_pattern",
 ]
 
-ALL_AGI_EVAL_TASKS = [
-    "agi_eval_lsat-ar:1shot::olmes",
-    "agi_eval_lsat-lr:1shot::olmes",
-    "agi_eval_lsat-rc:1shot::olmes",
-    "agi_eval_logiqa-en:1shot::olmes",
-    "agi_eval_sat-math:1shot::olmes",
-    "agi_eval_sat-en:1shot::olmes",
-    "agi_eval_aqua-rat:1shot::olmes",
-    "agi_eval_sat-en-without-passage:1shot::olmes",
-    "agi_eval_gaokao-english:1shot::olmes",
+AGI_EVAL_ENGLISH_TASKS = [
+    "lsat-ar",
+    "lsat-lr",
+    "lsat-rc",
+    "logiqa-en",
+    "sat-math",
+    "sat-en",
+    "aqua-rat",
+    "sat-en-without-passage",
+    "gaokao-english",
+]
+
+BBH_TASKS = [
+    "boolean_expressions",
+    "causal_judgement",
+    "date_understanding",
+    "disambiguation_qa",
+    "dyck_languages",
+    "formal_fallacies",
+    "geometric_shapes",
+    "hyperbaton",
+    "logical_deduction_five_objects",
+    "logical_deduction_seven_objects",
+    "logical_deduction_three_objects",
+    "movie_recommendation",
+    "multistep_arithmetic_two",
+    "navigate",
+    "object_counting",
+    "penguins_in_a_table",
+    "reasoning_about_colored_objects",
+    "ruin_names",
+    "salient_translation_error_detection",
+    "snarks",
+    "sports_understanding",
+    "temporal_sequences",
+    "tracking_shuffled_objects_five_objects",
+    "tracking_shuffled_objects_seven_objects",
+    "tracking_shuffled_objects_three_objects",
+    "web_of_lies",
+    "word_sorting",
 ]
 
 
