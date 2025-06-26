@@ -555,14 +555,20 @@ class TransformerConfigBuilder:
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
+            assert scheduler_class == CosWithWarmup.__name__ or scheduler_class == WSD.__name__
         except AssertionError as e:
             logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+                f"Expected scheduler class {CosWithWarmup.__name__} or {WSD.__name__}, but got {scheduler_class}: Anneals from a base LR cannot be inferred from this scheduler type. Exiting!"
             )
             raise e
 
-        scheduler = CosWithWarmup(**scheduler_config)
+        if scheduler_class == WSD.__name__:
+            scheduler = CosWithWarmup(**scheduler_config)
+        elif scheduler_class == CosWithWarmup.__name__:
+            scheduler = CosWithWarmup(**scheduler_config)
+        else:
+            raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
         return SchedulerState(
