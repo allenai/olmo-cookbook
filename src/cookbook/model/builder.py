@@ -539,9 +539,9 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            base_lr: int = config["train_module"]["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
+        except KeyError:
             # Now try olmo_core v1 config format
             try:
                 base_lr: int = config["optim"]["lr"]
