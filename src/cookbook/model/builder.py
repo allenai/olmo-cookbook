@@ -549,9 +549,10 @@ class TransformerConfigBuilder:
             try:
                 base_lr: int = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
-            except KeyError as e:
+            except Exception as e:
                 logger.error(
-                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                    e,
                 )
                 raise e
 
@@ -565,12 +566,22 @@ class TransformerConfigBuilder:
             )
             raise e
 
-        if scheduler_class == WSD.__name__:
-            scheduler = WSD(**scheduler_config)
-        elif scheduler_class == CosWithWarmup.__name__:
-            scheduler = CosWithWarmup(**scheduler_config)
-        else:
-            raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+        try:
+            if scheduler_class == WSD.__name__:
+                if not scheduler_config.get("decay_fraction", None):
+                    scheduler_config["decay_fraction"] = None
+                scheduler = WSD(**scheduler_config)
+            elif scheduler_class == CosWithWarmup.__name__:
+                scheduler = CosWithWarmup(**scheduler_config)
+            else:
+                raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+        except Exception as e:
+            logger.error(
+                "Could not instantiate scheduler from config. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                e,
+            )
+            logger.info(scheduler_config)
+            raise e
 
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
