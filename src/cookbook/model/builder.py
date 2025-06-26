@@ -482,10 +482,9 @@ class TransformerConfigBuilder:
         )
 
     def get_ac_config(self):
-        # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
-            modules=["blocks.*.feed_forward"],
+            modules=[f"blocks.{i}.feed_forward" for i in range(0, 64, 4)],
         )
 
     def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
