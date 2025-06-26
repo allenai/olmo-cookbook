@@ -5,7 +5,7 @@ workspace: "ai2/oe-data"
 nodes: 1
 gpus: 8
 preemptible: true
-max_tokens: 1_000_000
+max_tokens: 100_000_000
 global_batch_size: 2097152
 sequence_length: 4096
 seed: 1337
