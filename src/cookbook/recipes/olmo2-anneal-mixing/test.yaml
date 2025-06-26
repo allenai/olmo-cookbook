@@ -1,4 +1,4 @@
-name: "olmo2-1b_100M-anneal_dclm-natural-smaller-rank-microbatch-1e-5"
+name: "olmo2-1b_100M-anneal_dclm-natural-smaller-rank-microbatch-1e-5-high-end-lr"
 description: "OLMo2 1b anneal to 100M tokens, DCLM natural with smaller rank microbatch size"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
