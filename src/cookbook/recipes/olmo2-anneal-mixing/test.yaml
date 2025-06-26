@@ -1,5 +1,5 @@
-name: "olmo2-1b_100M-anneal_dclm-natural-smaller-rank-microbatch-1e-5-change-random-seed"
-description: "OLMo2 1b anneal to 100M tokens, DCLM natural with smaller rank microbatch size, 1e-5, diff random seed"
+name: "olmo2-1b_100M-anneal_dclm-natural-smaller-rank-microbatch-change-random-seed"
+description: "OLMo2 1b anneal to 100M tokens, DCLM natural with smaller rank microbatch size, diff random seed"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
 nodes: 1
@@ -19,7 +19,7 @@ scheduler_type: linear
 warmup_steps: 0
 annealing:
   enabled: true
-  initial_lr: 1e-5 #0.000074487 # See https://wandb.ai/ai2-llm/olmo-small/runs/75xu6sg6/overview
+  initial_lr: 0.000074487 # See https://wandb.ai/ai2-llm/olmo-small/runs/75xu6sg6/overview
 load_path: gs://ai2-llm/checkpoints/mayeec/olmo2-0425-1b-stage1/step1907359/model_and_optim/
 load_state: false
 dataset:
