@@ -6,6 +6,7 @@ from copy import deepcopy
 from hashlib import md5
 from typing import Optional
 from urllib.parse import urlparse
+from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     PythonEnv,
@@ -15,16 +16,17 @@ from cookbook.cli.utils import (
     make_eval_run_name,
 )
 from cookbook.constants import (
-    ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
     FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 
 
 def evaluate_checkpoint(
     oe_eval_commit: str,
+    oe_eval_branch: str,
     checkpoint_path: str,
     aws_access_key_id: str,
     aws_secret_access_key: str,
@@ -32,6 +34,7 @@ def evaluate_checkpoint(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    revision: str,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -67,6 +70,7 @@ def evaluate_checkpoint(
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
+        commit_branch=oe_eval_branch,
         is_editable=use_gantry,
     )
 
@@ -175,10 +179,27 @@ def evaluate_checkpoint(
     flags.append(f"--model-args '{model_args_str}'")
     flags.append(f"--model-type {model_backend}")
 
-    # these are all the tasks we want to run
-    all_tasks = sorted(
-        set(task for task_group in tasks for task in ALL_NAMED_GROUPS.get(task_group, [task_group]))
-    )
+    # these are all the tasks we want to run; note that we can't run regex patterns here,
+    # they have to be actual strings
+    all_tasks = sorted(list(set(
+        task
+        for task_group in tasks
+        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+        if isinstance(task, str)
+    )))
+
+    print('Launching evals on the following tasks:')
+    pprint(all_tasks)
+
+    # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
+    EXCLUDE_FROM_LAUNCH = [
+        r'^mmlu_.*:bpb::olmes$',
+        r'^lambada:bpb$'
+    ]
+    all_tasks = [
+        task for task in all_tasks
+        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
+    ]
 
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
@@ -187,6 +208,9 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
+        #     # these tasks don't work with vllm, so we run them on huggingface
+        #     partitioned_tasks.setdefault("hf", []).append(task)
         else:
             partitioned_tasks.setdefault("gen", []).append(task)
 
@@ -245,6 +269,10 @@ def evaluate_checkpoint(
             # set beaker image
             if beaker_image:
                 local_flags.append(f"--beaker-image {beaker_image}")
+
+            # set revision
+            if revision:
+                local_flags.append(f"--revision {revision}")
 
             # set gantry
             if use_gantry:
