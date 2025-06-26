@@ -1,7 +1,7 @@
 name: "olmo2-1b_1b-anneal_dclm-p001"
 description: "OLMo2 1b anneal to 1B tokens, DCLM p001 (dclm-offline-correlation-weighting-from-dense-olmo2.yaml)"
 budget: "ai2/oe-data"
-workspace: "ai2/dolma2"
+workspace: "ai2/oe-data"
 nodes: 1
 gpus: 8
 preemptible: true

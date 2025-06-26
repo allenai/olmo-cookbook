@@ -1,7 +1,7 @@
 name: "olmo2-1b_1b-anneal_dclm-good-search"
 description: "OLMo2 1b anneal to 1B tokens, DCLM good search (swarm 62e7dc06 run 95)"
 budget: "ai2/oe-data"
-workspace: "ai2/dolma2"
+workspace: "ai2/oe-data"
 nodes: 1
 gpus: 8
 preemptible: true
