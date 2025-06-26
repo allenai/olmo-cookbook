@@ -4,8 +4,8 @@ import sys
 import warnings
 from typing import Optional
 
-from cookbook.constants import ALL_NAMED_GROUPS
 from cookbook.eval.results import make_bpb_name
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 
 sys.path.append(os.path.dirname(os.getcwd()))
 
@@ -72,7 +72,8 @@ def run_instance_analysis(
     metrics = []  # e.g., primary_score
     for task in tasks:
         # Expand the named group if it exists
-        task_alias = ALL_NAMED_GROUPS.get(task, task)
+        all_task_groups = NamedTasksGroupRegistry.names()
+        task_alias = all_task_groups.get(task, task)
 
         # Add setup for primary_score
         metrics += ["primary_score"]

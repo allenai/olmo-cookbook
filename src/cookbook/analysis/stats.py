@@ -13,7 +13,6 @@ from cookbook.analysis.utils.pce import (
     compute_pairwise_p_values,
     compute_weighted_pairwise_p_values,
 )
-from cookbook.constants import ALL_NAMED_GROUPS
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
