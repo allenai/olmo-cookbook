@@ -326,12 +326,12 @@ class PredictionsAll(BaseDatalakeItem):
         all_predictions = []
         for metric in metrics:
             if not (result := cache.get(experiment_id=experiment_id, type="predictions")).success or force:
-                response = requests.get(
-                    f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
-                    params={"resulttype": "PREDICTIONS", "task_idx": metric.task_idx},
-                    headers={"accept": "application/json"},
-                )
                 try:
+                    response = requests.get(
+                        f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
+                        params={"resulttype": "PREDICTIONS", "task_idx": metric.task_idx},
+                        headers={"accept": "application/json"},
+                    )
                     response.raise_for_status()
                 except Exception as e:
                     if skip_on_fail:
