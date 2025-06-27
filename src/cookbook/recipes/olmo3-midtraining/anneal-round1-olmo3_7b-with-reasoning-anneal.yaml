@@ -1,0 +1,50 @@
+name: "anneal-round1-100B-olmo3_7b_with-reasoning-anneal"
+description: "OLMo3 7b anneal to 100B Tokens on midtraining mix WITH reasoning data"
+budget: "ai2/oe-base"
+workspace: "ai2/oe-data"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 100_000_000_000
+global_batch_size: 2097152
+sequence_length: 4096
+seed: 1337
+model: "olmo3_7B"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+annealing:
+  enabled: true
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
+load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model_and_optim/ #***TO BE UPDATED
+load_state: false
+dataset:
+  sources:
+  - name: dclm 
+    target_ratio: 0.45
+    paths:
+    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
+  - name: code 
+    target_ratio: 0.2
+    paths:
+    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+  - name: math # 11.12B tokens
+    target_ratio: 0.2
+    paths:
+    - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+  - name: reddit # 11.12B tokens
+    target_ratio: 0.09
+    paths:
+    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
+  - name: instruction # 11.12B tokens
+    target_ratio: 0.01
+    paths:
+    - gs://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/allenai/dolma2-tokenizer/*.npy
+  - name: reasoning 
+    target_ratio: 0.05
+    paths:
+    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
