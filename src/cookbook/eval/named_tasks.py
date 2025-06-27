@@ -334,7 +334,7 @@ class AgiEvalGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::hamish_zs_reasoning")
 class AgiEvalEnglishHamishZsReasoningGroup(BaseAverageNamedTasksGroup):
-    tasks = [f"{task}:0shot_cot::hamish_zs_reasoning" for task in constants.AGI_EVAL_ENGLISH_TASKS]
+    tasks = [f"agi_eval_{task}:0shot_cot::hamish_zs_reasoning" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("starcoder")
@@ -674,6 +674,7 @@ class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
 class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
+        # Everything in this task set is 0-shot
         "aime::hamish_zs_reasoning",
         "alpaca_eval_v3::hamish_zs_reasoning",
         "codex_humanevalplus:0-shot-chat::tulu-thinker",
