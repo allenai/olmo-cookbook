@@ -207,7 +207,7 @@ def install_oe_eval(
         installed_commit = result.stdout.strip()
 
         if commit_hash is None:
-            # Chich if commit matches remote hash (branch or HEAD)
+            # Check if commit matches remote hash (branch or HEAD)
             branch = commit_branch or "HEAD"
             result = subprocess.run(
                 ["git", "ls-remote", "origin", branch],
