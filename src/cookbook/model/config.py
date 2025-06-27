@@ -191,7 +191,7 @@ class WrappedTransformerConfig:
         """
         OLMo2 7B with SWA fix changes
         """
-        return getattr(TransformerConfig, "olmo2_7b")(
+        return getattr(TransformerConfig, "olmo2_7B")(
             vocab_size=tokenizer.padded_vocab_size(),
             n_kv_heads=8,
             hidden_size_multiplier=1.2,
