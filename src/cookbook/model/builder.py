@@ -647,13 +647,15 @@ class TransformerConfigBuilder:
 
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
 
-        self.transformer_config.block.attention.sliding_window = SlidingWindowAttentionConfig(
-            force_full_attention_on_first_layer=False,
-            force_full_attention_on_last_layer=True,
-            pattern=[4096, 4096, 4096, -1],
-        )
-        self.transformer_config.block.attention.use_flash = True
-        self.transformer_config.block.attention.use_head_qk_norm = True
+        # TODO(undfined): The hax once swafix is not an issue anymore
+        if self.model_identifier == "olmo2_7B_swafix":
+            self.transformer_config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+                force_full_attention_on_first_layer=False,
+                force_full_attention_on_last_layer=True,
+                pattern=[4096, 4096, 4096, -1],
+            )
+            self.transformer_config.block.attention.use_flash = True
+            self.transformer_config.block.attention.use_head_qk_norm = True
 
         return ModelTrainConfig(
             init_seed=self.seed,
