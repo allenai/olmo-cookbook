@@ -206,6 +206,11 @@ class MMLUMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.MMLU_CATEGORIES]
 
 
+@NamedTasksGroupRegistry.register("mmlu:cot::hamish_zs_reasoning")
+class MMLUHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:cot::hamish_zs_reasoning" for category in constants.MMLU_CATEGORIES]
+
+
 @NamedTasksGroupRegistry.register("core:rc")
 class CoreRCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:rc::olmes" for task in constants.ALL_CORE_TASKS]
@@ -298,6 +303,11 @@ class MinervaGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva::hamish_zs_reasoning")
+class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
     tasks = [
@@ -320,6 +330,11 @@ class CodeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("agi_eval")
 class AgiEvalGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:1shot::olmes" for task in constants.AGI_EVAL_ENGLISH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::hamish_zs_reasoning")
+class AgiEvalEnglishHamishZsReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:0shot_cot::hamish_zs_reasoning" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("starcoder")
@@ -366,6 +381,11 @@ class MtMbppGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("mt_mbpp_v2fix")
 class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.MULTILINGUAL_MBPP_TASKS_V2]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::hamish_zs_reasoning")
+class BBHHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::hamish_zs_reasoning" for category in constants.BBH_TASKS]
 
 
 def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
@@ -648,4 +668,26 @@ class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
         BasicRCGroup(),
         GenXlargeGroup(),
         CruxEvalGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
+class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "aime::hamish_zs_reasoning",
+        "alpaca_eval_v3::hamish_zs_reasoning",
+        "codex_humanevalplus:0-shot-chat::tulu-thinker",
+        "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
+        "gsm8k::zs_cot_latex",  #### to replace "gsm8k::hamish_zs_reasoning"
+        "ifeval::hamish_zs_reasoning",
+        "mbppplus:0-shot-chat::tulu-thinker",
+        "minerva_math_500::hamish_zs_reasoning",
+        "popqa::hamish_zs_reasoning",  #### todo: fix and test this guy.
+        AgiEvalEnglishHamishZsReasoningGroup(),
+        BBHHamishZSReasoningGroup(),
+        MinervaHamishZSReasoningGroup(),
+        MMLUHamishZSReasoningGroup(),
+
+        # https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JYPHTGX1E1HJQTV7S9A52E7M/logs?jobId=01JYPHTH5SGKET46T3SWJVT92C
+        # "zebralogic::hamish_zs_reasoning", # broken: metric error
     ]
