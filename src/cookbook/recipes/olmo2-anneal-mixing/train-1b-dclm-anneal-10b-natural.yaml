@@ -1,26 +1,26 @@
 name: "olmo2-1b_10b-anneal_dclm-natural"
 description: "OLMo2 1b anneal to 10B tokens, DCLM natural"
 budget: "ai2/oe-data"
-workspace: "ai2/dolma2"
+workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
-global_batch_size: 1048576
-sequence_length: 2048
+global_batch_size: 2097152
+sequence_length: 4096
 seed: 1337
-model: "olmo2_1B"
+model: olmo2_1B_v2
 tokenizer: "dolma2"
-priority: high
+priority: urgent
 eval_interval: 250
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 8192
+rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
 annealing:
   enabled: true
   initial_lr: 0.000074487 # See https://wandb.ai/ai2-llm/olmo-small/runs/75xu6sg6/overview
-load_path: gs://ai2-llm/checkpoints/OLMo-small/peteish1/step1907359
+load_path: gs://ai2-llm/checkpoints/mayeec/olmo2-0425-1b-stage1/step1907359/model_and_optim/
 load_state: false
 dataset:
   sources:
