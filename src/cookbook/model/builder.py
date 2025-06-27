@@ -16,6 +16,7 @@ from olmo_core.data import (
     NumpyDatasetType,
     TokenizerConfig,
 )
+from olmo_core.nn.attention import SlidingWindowAttentionConfig
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
 from olmo_core.float8 import Float8Config
@@ -645,6 +646,14 @@ class TransformerConfigBuilder:
             logger.info(self.model_overrides)
 
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
+
+        self.transformer_config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        self.transformer_config.block.attention.use_flash = True
+        self.transformer_config.block.attention.use_head_qk_norm = True
 
         return ModelTrainConfig(
             init_seed=self.seed,
