@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 import json
 import re
 import shlex
@@ -56,6 +57,7 @@ def evaluate_checkpoint(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: Optional[dict],
+    task_args: Optional[dict],
     fim_tokens: str,
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
@@ -80,8 +82,10 @@ def evaluate_checkpoint(
     # clusters_to_exclude
     clusters_to_exclude: set[str] = set()
 
-    # processing gantry args
+    # processing gantry/task args
     gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
+
+    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else task_args
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -290,15 +294,17 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            special_task_args = {}
             if fim_tokens:
-                special_task_args = FIM_TOKENS[fim_tokens]
+                def deep_merge(a, b):
+                    return {**a, **{k: deep_merge(a[k], b[k]) if k in a and isinstance(a[k], Mapping) and isinstance(b[k], Mapping) else b[k] for k in b}}
+
+                task_args_dict = deep_merge(task_args_dict, FIM_TOKENS[fim_tokens])
 
             if compute_gold_bpb:
-                special_task_args["compute_gold_bpb"] = True
+                task_args_dict["compute_gold_bpb"] = True
 
-            if special_task_args:
-                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
+            if task_args_dict:
+                local_flags.append(f"--task-args '{json.dumps(task_args_dict)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
