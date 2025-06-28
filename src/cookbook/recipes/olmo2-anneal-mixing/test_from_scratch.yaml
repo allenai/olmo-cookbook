@@ -6,7 +6,7 @@ nodes: 1
 gpus: 8
 preemptible: true
 max_tokens: 100663296 #100_000_000
-global_batch_size: 2097152
+global_batch_size: 131_072 #2097152
 sequence_length: 4096
 seed: 1337
 model: olmo2_1B_v2
@@ -14,7 +14,7 @@ tokenizer: "dolma2"
 priority: urgent
 eval_interval: 250
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 32768 #8192
+rank_microbatch_size: 16384 #8192
 dataset:
   sources:
     - name: adult_content
