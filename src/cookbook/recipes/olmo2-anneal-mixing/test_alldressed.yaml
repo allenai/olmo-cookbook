@@ -27,4 +27,4 @@ dataset:
   - name: all_dressed-snazzy2
     target_ratio: 1.0
     paths:
-    - gs://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2/**/*.npy
+    - s3://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2/**/*.npy
