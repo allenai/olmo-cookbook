@@ -503,7 +503,8 @@ def get_results(
 
     # then iterate over named groups...
     for named_group in named_groups:
-        pprint(named_group.tasks)
+        # # This messes up with piping. Removing for now. -luca
+        # pprint(named_group.tasks)
 
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
