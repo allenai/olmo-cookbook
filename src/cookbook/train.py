@@ -51,6 +51,11 @@ def train(
 ):
     trainer = build_train_config(config_path, run_name, group_id, beaker_user)
 
+    logger.info(f"Trainer max steps: {trainer.max_steps}")
+    logger.info(f"Trainer max duration: {trainer.max_duration}")
+    logger.info(f"Trainer max tokens: {trainer.max_tokens}")
+
+
     if trainer is None:
         logger.error("Failed to build training config! Exiting...")
         raise click.Abort()
