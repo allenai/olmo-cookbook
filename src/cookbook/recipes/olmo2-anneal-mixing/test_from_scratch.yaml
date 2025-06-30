@@ -1,4 +1,4 @@
-name: "olmo2-1b_100M-dclm-natural"
+name: "olmo2-1b_100M-dclm-natural-from-scratch-bug-test"
 description: "OLMo2 1b 100M tokens, DCLM natural"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
