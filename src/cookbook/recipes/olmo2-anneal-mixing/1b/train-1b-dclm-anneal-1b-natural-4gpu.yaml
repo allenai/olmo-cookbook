@@ -1,9 +1,9 @@
-name: "olmo2-1b_1b-anneal_dclm-natural-4gpu"
+name: "olmo2-1b_1b-anneal_dclm-natural-2gpu"
 description: "OLMo2 1b anneal to 1B tokens, DCLM natural"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
 nodes: 1
-gpus: 4
+gpus: 2
 preemptible: true
 max_tokens: 1_000_000_000
 global_batch_size: 2097152
