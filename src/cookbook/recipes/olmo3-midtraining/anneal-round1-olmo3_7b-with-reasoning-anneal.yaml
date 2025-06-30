@@ -1,15 +1,15 @@
 name: "anneal-round1-100B-olmo3_7b_with-reasoning-anneal"
 description: "OLMo3 7b anneal to 100B Tokens on midtraining mix WITH reasoning data"
 budget: "ai2/oe-base"
-workspace: "ai2/oe-data"
+workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 100_000_000_000
 global_batch_size: 2097152
-sequence_length: 4096
+sequence_length: 8192
 seed: 1337
-model: "olmo3_7B"
+model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
 priority: urgent
 eval_interval: 250
@@ -31,7 +31,7 @@ dataset:
   - name: code 
     target_ratio: 0.2
     paths:
-    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+    - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
   - name: math # 11.12B tokens
     target_ratio: 0.2
     paths:
@@ -43,7 +43,7 @@ dataset:
   - name: instruction # 11.12B tokens
     target_ratio: 0.01
     paths:
-    - gs://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
   - name: reasoning 
     target_ratio: 0.05
     paths:
