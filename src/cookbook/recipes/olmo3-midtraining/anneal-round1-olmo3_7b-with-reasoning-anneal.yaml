@@ -2,7 +2,7 @@ name: "anneal-round1-100B-olmo3_7b_with-reasoning-anneal"
 description: "OLMo3 7b anneal to 100B Tokens on midtraining mix WITH reasoning data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 4
+nodes: 16
 gpus: 8
 preemptible: true
 max_tokens: 100_000_000_000
@@ -24,7 +24,7 @@ load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model
 load_state: false
 dataset:
   sources:
-  - name: dclm 
+  - name: hqweb 
     target_ratio: 0.45
     paths:
     - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
