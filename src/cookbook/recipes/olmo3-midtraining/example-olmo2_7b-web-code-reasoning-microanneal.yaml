@@ -1,6 +1,6 @@
 name: "olmo2-7b_10b-microanneal_web-code-reasoning"
 description: "OLMo2 7b microanneal to 10B Tokens on web + code + reasoning data"
-budget: "ai2/oe-training"
+budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
