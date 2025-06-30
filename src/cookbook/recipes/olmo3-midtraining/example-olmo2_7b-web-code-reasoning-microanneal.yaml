@@ -1,7 +1,7 @@
 name: "olmo2-7b_10b-microanneal_web-code-reasoning"
 description: "OLMo2 7b microanneal to 10B Tokens on web + code + reasoning data"
 budget: "ai2/oe-training"
-workspace: "ai2/oe-data"
+workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
 preemptible: true
@@ -27,7 +27,7 @@ dataset:
   - name: dclm 
     target_ratio: 0.5
     paths:
-    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
   - name: code 
     target_ratio: 0.4
     paths:
