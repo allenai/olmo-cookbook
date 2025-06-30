@@ -18,7 +18,7 @@ from olmo_core.data import (
 )
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.float8 import Float8Config
+from olmo_core.float8 import AOFloat8LinearConfig, Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
@@ -178,6 +178,9 @@ class TransformerConfigBuilder:
     weka: bool
     metrics_config: Optional[MetricsConfig]
     max_dp_world_size: int
+    dp_shard_degree: Optional[int]
+    cp_degree: Optional[int]
+    float8: bool
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
@@ -210,6 +213,9 @@ class TransformerConfigBuilder:
         model_identifier: ModelConfigIdentifier,
         weka: bool,
         max_dp_world_size: int,
+        cp_degree: Optional[int],
+        dp_shard_degree: Optional[int],
+        float8: bool,
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
@@ -248,6 +254,9 @@ class TransformerConfigBuilder:
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
         self.max_dp_world_size = max_dp_world_size
+        self.cp_degree = cp_degree
+        self.dp_shard_degree = dp_shard_degree
+        self.float8 = float8
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
         self.save_interval = save_interval
@@ -359,8 +368,7 @@ class TransformerConfigBuilder:
                     # it is ignored for wandb metrics, only entity is used
                     # (it is used for comet metrics)
                     logger.warning(
-                        "metrics_config.workspace is ignored for WandB metrics. "
-                        "Use metrics_config.entity instead."
+                        "metrics_config.workspace is ignored for WandB metrics. Use metrics_config.entity instead."
                     )
 
                 callbacks[MetricBackend.wandb.value] = WandBCallback(
@@ -376,8 +384,7 @@ class TransformerConfigBuilder:
                     # show warning if entity is set to non-default value;
                     # it is not used for comet metrics (only workspace is used)
                     logger.warning(
-                        "metrics_config.entity is ignored for Comet metrics. "
-                        "Use metrics_config.workspace instead."
+                        "metrics_config.entity is ignored for Comet metrics. Use metrics_config.workspace instead."
                     )
 
                 callbacks[MetricBackend.comet.value] = CometCallback(
@@ -483,6 +490,15 @@ class TransformerConfigBuilder:
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
             modules=["blocks.*.feed_forward"],
+        )
+
+    def get_float8_config(self):
+        return Float8Config(
+            ao=AOFloat8LinearConfig(
+                enable_fsdp_float8_all_gather=True,
+                force_recompute_fp8_weight_in_bwd=True,
+                round_scales_to_power_of_2=True,
+            )
         )
 
     def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
@@ -596,10 +612,16 @@ class TransformerConfigBuilder:
             optim=self.get_optimizer_config(),
             compile_model=True,
             dp_config=train_module.TransformerDataParallelConfig(
-                name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
+                name=DataParallelType.hsdp,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+                shard_degree=self.dp_shard_degree,
             ),
+            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+            if self.cp_degree
+            else None,
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
-            float8_config=Float8Config(enabled=False),
+            float8_config=self.get_float8_config() if self.float8 else Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
             scheduler=self.get_scheduler_config(),
