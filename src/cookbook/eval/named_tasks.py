@@ -592,7 +592,7 @@ class Olmo3Dev7bMcqaGroup(BaseAverageOfAveragesNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:paper")
-class Olmo2PaperGroup(BaseNamedTasksGroup):
+class Olmo2PaperGroup(BaseTaskView):
     tasks = [
         "arc_challenge:rc::olmes",
         "arc_challenge:mc::olmes",
@@ -611,7 +611,7 @@ class Olmo2PaperGroup(BaseNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:7b")
-class Olmo2Dev7bGroup(BaseAverageOfAveragesNamedTasksGroup):
+class Olmo2Dev7bGroup(BaseTaskView):
     tasks = [
         "arc_challenge:mc::olmes",
         "arc_easy:mc::olmes",
@@ -625,7 +625,7 @@ class Olmo2Dev7bGroup(BaseAverageOfAveragesNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:1b")
-class Olmo2Dev1bGroup(BaseAverageOfAveragesNamedTasksGroup):
+class Olmo2Dev1bGroup(BaseTaskView):
     tasks = [
         "arc_challenge:rc::olmes",
         "arc_easy:rc::olmes",
@@ -637,7 +637,7 @@ class Olmo2Dev1bGroup(BaseAverageOfAveragesNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:main")
-class Olmo3Dev1bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
+class Olmo3Dev1bMainGroup(BaseTaskView):
     tasks = [
         # re.compile(r"^olmo3:dev:1b:macro:w_avg$"),
         Olmo3Dev1bMathBpbGroup(),
@@ -649,7 +649,6 @@ class Olmo3Dev1bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
         MtMbppV2fixGroup(),
         MMLURCGroup(),
         MMLUBpbGroup(),
-        CoreRCGroup(),
         "codex_humaneval:3shot:bpb::none",
         "mbpp:3shot:bpb::none",
         MinervaBpbGroup()
