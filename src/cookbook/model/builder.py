@@ -479,6 +479,7 @@ class TransformerConfigBuilder:
             lr=lr,
             weight_decay=0.033,
             betas=(0.9, 0.95),
+            foreach=True,
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
         )
 
