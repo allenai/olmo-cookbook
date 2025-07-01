@@ -140,38 +140,30 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
     def combine(self, results: MiniFrame) -> MiniFrame | None:
         out_table = MiniFrame(title=results.title)
 
-        # get task groups (e.g., MMLURCGroup())
-        named_group_children: list[BaseAverageNamedTasksGroup] = [
-            task for task in self.tasks if isinstance(task, BaseAverageNamedTasksGroup) 
-        ]
-
-        # get individual tasks (e.g., "arc_challenge:rc::olmes")
-        task_children = [
-            task for task in self.tasks if not isinstance(task, BaseAverageNamedTasksGroup) 
-        ]
-
         # calculate the averages for all child task groups
-        for named_group in named_group_children:
-            combined_table = named_group.combine(results)
-            if combined_table is not None:
-                # If the named group is able to average all scores, add it!
-                combined_table = combined_table.keep_cols(*[named_group.name])
-                out_table = combined_table + out_table
-
-        # get the aliases for all task groups
-        all_tasks = \
-            task_children + \
-            [named_group.name for named_group in named_group_children]
-
-        # now get a table of the child tasks and macro averages calculated!
-        filtered_rows = results.keep_cols(*all_tasks)
-        out_table = filtered_rows + out_table
-
+        for task_or_named_group in self.tasks:
+            if isinstance(task_or_named_group, BaseAverageNamedTasksGroup):
+                # get task groups (e.g., MMLURCGroup())
+                named_group: BaseAverageNamedTasksGroup = task_or_named_group
+                combined_table = named_group.combine(results)
+                if combined_table is not None:
+                    # If the named group is able to average all scores, add it!
+                    named_group_col = combined_table.keep_cols(*[named_group.name])
+                    out_table = out_table + named_group_col
+            elif isinstance(task_or_named_group, Union[str | re.Pattern]):
+                # get individual tasks (e.g., "arc_challenge:rc::olmes")
+                task: Union[str | re.Pattern] = task_or_named_group
+                task_col = results.keep_cols(*[task])
+                out_table = out_table + task_col
+            else:
+                raise TypeError(f"Task type not yet supported: {type(task_or_named_group)}.")
+            
         if len(out_table) == 0:
             return None
 
+        # compute the average of averages
         # each row here is a model
-        for row in filtered_rows.rows:
+        for row in list(out_table.rows):
 
             # we compute the average of the scores for this model; we set the average to None if
             # there are missing scores or if there are no scores at all.
@@ -182,6 +174,23 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
 
             # we add the average to the combined table
             out_table.add(col=self.name, row=row.name, val=average)
+
+        return out_table
+    
+
+class BaseTaskView(BaseAverageOfAveragesNamedTasksGroup):
+    """
+    Base class for tasks "views". In a task view, only the child tasks are averages 
+    
+    For example, "olmo3:dev:7b:main" is not a average, but contains "olmo3:dev:7b:mcqa" and "mmlu:mc" are task averages.
+    """
+    def combine(self, results: MiniFrame) -> MiniFrame | None:
+        # Compute all the task averages
+        out_table = super().combine(results)
+
+        # Remove task view as a column in the table
+        if out_table is not None:
+            out_table = out_table.drop_cols(self.name)
 
         return out_table
 
@@ -204,6 +213,11 @@ class MMLUBpbGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("mmlu:mc")
 class MMLUMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.MMLU_CATEGORIES]
+
+
+@NamedTasksGroupRegistry.register("mmlu:cot::hamish_zs_reasoning")
+class MMLUHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:cot::hamish_zs_reasoning" for category in constants.MMLU_CATEGORIES]
 
 
 @NamedTasksGroupRegistry.register("core:rc")
@@ -298,6 +312,11 @@ class MinervaGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva::hamish_zs_reasoning")
+class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
     tasks = [
@@ -320,6 +339,11 @@ class CodeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("agi_eval")
 class AgiEvalGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:1shot::olmes" for task in constants.AGI_EVAL_ENGLISH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::hamish_zs_reasoning")
+class AgiEvalEnglishHamishZsReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"agi_eval_{task}:0shot_cot::hamish_zs_reasoning" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("starcoder")
@@ -366,6 +390,11 @@ class MtMbppGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("mt_mbpp_v2fix")
 class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.MULTILINGUAL_MBPP_TASKS_V2]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::hamish_zs_reasoning")
+class BBHHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::hamish_zs_reasoning" for category in constants.BBH_TASKS]
 
 
 def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
@@ -548,7 +577,7 @@ class Olmo3Dev7bMcqaGroup(BaseAverageOfAveragesNamedTasksGroup):
         "squad:mc::gen2mc",
 
         # New OLMo 3
-        BasicRCGroup(),
+        BasicMCGroup(),
         # "lab_bench_dbqa:mc", # too noisy to include in macro-average
         # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
         "medmcqa:mc::none",
@@ -628,24 +657,60 @@ class Olmo3Dev1bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:main")
-class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
+class Olmo3Dev7bMainGroup(BaseTaskView):
     tasks = [
         # re.compile(r"^olmo3:dev:7b:macro:w_avg$"),
         Olmo3Dev7bMcqaGroup(),
+        Olmo3Dev7bGenGroup(),
         Olmo3Dev7bMathGroup(),
         Olmo3Dev7bCodeGenGroup(),
         Olmo3Dev7bCodeFimGroup(),
-        Olmo3Dev7bGenGroup(),
         ARCMCXlargeGroup(),
         MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmes",
+        GsmSymbGroup(),
+        MinervaGroup(),
         "codex_humaneval:3shot::olmo3",
         "mbpp:3shot::olmo3",
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
-        "gsm8k::olmes",
-        GsmSymbGroup(),
-        MinervaGroup(),
-        BasicRCGroup(),
-        GenXlargeGroup(),
         CruxEvalGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
+class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Everything in this task set is 0-shot
+        "aime::hamish_zs_reasoning",
+        "alpaca_eval_v3::hamish_zs_reasoning",
+        "codex_humanevalplus:0-shot-chat::tulu-thinker",
+        "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
+        "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
+        "ifeval::hamish_zs_reasoning",
+        "mbppplus:0-shot-chat::tulu-thinker",
+        "minerva_math_500::hamish_zs_reasoning",
+        "popqa::hamish_zs_reasoning",  #### from adapt: fix and test this guy.
+        AgiEvalEnglishHamishZsReasoningGroup(),
+        BBHHamishZSReasoningGroup(),
+        MinervaHamishZSReasoningGroup(),
+        MMLUHamishZSReasoningGroup(),
+        "zebralogic::hamish_zs_reasoning",
+        "livecodebench_codegeneration::tulu-thinker",
+
+        ### Not yet implemented
+        # cruxeval
+        # simpleqa
+        # gpqa diamond
+        # AMC 22/23
+        # math OOD
+        # turnwise
+        # typos eval
+        # bcfl v3
+        # ace bench
+        # appworld
+
+        # all safety
     ]
