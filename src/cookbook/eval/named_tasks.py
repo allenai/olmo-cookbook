@@ -679,16 +679,29 @@ class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
         "alpaca_eval_v3::hamish_zs_reasoning",
         "codex_humanevalplus:0-shot-chat::tulu-thinker",
         "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
-        "gsm8k::zs_cot_latex",  #### to replace "gsm8k::hamish_zs_reasoning"
+        "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         "ifeval::hamish_zs_reasoning",
         "mbppplus:0-shot-chat::tulu-thinker",
         "minerva_math_500::hamish_zs_reasoning",
-        "popqa::hamish_zs_reasoning",  #### todo: fix and test this guy.
+        "popqa::hamish_zs_reasoning",  #### from adapt: fix and test this guy.
         AgiEvalEnglishHamishZsReasoningGroup(),
         BBHHamishZSReasoningGroup(),
         MinervaHamishZSReasoningGroup(),
         MMLUHamishZSReasoningGroup(),
+        "zebralogic::hamish_zs_reasoning"
+        "livecodebench_codegeneration::tulu-thinker",
 
-        # https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JYPHTGX1E1HJQTV7S9A52E7M/logs?jobId=01JYPHTH5SGKET46T3SWJVT92C
-        # "zebralogic::hamish_zs_reasoning", # broken: metric error
+        ### Not yet implemented
+        # cruxeval
+        # simpleqa
+        # gpqa diamond
+        # AMC 22/23
+        # math OOD
+        # turnwise
+        # typos eval
+        # bcfl v3
+        # ace bench
+        # appworld
+
+        # all safety
     ]
