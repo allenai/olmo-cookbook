@@ -1,4 +1,4 @@
-name: "davidg-7b_10b-anneal_sponge-63-plus2-top_5-perc-dclm-50split"
+name: "davidg-7b_10b-anneal_sponge-63-code-prose-plus2-top_1-perc-dclm-50split"
 description: "OLMo2 7b anneal to 10B Tokens for 50% dclm 50% sponge-63 dclm_plus2 top 5%"
 budget: "ai2/oe-training"
 workspace: "ai2/dolma2"
@@ -31,7 +31,7 @@ dataset:
   - name: sponge-code-prose
     target_ratio: 0.2
     paths:
-    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/code_prose/hq_deduped/*.npy
+    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/code_prose/code_prose_deduped/*.npy
   - name: dclm-baseline-olmo2
     target_ratio: 0.5
     paths:
