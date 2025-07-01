@@ -688,7 +688,7 @@ class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
         BBHHamishZSReasoningGroup(),
         MinervaHamishZSReasoningGroup(),
         MMLUHamishZSReasoningGroup(),
-        "zebralogic::hamish_zs_reasoning"
+        "zebralogic::hamish_zs_reasoning",
         "livecodebench_codegeneration::tulu-thinker",
 
         ### Not yet implemented
