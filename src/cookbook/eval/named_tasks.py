@@ -459,7 +459,7 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
         # New OLMo 3
         "sciq:rc::olmo3",
         "qasper_yesno:rc::olmes",
-        "basic_skills:rc::olmes",
+        BasicRCGroup(),
         "lab_bench_dbqa",
         "lab_bench_protocolqa",
         "lambada",
