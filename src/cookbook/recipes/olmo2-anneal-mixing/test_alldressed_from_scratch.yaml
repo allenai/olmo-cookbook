@@ -1,0 +1,23 @@
+name: "olmo2-1b_100M-alldressed-from-scratch-bug-test"
+description: "OLMo2 1b 100M tokens, all dressed"
+budget: "ai2/oe-data"
+workspace: "ai2/oe-data"
+nodes: 1
+gpus: 8
+preemptible: true
+max_tokens: 100_663_296 #100_000_000
+global_batch_size: 131_072 #2097152
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384 #8192
+dataset:
+  sources:
+  - name: all_dressed-snazzy2
+    target_ratio: 1.0
+    paths:
+    - s3://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2/**/*.npy
