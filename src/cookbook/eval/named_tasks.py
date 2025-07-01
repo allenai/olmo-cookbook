@@ -205,6 +205,10 @@ class MMLUBpbGroup(BaseAverageNamedTasksGroup):
 class MMLUMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.MMLU_CATEGORIES]
 
+@NamedTasksGroupRegistry.register("mmlu:tulu")
+class MMLUTuluGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:mc::tulu" for category in constants.MMLU_CATEGORIES]
+
 
 @NamedTasksGroupRegistry.register("core:rc")
 class CoreRCGroup(BaseAverageNamedTasksGroup):
@@ -298,6 +302,11 @@ class MinervaGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva::tulu")
+class MinervaTuluGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::tulu" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
     tasks = [
@@ -320,6 +329,11 @@ class CodeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("agi_eval")
 class AgiEvalGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:1shot::olmes" for task in constants.AGI_EVAL_ENGLISH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::tulu3")
+class AgiEvalEnglish0ShotTuluGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"agi_eval_{task}:0shot_cot::tulu3" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("starcoder")
@@ -366,6 +380,11 @@ class MtMbppGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("mt_mbpp_v2fix")
 class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.MULTILINGUAL_MBPP_TASKS_V2]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot-v1::tulu")
+class BBHCotv1TuluGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot-v1::tulu" for category in constants.BBH_TASKS]
 
 
 def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
@@ -648,4 +667,49 @@ class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
         BasicRCGroup(),
         GenXlargeGroup(),
         CruxEvalGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:instruct:v0")
+class Olmo3DevInstruct(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Tulu 3 set
+        "gsm8k::tulu",
+        "drop::llama3", # drop:0shot-chat::olmes
+        MinervaTuluGroup(), # this is minerva_math::tulu 4 shot, should this be 0 shot?
+        AgiEvalEnglish0ShotTuluGroup(),
+        "ifeval::tulu", # ifeval:0-shot-cot
+        "popqa::tulu",
+        MMLUTuluGroup(),
+        "alpaca_eval_v3::tulu", 
+        BBHCotv1TuluGroup(),
+        "truthfulqa::tulu",
+
+        # New Tulu 4 tasks
+        "livecodebench_codegeneration::tulu",
+        AgiEvalEnglish0ShotTuluGroup(),
+
+        ### No config exists
+        # aime
+        # mbpp plus
+        # zebralogic
+        # codeeditorbench
+        # cruxeval
+        # ifbench
+        # math OOD -- omega:0-shot-chat?
+
+        #### Not yet implemented
+        # simpleqa
+        # gpqa diamond
+        # AMC 22/23
+        # turnwise
+        # typos eval
+        # bcfl v3
+        # ace bench
+        # appworld
+        # tong evals
+
+        #### Other task sets
+        # all safety
+        # chatbotarena (is this a task?)
     ]
