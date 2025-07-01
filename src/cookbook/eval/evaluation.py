@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 import json
 import re
 import shlex
@@ -56,6 +57,7 @@ def evaluate_checkpoint(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: Optional[dict],
+    task_args: Optional[dict],
     fim_tokens: str,
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
@@ -80,8 +82,10 @@ def evaluate_checkpoint(
     # clusters_to_exclude
     clusters_to_exclude: set[str] = set()
 
-    # processing gantry args
+    # processing gantry/task args
     gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
+
+    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else task_args
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -290,15 +294,29 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            special_task_args = {}
             if fim_tokens:
-                special_task_args = FIM_TOKENS[fim_tokens]
+                infilling_dict = FIM_TOKENS[fim_tokens]
+
+                # Add FIM tokens to context, preserving other existing kwargs
+                task_args_dict.setdefault("context_kwargs", {})
+                task_args_dict["context_kwargs"].update(infilling_dict["context_kwargs"])
+
+                # Add FIM stop sequences, preserving other existing stop sequences
+                task_args_dict.setdefault("generation_kwargs", {})
+                if "stop_sequences" in task_args_dict["generation_kwargs"]:
+                    # Add the stop tokens if they do not exist
+                    task_args_dict["generation_kwargs"]["stop_sequences"].extend(
+                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"] 
+                         if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]]
+                    )
+                else:
+                    task_args_dict["generation_kwargs"].update(infilling_dict["generation_kwargs"])
 
             if compute_gold_bpb:
-                special_task_args["compute_gold_bpb"] = True
+                task_args_dict["compute_gold_bpb"] = True
 
-            if special_task_args:
-                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
+            if task_args_dict:
+                local_flags.append(f"--task-args '{json.dumps(task_args_dict)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
