@@ -173,6 +173,7 @@ def install_beaker_py(
 
 def install_oe_eval(
     commit_hash: Optional[str],
+    commit_branch: Optional[str],
     env: Optional[PythonEnv] = None,
     no_dependencies: bool = True,
     is_editable: bool = False,
@@ -182,7 +183,52 @@ def install_oe_eval(
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
 
-    oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash)
+    # Get current installation location, if exists
+    result = subprocess.run(
+        [env.pip, "show", "oe-eval"],
+        capture_output=True,
+        text=True
+    )
+
+    oe_eval_dir = None
+    for line in result.stdout.splitlines():
+        if line.startswith("Editable project location:"):
+            oe_eval_dir = line.split(":", 1)[1].strip()
+            break
+
+    if bool(oe_eval_dir and os.path.exists(oe_eval_dir)):
+        # Get local commit hash
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=oe_eval_dir,
+            capture_output=True,
+            text=True
+        )
+        installed_commit = result.stdout.strip()
+
+        if commit_hash is None:
+            # Check if commit matches remote hash (branch or HEAD)
+            branch = commit_branch or "HEAD"
+            result = subprocess.run(
+                ["git", "ls-remote", "origin", branch],
+                cwd=oe_eval_dir,
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0 or not result.stdout:
+                return None
+            remote_commit = result.stdout.split()[0]
+
+            if installed_commit == remote_commit:
+                print(f"Current commit matches remote {branch} in {oe_eval_dir}")
+                return oe_eval_dir
+        else:
+            # Check if commit matches user-specified commit
+            if installed_commit == commit_hash:
+                print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
+                return oe_eval_dir
+
+    oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash, commit_branch)
 
     print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
     cmd = [
@@ -368,7 +414,7 @@ def make_eval_run_name(
     )
 
 
-def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
+def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_branch: Optional[str] = None) -> str:
     # current directory
     current_dir = os.getcwd()
 
@@ -389,11 +435,17 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None) -> str:
         # Execute clone
         subprocess.run(cmd, check=True)
 
+        if commit_branch:
+            # Change directory to the cloned repo
+            os.chdir(tmp_dir)
+            subprocess.run(shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True)
+            subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
+
         if commit_hash:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
             subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
-            subprocess.run(shlex.split(f"git checkout  '{commit_hash}'"), check=True)
+            subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
 
         return tmp_dir
 

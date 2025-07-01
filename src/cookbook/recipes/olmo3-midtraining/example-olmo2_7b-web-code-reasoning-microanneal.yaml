@@ -1,0 +1,38 @@
+name: "olmo2-7b_10b-microanneal_web-code-reasoning"
+description: "OLMo2 7b microanneal to 10B Tokens on web + code + reasoning data"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 4096
+seed: 1337
+model: "olmo2_7B"
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+annealing:
+  enabled: true
+  initial_lr: 6.135e-5 # See https://wandb.ai/ai2-llm/OLMo-2-1124-7B/reports/OLMo-2-7B-Nov-2024--VmlldzoxMDUzMzE1OA
+load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model_and_optim/
+load_state: false
+dataset:
+  sources:
+  - name: web 
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
+  - name: code 
+    target_ratio: 0.4
+    paths:
+    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+  - name: reasoning 
+    target_ratio: 0.1
+    paths:
+    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
