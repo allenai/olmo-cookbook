@@ -278,8 +278,9 @@ def convert_checkpoint(
 @click.option(
     "--task-args",
     type=str,
-    default="",
-    help="Extra arguments to pass to the task config",
+    default=[],
+    multiple=True,
+    help="Extra arguments to pass to the task config. Can specify multiple args.",
 )
 @click.option(
     "--model-args",
@@ -355,7 +356,7 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
-    task_args: str,
+    task_args: list[str],
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
@@ -371,7 +372,7 @@ def evaluate_model(
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
 
     parsed_task_args: dict[str, str] = {}
-    for arg in task_args.split(",,"):
+    for arg in task_args:
         if not (arg := arg.strip()):
             continue
         key, value = arg.split("=")

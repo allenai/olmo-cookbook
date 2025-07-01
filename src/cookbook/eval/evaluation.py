@@ -295,10 +295,22 @@ def evaluate_checkpoint(
                 local_flags.append("--vllm-for-mc")
 
             if fim_tokens:
-                def deep_merge(a, b):
-                    return {**a, **{k: deep_merge(a[k], b[k]) if k in a and isinstance(a[k], Mapping) and isinstance(b[k], Mapping) else b[k] for k in b}}
+                infilling_dict = FIM_TOKENS[fim_tokens]
 
-                task_args_dict = deep_merge(task_args_dict, FIM_TOKENS[fim_tokens])
+                # Add FIM tokens to context, preserving other existing kwargs
+                task_args_dict.setdefault("context_kwargs", {})
+                task_args_dict["context_kwargs"].update(infilling_dict["context_kwargs"])
+
+                # Add FIM stop sequences, preserving other existing stop sequences
+                task_args_dict.setdefault("generation_kwargs", {})
+                if "stop_sequences" in task_args_dict["generation_kwargs"]:
+                    # Add the stop tokens if they do not exist
+                    task_args_dict["generation_kwargs"]["stop_sequences"].extend(
+                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"] 
+                         if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]]
+                    )
+                else:
+                    task_args_dict["generation_kwargs"].update(infilling_dict["generation_kwargs"])
 
             if compute_gold_bpb:
                 task_args_dict["compute_gold_bpb"] = True
