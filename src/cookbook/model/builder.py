@@ -416,7 +416,7 @@ class TransformerConfigBuilder:
 
         return callbacks
 
-    def build_dataset_config(self, loader_processes: int = 16) -> NumpyDatasetConfig:
+    def build_dataset_config(self, loader_processes: int = 8) -> NumpyDatasetConfig:
         is_fractional = any(source.ratio is not None and source.ratio != 1 for source in self.sources)
 
         mixture_config = None
