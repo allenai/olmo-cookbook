@@ -34,11 +34,11 @@ dataset:
     - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
   - name: finemath
     # 10% less the .0195 over 10% for dolminos2math
-    target_ratio: 0.0805
+    target_ratio: 0.0806
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.1195
+    target_ratio: 0.1194
     paths:
     # 10.7B
     - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
