@@ -74,7 +74,6 @@ def evaluate_checkpoint(
         commit_hash=oe_eval_commit,
         commit_branch=oe_eval_branch,
         is_editable=use_gantry,
-        branch=oe_eval_branch,
     )
 
     # this is where we store all fixed flags to pass to oe-eval
