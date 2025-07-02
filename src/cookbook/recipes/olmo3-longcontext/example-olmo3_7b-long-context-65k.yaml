@@ -1,4 +1,4 @@
-name: "olmo3-7b-long-context-extension-example"
+name: "olmo3-7b-long-context-extension-65k-example"
 description: "OLMo3 7b swafix high-throughput configuration for 65k context length"
 budget: "ai2/oe-base"
 workspace: "ai2/oe-data"
