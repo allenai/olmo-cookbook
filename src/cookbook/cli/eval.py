@@ -259,12 +259,6 @@ def convert_checkpoint(
     help="Commit hash of the oe-eval toolkit to use; if not provided, use the latest commit",
 )
 @click.option(
-    "--oe-eval-branch",
-    type=str,
-    default=None,
-    help="Branch of the oe-eval toolkit to use; if provided, overrides the oe-eval commit hash",
-)
-@click.option(
     "--force-venv",
     is_flag=True,
     help="Force creation of new virtual environment",
@@ -346,7 +340,6 @@ def convert_checkpoint(
 def evaluate_model(
     oe_eval_branch: str,
     oe_eval_commit: str,
-    oe_eval_branch: Optional[str],
     checkpoint_path: str,
     aws_access_key_id: str,
     aws_secret_access_key: str,
@@ -415,7 +408,6 @@ def evaluate_model(
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
         oe_eval_commit=oe_eval_commit,
-        oe_eval_branch=oe_eval_branch,
         checkpoint_path=checkpoint_path,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,

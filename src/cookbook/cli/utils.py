@@ -177,7 +177,6 @@ def install_oe_eval(
     env: Optional[PythonEnv] = None,
     no_dependencies: bool = True,
     is_editable: bool = False,
-    branch: Optional[str] = None,
 ) -> str:
     env = env or PythonEnv.null()
 
@@ -427,9 +426,6 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
 
         # Base clone command with minimal history
         cmd = shlex.split(f"git clone --depth 1 {git_url}")
-
-        if branch:
-            cmd += shlex.split(f"--branch '{branch}'")
 
         if commit_hash:
             cmd.append("--no-checkout")
