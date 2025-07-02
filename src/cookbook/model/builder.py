@@ -613,7 +613,7 @@ class TransformerConfigBuilder:
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=5,
-            #max_duration=Duration.tokens(self.max_tokens),
+            max_duration=Duration.tokens(self.max_tokens),
         )
 
         for callback_name, callback in self.build_callbacks().items():
