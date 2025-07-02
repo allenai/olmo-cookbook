@@ -186,9 +186,10 @@ class WrappedTransformerConfig:
         )
 
     @classmethod
-    def olmo3_7B(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+    def olmo3_7B_swafix(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
-        Temporary OLMo3 7B config until it is merged into olmo-core
+        Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
         """
         config = getattr(TransformerConfig, "olmo2_7B")(
             n_kv_heads=8,
@@ -197,7 +198,9 @@ class WrappedTransformerConfig:
             vocab_size=tokenizer.padded_vocab_size(),
         )
         config.block.attention.sliding_window = SlidingWindowAttentionConfig(
-            force_first=False, force_last=False, pattern=[False, False, False, True]
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
         )
         config.block.attention.use_flash = True
         config.block.attention.use_head_qk_norm = True

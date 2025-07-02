@@ -117,6 +117,9 @@ class TransformerConfigBuilder:
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
+        dp_shard_degree (Optional[int]): The data parallel model/optimizer sharding degree.
+        cp_degree (Optional[int]): The number of devices to split context parallelism across. Useful for long context training.
+        float8 (bool): Whether to enable torchao float8 linear layers.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -178,9 +181,6 @@ class TransformerConfigBuilder:
     weka: bool
     metrics_config: Optional[MetricsConfig]
     max_dp_world_size: int
-    dp_shard_degree: Optional[int]
-    cp_degree: Optional[int]
-    float8: bool
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
@@ -196,6 +196,9 @@ class TransformerConfigBuilder:
     warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    dp_shard_degree: Optional[int]
+    cp_degree: Optional[int]
+    float8: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
 
@@ -213,15 +216,15 @@ class TransformerConfigBuilder:
         model_identifier: ModelConfigIdentifier,
         weka: bool,
         max_dp_world_size: int,
-        cp_degree: Optional[int],
-        dp_shard_degree: Optional[int],
-        float8: bool,
         save_interval: int,
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
+        dp_shard_degree: Optional[int] = None,
+        cp_degree: Optional[int] = None,
+        float8: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
         annealing: Optional[AnnealConfig] = None,
@@ -249,14 +252,14 @@ class TransformerConfigBuilder:
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.activation_checkpointing = activation_checkpointing
+        self.dp_shard_degree = dp_shard_degree
+        self.cp_degree = cp_degree
+        self.float8 = float8
         self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
         self.max_dp_world_size = max_dp_world_size
-        self.cp_degree = cp_degree
-        self.dp_shard_degree = dp_shard_degree
-        self.float8 = float8
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
         self.save_interval = save_interval
@@ -483,6 +486,7 @@ class TransformerConfigBuilder:
             weight_decay=0.033,
             betas=(0.9, 0.95),
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+            foreach=True,
         )
 
     def get_ac_config(self):
@@ -555,30 +559,47 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            base_lr: int = config["train_module"]["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
+        except KeyError:
             # Now try olmo_core v1 config format
             try:
                 base_lr: int = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
-            except KeyError as e:
+            except Exception as e:
                 logger.error(
-                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                    e,
                 )
                 raise e
 
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
+            assert scheduler_class == CosWithWarmup.__name__ or scheduler_class == WSD.__name__
         except AssertionError as e:
             logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+                f"Expected scheduler class {CosWithWarmup.__name__} or {WSD.__name__}, but got {scheduler_class}: Anneals from a base LR cannot be inferred from this scheduler type. Exiting!"
             )
             raise e
 
-        scheduler = CosWithWarmup(**scheduler_config)
+        try:
+            if scheduler_class == WSD.__name__:
+                if not scheduler_config.get("decay_fraction", None):
+                    scheduler_config["decay_fraction"] = None
+                scheduler = WSD(**scheduler_config)
+            elif scheduler_class == CosWithWarmup.__name__:
+                scheduler = CosWithWarmup(**scheduler_config)
+            else:
+                raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+        except Exception as e:
+            logger.error(
+                "Could not instantiate scheduler from config. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                e,
+            )
+            logger.info(scheduler_config)
+            raise e
+
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
         return SchedulerState(
