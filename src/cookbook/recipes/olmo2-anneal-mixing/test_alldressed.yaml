@@ -1,11 +1,11 @@
-name: "olmo2-1b_100M-rounded-anneal-all-dressed"
-description: "OLMo2 1b anneal to 100M tokens (rounded to be divisible), all-dressed"
+name: "olmo2-1b_100M-anneal-all-dressed-original"
+description: "OLMo2 1b anneal to 100M tokens, all-dressed (1 source, no mixing) before olmo-core fix"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
 nodes: 1
 gpus: 8
 preemptible: true
-max_tokens: 100663296 #100_000_000
+max_tokens: 100_000_000
 global_batch_size: 2097152
 sequence_length: 4096
 seed: 1337
@@ -14,7 +14,7 @@ tokenizer: "dolma2"
 priority: urgent
 eval_interval: 250
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 8192
+rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
 annealing:
