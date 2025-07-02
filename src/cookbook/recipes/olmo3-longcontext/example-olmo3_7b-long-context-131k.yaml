@@ -1,5 +1,5 @@
 name: "olmo3-7b-long-context-extension-example"
-description: "OLMo3 7b swafix high-throughput configuration for 65k context length"
+description: "OLMo3 7b swafix high-throughput configuration for 131k context length"
 budget: "ai2/oe-base"
 workspace: "ai2/oe-data"
 cluster: ai2/augusta-google-1
@@ -14,13 +14,13 @@ model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4194304
-sequence_length: &seq_len 655361
+sequence_length: &seq_len 131072
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
 eval_interval: 500
 scheduler_type: linear
 warmup_steps: 0
-dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+dp_shard_degree: 4  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
 # TODO: update to the actual start checkpoint for Long Context extension
