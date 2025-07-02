@@ -629,7 +629,11 @@ class TransformerConfigBuilder:
             optim=self.get_optimizer_config(),
             compile_model=True,
             dp_config=train_module.TransformerDataParallelConfig(
-                name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
+                name=DataParallelType.hsdp,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+                wrapping_strategy=train_module.TransformerDataParallelWrappingStrategy.blocks,
+                shard_degree=8,
             ),
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=self.get_fp8_config(),
