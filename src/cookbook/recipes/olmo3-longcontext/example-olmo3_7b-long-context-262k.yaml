@@ -8,7 +8,7 @@ workspace: "ai2/oe-data"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 2
+nodes: 4
 gpus: 8
 seed: 4123
 generate_doc_lengths: true  # enable intra-document masking
@@ -25,7 +25,7 @@ rank_microbatch_size: *seq_len  # must be the same as sequence_length
 eval_interval: 500
 scheduler_type: linear
 warmup_steps: 0
-dp_shard_degree: 2  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+dp_shard_degree: 4  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
 activation_checkpointing: true
