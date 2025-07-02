@@ -1,8 +1,8 @@
-# Example recipe for OLMo3 7b swafix high-throughput configuration for 131k context length
+# Example recipe for OLMo3 7b swafix high-throughput configuration for 262k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 8.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3-7b-long-context-extension-131k-example"
-description: "OLMo3 7b swafix high-throughput configuration for 131k context length"
+name: "olmo3-7b-long-context-extension-262k-example"
+description: "OLMo3 7b swafix high-throughput configuration for 262k context length"
 budget: "ai2/oe-base"
 workspace: "ai2/oe-data"
 cluster: ai2/augusta-google-1
@@ -19,7 +19,7 @@ model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4194304
-sequence_length: &seq_len 131072
+sequence_length: &seq_len 262144
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
 eval_interval: 500
