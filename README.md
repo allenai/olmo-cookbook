@@ -15,6 +15,12 @@ pip install -e .[all]
 
 2) Set up your environment
 
+```shell
+gcloud auth application-default login
+gcloud auth application-default set-quota-project ai2-allennlp
+export GOOGLE_CLOUD_PROJECT=ai2-allennlp
+```
+
 Optional: (Only if you are using Weka storage for token files)
 ```shell
   export WEKA_ENDPOINT_URL=<weka-endpoint-url>
@@ -36,12 +42,6 @@ olmo-cookbook prepare-user-workspace \
   --wandb-api-key <wandb-api-key>
 ```
 *Note: Weka / R2 endpoint urls only need to be set if you are using them for storage.*
-
-If you plan to run jobs on `ai2/augusta-google-1` then your workspace will also require the `Beaker` secrets:
-```
-GS_INTEROP_KEY
-GS_INTEROP_SECRET
-```
 
 ### Build your training configuration
 

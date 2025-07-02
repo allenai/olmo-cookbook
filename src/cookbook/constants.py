@@ -350,6 +350,11 @@ ALL_CORE_TASKS = [
     "winogrande",
 ]
 
+ARC_TASKS = [
+    "arc_easy",
+    "arc_challenge",
+]
+
 
 ALL_GEN_TASKS = [
     "coqa::olmes",
@@ -360,19 +365,29 @@ ALL_GEN_TASKS = [
     "gsm8k::olmo1",
 ]
 
-ALL_MINERVA_TASKS = [
-    "minerva_math_algebra::olmes",
-    "minerva_math_counting_and_probability::olmes",
-    "minerva_math_geometry::olmes",
-    "minerva_math_intermediate_algebra::olmes",
-    "minerva_math_number_theory::olmes",
-    "minerva_math_prealgebra::olmes",
-    "minerva_math_precalculus::olmes",
+ALL_GEN_XLARGE_TASKS = [
+    "coqa::xlarge",
+    "squad::xlarge",
+    "jeopardy::xlarge",
+    "naturalqs::xlarge",
+    "drop::xlarge",
 ]
 
-ALL_MATH_TASKS = [*ALL_MINERVA_TASKS, "gsm8k::olmo1", "gsm8k::olmes"]
+ALL_MINERVA_TASKS = [
+    "minerva_math_algebra",
+    "minerva_math_counting_and_probability",
+    "minerva_math_geometry",
+    "minerva_math_intermediate_algebra",
+    "minerva_math_number_theory",
+    "minerva_math_prealgebra",
+    "minerva_math_precalculus",
+]
 
-ALL_GSM_SYMB_TASKS = ["gsm_symbolic::olmo3", "gsm_symbolic:p1::olmo3", "gsm_symbolic:p2::olmo3"]
+ALL_GSM_SYMB_TASKS = [
+    "gsm_symbolic::olmo3", 
+    "gsm_symbolic:p1::olmo3",
+    "gsm_symbolic:p2::olmo3"
+]
 
 BASIC_SKILLS = [
     "basic_skills_arithmetic",
@@ -383,16 +398,46 @@ BASIC_SKILLS = [
     "basic_skills_pattern",
 ]
 
-ALL_AGI_EVAL_TASKS = [
-    "agi_eval_lsat-ar:1shot::olmes",
-    "agi_eval_lsat-lr:1shot::olmes",
-    "agi_eval_lsat-rc:1shot::olmes",
-    "agi_eval_logiqa-en:1shot::olmes",
-    "agi_eval_sat-math:1shot::olmes",
-    "agi_eval_sat-en:1shot::olmes",
-    "agi_eval_aqua-rat:1shot::olmes",
-    "agi_eval_sat-en-without-passage:1shot::olmes",
-    "agi_eval_gaokao-english:1shot::olmes",
+AGI_EVAL_ENGLISH_TASKS = [
+    "lsat-ar",
+    "lsat-lr",
+    "lsat-rc",
+    "logiqa-en",
+    "sat-math",
+    "sat-en",
+    "aqua-rat",
+    "sat-en-without-passage",
+    "gaokao-english",
+]
+
+BBH_TASKS = [
+    "boolean_expressions",
+    "causal_judgement",
+    "date_understanding",
+    "disambiguation_qa",
+    "dyck_languages",
+    "formal_fallacies",
+    "geometric_shapes",
+    "hyperbaton",
+    "logical_deduction_five_objects",
+    "logical_deduction_seven_objects",
+    "logical_deduction_three_objects",
+    "movie_recommendation",
+    "multistep_arithmetic_two",
+    "navigate",
+    "object_counting",
+    "penguins_in_a_table",
+    "reasoning_about_colored_objects",
+    "ruin_names",
+    "salient_translation_error_detection",
+    "snarks",
+    "sports_understanding",
+    "temporal_sequences",
+    "tracking_shuffled_objects_five_objects",
+    "tracking_shuffled_objects_seven_objects",
+    "tracking_shuffled_objects_three_objects",
+    "web_of_lies",
+    "word_sorting",
 ]
 
 
@@ -464,166 +509,68 @@ FIM_TASKS = [
     "codex_humanevalfim_random:temp0.2",
 ]
 
-MULTILINGUAL_MBPP_LANGUAGES = [
-    "bash",
-    "c",
-    "cpp",
-    "csharp",
-    "go",
-    "haskell",
-    "java",
-    "javascript",
-    "matlab",
-    "php",
-    "python",
-    "r",
-    "ruby",
-    "rust",
-    "scala",
-    "swift",
-    "typescript",
+
+CRUX_EVAL_TASKS = [
+    "cruxeval_input:pass@5",
+    "cruxeval_output:pass@5",
 ]
 
-# named groups are things you should able to average; they
-# should just contain aliases
-ALL_NAMED_GROUPS = {
-    "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
-    "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
-    "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
-    "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
-    "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
-    "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
-    "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
-    "gen": ALL_GEN_TASKS,
-    "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
-    "minerva": ALL_MINERVA_TASKS,
-    "math": ALL_MATH_TASKS,
-    "gsm-symb": ALL_GSM_SYMB_TASKS,
-    "code": ALL_CODEX_TASKS,
-    "agi_eval": ALL_AGI_EVAL_TASKS,
-    "starcoder": STARCODER_CODEX_TASKS,
-    "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
-    "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-    "fim": FIM_TASKS,
-    "mt_mbpp": [f"mt_mbpp:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
-    "mt_mbpp_v2fix": [f"mt_mbpp_v2fix:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
-}
+MULTILINGUAL_MBPP_TASKS = [
+    "mt_mbpp:bash",
+    "mt_mbpp:c",
+    "mt_mbpp:cpp",
+    "mt_mbpp:csharp",
+    "mt_mbpp:go",
+    "mt_mbpp:haskell",
+    "mt_mbpp:java",
+    "mt_mbpp:javascript",
+    "mt_mbpp:matlab",
+    "mt_mbpp:php",
+    "mt_mbpp:python",
+    "mt_mbpp:r",
+    "mt_mbpp:ruby",
+    "mt_mbpp:rust",
+    "mt_mbpp:scala",
+    "mt_mbpp:swift",
+    "mt_mbpp:typescript",
+]
 
-for helmet_length in (int(2**i) for i in range(13, 18)):
-    ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
-        set(
-            task
-            for group_name, tasks in HELMET_SUITES.items()
-            for task in tasks
-            if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
-        )
-    )
+MULTILINGUAL_MBPP_TASKS_V2 = [
+    "mt_mbpp_v2fix:bash",
+    "mt_mbpp_v2fix:c",
+    "mt_mbpp_v2fix:cpp",
+    "mt_mbpp_v2fix:csharp",
+    "mt_mbpp_v2fix:go",
+    "mt_mbpp_v2fix:haskell",
+    "mt_mbpp_v2fix:java",
+    "mt_mbpp_v2fix:javascript",
+    "mt_mbpp_v2fix:matlab",
+    "mt_mbpp_v2fix:php",
+    "mt_mbpp_v2fix:python",
+    "mt_mbpp_v2fix:r",
+    "mt_mbpp_v2fix:ruby",
+    "mt_mbpp_v2fix:rust",
+    "mt_mbpp_v2fix:scala",
+    "mt_mbpp_v2fix:swift",
+    "mt_mbpp_v2fix:typescript",
+]
 
+MULTIPL_E_HE_TASKS = [
+    'multipl_e_humaneval:cpp::olmo3', 
+    'multipl_e_humaneval:java::olmo3', 
+    'multipl_e_humaneval:js::olmo3', 
+    'multipl_e_humaneval:php::olmo3', 
+    'multipl_e_humaneval:rs::olmo3', 
+    'multipl_e_humaneval:sh::olmo3', 
+]
 
-ALL_DISPLAY_TASKS = {
-    "olmo2:paper": [
-        r"arc_challenge:mc.*",
-        r"hellaswag:mc.*",
-        r"winogrande:mc.*",
-        r"naturalqs.*",
-        r"drop.*",
-        r"agieval.*",
-        r"^gsm8k::olmes$",
-        r"^mmlu:mc$",
-        r"^mmlu_pro:mc$",
-        r"^agi_eval$",
-    ],
-    "olmo2:dev:7b": [
-        r"arc_challenge:mc.*",
-        r"arc_easy:mc.*",
-        r"hellaswag:mc.*",
-        r"naturalqs.*",
-        r"^gsm8k::olmo1$",
-        r"^mmlu:mc$",
-        r"^core:mc$",
-        r"^gen$",
-    ],
-    "olmo2:dev:1b": [
-        r"arc_challenge:rc.*",
-        r"arc_easy:rc.*",
-        r"hellaswag:rc.*",
-        r"^gsm8k::olmo1$",
-        r"^mmlu:rc$",
-        r"^core:rc$",
-    ],
-    "olmo3:dev:1b": [
-        "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
-        "^arc_easy.*olmes",
-        "^basic_skills.*olmes",
-        "^codex_humaneval.*3shot",
-        "^coqa.*gen2mc",
-        "^csqa.*olmes",
-        "^drop.*gen2mc",
-        "^hellaswag.*olmes",
-        "^jeopardy.*gen2mc",
-        "^lab_bench.*",
-        "^lambada.*",
-        "^mbpp.*3shot",
-        "^medmcqa.*none",
-        "^medqa.*none",
-        "^minerva.*olmes$",     # doesn't return average
-        # "minerva",
-        "^mmlu.*olmes$",    # doesn't return average
-        # "mmlu:rc",
-        "^mt_mbpp_v2fix.*",           # still returns average
-        "^naturalqs.*gen2mc",
-        "^piqa.*olmes",
-        "^qasper_yesno.*olmes",
-        "^sciq.*olmo3",
-        "^sciriff_yesno.*olmes",
-        "^socialiqa.*olmes",
-        "^squad.*gen2mc",
-        "^winogrande.*olmes",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ],
-    "olmo3:dev:1b:mini": [
-        "^arc_challenge:rc.*",
-        "^arc_easy:rc.*",
-        "^codex_humaneval.*3shot",
-        "^hellaswag:rc.*olmes",
-        "^mbpp.*3shot",
-        "^minerva$",
-        "^mt_mbpp_v2fix$",
-        "^winogrande:rc.*olmes",
-        "basic:rc",
-        "core:rc"
-        "mmlu:bpb",
-        "mmlu:rc",
-    ],
-    "olmo3:dev:7b:mini": [
-        "^arc_challenge:mc::olmes:full",
-        "^arc_easy:mc::olmes:full",
-        "^hellaswag:rc.*olmes",
-        "^codex_humaneval::olmo3",
-        "^mbpp:3shot::olmo3",
-        "^gsm-symb$",
-        "^minerva$",
-        "^mt_mbpp_v2fix$",
-        "^core:mc$",
-        "^mmlu:mc$",
-    ],
-    "helmet:8k": [r"^helmet:8k$"],
-    "helmet:16k": [r"^helmet:16k$"],
-    "helmet:32k": [r"^helmet:32k$"],
-    "helmet:64k": [r"^helmet:64k$"],
-    "helmet:128k": [r"^helmet:128k$"],
-}
-
-
-SHORT_NAMES = {
-    r"::olmes$": "",
-    r"^gsm8k::olmo1$": "GSM*",
-    r"^naturalqs": "NQ",
-    r"^(arc\_\w)\w+": r"\1",
-    r"^hellaswag": "HSwag",
-    r"^winogrande": "WinoG",
-}
+MULTIPL_E_MBPP_TASKS = [
+    'multipl_e_mbpp:cpp::olmo3', 
+    'multipl_e_mbpp:java::olmo3', 
+    'multipl_e_mbpp:js::olmo3', 
+    'multipl_e_mbpp:php::olmo3', 
+    'multipl_e_mbpp:rs::olmo3',
+]
 
 
 OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
@@ -631,89 +578,252 @@ OE_EVAL_COMMIT_HASH = None
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
 
-# use these tasks to launch oe-eval jobs
-ALL_EVAL_TASKS = {
-    "olmo3:dev:1b:vllm": [
-        "arc_challenge:rc::olmes:full",
-        "arc_easy:rc::olmes:full",
-        "basic_skills:rc::olmes",
-        "codex_humaneval:3shot:bpb::none",
-        "coqa:rc::gen2mc",
-        "csqa:rc::olmes:full",
-        "drop:rc::gen2mc",
-        "hellaswag:rc::olmes:full",
-        "jeopardy:rc::gen2mc",
-        "lab_bench_dbqa",
-        "lab_bench_protocolqa",
-        "lambada",
-        "mbpp:3shot:bpb::none",
-        "medmcqa:rc::none",
-        "medqa_en:rc::none",
-        "minerva_math::olmes",
-        "mmlu:rc::olmes",
-        "mt_mbpp_v2fix",
-        "naturalqs:rc::gen2mc",
-        "piqa:rc::olmes:full",
-        "qasper_yesno:rc::olmes",
-        "sciq:rc::olmo3",
-        "sciriff_yesno:rc::olmes",
-        "socialiqa:rc::olmes:full",
-        "squad:rc::gen2mc",
-        "winogrande:rc::olmes:full",
-    ],
-    "olmo3:dev:1b:hf": [
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ],
-    "olmo3:dev:7b:vllm": [
-        "arc_challenge:mc::xlarge",
-        "arc_easy:mc::xlarge",
-        "basic_skills:rc::olmes",
-        "bigcodebench:3shot::olmo3",
-        "codex_humaneval:3shot::olmo3",
-        "codex_humanevalfim_multi:temp0.2",
-        "codex_humanevalfim_random:temp0.2",
-        "codex_humanevalfim_single:temp0.2",
-        "coqa::xlarge",
-        "coqa:mc::gen2mc",
-        "cruxeval_input:pass@5",
-        "cruxeval_output:pass@5",
-        "csqa:mc::xlarge",
-        "deepseek_leetcode::olmo3",
-        "drop::xlarge",
-        "drop:mc::gen2mc",
-        "ds1000:3shot::olmo3",
-        "gsm_symbolic::olmo3",
-        "gsm_symbolic:p1::olmo3",
-        "gsm_symbolic:p2::olmo3",
-        "gsm8k::olmes",
-        "hellaswag:rc::xlarge",
-        "jeopardy::xlarge",
-        "jeopardy:mc::gen2mc",
-        "lab_bench_dbqa:mc",
-        "lab_bench_protocolqa:mc",
-        "lambada",
-        "mbpp:3shot::olmo3",
-        "medmcqa:mc::none",
-        "medqa_en:mc::none",
-        "minerva_math::olmes",
-        "mmlu:mc::olmes",
-        "mt_mbpp_v2fix",
-        "multipl_e:6lang::olmo3",
-        "naturalqs::xlarge",
-        "naturalqs:mc::gen2mc",
-        "openbookqa:mc::xlarge",
-        "piqa:mc::xlarge",
-        "qasper_yesno:mc::olmes",
-        "sciq:mc::xlarge",
-        "sciriff_yesno:mc::olmes",
-        "socialiqa:mc::xlarge",
-        "squad::xlarge",
-        "squad:mc::gen2mc",
-        "winogrande:rc::xlarge",
-    ],
-    "olmo3:dev:7b:hf": [
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
-    ],
-}
+
+# # # # # # # # # # # # # LEGACY NAMED GROUPS # # # # # # # # # # # # #
+# The following named/display groups are preserved as reference only. #
+# Do NOT uncomment them, use new named_tasks.py instead.              #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# ALL_NAMED_GROUPS = {
+#     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
+#     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
+#     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
+#     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
+#     "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
+#     "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
+#     "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
+#     "gen": ALL_GEN_TASKS,
+#     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
+#     "minerva": ALL_MINERVA_TASKS,
+#     "math": ALL_MATH_TASKS,
+#     "gsm-symb": ALL_GSM_SYMB_TASKS,
+#     "code": ALL_CODEX_TASKS,
+#     "agi_eval": ALL_AGI_EVAL_TASKS,
+#     "starcoder": STARCODER_CODEX_TASKS,
+#     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
+#     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
+#     "fim": FIM_TASKS,
+#     "mt_mbpp": [f"mt_mbpp:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
+#     "mt_mbpp_v2fix": [f"mt_mbpp_v2fix:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
+# }
+
+# for helmet_length in (int(2**i) for i in range(13, 18)):
+#     ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
+#         set(
+#             task
+#             for group_name, tasks in HELMET_SUITES.items()
+#             for task in tasks
+#             if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
+#         )
+#     )
+
+
+# ALL_DISPLAY_TASKS = {
+#     "olmo2:paper": [
+#         r"arc_challenge:(rc|mc)::olmes$",
+#         r"hellaswag:(rc|mc)::olmes$",
+#         r"winogrande:(rc|mc)::olmes$",
+#         r"naturalqs::olmes$",
+#         r"drop::olmes$",
+#         r"agieval.*::olmes$",
+#         r"^gsm8k::olmes$",
+#         r"^mmlu:rc$",
+#         r"^mmlu:mc$",
+#         r"^mmlu_pro:mc$",
+#         r"^agi_eval$",
+#         r"^triviaqa::olmes$",
+#     ],
+#     "olmo2:dev:7b": [
+#         r"arc_challenge:mc.*",
+#         r"arc_easy:mc.*",
+#         r"hellaswag:mc.*",
+#         r"naturalqs.*",
+#         r"^gsm8k::olmo1$",
+#         r"^mmlu:mc$",
+#         r"^core:mc$",
+#         r"^gen$",
+#     ],
+#     "olmo2:dev:1b": [
+#         r"arc_challenge:rc.*",
+#         r"arc_easy:rc.*",
+#         r"hellaswag:rc.*",
+#         r"^gsm8k::olmo1$",
+#         r"^mmlu:rc$",
+#         r"^core:rc$",
+#     ],
+#     "olmo3:dev:1b": [
+#         "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
+#         "^arc_easy.*olmes",
+#         "^basic_skills.*olmes",
+#         "^codex_humaneval.*3shot",
+#         "^coqa.*gen2mc",
+#         "^csqa.*olmes",
+#         "^drop.*gen2mc",
+#         "^hellaswag.*olmes",
+#         "^jeopardy.*gen2mc",
+#         "^lab_bench.*",
+#         "^lambada.*",
+#         "^mbpp.*3shot",
+#         "^medmcqa.*none",
+#         "^medqa.*none",
+#         "^minerva.*olmes$",     # doesn't return average
+#         # "minerva",
+#         "^mmlu.*olmes$",    # doesn't return average
+#         # "mmlu:rc",
+#         "^mt_mbpp_v2fix.*",           # still returns average
+#         "^naturalqs.*gen2mc",
+#         "^piqa.*olmes",
+#         "^qasper_yesno.*olmes",
+#         "^sciq.*olmo3",
+#         "^sciriff_yesno.*olmes",
+#         "^socialiqa.*olmes",
+#         "^squad.*gen2mc",
+#         "^winogrande.*olmes",
+#         "ultrachat_masked_ppl",
+#         "wildchat_masked_ppl",
+#     ],
+#     "olmo3:dev:1b:mini": [
+#         "^arc_challenge:rc.*",
+#         "^arc_easy:rc.*",
+#         "^codex_humaneval.*3shot",
+#         "^hellaswag:rc.*olmes",
+#         "^mbpp.*3shot",
+#         "^minerva$",
+#         "^mt_mbpp_v2fix$",
+#         "^winogrande:rc.*olmes",
+#         "basic:rc",
+#         "core:rc"
+#         "mmlu:bpb",
+#         "mmlu:rc",
+#     ],
+#     "olmo3:dev:7b:mini": [
+#         "^arc_challenge:mc::olmes:full",
+#         "^arc_easy:mc::olmes:full",
+#         "^hellaswag:rc.*olmes",
+#         "^codex_humaneval::olmo3",
+#         "^mbpp:3shot::olmo3",
+#         "^gsm-symb$",
+#         "^minerva$",
+#         "^mt_mbpp_v2fix$",
+#         "^core:mc$",
+#         "^mmlu:mc$",
+#     ],
+#     "helmet:8k": [r"^helmet:8k$"],
+#     "helmet:16k": [r"^helmet:16k$"],
+#     "helmet:32k": [r"^helmet:32k$"],
+#     "helmet:64k": [r"^helmet:64k$"],
+#     "helmet:128k": [r"^helmet:128k$"],
+# }
+
+
+# SHORT_NAMES = {
+#      r"::olmes$": "",
+#      r"::olmes:full$": "",
+#      r"^gsm8k::olmo1$": "GSM*",
+#      r"^naturalqs": "NQ",
+#      r"^(arc\_\w)\w+": r"\1",
+#      r"^hellaswag": "HSwag",
+
+
+#      r"^winogrande": "WinoG",
+#      r"^codex_humaneval": "humaneval",
+#      r"::olmo3$": "",
+#      r"::none$": "",
+#      r":3shot": "",
+#      r"::full$": "",
+#  }
+
+
+# ALL_EVAL_TASKS = {
+#     "olmo2:paper": [
+#         "olmo_2_heldout::olmes",
+#         "olmo_2_generative::olmes",
+#         "core_9mcqa::olmes", # evaluates both mc and rc
+#         "mmlu:mc::olmes",
+#         "mmlu:rc::olmes",
+#         "triviaqa::olmes"
+#     ],
+#     "olmo3:dev:1b:vllm": [
+#         "arc_challenge:rc::olmes:full",
+#         "arc_easy:rc::olmes:full",
+#         "basic_skills:rc::olmes",
+#         "codex_humaneval:3shot:bpb::none",
+#         "coqa:rc::gen2mc",
+#         "csqa:rc::olmes:full",
+#         "drop:rc::gen2mc",
+#         "hellaswag:rc::olmes:full",
+#         "jeopardy:rc::gen2mc",
+#         "lab_bench_dbqa",
+#         "lab_bench_protocolqa",
+#         "lambada",
+#         "mbpp:3shot:bpb::none",
+#         "medmcqa:rc::none",
+#         "medqa_en:rc::none",
+#         "minerva_math::olmes",
+#         "mmlu:rc::olmes",
+#         "mt_mbpp_v2fix",
+#         "naturalqs:rc::gen2mc",
+#         "piqa:rc::olmes:full",
+#         "qasper_yesno:rc::olmes",
+#         "sciq:rc::olmo3",
+#         "sciriff_yesno:rc::olmes",
+#         "socialiqa:rc::olmes:full",
+#         "squad:rc::gen2mc",
+#         "winogrande:rc::olmes:full",
+#     ],
+#     "olmo3:dev:1b:hf": [
+#         "ultrachat_masked_ppl",
+#         "wildchat_masked_ppl",
+#     ],
+#     "olmo3:dev:7b:vllm": [
+#         "arc_challenge:mc::xlarge",
+#         "arc_easy:mc::xlarge",
+#         "basic_skills:rc::olmes",
+#         "bigcodebench:3shot::olmo3",
+#         "codex_humaneval:3shot::olmo3",
+#         "codex_humanevalfim_multi:temp0.2",
+#         "codex_humanevalfim_random:temp0.2",
+#         "codex_humanevalfim_single:temp0.2",
+#         "coqa::xlarge",
+#         "coqa:mc::gen2mc",
+#         "cruxeval_input:pass@5",
+#         "cruxeval_output:pass@5",
+#         "csqa:mc::xlarge",
+#         "deepseek_leetcode::olmo3",
+#         "drop::xlarge",
+#         "drop:mc::gen2mc",
+#         "ds1000:3shot::olmo3",
+#         "gsm_symbolic::olmo3",
+#         "gsm_symbolic:p1::olmo3",
+#         "gsm_symbolic:p2::olmo3",
+#         "gsm8k::olmes",
+#         "hellaswag:rc::xlarge",
+#         "jeopardy::xlarge",
+#         "jeopardy:mc::gen2mc",
+#         "lab_bench_dbqa:mc",
+#         "lab_bench_protocolqa:mc",
+#         "lambada",
+#         "mbpp:3shot::olmo3",
+#         "medmcqa:mc::none",
+#         "medqa_en:mc::none",
+#         "minerva_math::olmes",
+#         "mmlu:mc::olmes",
+#         "mt_mbpp_v2fix",
+#         "multipl_e:6lang::olmo3",
+#         "naturalqs::xlarge",
+#         "naturalqs:mc::gen2mc",
+#         "openbookqa:mc::xlarge",
+#         "piqa:mc::xlarge",
+#         "qasper_yesno:mc::olmes",
+#         "sciq:mc::xlarge",
+#         "sciriff_yesno:mc::olmes",
+#         "socialiqa:mc::xlarge",
+#         "squad::xlarge",
+#         "squad:mc::gen2mc",
+#         "winogrande:rc::xlarge",
+#     ],
+#     "olmo3:dev:7b:hf": [
+#         "ultrachat_masked_ppl",
+#         "wildchat_masked_ppl",
+#     ],
+# }

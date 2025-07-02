@@ -1,11 +1,13 @@
 import json
 import logging
 import re
+import sys
 from typing import Optional
 
 import click
 from rich.console import Console
 from rich.table import Table
+from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -13,9 +15,6 @@ from cookbook.cli.utils import (
     get_huggingface_token,
 )
 from cookbook.constants import (
-    ALL_DISPLAY_TASKS,
-    ALL_EVAL_TASKS,
-    ALL_NAMED_GROUPS,
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
@@ -26,10 +25,11 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.results import make_dashboard_table
+from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +174,7 @@ def convert_checkpoint(
     multiple=True,
     help=(
         "Set specific tasks or tasks groups. Can be specified multiple times. "
-        f"Tasks groups are: {', '.join(ALL_NAMED_GROUPS)}"
+        f"Tasks groups are: {', '.join(NamedTasksGroupRegistry.names())}"
     ),
 )
 @click.option(
@@ -247,6 +247,12 @@ def convert_checkpoint(
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
 @click.option(
+    "--oe-eval-branch",
+    type=str,
+    default=None,
+    help="Branch of the oe-eval toolkit to use; if not provided, use main",
+)
+@click.option(
     "--oe-eval-commit",
     type=str,
     default=None,
@@ -289,10 +295,23 @@ def convert_checkpoint(
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
 @click.option(
+    "--task-args",
+    type=str,
+    default=[],
+    multiple=True,
+    help="Extra arguments to pass to the task config. Can specify multiple args.",
+)
+@click.option(
     "--model-args",
     type=str,
     default="",
     help="Extra arguments to pass to the model",
+)
+@click.option(
+    "--revision",
+    type=str,
+    default=None,
+    help="Revision of model in HF hub",
 )
 @click.option(
     "--fim-tokens",
@@ -318,7 +337,14 @@ def convert_checkpoint(
     default="",
     help="Suffix to add to the run name",
 )
+@click.option(
+    "--num-shots",
+    type=int,
+    default=None,
+    help="Number of shots to use for evaluation; by default, the number of shots is part of task def in oe-eval",
+)
 def evaluate_model(
+    oe_eval_branch: str,
     oe_eval_commit: str,
     oe_eval_branch: Optional[str],
     checkpoint_path: str,
@@ -328,6 +354,7 @@ def evaluate_model(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    revision: str,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -349,10 +376,12 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    task_args: list[str],
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    num_shots: int | None,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -362,13 +391,20 @@ def evaluate_model(
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
 
+    parsed_task_args: dict[str, str] = {}
+    for arg in task_args:
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_task_args[key] = json.loads(value)
+
     parsed_model_args: dict[str, str] = {}
     for arg in model_args.split(","):
         if not (arg := arg.strip()):
             continue
         key, value = arg.split("=")
         parsed_model_args[key] = value
-        
+
     parsed_gantry_args: dict[str, str] = {}
     for arg in gantry_args.split(","):
         if not (arg := arg.strip()):
@@ -376,10 +412,8 @@ def evaluate_model(
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
 
-    # expand tasks; note must be aliases or task suites in oe-eval
-    tasks = [e for t in tasks for e in (ALL_EVAL_TASKS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
     evaluate_checkpoint(
+        oe_eval_branch=oe_eval_branch,
         oe_eval_commit=oe_eval_commit,
         oe_eval_branch=oe_eval_branch,
         checkpoint_path=checkpoint_path,
@@ -389,6 +423,7 @@ def evaluate_model(
         cluster=cluster,
         huggingface_secret=huggingface_secret,
         add_bos_token=add_bos_token,
+        revision=revision,
         budget=budget,
         priority=priority,
         num_gpus=num_gpus,
@@ -409,17 +444,17 @@ def evaluate_model(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        task_args=parsed_task_args,
         model_args=parsed_model_args,
         fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
+        num_shots=num_shots,
     )
 
 
-@click.option(
-    "-d", "--dashboard", type=str, required=True, help="Set dashboard name"
-)
+@click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
 @click.option(
     "-m",
     "--models",
@@ -469,11 +504,6 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
-@click.option(
-    "--missing-pairs",
-    is_flag=True,
-    help="Return only missing model-task pairs in JSON format",
-)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -484,20 +514,68 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-    missing_pairs: bool,
 ) -> None:
-    tables = make_dashboard_table(dashboard=dashboard, force=force, skip_on_fail=skip_on_fail)
 
-    # if a task starts with *, it means it is a named group and we need to expand it
-    tasks = [e for t in tasks for e in (ALL_NAMED_GROUPS.get(t.lstrip("*"), [t]) if t.startswith("*") else [t])]
-    
-    # after that, we check for task patterns
-    task_patterns = [re.compile(t_) for task in tasks for t_ in ALL_DISPLAY_TASKS.get(task, [task])]
-    results = (tables.averages + tables.metrics).keep_cols(*task_patterns)
+    # compile tasks names into regex patterns (if possible)
+    compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
+    # we partition between single tasks and named groups; we also keep a set of all tasks names,
+    # which we will use later to print any missing tasks.
+    named_groups: list[BaseNamedTasksGroup] = []
+    columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
+    for compiled_task in compiled_tasks:
+        matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
+        named_groups.extend(matching_groups)
+        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
+
+    # we get the metrics table from the datalake
+    metrics_table, missing_tasks = make_dashboard_table(
+        dashboard=dashboard,
+        force=force,
+        skip_on_fail=skip_on_fail,
+    )
+
+    # start by filtering in all the single tasks
+    results = metrics_table.keep_cols(*compiled_tasks)
+
+    # then iterate over named groups...
+    for named_group in named_groups:
+        # # This messes up with piping. Removing for now. -luca
+        # pprint(named_group.tasks)
+
+        # ...and try to combine them into a single score. Note we are giving it the full metrics table,
+        # not the one after filtering to single tasks.
+        combined_table = named_group.combine(metrics_table)
+
+        if combined_table is not None:
+            # we manage to combine! lets put the combined score at the front
+            results = combined_table + results
+        else:
+            # this cannot be combined. let's add each metric as a column. make sure not
+            # to include duplicates.
+            named_group_table = metrics_table.keep_cols(*named_group.expanded_tasks)
+            existing_columns = set(results.columns)
+            named_group_table_only_new_columns = named_group_table.keep_cols(
+                *(c for c in named_group_table.columns if c not in existing_columns)
+            )
+
+            # we add the new columns to the end of the table
+            results = results + named_group_table_only_new_columns
+
+    # we filtered tasks, but the user might want to display only some models
+    rows_filter_models: list[str | re.Pattern] = []
     if len(models) > 0:
-        results = results.keep_rows(*[re.compile(m) for m in models])
+        # okay we filter models too! do the same regex trick as above
+        rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
+        results = results.keep_rows(*rows_filter_models)
 
+    # we gotta let the user know if there are any missing tasks
+    print_missing_tasks(
+        missing_tasks=missing_tasks,
+        rows_filter_models=rows_filter_models,
+        columns_filter_tasks=columns_filter_tasks,
+    )
+    # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(
             by_col=((sort_column_name or next(iter(results.columns))) if sort_by.startswith("col") else None),
@@ -509,35 +587,7 @@ def get_results(
         # if no columns are left, we don't need to sort
         pass
 
-    if tables.missing_tasks:
-        for model, missing_tasks in tables.missing_tasks.items():
-            logger.warning(
-                "\t😱 Model \033[1m%s\033[0m is missing \033[1m%d tasks\033[0m:\t%s",
-                model,
-                len(missing_tasks),
-                ", ".join(missing_tasks),
-            )
-
-    if missing_pairs:
-        missing_pairs_list = []
-        # Convert requested tasks to a set for efficient lookup
-        requested_tasks = set()
-        for task in tasks:
-            if task.startswith("*"):
-                # Expand named groups
-                requested_tasks.update(ALL_NAMED_GROUPS.get(task.lstrip("*"), []))
-            else:
-                # Expand display tasks
-                requested_tasks.update(ALL_DISPLAY_TASKS.get(task, [task]))
-
-        for model, missing_tasks in tables.missing_tasks.items():
-            # Only include tasks that were actually requested
-            for task in missing_tasks:
-                if task in requested_tasks:
-                    missing_pairs_list.append({"model": model, "task": task})
-        print(json.dumps(missing_pairs_list))
-        return
-
+    # output according to format requested by the user
     if format == "json":
         print(json.dumps(results._data))
     elif format == "table":
@@ -575,25 +625,70 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
     print(f"Removed {len(resp)} models from the dashboard")
 
 
-@click.argument("subset_type", type=str)
-@click.option("-t", "--task", type=str, multiple=True, help="List experiments for a given task")
-def list_tasks(subset_type: str, task: list[str] | None):
-    valid_tasks = [re.compile(t) for t in task] if task else []
+@click.option("-t", "--task", type=str, multiple=True, help="Tasks to filter by")
+def list_tasks(task: list[str] | None):
+    valid_tasks = [re.compile(t) if re.escape(t) != t else t for t in task] if task else []
 
-    table = Table(title=f"Listing {subset_type.capitalize()} tasks")
+    # first, we write a helper function to compare tasks; this is necessary because both valid tasks and
+    # tasks in a group can be either strings or regex patterns.
+    def _compare_tasks(task_target: str | re.Pattern, task_source: str | re.Pattern) -> bool:
+        if isinstance(task_source, re.Pattern):
+            if isinstance(task_target, re.Pattern):
+                return task_source == task_target
+            else:
+                return task_source.search(task_target) is not None
+        elif isinstance(task_target, re.Pattern):
+            return task_target.search(task_source) is not None
+        else:
+            return task_target == task_source
+
+    table = Table(title=f"Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")
 
-    assert subset_type in ["display", "named"], f"Invalid task type: {subset_type}"
+    for group_name in NamedTasksGroupRegistry.names():
+        task_group = NamedTasksGroupRegistry.get(group_name)
 
-    for task_group, task_names in (ALL_DISPLAY_TASKS if subset_type == "display" else ALL_NAMED_GROUPS).items():
-        if len(valid_tasks) > 0:
-            valid_task_in_key = any(v.search(task_group) for v in valid_tasks)
-            valid_task_in_names = any(v.search(name) for v in valid_tasks for name in task_names)
-            if not valid_task_in_key and not valid_task_in_names:
-                continue
-        table.add_row(task_group, "\n".join(task_names), f"{len(task_names):,}")
+        # there are three option on what to print here:
+        # 1. some of the tasks in the group are in valid tasks: we print the name of the group, and those tasks
+        # 2. the group_name name is in valid tasks: we print the name of the group, and all tasks in the group
+        # 3. none of the tasks in the group are in valid tasks: we skip the group
+        # 4. the valid tasks is empty: we print the name of the group, and all tasks in the group
+
+        # first shortcut; if valid tasks is empty, we print all tasks in the group
+        if len(valid_tasks) == 0:
+            table.add_row(
+                group_name,
+                "\n".join(str(t) for t in task_group.expanded_tasks),
+                f"{len(task_group.expanded_tasks):,}",
+            )
+            continue
+
+        # another shortcut; if any of valid names matches group name, we print all tasks in the group
+        if any(v.search(group_name) if isinstance(v, re.Pattern) else v == group_name for v in valid_tasks):
+            table.add_row(
+                group_name,
+                "\n".join(str(t) for t in task_group.expanded_tasks),
+                f"{len(task_group.expanded_tasks):,}",
+            )
+            continue
+
+        # okay, if we are here, means that the group name is not in valid tasks; but there might be some tasks
+        # that are, so we need to check that.
+
+        matching_tasks_from_group: list[str | re.Pattern] = []
+        for task_item in task_group.expanded_tasks:
+            for valid_task in valid_tasks:
+                if _compare_tasks(task_item, valid_task):
+                    matching_tasks_from_group.append(task_item)
+
+        if len(matching_tasks_from_group) > 0:
+            table.add_row(
+                group_name,
+                "\n".join(str(t) for t in matching_tasks_from_group),
+                f"{len(matching_tasks_from_group):,}/{len(task_group.expanded_tasks):,}",
+            )
 
     console = Console()
     console.print(table)
@@ -605,7 +700,7 @@ def list_all_experiments(model: str, task: list[str] | None) -> None:
     experiments = FindExperiments.run(model_name=model)
     valid_tasks = [re.compile(t) for t in task] if task else []
 
-    table = Table()
+    table = Table(title=f"Listing experiments for model {model}")
     table.add_column("Experiment ID")
     table.add_column("Model Name")
     table.add_column("Task Name")

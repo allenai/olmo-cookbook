@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 import json
 import re
 import shlex
@@ -6,6 +7,7 @@ from copy import deepcopy
 from hashlib import md5
 from typing import Optional
 from urllib.parse import urlparse
+from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     PythonEnv,
@@ -15,17 +17,17 @@ from cookbook.cli.utils import (
     make_eval_run_name,
 )
 from cookbook.constants import (
-    ALL_NAMED_GROUPS,
     BEAKER_KNOWN_CLUSTERS,
     FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 
 
 def evaluate_checkpoint(
     oe_eval_commit: str,
-    oe_eval_branch: Optional[str],
+    oe_eval_branch: str,
     checkpoint_path: str,
     aws_access_key_id: str,
     aws_secret_access_key: str,
@@ -33,6 +35,7 @@ def evaluate_checkpoint(
     cluster: str,
     huggingface_secret: str,
     add_bos_token: bool,
+    revision: str,
     budget: str,
     priority: str,
     num_gpus: int,
@@ -54,10 +57,12 @@ def evaluate_checkpoint(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: Optional[dict],
+    task_args: Optional[dict],
     fim_tokens: str,
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    num_shots: int | None,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -67,6 +72,7 @@ def evaluate_checkpoint(
     oe_eval_dir = install_oe_eval(
         env=env,
         commit_hash=oe_eval_commit,
+        commit_branch=oe_eval_branch,
         is_editable=use_gantry,
         branch=oe_eval_branch,
     )
@@ -77,10 +83,10 @@ def evaluate_checkpoint(
     # clusters_to_exclude
     clusters_to_exclude: set[str] = set()
 
-    # processing gantry args
-    if isinstance(gantry_args, str):
-        # load gantry args using json
-        gantry_args = json.loads(gantry_args.strip() or "{}")
+    # processing gantry/task args
+    gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
+
+    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else task_args
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -124,7 +130,7 @@ def evaluate_checkpoint(
                 env=env,  # pyright: ignore
             )
             flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
-            gantry_args = {"hf_token": "true", **gantry_args}
+            gantry_args_dict = {"hf_token": "true", **gantry_args_dict}
         else:
             print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
 
@@ -139,6 +145,7 @@ def evaluate_checkpoint(
     run_name = make_eval_run_name(
         checkpoint_path=checkpoint_path,
         add_bos_token=add_bos_token,
+        num_shots=num_shots,
         name_suffix=name_suffix.strip(),
     )
 
@@ -158,6 +165,11 @@ def evaluate_checkpoint(
     flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
     flags.append("--push-datalake")
 
+    # override number of shots; by default, the number of shots is part of task definition in oe-eval
+    # changing number of shots will result in a new run name, similar to how we do it for BOS token.
+    if num_shots is not None:
+        flags.append(f"--num-shots {num_shots}")
+
     # figure out model args based on cli
     model_args = {
         "model_path": checkpoint_path,
@@ -172,10 +184,27 @@ def evaluate_checkpoint(
     flags.append(f"--model-args '{model_args_str}'")
     flags.append(f"--model-type {model_backend}")
 
-    # these are all the tasks we want to run
-    all_tasks = sorted(
-        set(task for task_group in tasks for task in ALL_NAMED_GROUPS.get(task_group, [task_group]))
-    )
+    # these are all the tasks we want to run; note that we can't run regex patterns here,
+    # they have to be actual strings
+    all_tasks = sorted(list(set(
+        task
+        for task_group in tasks
+        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+        if isinstance(task, str)
+    )))
+
+    print('Launching evals on the following tasks:')
+    pprint(all_tasks)
+
+    # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
+    EXCLUDE_FROM_LAUNCH = [
+        r'^mmlu_.*:bpb::olmes$',
+        r'^lambada:bpb$'
+    ]
+    all_tasks = [
+        task for task in all_tasks
+        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
+    ]
 
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
@@ -184,6 +213,9 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
+        #     # these tasks don't work with vllm, so we run them on huggingface
+        #     partitioned_tasks.setdefault("hf", []).append(task)
         else:
             partitioned_tasks.setdefault("gen", []).append(task)
 
@@ -243,6 +275,10 @@ def evaluate_checkpoint(
             if beaker_image:
                 local_flags.append(f"--beaker-image {beaker_image}")
 
+            # set revision
+            if revision:
+                local_flags.append(f"--revision {revision}")
+
             # set gantry
             if use_gantry:
                 local_flags.append("--use-gantry")
@@ -250,26 +286,38 @@ def evaluate_checkpoint(
             if beaker_retries > 0:
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
-            assert isinstance(gantry_args, dict), "gantry_args must be a dictionary"
-
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args}
+            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
 
             # finally append gantry args
-            local_flags.append(f"--gantry-args '{json.dumps(gantry_args)}'")
+            local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
 
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            special_task_args = {}
             if fim_tokens:
-                special_task_args = FIM_TOKENS[fim_tokens]
+                infilling_dict = FIM_TOKENS[fim_tokens]
+
+                # Add FIM tokens to context, preserving other existing kwargs
+                task_args_dict.setdefault("context_kwargs", {})
+                task_args_dict["context_kwargs"].update(infilling_dict["context_kwargs"])
+
+                # Add FIM stop sequences, preserving other existing stop sequences
+                task_args_dict.setdefault("generation_kwargs", {})
+                if "stop_sequences" in task_args_dict["generation_kwargs"]:
+                    # Add the stop tokens if they do not exist
+                    task_args_dict["generation_kwargs"]["stop_sequences"].extend(
+                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"] 
+                         if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]]
+                    )
+                else:
+                    task_args_dict["generation_kwargs"].update(infilling_dict["generation_kwargs"])
 
             if compute_gold_bpb:
-                special_task_args["compute_gold_bpb"] = True
+                task_args_dict["compute_gold_bpb"] = True
 
-            if special_task_args:
-                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
+            if task_args_dict:
+                local_flags.append(f"--task-args '{json.dumps(task_args_dict)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
