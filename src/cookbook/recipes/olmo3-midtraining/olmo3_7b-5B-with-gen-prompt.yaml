@@ -1,8 +1,8 @@
 name: "olmo3-7b-5B-with-gen-prompt"
 description: "OLMo3 7b 5B with generation prompt"
 budget: "ai2/oe-base"
-workspace: "ai2/oe-data"
-nodes: 1
+workspace: "ai2/olmo-3-microanneals"
+nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 5_000_000_000
