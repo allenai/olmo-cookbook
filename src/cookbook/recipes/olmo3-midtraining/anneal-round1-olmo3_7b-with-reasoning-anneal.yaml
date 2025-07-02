@@ -13,7 +13,7 @@ model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
 priority: urgent
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 8192
+rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 0
 activation_checkpointing: true

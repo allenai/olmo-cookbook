@@ -19,7 +19,7 @@ from olmo_core.data import (
 from olmo_core.nn.attention import SlidingWindowAttentionConfig
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.float8 import Float8Config
+from olmo_core.float8 import AOFloat8LinearConfig, Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
@@ -233,6 +233,7 @@ class TransformerConfigBuilder:
         seed: int = 42,
         warmup_steps: Optional[int] = None,
         profile: bool = False,
+        float8_enabled: bool = True,
     ):
         self.run_name = run_name
         self.sources = sources
@@ -270,6 +271,7 @@ class TransformerConfigBuilder:
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
+        self.float8_enabled = float8_enabled
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
@@ -515,6 +517,16 @@ class TransformerConfigBuilder:
                 resource_path(folder=self.load_path, fname="config.json"),
             )
 
+    def get_fp8_config(self) -> Float8Config:
+        return Float8Config(
+            enabled=self.float8_enabled,
+            ao=AOFloat8LinearConfig(
+                enable_fsdp_float8_all_gather=True,
+                force_recompute_fp8_weight_in_bwd=True,
+                round_scales_to_power_of_2=True,
+            ),
+        )
+
     def get_state_from_checkpoint(self) -> SchedulerState:
         state_path, config_path = self.load_state_and_config_from_path()
         train_state = torch.load(state_path, weights_only=False)
@@ -620,7 +632,7 @@ class TransformerConfigBuilder:
                 name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
             ),
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
-            float8_config=Float8Config(enabled=False),
+            float8_config=self.get_fp8_config(),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
             scheduler=self.get_scheduler_config(),
