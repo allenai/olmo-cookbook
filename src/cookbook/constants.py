@@ -338,6 +338,135 @@ HELMET_SUITES = {
     "helmet_summ__8192::suite": ["helmet_infbench_sum_eng_6792__8192::std", "helmet_multi_lexsum_7492__8192::std"],
 }
 
+RULER_SUITES = {
+    "ruler_niah__4096::suite": [
+        "ruler_niah_s_1__4096",
+        "ruler_niah_s_2__4096",
+        "ruler_niah_s_3__4096",
+        "ruler_niah_mk_1__4096",
+        "ruler_niah_mk_2__4096",
+        "ruler_niah_mk_3__4096",
+        "ruler_niah_mv__4096",
+        "ruler_niah_mq__4096",
+    ],
+    "ruler_multi_hop_tracing__4096::suite": [
+        "ruler_vt__4096",
+    ],
+    "ruler_aggregation__4096::suite": [
+        "ruler_cwe__4096",
+        "ruler_fwe__4096",
+    ],
+    "ruler_qa__4096::suite": [
+        "ruler_qa_1__4096",
+        "ruler_qa_2__4096"
+    ],
+    "ruler_niah__8192::suite": [
+        "ruler_niah_s_1__8192",
+        "ruler_niah_s_2__8192",
+        "ruler_niah_s_3__8192",
+        "ruler_niah_mk_1__8192",
+        "ruler_niah_mk_2__8192",
+        "ruler_niah_mk_3__8192",
+        "ruler_niah_mv__8192",
+        "ruler_niah_mq__8192",
+    ],
+    "ruler_multi_hop_tracing__8192::suite": [
+        "ruler_vt__8192",
+    ],
+    "ruler_aggregation__8192::suite": [
+        "ruler_cwe__8192",
+        "ruler_fwe__8192",
+    ],
+    "ruler_qa__8192::suite": [
+        "ruler_qa_1__8192",
+        "ruler_qa_2__8192"
+    ], 
+    "ruler_niah__16384::suite": [
+        "ruler_niah_s_1__16384",
+        "ruler_niah_s_2__16384",
+        "ruler_niah_s_3__16384",
+        "ruler_niah_mk_1__16384",
+        "ruler_niah_mk_2__16384",
+        "ruler_niah_mk_3__16384",
+        "ruler_niah_mv__16384",
+        "ruler_niah_mq__16384",
+    ],
+    "ruler_multi_hop_tracing__16384::suite": [
+        "ruler_vt__16384",
+    ],
+    "ruler_aggregation__16384::suite": [
+        "ruler_cwe__16384",
+        "ruler_fwe__16384",
+    ],
+    "ruler_qa__16384::suite": [
+        "ruler_qa_1__16384",
+        "ruler_qa_2__16384"
+    ],
+    "ruler_niah__32768::suite": [
+        "ruler_niah_s_1__32768",
+        "ruler_niah_s_2__32768",
+        "ruler_niah_s_3__32768",
+        "ruler_niah_mk_1__32768",
+        "ruler_niah_mk_2__32768",
+        "ruler_niah_mk_3__32768",
+        "ruler_niah_mv__32768",
+        "ruler_niah_mq__32768",
+    ],
+    "ruler_multi_hop_tracing__32768::suite": [
+        "ruler_vt__32768",
+    ],
+    "ruler_aggregation__32768::suite": [
+        "ruler_cwe__32768",
+        "ruler_fwe__32768",
+    ],
+    "ruler_qa__32768::suite": [
+        "ruler_qa_1__32768",
+        "ruler_qa_2__32768"
+    ],
+    "ruler_niah__65536::suite": [
+        "ruler_niah_s_1__65536",
+        "ruler_niah_s_2__65536",
+        "ruler_niah_s_3__65536",
+        "ruler_niah_mk_1__65536",
+        "ruler_niah_mk_2__65536",
+        "ruler_niah_mk_3__65536",
+        "ruler_niah_mv__65536",
+        "ruler_niah_mq__65536",
+    ],
+    "ruler_multi_hop_tracing__65536::suite": [
+        "ruler_vt__65536",
+    ],
+    "ruler_aggregation__65536::suite": [
+        "ruler_cwe__65536",
+        "ruler_fwe__65536",
+    ],
+    "ruler_qa__65536::suite": [
+        "ruler_qa_1__65536",
+        "ruler_qa_2__65536"
+    ],
+    "ruler_niah__131072::suite": [
+        "ruler_niah_s_1__131072",
+        "ruler_niah_s_2__131072",
+        "ruler_niah_s_3__131072",
+        "ruler_niah_mk_1__131072",
+        "ruler_niah_mk_2__131072",
+        "ruler_niah_mk_3__131072",
+        "ruler_niah_mv__131072",
+        "ruler_niah_mq__131072",
+    ],
+    "ruler_multi_hop_tracing__131072::suite": [
+        "ruler_vt__131072",
+    ],
+    "ruler_aggregation__131072::suite": [
+        "ruler_cwe__131072",
+        "ruler_fwe__131072",
+    ],
+    "ruler_qa__131072::suite": [
+        "ruler_qa_1__131072",
+        "ruler_qa_2__131072"
+    ], 
+}
+
 ALL_CORE_TASKS = [
     "arc_easy",
     "arc_challenge",
