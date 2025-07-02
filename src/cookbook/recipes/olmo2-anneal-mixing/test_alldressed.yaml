@@ -1,5 +1,5 @@
-name: "olmo2-1b_100M-anneal-all-dressed-original"
-description: "OLMo2 1b anneal to 100M tokens, all-dressed (1 source, no mixing) before olmo-core fix"
+name: "olmo2-1b_100M-anneal-all-dressed-fixed"
+description: "OLMo2 1b anneal to 100M tokens, all-dressed (1 source, no mixing) after olmo-core fix"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
 nodes: 1

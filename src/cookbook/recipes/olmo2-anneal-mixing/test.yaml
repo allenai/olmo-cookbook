@@ -1,5 +1,5 @@
-name: "olmo2-1b_100M-anneal_dclm-natural-original"
-description: "OLMo2 1b anneal to 100M tokens, DCLM natural (mixing dataset) before olmo-core fix"
+name: "olmo2-1b_100M-anneal_dclm-natural-fixed"
+description: "OLMo2 1b anneal to 100M tokens, DCLM natural (mixing dataset) after olmo-core fix"
 budget: "ai2/oe-data"
 workspace: "ai2/oe-data"
 nodes: 1
