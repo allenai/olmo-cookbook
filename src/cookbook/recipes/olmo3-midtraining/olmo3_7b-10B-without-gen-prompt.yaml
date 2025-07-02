@@ -45,12 +45,7 @@ dataset:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/mj_intermediate_math/allenai/dolma2-tokenizer/*.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
-  - name: reddit
-    # 8_923_780_609 tokens
-    target_ratio: 0.089
-    paths:
-    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
   - name: instruction
-    target_ratio: 0.011
+    target_ratio: 0.1
     paths:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-kyle-modified-chat-template-no-generation-prompt/*.npy
