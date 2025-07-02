@@ -633,7 +633,7 @@ class TransformerConfigBuilder:
                 param_dtype=DType.bfloat16,
                 reduce_dtype=DType.float32,
                 wrapping_strategy=train_module.TransformerDataParallelWrappingStrategy.blocks,
-                shard_degree=8,
+                shard_degree=32,
             ),
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=self.get_fp8_config(),
