@@ -1,0 +1,46 @@
+name: "olmo2-1b-1T_10b-anneal_dclm-good-search"
+description: "OLMo2 1b 1T ckpt anneal to 10B tokens, DCLM good search (swarm 62e7dc06 run 95)"
+budget: "ai2/oe-data"
+workspace: "ai2/oe-data"
+nodes: 1
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: "dolma2"
+priority: urgent
+eval_interval: 250
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 32768
+scheduler_type: linear
+warmup_steps: 0
+annealing:
+  enabled: true
+  initial_lr: 0.00036563 # See https://wandb.ai/ai2-llm/olmo-small/runs/kq3x9sam
+load_path: gs://ai2-llm/checkpoints/mayeec/olmo2-0425-1b-stage1/step480000/model_and_optim/
+load_state: false
+dataset:
+  sources:
+    - name: crime_and_law
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/crime_and_law/**/*.npy
+      target_ratio: 0.05263157894736841
+    - name: entertainment
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/entertainment/**/*.npy
+      target_ratio: 0.3157894736842105
+    - name: finance_and_business
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/finance_and_business/**/*.npy
+      target_ratio: 0.05263157894736841
+    - name: games
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/games/**/*.npy
+      target_ratio: 0.21052631578947364
+    - name: science_math_and_technology
+      paths:
+        - s3://ai2-llm/preprocessed/dclm/baseline_topic_ft_lr05_ng2_n3M6_ova_20pct/allenai/dolma2-tokenizer/science_math_and_technology/**/*.npy
+      target_ratio: 0.3684210526315789
