@@ -101,6 +101,7 @@ class TransformerConfigBuilder:
         seed (int): The random seed for reproducibility.
         tokenizer (TokenizerConfig): The tokenizer configuration.
         dtype (str): The data type for the dataset.
+        generate_doc_lengths (bool): Whether to generate document lengths for the dataset. Enabling this enables intra-document masking.
         weka (bool): Whether to use Weka buckets.
         metrics_config (Optional[MetricsConfig]): The metrics configuration, if any.
         max_dp_world_size (int): The maximum data parallel world size.
@@ -178,6 +179,7 @@ class TransformerConfigBuilder:
     seed: int
     tokenizer: TokenizerConfig
     dtype: str
+    generate_doc_lengths: bool
     weka: bool
     metrics_config: Optional[MetricsConfig]
     max_dp_world_size: int
@@ -214,6 +216,7 @@ class TransformerConfigBuilder:
         tokenizer: str,
         dtype: str,
         model_identifier: ModelConfigIdentifier,
+        generate_doc_lengths: bool,
         weka: bool,
         max_dp_world_size: int,
         save_interval: int,
@@ -257,13 +260,13 @@ class TransformerConfigBuilder:
         self.float8 = float8
         self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
+        self.generate_doc_lengths = generate_doc_lengths
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
         self.max_dp_world_size = max_dp_world_size
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
         self.save_interval = save_interval
-        self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
         self.learning_rate = learning_rate
         self.global_batch_size = global_batch_size
@@ -407,6 +410,7 @@ class TransformerConfigBuilder:
                     sequence_length=self.sequence_length,
                     tokenizer=self.tokenizer,
                     work_dir=self.dataset_cache,
+                    generate_doc_lengths=self.generate_doc_lengths,
                 ),
                 eval_interval=self.eval_interval,
             )
@@ -455,6 +459,7 @@ class TransformerConfigBuilder:
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
+            generate_doc_lengths=self.generate_doc_lengths,
         )
 
         return dataset_config
