@@ -12,7 +12,9 @@ nodes: 2
 gpus: 8
 seed: 4123
 generate_doc_lengths: true  # enable intra-document masking
+# TODO: update to the actual start checkpoint for Long Context extension
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B/step297000/model_and_optim/
+load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
@@ -27,8 +29,6 @@ dp_shard_degree: 2  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
 activation_checkpointing: true
-# TODO: update to the actual start checkpoint for Long Context extension
-load_state: false
 downstream_evaluators:
   - olmo2_dev_1b
 dataset:
