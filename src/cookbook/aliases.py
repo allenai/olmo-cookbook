@@ -103,6 +103,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
     global_batch_size: Optional[int] = None
+    generate_doc_lengths: bool = False
     lm_evaluator: bool = False
     downstream_evaluators: list[DownstreamEvaluatorType] = []  # type: ignore
     max_target_sequence_length: int = 8192

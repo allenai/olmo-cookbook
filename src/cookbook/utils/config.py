@@ -156,6 +156,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         cluster=base_config.cluster,
         downstream_evaluators=base_config.downstream_evaluators,
         dtype=base_config.dataset.dtype,
+        generate_doc_lengths=base_config.generate_doc_lengths,
         eval_interval=base_config.eval_interval,
         group_id=group_id.strip(),
         lm_evaluator=base_config.lm_evaluator,

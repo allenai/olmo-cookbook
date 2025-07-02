@@ -10,6 +10,7 @@ global_batch_size: 4194304
 sequence_length: 65536
 max_target_sequence_length: 65536
 rank_microbatch_size: 65536  # must be the same as sequence_length
+generate_doc_lengths: true  # enable intra-document masking
 seed: 4123
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
