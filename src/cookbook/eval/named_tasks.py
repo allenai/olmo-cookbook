@@ -602,8 +602,10 @@ class Olmo2PaperGroup(BaseTaskView):
         "winogrande:mc::olmes",
         "naturalqs::olmes",
         "drop::olmes",
-        "agieval.*::olmes",
+        AgiEvalGroup(),
         "gsm8k::olmes",
+        MMLUMCGroup(),
+        MMLURCGroup(),
         CoreMCGroup(),
         MMLUProMCGroup(),
         "triviaqa::olmes"
@@ -617,7 +619,7 @@ class Olmo2Dev7bGroup(BaseTaskView):
         "arc_easy:mc::olmes",
         "hellaswag:mc::olmes",
         "naturalqs::olmes",
-        "^gsm8k::olmo1",
+        "gsm8k::olmo1",
         MMLUMCGroup(),
         CoreMCGroup(),
         GenGroup(),
@@ -652,6 +654,14 @@ class Olmo3Dev1bMainGroup(BaseTaskView):
         "codex_humaneval:3shot:bpb::none",
         "mbpp:3shot:bpb::none",
         MinervaBpbGroup()
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:main:hf")
+class Olmo3Dev1bMainHFGroup(BaseTaskView):
+    tasks = [
+        "ultrachat_masked_ppl",
+        "wildchat_masked_ppl",
     ]
 
 
