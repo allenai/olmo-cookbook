@@ -8,6 +8,7 @@ preemptible: true
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4194304
 sequence_length: 65536
+max_target_sequence_length: 65536
 rank_microbatch_size: 65536  # must be the same as sequence_length
 seed: 4123
 model: "olmo3_7B_swafix"
