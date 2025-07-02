@@ -1,0 +1,51 @@
+2025-07-02 12:05:17.902	neptune-cs-aus-256.reviz.ai2.in:0	olmo_core.utils:204	INFO	Setting env var 'OMP_NUM_THREADS' to '8'
+2025-07-02 12:05:17.902	neptune-cs-aus-256.reviz.ai2.in:0	olmo_core.utils:204	INFO	Setting env var 'TOKENIZERS_PARALLELISM' to 'false'
+2025-07-02 12:05:17.909	neptune-cs-aus-256.reviz.ai2.in:0	cookbook.utils.data:51	INFO	Source distribution cache found, using cached values! This can be disabled by setting use_cache=False.
+2025-07-02 12:05:18.613	neptune-cs-aus-256.reviz.ai2.in:0	cookbook.cli.cli:96	INFO	Launching experiment group '3a2bf255' as user 'YAPEIC'
+2025-07-02 12:05:18.613	neptune-cs-aus-256.reviz.ai2.in:0	cookbook.cli.cli:98	INFO	name='olmo3-7b-5B-with-gen-prompt' description='OLMo3 7b 5B with generation prompt' budget='ai2/oe-base' workspace='ai2/oe-data' nodes=1 gpus=8 max_tokens=5000000000 sequence_length=8192 seed=1337 cluster='ai2/augusta-google-1' tokenizer='dolma2' priority=<Priority.high: 'high'> dataset=DatasetConfig(sources=[SourceConfig(name='web', paths=['s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy'], target_ratio=0.4, repetition_factor=1.0, max_source_ratio=1.0), SourceConfig(name='code', paths=['s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy'], target_ratio=0.2, repetition_factor=1.0, max_source_ratio=1.0), SourceConfig(name='finemath', paths=['gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy'], target_ratio=0.0806, repetition_factor=1.0, max_source_ratio=1.0), SourceConfig(name='dolminos2math', paths=['s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy', 's3://ai2-llm/preprocessed/midtraining-reasoning/mj_intermediate_math/allenai/dolma2-tokenizer/*.npy', 's3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy', 's3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy'], target_ratio=0.1194, repetition_factor=1.0, max_source_ratio=1.0), SourceConfig(name='instruction', paths=['s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy'], target_ratio=0.2, repetition_factor=1.0, max_source_ratio=1.0)], dtype='uint32', processes=16, seed=42) model=ModelConfigIdentifier('olmo2_7B_swafix') load_path='gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000' load_state=False annealing=AnnealConfig(enabled=True, initial_lr=None) nccl_debug=False activation_checkpointing=True model_overrides=None scheduler_type=<SchedulerType.LINEAR: 'linear'> hard_stop=None rank_microbatch_size=8192 learning_rate=None global_batch_size=2097152 lm_evaluator=False downstream_evaluators=[] max_target_sequence_length=8192 metrics_config=MetricsConfig(project='olmo-cookbook', workspace='ai2', entity='ai2-llm', backends=[<MetricBackend.wandb: 'wandb'>]) preemptible=True shared_filesystem=False weka=False eval_interval=200 save_interval=1000 warmup_steps=0 path=PosixPath('src/cookbook/recipes/olmo3-midtraining/olmo3_7b-5B-with-gen-prompt.yaml')
+2025-07-02 12:05:18.614	neptune-cs-aus-256.reviz.ai2.in:0	cookbook.cli.cli:99	INFO	Token distribution by source:
+2025-07-02 12:05:18.614	neptune-cs-aus-256.reviz.ai2.in:0	cookbook.cli.cli:100	INFO	({'web': 0.08303815957393879, 'code': 0.2764800001323024, 'finemath': 0.4578474983884569, 'dolminos2math': 0.16061813732064995, 'instruction': 0.022016204584651984}, 74387157455)
+2025-07-02 12:05:18.614	neptune-cs-aus-256.reviz.ai2.in:0	cookbook.cli.cli:101	INFO	Running with trainer config:
+2025-07-02 12:05:18.628	neptune-cs-aus-256.reviz.ai2.in:0	olmo_core.utils:357	CRITICAL	Uncaught ProfileNotFound: The config profile (WEKA) could not be found
+Traceback (most recent call last):
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/bin/olmo-cookbook", line 10, in <module>
+    sys.exit(cli.cli())
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/click/core.py", line 1442, in __call__
+    return self.main(*args, **kwargs)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/click/core.py", line 1363, in main
+    rv = self.invoke(ctx)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/click/core.py", line 1830, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/click/core.py", line 1226, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/click/core.py", line 794, in invoke
+    return callback(*args, **kwargs)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/src/cookbook/cli/cli.py", line 102, in launch
+    logger.info(build_train_config(config, experiment_config.name, group_uuid, beaker_user, dry_run=True))
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/src/cookbook/utils/config.py", line 136, in build_train_config
+    load_path_fs = remote_fs_cache()[urlparse(base_config.load_path).scheme]
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/src/cookbook/utils/config.py", line 117, in remote_fs_cache
+    weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/fsspec/spec.py", line 81, in __call__
+    obj = super().__call__(*args, **kwargs)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/s3fs/core.py", line 187, in __init__
+    self.s3 = self.connect()
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/s3fs/core.py", line 292, in connect
+    self.s3 = self.session.create_client('s3', aws_access_key_id=self.key, aws_secret_access_key=self.secret, aws_session_token=self.token, config=conf, use_ssl=ssl,
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/session.py", line 943, in create_client
+    region_name = self._resolve_region_name(region_name, config)
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/session.py", line 1051, in _resolve_region_name
+    region_name = self.get_config_variable('region')
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/session.py", line 324, in get_config_variable
+    return self.get_component('config_store').get_config_variable(
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/configprovider.py", line 518, in get_config_variable
+    return provider.provide()
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/configprovider.py", line 724, in provide
+    value = provider.provide()
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/configprovider.py", line 811, in provide
+    scoped_config = self._session.get_scoped_config()
+  File "/weka/oe-training-default/yapeic/olmo-cookbook/.venv/lib/python3.10/site-packages/botocore/session.py", line 423, in get_scoped_config
+    raise ProfileNotFound(profile=profile_name)
+botocore.exceptions.ProfileNotFound: The config profile (WEKA) could not be found
