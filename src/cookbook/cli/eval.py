@@ -276,6 +276,13 @@ def convert_checkpoint(
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
 @click.option(
+    "--task-args",
+    type=str,
+    default=[],
+    multiple=True,
+    help="Extra arguments to pass to the task config. Can specify multiple args.",
+)
+@click.option(
     "--model-args",
     type=str,
     default="",
@@ -349,6 +356,7 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    task_args: list[str],
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
@@ -362,6 +370,13 @@ def evaluate_model(
 
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
+    parsed_task_args: dict[str, str] = {}
+    for arg in task_args:
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_task_args[key] = json.loads(value)
 
     parsed_model_args: dict[str, str] = {}
     for arg in model_args.split(","):
@@ -408,6 +423,7 @@ def evaluate_model(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        task_args=parsed_task_args,
         model_args=parsed_model_args,
         fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,

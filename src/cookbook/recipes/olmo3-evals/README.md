@@ -16,9 +16,11 @@ For **OLMo 2 1B 5xC** or **OLMo 2 7B annealing** runs, which we are still using 
 Some more notes about in-loop eval:
 * If you want to add an in-loop eval, the repo is here: https://github.com/allenai/OLMo-in-loop-evals
 * When selecting which metrics in Wandb, be very careful around whether you are selecting `{dev|test}`, `{rc|mc}`, `{length-normalized-accuracy|length-normalized-accuracy v2}`, `{BPB|BPB v2}`, `{5shot|5shot_fast}`.
+    * The `v2` tasks fix the length-normalization, the original versions are reported for backwards-compatibility.
+    * `5shot_fast` and `5shot` will give the same numbers, the `_fast` implementation uses one forward pass for the `A/B/C/D` tokens in MCQA tasks.
 
 
-## Offline evaluation
+## Offline evaluation (1B or smaller)
 
 For all OLMo models (+ external baselines), this is a running list of evals we care about.
 
@@ -37,7 +39,7 @@ DASHBOARD="olmo-3-evals"
 WORKSPACE="ai2/olmo-3-evals"
 
 olmo-cookbook-eval evaluate "$CHECKPOINT" \
-    --tasks "*olmo3:dev:1b:vllm" \
+    --tasks "olmo3:dev:1b:main" \
     --priority "$PRIORITY" \
     --cluster "$CLUSTER" \
     --num-gpus "$NUM_GPUS" \
@@ -48,7 +50,7 @@ olmo-cookbook-eval evaluate "$CHECKPOINT" \
     --workspace "$WORKSPACE"
 
 olmo-cookbook-eval evaluate "$CHECKPOINT" \
-    --tasks "*olmo3:dev:1b:hf" \
+    --tasks "olmo3:dev:1b:main:hf" \
     --priority "$PRIORITY" \
     --cluster "$CLUSTER" \
     --num-gpus "$NUM_GPUS" \
@@ -60,31 +62,82 @@ olmo-cookbook-eval evaluate "$CHECKPOINT" \
 ```
 
 Notes: 
-* Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/e20beaee74a6a10b18113520e9e907fdbc24f444/src/cookbook/constants.py*
-
+* Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/main/src/cookbook/eval/named_tasks.py
 
 *How long does it take?*
-* "*olmo3:dev:1b:vllm" are a full suite of 20 tasks, each task w multiple metrics + some tasks as families w multiple subtasks. In total, this is around 150 metrics. Takes 2 hours to do all of them on `--partition-size 8` and `num-gpus 1` with single L40 (launches 5 jobs).
-* "*olmo3:dev:1b:hf" are two masked PPL evals. Takes 1 hour to do both on a single L40.
+* `olmo3:dev:1b:main` are a full suite of 20 tasks, each task w multiple metrics + some tasks as families w multiple subtasks. In total, this is around 150 metrics. Takes 2 hours to do all of them on `--partition-size 8` and `num-gpus 1` with single L40 (launches 5 jobs).
+* `olmo3:dev:1b:main:hf` are two masked PPL evals. Takes 1 hour to do both on a single L40.
 
 To pull dashboard results (use `--format json` to see full results):
 
 ```python
 olmo-cookbook-eval results \
     --dashboard olmo-3-evals \
-    --tasks olmo3:dev:1b \
+    --tasks olmo3:dev:1b:main \
+    --tasks olmo3:dev:1b:main:hf \
     --format json | jq '.' | less
 ```
 
 
 *Notes*
 * If you want to see if the datalake uploading job ran, use your beaker experimental ID to this URL: `https://oe-eval-datalake.allen.ai/greenlake/metadata/01JWMGNY3G3R5N91NW9TCKF6FB`.
-* I hate this design, but currently in order to use a named group when pulling dashboard results, you need to use it with a `*`, like `--tasks *mmlu:rc`, which then matches to `ALL_NAMED_GROUPS` in `constants.py`. If you don't include the `*`, it'll pass the exact string `mmlu:rc` and fail to match things.
-* I don't know why `basic_skills` pull dashboard requires removing `:rc::olmes` but launching eval requires adding it or it'll only launch the Arithmetic subportion. Something weird.
+
+## Offline evaluation (7B or larger)
+
+To launch the base evals for large training runs, we have a separate set. We assume the models a better capability to follow task formats, so this set removes BPB and includes MC:
+
+```sh
+olmo-cookbook-eval evaluate "$CHECKPOINT" \
+    --tasks "olmo3:dev:7b:main" \
+    --model-backend vllm \
+    ...
+```
+
+And pull your results with:
+
+```python
+olmo-cookbook-eval results \
+    --dashboard olmo-3-evals \
+    --tasks olmo3:dev:7b:main \
+    --format json | jq '.' | less
+```
+
+*How long does it take?*
+* `olmo3:dev:7b:main` takes roughly 30 minutes to do all of them on `--partition-size 1` and `num-gpus 2` with L40s.
+
+## Offline evaluation (midtraining)
+
+We have an additional set of adapt evals formatted for mid-trained models, this is meant to be run **in addition** to the base models. Please make sure to add the additional arguements to use a basic chat template for base models:
+
+```sh
+olmo-cookbook-eval evaluate "$CHECKPOINT" \
+  --tasks olmo3:dev:midtrain:v0 \
+  --model-backend vllm \
+  --no-compute-gold-bpb \
+  --model-args chat_template=basic_answer \
+  --use-gantry \
+  --gantry-args env-secret="OPENAI_API_KEY=openai_api_key" \
+  --task-args chat_overrides="{\"generation_kwargs\": {\"stop_sequences\": [\"Problem:\", \"Answer:\", \"Question:\", \"</s>\", \"<|eot_id|>\"]}}"
+  ...
+```
+
+And pull your results with:
+
+```python
+olmo-cookbook-eval results \
+    --dashboard olmo-3-evals \
+    --tasks olmo3:dev:midtrain:v0 \
+    --format json | jq '.' | less
+```
+
+Please refer to #oe-midtraining for more documentation.
+
+*How long does it take?*
+* `olmo3:dev:midtrain:v0` takes roughly 20 minutes using `--partition-size 1` and `num-gpus 2` with L40s.
 
 ## FAQs
 
-1. **Why leave out GSM8k?** The task is odd and appears mainly moved by hill-climbing with mid-training data. Minerva seems like it covers a greater range.
+1. **Why leave out GSM8k for base?** The task is odd and appears mainly moved by hill-climbing with mid-training data. Minerva seems like it covers a greater range.
 
 2. **BPB vs RC vs MC?** This is still debated among team, but the eventual goal should be to move toward BPB that we trust for our experiments, and monitoring MC (or our final target end task format) on 7B+ runs for metric breakthrough moments & final scores.
 
