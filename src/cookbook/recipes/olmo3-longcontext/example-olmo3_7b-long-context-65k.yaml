@@ -1,7 +1,7 @@
 name: "olmo3-7b-long-context-extension-example"
 description: "OLMo3 7b swafix high-throughput configuration example"
 budget: "ai2/oe-base"
-workspace: "ai2/oe-data"
+workspace: "ai2/OLMo-core"
 nodes: 2
 gpus: 8
 preemptible: true
