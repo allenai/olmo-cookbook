@@ -22,6 +22,7 @@ class MixtureBuilder:
     sequence_length: int
     seed: int
     dtype: NumpyDatasetDType
+    global_batch_size: int
     processes: int = 1
     cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
         default_factory=lambda: dict(
@@ -62,5 +63,6 @@ class MixtureBuilder:
             sequence_length=self.sequence_length,
             seed=self.seed,
             dtype=self.dtype,
+            global_batch_size=self.global_batch_size,
             processes=self.processes,
         )
