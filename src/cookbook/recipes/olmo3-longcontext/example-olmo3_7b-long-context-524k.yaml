@@ -1,6 +1,6 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 524k context length
 # Needs updates with actual training dataset and hyperparameters
-# Benchmarked at _ TPS/device on 4x8 H100s
+# Benchmarked at 5k TPS/device on 4x8 H100s
 name: "olmo3-7b-long-context-extension-524k-example"
 description: "OLMo3 7b swafix high-throughput configuration for 524k context length"
 budget: "ai2/oe-base"
