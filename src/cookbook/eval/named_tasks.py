@@ -690,7 +690,7 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
-class Olmo3Dev7bMainGroup(BaseAverageOfAveragesNamedTasksGroup):
+class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot
         "aime::hamish_zs_reasoning",
