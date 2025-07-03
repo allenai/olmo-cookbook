@@ -79,6 +79,12 @@ def make_dashboard_table(
         # we add primary metric after checking that we have a model name
         assert metric.model_name is not None
 
+        # @davidh: Hotfix for minerva math. The primary metric is set incorrectly in oe-eval but we
+        # want to make 100% sure we're looking at the right metric, because a lot of midtraining eval
+        # has already been ran.
+        if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
 
