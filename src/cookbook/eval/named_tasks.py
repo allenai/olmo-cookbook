@@ -693,21 +693,21 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot
-        "aime::hamish_zs_reasoning",
         "alpaca_eval_v3::hamish_zs_reasoning",
-        "codex_humanevalplus:0-shot-chat::tulu-thinker",
-        "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
-        "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         "ifeval::hamish_zs_reasoning",
-        "mbppplus:0-shot-chat::tulu-thinker",
+        "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
+        MinervaHamishZSReasoningGroup(),
         "minerva_math_500::hamish_zs_reasoning",
+        "aime::hamish_zs_reasoning",
+        "codex_humanevalplus:0-shot-chat::tulu-thinker",
+        "mbppplus:0-shot-chat::tulu-thinker",
+        "livecodebench_codegeneration::tulu-thinker",
+        BBHHamishZSReasoningGroup(),
+        "zebralogic::hamish_zs_reasoning",
+        "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
         "popqa::hamish_zs_reasoning",  #### from adapt: fix and test this guy.
         AgiEvalEnglishHamishZsReasoningGroup(),
-        BBHHamishZSReasoningGroup(),
-        MinervaHamishZSReasoningGroup(),
         MMLUHamishZSReasoningGroup(),
-        "zebralogic::hamish_zs_reasoning",
-        "livecodebench_codegeneration::tulu-thinker",
 
         ### Not yet implemented
         # cruxeval
