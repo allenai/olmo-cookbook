@@ -201,10 +201,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         trainer = config.trainer.build(train_module, data_loader)
 
         # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
-        if (
-            not trainer.maybe_load_checkpoint(trainer.save_folder, load_trainer_state=base_config.load_state)
-            and base_config.load_path
-        ):
+        if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
             logger.info(
                 f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
             )
