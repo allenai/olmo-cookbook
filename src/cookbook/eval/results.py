@@ -81,7 +81,7 @@ def make_dashboard_table(
 
         # @davidh: Hotfix for minerva math. The primary metric is set incorrectly in oe-eval but we
         # want to make 100% sure we're looking at the right metric, because a lot of midtraining eval
-        # has already been ran.
+        # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
         if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
             metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
 
