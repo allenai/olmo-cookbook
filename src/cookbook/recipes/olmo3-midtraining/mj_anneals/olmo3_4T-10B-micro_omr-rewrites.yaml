@@ -28,7 +28,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
   - name: openmathreasoning # 2.966B tokens | 2.966B requested 
-    target_ratio: 0.2966
+    target_ratio: 0.2965
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-dialogue-2students-error-correct/allenai/dolma2-tokenizer
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-sleek/allenai/dolma2-tokenizer
@@ -40,7 +40,7 @@ dataset:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-teacher-student-planning/allenai/dolma2-tokenizer
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-clean-thoughts/allenai/dolma2-tokenizer
   - name: fineMath # 34.06B tokens | 2.034B requested
-    target_ratio: 0.2034
+    target_ratio: 0.2035
     paths:
     - s3://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
 
