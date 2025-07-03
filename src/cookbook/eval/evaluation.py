@@ -295,7 +295,11 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            special_task_args = json.loads(special_task_args_str)
+            if special_task_args_str:
+                special_task_args = json.loads(special_task_args_str)
+            else:
+                special_task_args = None
+
             if fim_tokens:
                 infilling_dict = FIM_TOKENS[fim_tokens]
 
