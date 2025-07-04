@@ -1,0 +1,42 @@
+name: "meta-reasoning-olmo3-microanneal-5b"
+description: "OLMo3 7b 5B math meta-reasoning microanneal"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 5_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
+load_state: false
+dataset:
+  sources:
+  - name: web 
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
+  - name: math-meta-reasoning 
+    target_ratio: 0.25
+    repetition_factor: 1.2
+    paths:
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+  - name: code-meta-reasoning 
+    target_ratio: 0.25
+    repetition_factor: 1.2
+    paths:
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+
+
+  # /model_and_optim/
