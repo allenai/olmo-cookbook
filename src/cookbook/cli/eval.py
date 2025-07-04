@@ -326,6 +326,12 @@ def convert_checkpoint(
     help="Whether to use the backend in the run name",
 )
 @click.option(
+    "--backfill/--no-backfill",
+    default=False,
+    type=bool,
+    help="When True, only launch evals that are marked as 'missing' in the workspace.",
+)
+@click.option(
     "--name-suffix",
     type=str,
     default="",
@@ -373,6 +379,7 @@ def evaluate_model(
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
+    backfill: bool,
     name_suffix: str,
     num_shots: int | None,
 ):
@@ -404,6 +411,33 @@ def evaluate_model(
             continue
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
+
+    backfill_task_aliases = []
+    if backfill:
+        # Convert the path to the cookbook checkpoint format
+        # E.g., "allenai/OLMo-2-1124-13B-SFT" => "OLMo-2-1124-13B-SFT"
+        if checkpoint_path.count('/') > 1:
+            parts = checkpoint_path.split('/')
+            model_name = '_'.join(parts[-2:])
+        else:
+            model_name = checkpoint_path.split('/')[-1]
+
+        # Call the dashboard to get all the missing results
+        missing_tasks = get_results(
+            dashboard,
+            model_name,
+            tasks,
+            format='return_missing',
+            sort_by='avg',
+            sort_column_name=None,
+            sort_descending=None,
+            force=False,
+            skip_on_fail=True,
+        )
+        backfill_task_aliases = missing_tasks.get(model_name, [])
+        
+        print('Found the following missing tasks!')
+        pprint(backfill_task_aliases)
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
@@ -442,6 +476,7 @@ def evaluate_model(
         use_vllm_v1_spec=vllm_use_v1_spec,
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
+        backfill_task_aliases=backfill_task_aliases,
         num_shots=num_shots,
     )
 
@@ -567,6 +602,10 @@ def get_results(
         rows_filter_models=rows_filter_models,
         columns_filter_tasks=columns_filter_tasks,
     )
+
+    if format == 'return_missing':
+        return missing_tasks
+
     # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(

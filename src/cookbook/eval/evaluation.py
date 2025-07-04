@@ -62,6 +62,7 @@ def evaluate_checkpoint(
     use_vllm_v1_spec: bool,
     use_backend_in_run_name: bool,
     name_suffix: str,
+    backfill_task_aliases: list[str],
     num_shots: int | None,
 ):
     # Create virtual environment
@@ -189,7 +190,7 @@ def evaluate_checkpoint(
         task
         for task_group in tasks
         for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
-        if isinstance(task, str)
+        if isinstance(task, str) and (backfill_task_aliases == [] or task in backfill_task_aliases)
     )))
 
     print('Launching evals on the following tasks:')
