@@ -1,5 +1,5 @@
-name: "baseline-dolminos-anneal-100B-olmo3_7b"
-description: "Baseline dolmino mix OLMo3 7b anneal to 100B Tokens"
+name: "lr-test-baseline-dolminos-anneal-100B-olmo3_7b"
+description: "LR test version of baseline dolmino mix OLMo3 7b anneal to 100B Tokens"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 16
