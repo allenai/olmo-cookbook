@@ -114,7 +114,7 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
 
     _REMOTE_FS_CACHE = dict(
         s3=s3fs.S3FileSystem(),
-        weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+        # weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
         gs=gcsfs.GCSFileSystem(),
     )
 
