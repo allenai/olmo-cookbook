@@ -1,5 +1,5 @@
 name: "davidg-sponge-eli5-edu-olmo3_7b-microanneal"
-description: "OLMo3 7b 10B example microanneal"
+description: "OLMo3 7b 10B Sponge ELI5/Edu filtered microanneal"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
