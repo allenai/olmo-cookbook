@@ -34,6 +34,6 @@ dataset:
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
   - name: code-meta-reasoning 
     target_ratio: 0.25
-    repetition_factor: 2
+    repetition_factor: 1
     paths:
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
