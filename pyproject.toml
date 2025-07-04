@@ -28,6 +28,8 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
+    "beaker-py>=1,<2",
+    "torch==2.6.0",
 ]
 
 [project.optional-dependencies]
