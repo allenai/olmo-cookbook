@@ -1,4 +1,4 @@
-name: "meta-reasoning-olmo3-microanneal-5b"
+name: "math-meta-reasoning-olmo3-microanneal-5b"
 description: "OLMo3 7b 5B math meta-reasoning microanneal"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
@@ -28,15 +28,15 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
   - name: math-meta-reasoning 
-    target_ratio: 0.25
-    repetition_factor: 1.2
+    target_ratio: 0.5
+    repetition_factor: 2.5
     paths:
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
-  - name: code-meta-reasoning 
-    target_ratio: 0.25
-    repetition_factor: 1.2
-    paths:
-    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+  # - name: code-meta-reasoning 
+  #   target_ratio: 0.25
+  #   repetition_factor: 1.2
+  #   paths:
+  #   - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
 
 
   # /model_and_optim/
