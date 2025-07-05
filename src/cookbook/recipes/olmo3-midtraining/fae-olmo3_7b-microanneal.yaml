@@ -21,12 +21,6 @@ annealing:
   enabled: true
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
-packages:
-  - pip: |
-      torch==2.6.0+cu128
-      torchvision==0.22.0+cu128
-      torchaudio==2.6.0+cu128
-      --extra-index-url https://download.pytorch.org/whl/cu128
 dataset:
   sources:
   - name: web 
