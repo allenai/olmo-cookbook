@@ -6,7 +6,7 @@ nodes: 16
 gpus: 8
 preemptible: true
 max_tokens: 100_000_000_000
-global_batch_size: 2097152
+global_batch_size: 16777216
 sequence_length: 8192
 seed: 1337
 model: "olmo2_7B_swafix"
