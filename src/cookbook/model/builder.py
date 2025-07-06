@@ -479,7 +479,8 @@ class TransformerConfigBuilder:
         lr = self.get_learning_rate()
 
         if self.annealing is not None:
-            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
+            # lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
+            lr = getattr(self.annealing, "initial_lr", None) or lr
 
         return SkipStepAdamWConfig(
             lr=lr,
