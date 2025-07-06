@@ -196,10 +196,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         trainer = config.trainer.build(train_module, data_loader)
 
         # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
-        if (
-            not trainer.maybe_load_checkpoint(trainer.save_folder, load_trainer_state=base_config.load_state)
-            and base_config.load_path
-        ):
+        if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
             logger.info(
                 f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
             )
@@ -241,7 +238,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-data",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu126",
+            beaker_image="petew/olmo-core-tch270cu128",
             priority=group.config.priority,
             env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
@@ -253,6 +250,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
                 BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
+            retries=3,
             setup_steps=[
                 'git clone "$REPO_URL"',
                 "conda shell.bash activate base",
