@@ -21,6 +21,8 @@ annealing:
   enabled: true
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
+downstream_evaluators:
+  - olmo2_dev_1b
 dataset:
   sources:
   - name: nemotron-cc
