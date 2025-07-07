@@ -1,4 +1,4 @@
-name: "davidg-7b_10b-anneal_sponge-99%filtered-alldressed-60split"
+name: "davidg-7b_10b-anneal_sponge-top1-filtered-alldressed-60split"
 description: "OLMo3 7b anneal to 10B Tokens for 60% alldressed 40% sponge-63 dclm_plus2 top 1%"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
