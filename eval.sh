@@ -99,16 +99,9 @@ done'
 
 
 
+INCLUDED=("0086" "0187")
 
-EXCLUDED=("0086" "0187")
-
-for i in $(seq -f "%04g" 3 511); do
-    # Skip excluded steps
-    if [[ " ${EXCLUDED[@]} " =~ " ${i} " ]]; then
-        echo "Skipping excluded step $i"
-        continue
-    fi
-
+for i in "${INCLUDED[@]}"; do
     CHECKPOINT="/oe-data-default/ai2-llm/checkpoints/mayeec/5xC-30m-superswarm-ee28fc9c-${i}/step22100-hf"
 
     echo "Evaluating checkpoint: $CHECKPOINT"
@@ -140,6 +133,19 @@ for i in $(seq -f "%04g" 3 511); do
         --cluster 80g \
         --num-gpus 1 \
         --model-backend vllm \
+        --model-args dtype=bfloat16 \
+        --partition-size 8 \
+        --dashboard regmixer \
+        --workspace ai2/dolma2
+
+    olmo-cookbook-eval evaluate "$CHECKPOINT" \
+        --tasks ultrachat_masked_ppl \
+        --tasks wildchat_masked_ppl \
+        --compute-gold-bpb \
+        --priority urgent \
+        --cluster 80g \
+        --num-gpus 1 \
+        --model-backend hf \
         --model-args dtype=bfloat16 \
         --partition-size 8 \
         --dashboard regmixer \
