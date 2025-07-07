@@ -167,8 +167,18 @@ def run_olmo_cookbook(weka_path):
     """Run the olmo-cookbook command with the GCS path"""
     print("Converting %s" % weka_path)
     weka_path = weka_path.replace("weka://", "/").rstrip("/")
-    cmd = ["olmo-cookbook-eval", "convert", weka_path, "-t", "olmo-core-v2", "--use-beaker"]
-
+    cmd = [
+        "olmo-cookbook-eval",
+        "convert",
+        weka_path,
+        "-t",
+        "olmo-core-v2",
+        "--use-beaker",
+        "--huggingface-transformers-git-url",
+        "https://github.com/2015aroras/transformers.git",
+        "--huggingface-transformers-commit-hash",
+        "ca728b8879ce5127ea3e2f8d309c2c5febab5dc5",
+    ]
     print(f"Running: {' '.join(cmd)}")
 
     try:
