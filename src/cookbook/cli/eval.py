@@ -18,10 +18,12 @@ from cookbook.constants import (
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_CONVERT_DTYPES,
     OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
+    TRANSFORMERS_GIT_URL,
 )
 from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
@@ -45,6 +47,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
 )
+@click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -82,6 +85,12 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
 )
+@click.option(
+    "--dtype",
+    type=click.Choice(OLMO_CORE_CONVERT_DTYPES),
+    default=None,
+    help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -101,6 +110,7 @@ def convert_checkpoint(
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     olmo_core_v2_commit_hash: str,
+    huggingface_transformers_git_url: str,
     huggingface_transformers_commit_hash: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
@@ -110,6 +120,7 @@ def convert_checkpoint(
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    dtype: Optional[str] = None,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -124,6 +135,7 @@ def convert_checkpoint(
         huggingface_output_suffix=huggingface_output_suffix,
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
+        huggingface_transformers_git_url=huggingface_transformers_git_url,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
         max_sequence_length=max_sequence_length,
@@ -139,6 +151,7 @@ def convert_checkpoint(
         use_beaker=use_beaker,
         use_system_python=use_system_python,
         skip_validation=skip_validation,
+        dtype=dtype,
     )
 
 
@@ -276,6 +289,13 @@ def convert_checkpoint(
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
 @click.option(
+    "--task-args",
+    type=str,
+    default=[],
+    multiple=True,
+    help="Extra arguments to pass to the task config. Can specify multiple args.",
+)
+@click.option(
     "--model-args",
     type=str,
     default="",
@@ -349,6 +369,7 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    task_args: list[str],
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
@@ -362,6 +383,13 @@ def evaluate_model(
 
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
+    parsed_task_args: dict[str, str] = {}
+    for arg in task_args:
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_task_args[key] = json.loads(value)
 
     parsed_model_args: dict[str, str] = {}
     for arg in model_args.split(","):
@@ -408,6 +436,7 @@ def evaluate_model(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        task_args=parsed_task_args,
         model_args=parsed_model_args,
         fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
