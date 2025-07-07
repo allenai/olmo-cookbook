@@ -184,7 +184,7 @@ def run_olmo_cookbook(gs_path):
 def main():
     parser = argparse.ArgumentParser(description="Process YAML file and run olmo-cookbook with latest checkpoint")
     parser.add_argument("yaml_file", help="Path to the YAML file")
-
+    parser.add_argument("--beaker-name", required=False, default=None)
     args = parser.parse_args()
 
     # Validate input file exists
@@ -199,7 +199,10 @@ def main():
     print(f"YAML name: {yaml_name}")
 
     # Step 2: Get beaker name
-    beaker_name = get_beaker_name()
+    if args.beaker_name == None:
+        beaker_name = get_beaker_name()
+    else:
+        beaker_name = args.beaker_name
     print(f"Beaker name: {beaker_name}")
 
     # Step 3: Find latest checkpoint
