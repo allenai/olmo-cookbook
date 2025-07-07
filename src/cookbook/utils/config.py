@@ -114,7 +114,7 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
 
     _REMOTE_FS_CACHE = dict(
         s3=s3fs.S3FileSystem(),
-        # weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+        weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
         gs=gcsfs.GCSFileSystem(),
     )
 
@@ -170,7 +170,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         sources=source_instances,
         tokenizer=base_config.tokenizer,
         metrics_config=base_config.metrics_config,
-        weka=base_config.weka,
+        weka=None, #base_config.weka,
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
         load_path=base_config.load_path,
