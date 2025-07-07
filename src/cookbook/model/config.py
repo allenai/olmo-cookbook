@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
@@ -185,6 +184,18 @@ class WrappedTransformerConfig:
             layer_norm_eps=DefaultTransformerProperties.layer_norm_eps,
             qk_norm=DefaultTransformerProperties.qk_norm,
             block_name=DefaultTransformerProperties.block_type,
+        )
+
+    @classmethod
+    def olmo2_7B_swafix(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2 7B with SWA fix changes
+        """
+        return getattr(TransformerConfig, "olmo2_7B")(
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
         )
 
     @classmethod
