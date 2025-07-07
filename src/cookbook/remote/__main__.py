@@ -32,7 +32,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
@@ -42,7 +42,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
@@ -57,7 +57,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
         elif dst_loc.prot == "gs":
@@ -66,7 +66,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
