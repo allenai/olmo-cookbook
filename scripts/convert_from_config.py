@@ -222,6 +222,7 @@ def main():
     parser = argparse.ArgumentParser(description="Process YAML file and run olmo-cookbook with latest checkpoint")
     parser.add_argument("yaml_file", help="Path to the YAML file")
     parser.add_argument("--beaker-name", required=False, default=None)
+    parser.add_argument("--overwrite", required=False, type=bool, default=False)
     args = parser.parse_args()
 
     # Validate input file exists
@@ -250,7 +251,7 @@ def main():
     print(f"Latest checkpoint: {latest_checkpoint}")
 
     # Step 4: Check if weka path already exists
-    if check_hf_path_exists(latest_checkpoint):
+    if check_hf_path_exists(latest_checkpoint) and not args.overwrite:
         print(f"\n🚫 Converted checkpoint already exists in weka storage. Skipping cookbook command.")
         print(f"The checkpoint has already been copied to weka://oe-training-default/")
         return
