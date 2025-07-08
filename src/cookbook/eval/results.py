@@ -57,7 +57,7 @@ def make_dashboard_table(
     # keep track of bpb metrics names; we need these to warn users if a metric is missing,
     # but we wanna report the original metric name in the warning.
     bpb_to_og_metric_name_map: dict[str, str] = {}
-    
+
     # Filter to keep only the newest metric for each (model_name, alias) pair
     unique_metrics = {}
     for metric in metrics:
@@ -139,5 +139,5 @@ def print_missing_tasks(
             file=sys.stderr,
         )
         for task in model_missing_tasks:
-            print(f"  -{task}", file=sys.stderr)
+            print(f"  - {task}", file=sys.stderr)
         print(file=sys.stderr)
