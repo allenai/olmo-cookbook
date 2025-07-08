@@ -473,7 +473,7 @@ def run_checkpoint_conversion(
             gantry_flags.append(f"--cluster {cluster}")
 
         remote_command = [
-            "pip install uv && uv pip install . --system && && uv pip install torchao --system",
+            "pip install uv && uv pip install . --system && uv pip install torchao --system",
             "olmo-cookbook-eval convert",
             f"{input_dir}",
             f"--olmo-type {olmo_type}",
