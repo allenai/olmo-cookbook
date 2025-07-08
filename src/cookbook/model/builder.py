@@ -199,6 +199,7 @@ class TransformerConfigBuilder:
     activation_checkpointing: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
+    shard_degree: Optional[int] = None
 
     def __init__(
         self,
@@ -219,6 +220,7 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        shard_degree: Optional[int] = None,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
@@ -273,6 +275,7 @@ class TransformerConfigBuilder:
         self.cluster = cluster
         self.float8_enabled = float8_enabled
         self.cancel_check_interval = 50
+        self.shard_degree = shard_degree
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
@@ -634,7 +637,7 @@ class TransformerConfigBuilder:
                 param_dtype=DType.bfloat16,
                 reduce_dtype=DType.float32,
                 wrapping_strategy=train_module.TransformerDataParallelWrappingStrategy.blocks,
-                shard_degree=32,
+                shard_degree=self.shard_degree,
             ),
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=self.get_fp8_config(),

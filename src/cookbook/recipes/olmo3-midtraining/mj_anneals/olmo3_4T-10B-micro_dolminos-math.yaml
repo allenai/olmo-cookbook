@@ -1,8 +1,8 @@
-name: "example-olmo3-microanneal"
-description: "OLMo3 7b 10B example microanneal"
+name: "microanneal-dolminos_math_baseline"
+description: "OLMo3_4T 10B-microanneal with flat dolminos math dataset as a baseline"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 4
+nodes: 2
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
@@ -19,15 +19,16 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
 dataset:
   sources:
-  - name: web 
+  - name: web # 6.17B tokens | 5B requested
     target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
-  - name: code 
+  - name: dolminos_math # 10.69B tokens | 5B requested
     target_ratio: 0.5
     paths:
-    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math/allenai/dolma2-tokenizer/*.npy
+
