@@ -782,13 +782,12 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         StyledAlpacaEvalThinkerGroup(),
         IFEvalMTThinkerGroup(),
         AlpacaEvalMTGroup(),
-        StyledPopQAThinkerGroup(),
+        # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
         Omega0ShotCoTGroup(),
         "simpleqa::tulu-thinker",
-        "multiturn_alpacaeval_*::tulu",
-        "styled_math500::tulu-thinker",
-        "styled_alpacaeval::tulu-thinker",
-        "styled_popqa::tulu-thinker",
+        StyledPopQAThinkerGroup(),
+        StyledMath500ThinkerGroup(),
+        StyledAlpacaEvalThinkerGroup(),
 
         ### Not implemented
         # cruxeval
