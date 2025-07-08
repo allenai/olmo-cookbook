@@ -1,0 +1,15 @@
+[profile default]
+region = us-east-1
+output = json
+
+[profile WEKA]
+region = us-east-1
+output = json
+
+[profile S3]
+region = us-east-1
+output = json
+
+[profile R2]
+region = us-east-1
+output = json
