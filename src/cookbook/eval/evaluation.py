@@ -1,13 +1,12 @@
-from collections.abc import Mapping
 import json
 import re
 import shlex
 import subprocess
 from copy import deepcopy
 from hashlib import md5
+import sys
 from typing import Optional
 from urllib.parse import urlparse
-from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     PythonEnv,
@@ -85,7 +84,7 @@ def evaluate_checkpoint(
     # processing gantry/task args
     gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
 
-    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else task_args
+    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else (task_args or {})
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -197,9 +196,6 @@ def evaluate_checkpoint(
     # we finish by sorting the tasks
     all_tasks = sorted(all_tasks_set)
 
-    print('Launching evals on the following tasks:')
-    pprint(all_tasks)
-
     # @davidh: we have a few specific tasks that are not implemented in oe-eval as standalone tasks
     # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
     #          it's just the task alias that does not exist.
@@ -212,6 +208,16 @@ def evaluate_checkpoint(
         if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
     ]
 
+    # DOING SOME PRETTY PRINTING HERE #
+    print(
+        f"\n🏗️ Running following evals for \033[1m{run_name}\033[0m:",
+        file=sys.stderr,
+    )
+    for task in all_tasks:
+        print(f"  - {task}", file=sys.stderr)
+    print(file=sys.stderr)
+    # # # # # # # # # # # # # # # # # #
+
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
     for task in all_tasks:
@@ -219,6 +225,7 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # TODO: automatically partition HF tasks --@soldni
         # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
         #     # these tasks don't work with vllm, so we run them on huggingface
         #     partitioned_tasks.setdefault("hf", []).append(task)
