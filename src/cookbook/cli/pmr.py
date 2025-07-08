@@ -19,13 +19,16 @@ Examples:
 ---------
 
 Create a cluster of instances:
-    poormanray create --name chipstest --number 5 --instance i4i.2xlarge --detach
+    poormanray create --name chipstest --number 5 --instance-type i4i.2xlarge --detach
 
 List instances in a cluster:
     poormanray list --name chipstest --region us-east-1
 
 Set up AWS credentials and D2TK pipeline on instances:
     poormanray setup-d2tk --name chipstest --ssh-key-path ~/.ssh/id_rsa
+
+Set up decon pipeline on instances:
+    poormanray setup-decon --name chipstest --ssh-key-path ~/.ssh/id_rsa --github-token xxx
 
 Run a command on all instances in a cluster:
     poormanray run --name chipstest --command "echo 'Hello, world!'" --ssh-key-path ~/.ssh/id_rsa
@@ -232,6 +235,99 @@ uv venv
 uv pip install dolma
 """.strip()
 
+
+def make_decon_python_setup(github_token: str | None = None, host_index: int | None = None, host_count: int | None = None) -> str:
+    """Generate the DECON Python setup script with optional GitHub token and PMR environment variables."""
+    clone_cmd = "git clone https://github.com/allenai/decon.git"
+    if github_token:
+        clone_cmd = f"git clone https://{github_token}@github.com/allenai/decon.git"
+
+    # Add PMR environment setup if host_index and host_count are provided
+    pmr_setup = ""
+    if host_index is not None and host_count is not None:
+        pmr_setup = f"""
+# Set up PMR environment variables
+if ! grep -q "PMR_HOST_INDEX" /etc/environment; then
+    echo "PMR_HOST_INDEX={host_index}" | sudo tee -a /etc/environment
+    echo "PMR_HOST_COUNT={host_count}" | sudo tee -a /etc/environment
+fi
+export PMR_HOST_INDEX={host_index}
+export PMR_HOST_COUNT={host_count}
+"""
+
+    return f"""
+#!/bin/bash
+{PACKAGE_MANAGER_DETECTOR}
+
+# Set up drives
+TOTAL_DRIVES=$(ls /dev/nvme*n1 | wc -l)
+
+if [ $TOTAL_DRIVES -eq 1 ]; then
+    echo "No instance store drives found, only root drive exists"
+elif [ $TOTAL_DRIVES -eq 2 ]; then
+    # Single instance store drive - format as ext4 and mount directly
+    echo "Found single instance store drive, formatting as ext4 and mounting"
+    sudo mkfs.ext4 /dev/nvme1n1
+    sudo mkdir -p /mnt/decon-work
+    sudo mount /dev/nvme1n1 /mnt/decon-work
+    sudo chown -R $USER /mnt/decon-work
+else
+    # Multiple instance store drives - create RAID array first
+    echo "Found multiple instance store drives, creating RAID array"
+    sudo yum install mdadm -y
+    NUM_DRIVES=$((TOTAL_DRIVES - 1))
+    MDADM_CMD="sudo mdadm --create /dev/md0 --level=0 --raid-devices=$NUM_DRIVES"
+    for i in $(seq 1 $NUM_DRIVES); do
+        MDADM_CMD="$MDADM_CMD /dev/nvme${{i}}n1"
+    done
+    eval $MDADM_CMD
+    sudo mkfs.ext4 /dev/md0
+    sudo mkdir -p /mnt/decon-work
+    sudo mount /dev/md0 /mnt/decon-work
+    sudo chown -R $USER /mnt/decon-work
+fi
+
+
+set -ex
+{pmr_setup}
+# install python 3.12 with pip
+sudo "${{PKG_MANAGER}}" update
+sudo "${{PKG_MANAGER}}" install python3.12 python3.12-pip -y
+
+# create symlink from /usr/bin/python to python3.12
+sudo ln -sf /usr/bin/python3.12 /usr/bin/python
+sudo ln -sf /usr/bin/pip3.12 /usr/bin/pip
+
+# install git, tmux, htop
+sudo "${{PKG_MANAGER}}" install git tmux htop -y
+
+# install gcc, g++, cmake, openssl-devel
+sudo "${{PKG_MANAGER}}" install gcc g++ cmake openssl-devel -y
+
+# install github cli
+curl -sS https://webi.sh/gh | sh
+
+# install s5cmd
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
+tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+sudo mv s5cmd /usr/local/bin/
+
+# install rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh
+bash rustup.sh -y
+source ~/.bashrc
+
+cd
+{clone_cmd}
+cd decon
+cargo build --release
+pip install -r python/requirements.txt
+
+make evals-s3
+""".strip()
+
+# Keep the default for backward compatibility
+DECON_PYTHON_SETUP = make_decon_python_setup()
 
 class InstanceStatus(Enum):
     PENDING = "pending"
@@ -1707,6 +1803,88 @@ def setup_dolma_python(
 
 
 @common_cli_options
+@click.option(
+    "-g",
+    "--github-token",
+    type=str,
+    default=None,
+    help="GitHub personal access token for cloning private repositories",
+)
+def setup_decon(
+    name: str,
+    region: str,
+    owner: str,
+    instance_id: list[str] | None,
+    ssh_key_path: str,
+    detach: bool,
+    github_token: str | None,
+    **kwargs,
+):
+    """
+    Set up the DECON toolkit on EC2 instances.
+
+    Args:
+        name: Project name to filter instances by
+        region: AWS region to search in
+        owner: Owner name to filter instances by
+        instance_id: Optional list of specific instance IDs to target
+        ssh_key_path: Path to SSH private key file
+        detach: Whether to run setup in detached mode
+        github_token: GitHub personal access token with read permissions on for cloning private github.com/allenai/decon.git"
+        **kwargs: Additional keyword arguments
+    """
+    # First set up AWS credentials on the instances
+    logger.info(f"Setting up AWS credentials on instances with project={name}, owner={owner} in region {region}")
+    setup_instances(
+        name=name,
+        region=region,
+        owner=owner,
+        instance_id=instance_id,
+        ssh_key_path=ssh_key_path,
+    )
+
+    # Get all instances that will be set up
+    instances = InstanceInfo.describe_instances(region=region, project=name)
+
+    # Filter by instance ID if provided
+    if instance_id is not None:
+        instances = [instance for instance in instances if instance.instance_id in instance_id]
+
+    logger.info(f"Setting up Decon on {len(instances)} instances with PMR environment variables")
+
+    # Set up each instance with its specific host index
+    for idx, instance in enumerate(instances):
+        logger.info(f"Setting up Decon on instance {instance.instance_id} ({instance.name}) with PMR_HOST_INDEX={idx}")
+
+        # Generate the setup script with the specific host index for this instance
+        decon_setup_script = make_decon_python_setup(github_token, host_index=idx, host_count=len(instances))
+        base64_encoded_setup_command = base64.b64encode(decon_setup_script.encode("utf-8")).decode("utf-8")
+
+        # Create command to write and execute the setup script
+        command = [
+            f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
+            "chmod +x setup.sh",
+            "./setup.sh",
+        ]
+
+        # Run the setup command on this specific instance
+        run_command(
+            name=name,
+            region=region,
+            owner=owner,
+            instance_id=[instance.instance_id],
+            command=" && ".join(command),
+            script=None,
+            ssh_key_path=ssh_key_path,
+            detach=detach,
+            spindown=False,
+            screen=True,
+        )
+
+    logger.info("Decon setup completed on all instances")
+
+
+@common_cli_options
 def map_commands(
     name: str,
     region: str,
@@ -1845,6 +2023,7 @@ cli.command(name="run")(run_command)
 cli.command(name="setup")(setup_instances)
 cli.command(name="setup-d2tk")(setup_dolma2_toolkit)
 cli.command(name="setup-dolma-python")(setup_dolma_python)
+cli.command(name="setup-decon")(setup_decon)
 cli.command(name="map")(map_commands)
 cli.command(name="pause")(pause_instances)
 cli.command(name="resume")(resume_instances)
