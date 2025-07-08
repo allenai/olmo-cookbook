@@ -1,4 +1,4 @@
-name: "olmo3_7b-format-microanneal-5B-newline-no-dolminos2math"
+name: "olmo3_7b-format-microanneal-5B-tulu-no-dolminos2math"
 description: "OLMo3 7b 5B, Tulu format, no dolminos2math"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
