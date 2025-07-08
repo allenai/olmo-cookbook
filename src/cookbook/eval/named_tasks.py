@@ -373,7 +373,12 @@ class MultiPlEMBPPGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("fim")
 class FimGroup(BaseAverageNamedTasksGroup):
-    tasks = [task for task in constants.FIM_TASKS]
+    tasks = [f'{task}:temp0.2' for task in constants.FIM_TASKS]
+
+
+@NamedTasksGroupRegistry.register("fim::olmo3")
+class FimOLMo3Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}::olmo3' for task in constants.FIM_TASKS]
 
 
 @NamedTasksGroupRegistry.register("crux-eval")
@@ -579,7 +584,7 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
 class Olmo3Dev7bCodeFimGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Code
-        FimGroup(),
+        FimOLMo3Group(),
     ]
 
 
@@ -746,7 +751,7 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         BBHHamishZSReasoningGroup(),
         "zebralogic::hamish_zs_reasoning",
         "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
-        "popqa::hamish_zs_reasoning",  #### from adapt: fix and test this guy.
+        "popqa::olmo3:thinker",  #### from adapt: fix and test this guy.
         AgiEvalEnglishHamishZsReasoningGroup(),
         MMLUHamishZSReasoningGroup(),
 

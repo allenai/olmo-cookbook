@@ -504,9 +504,9 @@ FIM_TOKENS = {
 }
 
 FIM_TASKS = [
-    "codex_humanevalfim_single:temp0.2",
-    "codex_humanevalfim_multi:temp0.2",
-    "codex_humanevalfim_random:temp0.2",
+    "codex_humanevalfim_single",
+    "codex_humanevalfim_multi",
+    "codex_humanevalfim_random",
 ]
 
 
