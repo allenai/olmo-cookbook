@@ -215,6 +215,26 @@ class MMLUMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.MMLU_CATEGORIES]
 
 
+@NamedTasksGroupRegistry.register("mmlu_stem:mc")
+class MMLUStemMCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"mmlu_{category}:mc::olmes" for category in constants.MMLU_SUBCATEGORIES["stem"]]
+
+
+@NamedTasksGroupRegistry.register("mmlu_humanities:mc")
+class MMLUHumanitiesMCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"mmlu_{category}:mc::olmes" for category in constants.MMLU_SUBCATEGORIES["humanities"]]
+
+
+@NamedTasksGroupRegistry.register("mmlu_social_sciences:mc")
+class MMLUSocialSciencesMCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"mmlu_{category}:mc::olmes" for category in constants.MMLU_SUBCATEGORIES["social_sciences"]]
+
+
+@NamedTasksGroupRegistry.register("mmlu_other:mc")
+class MMLUOtherMCGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"mmlu_{category}:mc::olmes" for category in constants.MMLU_SUBCATEGORIES["other"]]
+
+
 @NamedTasksGroupRegistry.register("mmlu:cot::hamish_zs_reasoning")
 class MMLUHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:cot::hamish_zs_reasoning" for category in constants.MMLU_CATEGORIES]
@@ -595,8 +615,6 @@ class Olmo3Dev7bGenGroup(BaseAverageOfAveragesNamedTasksGroup):
         "winogrande:rc::xlarge",
         "lambada",
         BasicRCGroup(),
-
-        # Gen OLMES
         "drop::xlarge",
         "jeopardy::xlarge",
         "naturalqs::xlarge",
@@ -605,30 +623,33 @@ class Olmo3Dev7bGenGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa")
-class Olmo3Dev7bMcqaGroup(BaseAverageOfAveragesNamedTasksGroup):
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:stem")
+class Olmo3Dev7bMcqaSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Core OLMES
         ARCMCXlargeGroup(),
-        MMLUMCGroup(),
+        MMLUStemMCGroup(),
+        "medmcqa:mc::none",
+        "medqa_en:mc::none",
+        "sciq:mc::xlarge",
+        # "lab_bench_dbqa:mc", # too noisy to include in macro-average
+        # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:non_stem")
+class Olmo3Dev7bMcqaNonSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        MMLUHumanitiesMCGroup(),
+        MMLUSocialSciencesMCGroup(),
+        MMLUOtherMCGroup(),
         "csqa:mc::xlarge",
         "piqa:mc::xlarge",
         "socialiqa:mc::xlarge",
-
-        # Gen2MC OLMES
         "coqa:mc::gen2mc",
         "drop:mc::gen2mc",
         "jeopardy:mc::gen2mc",
         "naturalqs:mc::gen2mc",
         "squad:mc::gen2mc",
-
-        # New OLMo 3
-        BasicMCGroup(),
-        # "lab_bench_dbqa:mc", # too noisy to include in macro-average
-        # "lab_bench_protocolqa:mc", # too noisy to include in macro-average
-        "medmcqa:mc::none",
-        "medqa_en:mc::none",
-        "sciq:mc::xlarge",
     ]
 
 
@@ -715,7 +736,8 @@ class Olmo3Dev1bMainHFGroup(BaseTaskView):
 class Olmo3Dev7bMainGroup(BaseTaskView):
     tasks = [
         # re.compile(r"^olmo3:dev:7b:macro:w_avg$"),
-        Olmo3Dev7bMcqaGroup(),
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
         Olmo3Dev7bGenGroup(),
         Olmo3Dev7bMathGroup(),
         Olmo3Dev7bCodeGenGroup(),
@@ -735,7 +757,7 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
+@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v1")
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot
