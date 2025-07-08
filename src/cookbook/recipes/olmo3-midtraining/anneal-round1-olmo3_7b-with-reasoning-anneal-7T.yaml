@@ -1,5 +1,5 @@
-name: "anneal-round1-100B-olmo3_7b_with-reasoning-anneal"
-description: "OLMo3 7b anneal to 100B Tokens on midtraining mix WITH reasoning data"
+name: "anneal-round1-100B-olmo3_7b_with-reasoning-anneal-7T"
+description: "OLMo3 7b anneal to 100B Tokens on midtraining mix WITH reasoning data from 7T ckpt"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 16
