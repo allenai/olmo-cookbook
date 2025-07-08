@@ -69,7 +69,7 @@ def make_dashboard_table(
                 unique_metrics[key] = metric
         else:
             unique_metrics[key] = metric
-    metrics = list(unique_metrics.values())
+    metrics: list[MetricsAll] = list(unique_metrics.values())
 
     for metric in metrics:
         if metric.is_aggregate:
@@ -84,6 +84,11 @@ def make_dashboard_table(
         # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
         if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
             metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+
+        # @davidh: Hotfix for Alpaca Eval tasks. The alpaca eval metric multiplies its score by 100. No PR
+        # in oe-eval to avoid messing with adapt's backend.
+        if 'alpaca' in metric.alias:
+            metric.metrics.primary_score /= 100
 
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
