@@ -397,6 +397,47 @@ class BBHHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"bbh_{category}:cot::hamish_zs_reasoning" for category in constants.BBH_TASKS]
 
 
+@NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
+class IFEvalMTThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"ifeval_mt_{task_type}::tulu-thinker" for task_type in constants.IFEVAL_MT_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multiturn_alpacaeval::tulu")
+class AlpacaEvalMTGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"multiturn_alpacaeval_{task_type}::tulu" for task_type in constants.MULTITURN_ALPACAEVAL_TASKS]
+
+
+@NamedTasksGroupRegistry.register("styled_popqa::tulu-thinker")
+class StyledPopQAThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"styled_popqa_{task_type}::tulu-thinker" for task_type in constants.STYLED_TASKS_POPQA]
+
+
+@NamedTasksGroupRegistry.register("styled_math500::tulu-thinker")
+class StyledMath500ThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"styled_math500_{task_type}::tulu-thinker" for task_type in constants.STYLED_TASKS]
+
+
+@NamedTasksGroupRegistry.register("styled_alpacaeval::tulu-thinker")
+class StyledAlpacaEvalThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = []
+    for task_type in constants.STYLED_TASKS:
+        for reference_set in ["og", "new"]:
+            tasks += [f"styled_alpacaeval_{task_type}_{reference_set}_ref::tulu-thinker"]
+
+
+@NamedTasksGroupRegistry.register("omega:0-shot-chat")
+class Omega0ShotCoTGroup(BaseAverageNamedTasksGroup):
+    tasks = []
+    for broad_cate in constants.OMEGA_SUB_CATEGORIES:
+        if broad_cate == "explorative":
+            target_splits = ["test_in", "test_out"]
+        else:
+            target_splits = ["test"]
+        for sub_cate in constants.OMEGA_SUB_CATEGORIES[broad_cate]:
+            for target_split in target_splits:
+                tasks += [f"omega_{broad_cate}_{sub_cate}_{target_split}:0-shot-chat"]
+
+
 def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
     class HelmetGroup(BaseAverageNamedTasksGroup):
         tasks = [
@@ -709,17 +750,23 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         AgiEvalEnglishHamishZsReasoningGroup(),
         MMLUHamishZSReasoningGroup(),
 
-        ### Not yet implemented
+        "ifeval_ood::tulu-thinker",
+        StyledMath500ThinkerGroup(),
+        StyledAlpacaEvalThinkerGroup(),
+        IFEvalMTThinkerGroup(),
+        AlpacaEvalMTGroup(),
+        StyledPopQAThinkerGroup(),
+        Omega0ShotCoTGroup(),
+        "simpleqa::tulu-thinker",
+        "multiturn_alpacaeval_*::tulu",
+        "styled_math500::tulu-thinker",
+        "styled_alpacaeval::tulu-thinker",
+        "styled_popqa::tulu-thinker",
+
+        ### Not implemented
         # cruxeval
-        # simpleqa
         # gpqa diamond
         # AMC 22/23
-        # math OOD
-        # turnwise
-        # typos eval
-        # bcfl v3
-        # ace bench
-        # appworld
-
-        # all safety
+        # adapt tool use benchmarks
+        # adapt safety benchmarks
     ]
