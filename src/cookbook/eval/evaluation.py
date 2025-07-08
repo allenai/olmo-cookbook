@@ -185,12 +185,17 @@ def evaluate_checkpoint(
 
     # these are all the tasks we want to run; note that we can't run regex patterns here,
     # they have to be actual strings
-    all_tasks = sorted(list(set(
-        task
-        for task_group in tasks
-        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
-        if isinstance(task, str)
-    )))
+    all_tasks_set = set()
+    for task_group in tasks:
+        try:
+            # this is a task group! the get function will return a class that has an expanded_tasks attribute
+            all_tasks_set.update(NamedTasksGroupRegistry.get(task_group).expanded_tasks)
+        except ValueError:
+            # actually not a task group, just a task name. append as is.
+            all_tasks_set.add(task_group)
+
+    # we finish by sorting the tasks
+    all_tasks = sorted(all_tasks_set)
 
     print('Launching evals on the following tasks:')
     pprint(all_tasks)
@@ -306,7 +311,7 @@ def evaluate_checkpoint(
                 if "stop_sequences" in task_args_dict["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     task_args_dict["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"] 
+                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
                          if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]]
                     )
                 else:
