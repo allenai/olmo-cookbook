@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 0.00024890158
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step139000
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step467000
 load_state: false
 dataset:
   sources:
