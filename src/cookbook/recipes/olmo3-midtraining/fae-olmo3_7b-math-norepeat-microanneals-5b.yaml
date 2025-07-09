@@ -28,11 +28,11 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
   - name: code
-    target_ratio: 0.3
+    target_ratio: 0.2
     paths:
     - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
   - name: finemath
-    target_ratio: 0.2
+    target_ratio: 0.3
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
   - name: math-meta-reasoning 
