@@ -1,16 +1,21 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3-7b-long-context-extension-65k-example"
-description: "OLMo3 7b swafix high-throughput configuration for 65k context length"
+name: "olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-week1"
+description: "OLMo3 7B w/ swafix trained up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/oe-data"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 2
+nodes: 4
 gpus: 8
 seed: 4123
+
+wandb:
+  project: "olmo3-7b-long-context"
+  entity: "ai2-llm"
+
 generate_doc_lengths: true  # enable intra-document masking
 # TODO: update to the actual start checkpoint for Long Context extension
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B/step297000/model_and_optim/
