@@ -42,11 +42,10 @@ def make_dashboard_table(
     # tables = DashboardTables.from_title(dashboard)
 
     metrics_table = MiniFrame(title=dashboard)
-    missing_tasks: dict[str, list[str]] = {}
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
-        return metrics_table, missing_tasks
+        return metrics_table
 
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
@@ -99,20 +98,7 @@ def make_dashboard_table(
                 metrics_table.add(col=bpb_alias, row=metric.model_name, val=metric.metrics.bpb)
                 bpb_to_og_metric_name_map[bpb_alias] = metric.alias
 
-    for model_row in metrics_table.rows:
-        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
-            # check if any of the values are None; if all values are there, this metric is ok,
-            # we have all results!
-            if metric_column_value is not None:
-                continue
-
-            # replace if necessary
-            metric_column_name = bpb_to_og_metric_name_map.get(metric_column_name, metric_column_name)
-
-            # add missing tasks to the missing_tasks dict
-            missing_tasks.setdefault(model_row.name, []).append(metric_column_name)
-
-    return metrics_table, missing_tasks
+    return metrics_table
 
 
 def print_missing_tasks(

@@ -808,9 +808,9 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot
         "alpaca_eval_v3::hamish_zs_reasoning",
-        AlpacaEvalMTGroup(),
         "ifeval::hamish_zs_reasoning",
-        IFEvalMTThinkerGroup(),
+        # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
+        # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
         "ifeval_ood::tulu-thinker",
         StyledMath500ThinkerGroup(),
         StyledAlpacaEvalThinkerGroup(),
@@ -826,7 +826,7 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         BBHOLMo3ThinkerGroup(),
         "zebralogic::hamish_zs_reasoning",
         "gpqa:0shot_cot::olmo3:thinker", # requires 4096 context window
-        "popqa::olmo3:thinker",  #### from adapt: fix and test this guy.
+        "popqa::olmo3:thinker",
         AgiEvalEnglishOLMo3ThinkerGroup(),
         MMLUOLMo3ThinkerGroup(),
         "simpleqa::tulu-thinker",
