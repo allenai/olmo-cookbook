@@ -757,10 +757,11 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v1")
+# This is a legacy group, please use the "v1" version!
+@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
-        # Everything in this task set is 0-shot
+        # Everything in this task set is 0-shot (except PopQA)
         "alpaca_eval_v3::hamish_zs_reasoning",
         "ifeval::hamish_zs_reasoning",
         "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
@@ -773,21 +774,39 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         BBHHamishZSReasoningGroup(),
         "zebralogic::hamish_zs_reasoning",
         "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
-        "popqa::olmo3:thinker",  #### from adapt: fix and test this guy.
+        "popqa::hamish_zs_reasoning",  #### from adapt: fix and test this guy.
         AgiEvalEnglishHamishZsReasoningGroup(),
         MMLUHamishZSReasoningGroup(),
+    ]
 
+
+@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v1")
+class Olmo3DevMidtrainMainGroup(BaseTaskView):
+    tasks = [
+        # Everything in this task set is 0-shot
+        "alpaca_eval_v3::hamish_zs_reasoning",
+        AlpacaEvalMTGroup(),
+        "ifeval::hamish_zs_reasoning",
+        IFEvalMTThinkerGroup(),
         "ifeval_ood::tulu-thinker",
         StyledMath500ThinkerGroup(),
         StyledAlpacaEvalThinkerGroup(),
-        IFEvalMTThinkerGroup(),
-        AlpacaEvalMTGroup(),
         # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
+        "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
+        MinervaHamishZSReasoningGroup(),
+        "minerva_math_500::hamish_zs_reasoning",
+        "aime::hamish_zs_reasoning",
         Omega0ShotCoTGroup(),
+        "codex_humanevalplus:0-shot-chat::tulu-thinker",
+        "mbppplus:0-shot-chat::tulu-thinker",
+        "livecodebench_codegeneration::tulu-thinker",
+        BBHHamishZSReasoningGroup(),
+        "zebralogic::hamish_zs_reasoning",
+        "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
+        "popqa::olmo3:thinker",  #### from adapt: fix and test this guy.
+        AgiEvalEnglishHamishZsReasoningGroup(),
+        MMLUHamishZSReasoningGroup(),
         "simpleqa::tulu-thinker",
-        StyledPopQAThinkerGroup(),
-        StyledMath500ThinkerGroup(),
-        StyledAlpacaEvalThinkerGroup(),
 
         ### Not implemented
         # cruxeval
