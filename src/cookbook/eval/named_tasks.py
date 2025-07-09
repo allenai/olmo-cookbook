@@ -811,7 +811,7 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         "ifeval::hamish_zs_reasoning",
         # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
         # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
-        "ifeval_ood::tulu-thinker",
+        # "ifeval_ood::tulu-thinker", # this is held-out (for now?)
         StyledMath500ThinkerGroup(),
         StyledAlpacaEvalThinkerGroup(),
         # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
