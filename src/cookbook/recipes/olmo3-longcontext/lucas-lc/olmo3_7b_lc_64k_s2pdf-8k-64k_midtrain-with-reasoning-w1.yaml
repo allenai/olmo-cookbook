@@ -1,7 +1,7 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1"
+name: "olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning-w1"
 description: "OLMo3 7B w/ swafix trained up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -81,18 +81,6 @@ dataset:
     target_ratio: 0.0008333 # was 0.0025
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
-
-  # We wanna follow a qwen-3 like setup. From their tech report:
-  #
-  # > All models are pre-trained on hundreds of billions of tokens with a sequence length of 32,768
-  # > tokens. The long context corpus includes 75% of text between 16,384 to 32,768 tokens in length,
-  # > and 25% of text between 4,096 to 16,384 in length.
-  #
-  # Our model was pretrained with 8k length and we want to extend to 64k, so we tweak the recipe to:
-  #
-  # - 75% of tokens are between 32,768 and 65,536 tokens in length
-  # - 25% of tokens are between 8,192 and 32,768 tokens in length
-
 
   - name: LC-s2pdf_8k-64k
     # 19.87B (2e13) + 15.38B (2e14) + 14.07B (2e15) tokens in this subset
