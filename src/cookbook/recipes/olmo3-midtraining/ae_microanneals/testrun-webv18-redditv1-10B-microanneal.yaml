@@ -1,5 +1,5 @@
-name: "olmo3-7b-10B-micro-fim-stack-edu-hq-weighted-pl-alldressed"
-description: "OLMo3 7b anneal to 10B Tokens for fim-stack-edu hq weighted-pl-v0 + all dressed hq web"
+name: "webv19-redditv1-10B-olmo3-microanneal"
+description: "OLMo3 7b 10B web v18 + reddit v1 microanneal"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -23,12 +23,11 @@ load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
 dataset:
   sources:
-  - name: fim-stackedu-hq-v2-weighted-pl
+  - name: web 
     target_ratio: 0.5
     paths:
-    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
-  - name: hqweb
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
+  - name: reddit 
     target_ratio: 0.5
-    repetition_factor: 1.5
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
