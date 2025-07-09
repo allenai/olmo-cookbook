@@ -315,9 +315,3 @@ All PMR CLI commands support the following options:
 | `--script` | `-s` | None | Path to script file or directory to execute |
 
 Note that you can provide either `--command` or `--script`, but not both. When using `--script` with a directory path, all executable files in that directory will be distributed across the instances.
-
-# Midtraining utilities
-I (mj) built out some utilities to minimize manual labor for common tasks for midtraining.
-- [`scripts/gs2weka.py`](scripts/gs2weka.py): This script finds the latest checkpoint for a given model configuration and copies it from Google Cloud Storage to Weka storage using olmo-cookbook. Run with `python scripts/gs2weka.py <yaml_file>` to automatically detect your Beaker account and process the latest checkpoint, or use --beaker-name to specify a different account name.
-- [`scripts/convert_from_config.py`](scripts/convert_from_config.py): This script finds the latest checkpoint in Weka storage for a given model configuration and converts it to HuggingFace format using olmo-cookbook-eval. Run with `python scripts/convert_from_config.py <yaml_file>` to automatically detect your Beaker account and convert the latest checkpoint, with optional --overwrite flag to reconvert existing checkpoints.
-- [`scripts/olmo3_midtrain_eval.sh`](scripts/olmo3_midtrain_eval.sh): This script runs OLMo3 midtraining evaluations on a given checkpoint path using two different task suites (midtrain and main). Run with `bash scripts/olmo3_midtrain_eval.sh <checkpoint_path>` where the checkpoint path should point to a converted HuggingFace format checkpoint (e.g., ending in -hf).
