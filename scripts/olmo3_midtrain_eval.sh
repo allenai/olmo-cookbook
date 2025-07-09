@@ -10,23 +10,23 @@ fi
 CHECKPOINT_PATH="$1"
 
 
-#olmo-cookbook-eval evaluate \
-#  "$CHECKPOINT_PATH" \
-#  --tasks olmo3:dev:midtrain:v0 \
-#  --priority high \
-#  --cluster aus80g \
-#  --num-gpus 1 \
-#  --partition-size 8 \
-#  --model-backend vllm \
-#  --no-compute-gold-bpb \
-#  --model-args chat_template=basic_answer,trust_remote_code=true,max_length=8192 \
-#  --use-gantry \
-#  --gantry-args env-secret="OPENAI_API_KEY=openai_api_key" \
-#  --task-args chat_overrides="{\"generation_kwargs\": {\"stop_sequences\": [\"Problem:\", \"Answer:\", \"Question:\", \"</s>\", \"<|eot_id|>\"]}}" \
-#  --oe-eval-branch davidh/head-qk-norm \
-#  --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
-#  --dashboard olmo3-midtraining \
-#  --workspace ai2/olmo-3-microanneals
+olmo-cookbook-eval evaluate \
+  "$CHECKPOINT_PATH" \
+  --tasks olmo3:dev:midtrain:v0 \
+  --priority high \
+  --cluster aus80g \
+  --num-gpus 1 \
+  --partition-size 8 \
+  --model-backend vllm \
+  --no-compute-gold-bpb \
+  --model-args chat_template=basic_answer,trust_remote_code=true,max_length=8192 \
+  --use-gantry \
+  --gantry-args env-secret="OPENAI_API_KEY=openai_api_key" \
+  --task-args chat_overrides="{\"generation_kwargs\": {\"stop_sequences\": [\"Problem:\", \"Answer:\", \"Question:\", \"</s>\", \"<|eot_id|>\"]}}" \
+  --oe-eval-branch davidh/head-qk-norm \
+  --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
+  --dashboard olmo3-midtraining \
+  --workspace ai2/olmo-3-microanneals
 
 olmo-cookbook-eval evaluate \
   "$CHECKPOINT_PATH" \
