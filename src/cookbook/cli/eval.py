@@ -437,7 +437,11 @@ def evaluate_model(
         )
 
         # Override our tasks with the missing set
-        tasks = missing_tasks[model_name]
+        if model_name in missing_tasks:
+            tasks = missing_tasks[model_name]
+        else:
+            print(f'Found no missing tasks for {model_name}')
+            return
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
@@ -555,7 +559,7 @@ def get_results(
         columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
-    metrics_table, missing_tasks = make_dashboard_table(
+    metrics_table = make_dashboard_table(
         dashboard=dashboard,
         force=force,
         skip_on_fail=skip_on_fail,
@@ -594,6 +598,25 @@ def get_results(
         # okay we filter models too! do the same regex trick as above
         rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
         results = results.keep_rows(*rows_filter_models)
+
+    missing_tasks: dict[str, list[str]] = {}
+    for model_row in results.rows:
+        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
+            # check if any of the values are None; if all values are there, this metric is ok,
+            # we have all results!
+            if metric_column_value is not None:
+                continue
+
+            all_tasks_set = set()
+            try:
+                # this is a task group! the get function will return a class that has an expanded_tasks attribute
+                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+            except ValueError:
+                # actually not a task group, just a task name. append as is.
+                all_tasks_set.add(metric_column_name)
+
+            # add missing tasks to the missing_tasks dict
+            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
 
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
