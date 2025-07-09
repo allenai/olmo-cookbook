@@ -6,14 +6,10 @@ from typing import Optional
 
 import click
 from rich.console import Console
-from rich.table import Table
 from rich.pretty import pprint
+from rich.table import Table
 
-from cookbook.cli.utils import (
-    get_aws_access_key_id,
-    get_aws_secret_access_key,
-    get_huggingface_token,
-)
+from cookbook.cli.utils import get_aws_access_key_id, get_aws_secret_access_key, get_huggingface_token
 from cookbook.constants import (
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
@@ -25,10 +21,10 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
@@ -337,6 +333,12 @@ def convert_checkpoint(
     default=None,
     help="Number of shots to use for evaluation; by default, the number of shots is part of task def in oe-eval",
 )
+@click.option(
+    "--only-missing",
+    is_flag=True,
+    default=False,
+    help="If True, we only run evals on the tasks which are missing in datalake",
+)
 def evaluate_model(
     oe_eval_branch: str,
     oe_eval_commit: str,
@@ -375,6 +377,7 @@ def evaluate_model(
     use_backend_in_run_name: bool,
     name_suffix: str,
     num_shots: int | None,
+    only_missing: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -443,6 +446,7 @@ def evaluate_model(
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
         num_shots=num_shots,
+        only_missing=only_missing,
     )
 
 
@@ -507,7 +511,6 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 

@@ -1,12 +1,14 @@
-from collections.abc import Mapping
 import json
+import os
 import re
 import shlex
 import subprocess
+from collections.abc import Mapping
 from copy import deepcopy
 from hashlib import md5
 from typing import Optional
 from urllib.parse import urlparse
+
 from rich.pretty import pprint
 
 from cookbook.cli.utils import (
@@ -16,13 +18,9 @@ from cookbook.cli.utils import (
     install_oe_eval,
     make_eval_run_name,
 )
-from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
-    FIM_TOKENS,
-    OE_EVAL_LAUNCH_COMMAND,
-    WEKA_MOUNTS,
-)
+from cookbook.constants import BEAKER_KNOWN_CLUSTERS, FIM_TOKENS, OE_EVAL_LAUNCH_COMMAND, WEKA_MOUNTS
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
+from cookbook.eval.results import make_dashboard_table
 
 
 def evaluate_checkpoint(
@@ -63,6 +61,7 @@ def evaluate_checkpoint(
     use_backend_in_run_name: bool,
     name_suffix: str,
     num_shots: int | None,
+    only_missing: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -185,25 +184,28 @@ def evaluate_checkpoint(
 
     # these are all the tasks we want to run; note that we can't run regex patterns here,
     # they have to be actual strings
-    all_tasks = sorted(list(set(
-        task
-        for task_group in tasks
-        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
-        if isinstance(task, str)
-    )))
+    all_tasks = sorted(
+        list(
+            set(
+                task
+                for task_group in tasks
+                for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+                if isinstance(task, str)
+            )
+        )
+    )
 
-    print('Launching evals on the following tasks:')
+    if only_missing:
+        _, missing_tasks = make_dashboard_table(dashboard=dashboard, force=False, skip_on_fail=True)
+        results_name = os.path.basename("_".join(checkpoint_path.rsplit("/", 1)))
+        this_missing_tasks = missing_tasks.get(results_name, [])
+        all_tasks = [_ for _ in all_tasks if _ in this_missing_tasks]
+    print("Launching evals on the following tasks:")
     pprint(all_tasks)
 
     # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
-    EXCLUDE_FROM_LAUNCH = [
-        r'^mmlu_.*:bpb::olmes$',
-        r'^lambada:bpb$'
-    ]
-    all_tasks = [
-        task for task in all_tasks
-        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
-    ]
+    EXCLUDE_FROM_LAUNCH = [r"^mmlu_.*:bpb::olmes$", r"^lambada:bpb$"]
+    all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
 
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
@@ -306,8 +308,11 @@ def evaluate_checkpoint(
                 if "stop_sequences" in task_args_dict["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     task_args_dict["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"] 
-                         if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]]
+                        [
+                            stop_tok
+                            for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]
+                        ]
                     )
                 else:
                     task_args_dict["generation_kwargs"].update(infilling_dict["generation_kwargs"])
