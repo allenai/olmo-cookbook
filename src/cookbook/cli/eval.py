@@ -437,7 +437,11 @@ def evaluate_model(
         )
 
         # Override our tasks with the missing set
-        tasks = missing_tasks[model_name]
+        if model_name in missing_tasks:
+            tasks = missing_tasks[model_name]
+        else:
+            print(f'Found no missing tasks for {model_name}')
+            return
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,

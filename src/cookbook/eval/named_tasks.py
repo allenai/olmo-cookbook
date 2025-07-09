@@ -112,10 +112,13 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
 
     def combine(self, results: MiniFrame) -> MiniFrame | None:
         filtered_rows = results.keep_cols(*self.expanded_tasks)
-        if len(filtered_rows) == 0:
-            return None
 
         combined_table = MiniFrame(title=results.title)
+
+        # Add empty values to all tasks
+        for row in results.rows:
+            for task in self.expanded_tasks:
+                combined_table.add(col=task, row=row.name, val=None)
 
         # each row here is a model
         for row in filtered_rows.rows:
@@ -138,32 +141,37 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
     """
 
     def combine(self, results: MiniFrame) -> MiniFrame | None:
-        out_table = MiniFrame(title=results.title)
+        filtered_rows = MiniFrame(title=results.title)
 
         # calculate the averages for all child task groups
+        child_task_names: Union[str | re.Pattern] = []
         for task_or_named_group in self.tasks:
             if isinstance(task_or_named_group, BaseAverageNamedTasksGroup):
                 # get task groups (e.g., MMLURCGroup())
                 named_group: BaseAverageNamedTasksGroup = task_or_named_group
                 combined_table = named_group.combine(results)
-                if combined_table is not None:
-                    # If the named group is able to average all scores, add it!
-                    named_group_col = combined_table.keep_cols(*[named_group.name])
-                    out_table = out_table + named_group_col
+                # If the named group is able to average all scores, add it!
+                named_group_col = combined_table.keep_cols(*[named_group.name])
+                child_task_names.append(named_group.name)
+                filtered_rows = filtered_rows + named_group_col
             elif isinstance(task_or_named_group, Union[str | re.Pattern]):
                 # get individual tasks (e.g., "arc_challenge:rc::olmes")
                 task: Union[str | re.Pattern] = task_or_named_group
                 task_col = results.keep_cols(*[task])
-                out_table = out_table + task_col
+                child_task_names.append(task)
+                filtered_rows = filtered_rows + task_col
             else:
                 raise TypeError(f"Task type not yet supported: {type(task_or_named_group)}.")
-            
-        if len(out_table) == 0:
-            return None
+
+        # Any tasks that do not exist for all models, add a "None" entry
+        for row in results.rows:
+            for task in child_task_names:
+                if not task in filtered_rows or filtered_rows[(task, row.name)] is None:
+                    filtered_rows.add(col=task, row=row.name, val=None)
 
         # compute the average of averages
         # each row here is a model
-        for row in list(out_table.rows):
+        for row in list(filtered_rows.rows):
 
             # we compute the average of the scores for this model; we set the average to None if
             # there are missing scores or if there are no scores at all.
@@ -173,9 +181,9 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
                 average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
 
             # we add the average to the combined table
-            out_table.add(col=self.name, row=row.name, val=average)
+            filtered_rows.add(col=self.name, row=row.name, val=average)
 
-        return out_table
+        return filtered_rows
     
 
 class BaseTaskView(BaseAverageOfAveragesNamedTasksGroup):
@@ -238,6 +246,11 @@ class MMLUOtherMCGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("mmlu:cot::hamish_zs_reasoning")
 class MMLUHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:cot::hamish_zs_reasoning" for category in constants.MMLU_CATEGORIES]
+
+
+@NamedTasksGroupRegistry.register("mmlu:cot::olmo3:thinker")
+class MMLUOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:cot::olmo3:thinker" for category in constants.MMLU_CATEGORIES]
 
 
 @NamedTasksGroupRegistry.register("core:rc")
@@ -366,6 +379,11 @@ class AgiEvalEnglishHamishZsReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"agi_eval_{task}:0shot_cot::hamish_zs_reasoning" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
+@NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::olmo3:thinker")
+class AgiEvalEnglishOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"agi_eval_{task}:0shot_cot::olmo3:thinker" for task in constants.AGI_EVAL_ENGLISH_TASKS]
+
+
 @NamedTasksGroupRegistry.register("starcoder")
 class StarcoderGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.STARCODER_CODEX_TASKS]
@@ -420,6 +438,11 @@ class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("bbh:cot::hamish_zs_reasoning")
 class BBHHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"bbh_{category}:cot::hamish_zs_reasoning" for category in constants.BBH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::olmo3:thinker")
+class BBHOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::olmo3:thinker" for category in constants.BBH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
@@ -800,12 +823,12 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         "codex_humanevalplus:0-shot-chat::tulu-thinker",
         "mbppplus:0-shot-chat::tulu-thinker",
         "livecodebench_codegeneration::tulu-thinker",
-        BBHHamishZSReasoningGroup(),
+        BBHOLMo3ThinkerGroup(),
         "zebralogic::hamish_zs_reasoning",
-        "gpqa:0shot_cot::hamish_zs_reasoning", # requires 4096 context window
+        "gpqa:0shot_cot::olmo3:thinker", # requires 4096 context window
         "popqa::olmo3:thinker",  #### from adapt: fix and test this guy.
-        AgiEvalEnglishHamishZsReasoningGroup(),
-        MMLUHamishZSReasoningGroup(),
+        AgiEvalEnglishOLMo3ThinkerGroup(),
+        MMLUOLMo3ThinkerGroup(),
         "simpleqa::tulu-thinker",
 
         ### Not implemented
