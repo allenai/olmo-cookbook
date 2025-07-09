@@ -13,6 +13,7 @@ from cookbook.cli.utils import (
     get_aws_access_key_id,
     get_aws_secret_access_key,
     get_huggingface_token,
+    make_eval_run_name,
 )
 from cookbook.constants import (
     FIM_TOKENS,
@@ -326,6 +327,12 @@ def convert_checkpoint(
     help="Whether to use the backend in the run name",
 )
 @click.option(
+    "--backfill/--no-backfill",
+    default=False,
+    type=bool,
+    help="When True, only launch evals that are marked as 'missing' in the workspace.",
+)
+@click.option(
     "--name-suffix",
     type=str,
     default="",
@@ -373,6 +380,7 @@ def evaluate_model(
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
+    backfill: bool,
     name_suffix: str,
     num_shots: int | None,
 ):
@@ -404,6 +412,32 @@ def evaluate_model(
             continue
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
+
+    if backfill:
+        # Get the model's run name using cookbook logic
+        # E.g., "allenai/OLMo-2-1124-13B-SFT" => "OLMo-2-1124-13B-SFT"
+        model_name = make_eval_run_name(
+            checkpoint_path=checkpoint_path,
+            add_bos_token=add_bos_token,
+            num_shots=num_shots,
+            name_suffix=name_suffix.strip(),
+        )
+
+        # Call the dashboard to get all the missing results
+        missing_tasks = get_results(
+            dashboard,
+            model_name,
+            tasks,
+            format='return_missing',
+            sort_by='avg',
+            sort_column_name=None,
+            sort_descending=None,
+            force=False,
+            skip_on_fail=True,
+        )
+
+        # Override our tasks with the missing set
+        tasks = missing_tasks[model_name]
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
@@ -567,6 +601,10 @@ def get_results(
         rows_filter_models=rows_filter_models,
         columns_filter_tasks=columns_filter_tasks,
     )
+
+    if format == 'return_missing':
+        return missing_tasks
+
     # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(
