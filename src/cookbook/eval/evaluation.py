@@ -3,6 +3,7 @@ import os
 import re
 import shlex
 import subprocess
+import sys
 from collections.abc import Mapping
 from copy import deepcopy
 from hashlib import md5
@@ -61,7 +62,6 @@ def evaluate_checkpoint(
     use_backend_in_run_name: bool,
     name_suffix: str,
     num_shots: int | None,
-    only_missing: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -84,7 +84,7 @@ def evaluate_checkpoint(
     # processing gantry/task args
     gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
 
-    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else task_args
+    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else (task_args or {})
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -195,17 +195,22 @@ def evaluate_checkpoint(
         )
     )
 
-    if only_missing:
-        _, missing_tasks = make_dashboard_table(dashboard=dashboard, force=False, skip_on_fail=True)
-        results_name = os.path.basename("_".join(checkpoint_path.rsplit("/", 1)))
-        this_missing_tasks = missing_tasks.get(results_name, [])
-        all_tasks = [_ for _ in all_tasks if _ in this_missing_tasks]
     print("Launching evals on the following tasks:")
     pprint(all_tasks)
 
     # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
     EXCLUDE_FROM_LAUNCH = [r"^mmlu_.*:bpb::olmes$", r"^lambada:bpb$"]
     all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
+
+    # DOING SOME PRETTY PRINTING HERE #
+    print(
+        f"\n🏗️ Running following evals for \033[1m{run_name}\033[0m:",
+        file=sys.stderr,
+    )
+    for task in all_tasks:
+        print(f"  - {task}", file=sys.stderr)
+    print(file=sys.stderr)
+    # # # # # # # # # # # # # # # # # #
 
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
@@ -214,6 +219,7 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # TODO: automatically partition HF tasks --@soldni
         # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
         #     # these tasks don't work with vllm, so we run them on huggingface
         #     partitioned_tasks.setdefault("hf", []).append(task)

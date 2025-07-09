@@ -9,7 +9,12 @@ from rich.console import Console
 from rich.pretty import pprint
 from rich.table import Table
 
-from cookbook.cli.utils import get_aws_access_key_id, get_aws_secret_access_key, get_huggingface_token
+from cookbook.cli.utils import (
+    get_aws_access_key_id,
+    get_aws_secret_access_key,
+    get_huggingface_token,
+    make_eval_run_name,
+)
 from cookbook.constants import (
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
@@ -322,6 +327,12 @@ def convert_checkpoint(
     help="Whether to use the backend in the run name",
 )
 @click.option(
+    "--backfill/--no-backfill",
+    default=False,
+    type=bool,
+    help="When True, only launch evals that are marked as 'missing' in the workspace.",
+)
+@click.option(
     "--name-suffix",
     type=str,
     default="",
@@ -332,12 +343,6 @@ def convert_checkpoint(
     type=int,
     default=None,
     help="Number of shots to use for evaluation; by default, the number of shots is part of task def in oe-eval",
-)
-@click.option(
-    "--only-missing",
-    is_flag=True,
-    default=False,
-    help="If True, we only run evals on the tasks which are missing in datalake",
 )
 def evaluate_model(
     oe_eval_branch: str,
@@ -375,9 +380,9 @@ def evaluate_model(
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
+    backfill: bool,
     name_suffix: str,
     num_shots: int | None,
-    only_missing: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -407,6 +412,36 @@ def evaluate_model(
             continue
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
+
+    if backfill:
+        # Get the model's run name using cookbook logic
+        # E.g., "allenai/OLMo-2-1124-13B-SFT" => "OLMo-2-1124-13B-SFT"
+        model_name = make_eval_run_name(
+            checkpoint_path=checkpoint_path,
+            add_bos_token=add_bos_token,
+            num_shots=num_shots,
+            name_suffix=name_suffix.strip(),
+        )
+
+        # Call the dashboard to get all the missing results
+        missing_tasks = get_results(
+            dashboard,
+            model_name,
+            tasks,
+            format="return_missing",
+            sort_by="avg",
+            sort_column_name=None,
+            sort_descending=None,
+            force=False,
+            skip_on_fail=True,
+        )
+
+        # Override our tasks with the missing set
+        if model_name in missing_tasks:
+            tasks = missing_tasks[model_name]
+        else:
+            print(f"Found no missing tasks for {model_name}")
+            return
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
@@ -446,7 +481,6 @@ def evaluate_model(
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
         num_shots=num_shots,
-        only_missing=only_missing,
     )
 
 
@@ -524,7 +558,7 @@ def get_results(
         columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
-    metrics_table, missing_tasks = make_dashboard_table(
+    metrics_table = make_dashboard_table(
         dashboard=dashboard,
         force=force,
         skip_on_fail=skip_on_fail,
@@ -564,12 +598,35 @@ def get_results(
         rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
         results = results.keep_rows(*rows_filter_models)
 
+    missing_tasks: dict[str, list[str]] = {}
+    for model_row in results.rows:
+        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
+            # check if any of the values are None; if all values are there, this metric is ok,
+            # we have all results!
+            if metric_column_value is not None:
+                continue
+
+            all_tasks_set = set()
+            try:
+                # this is a task group! the get function will return a class that has an expanded_tasks attribute
+                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+            except ValueError:
+                # actually not a task group, just a task name. append as is.
+                all_tasks_set.add(metric_column_name)
+
+            # add missing tasks to the missing_tasks dict
+            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
+
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
         missing_tasks=missing_tasks,
         rows_filter_models=rows_filter_models,
         columns_filter_tasks=columns_filter_tasks,
     )
+
+    if format == "return_missing":
+        return missing_tasks
+
     # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(
