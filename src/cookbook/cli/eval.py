@@ -13,15 +13,18 @@ from cookbook.cli.utils import (
     get_aws_access_key_id,
     get_aws_secret_access_key,
     get_huggingface_token,
+    make_eval_run_name,
 )
 from cookbook.constants import (
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_CONVERT_DTYPES,
     OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
+    TRANSFORMERS_GIT_URL,
 )
 from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
@@ -45,6 +48,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
 )
+@click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -82,6 +86,12 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
 )
+@click.option(
+    "--dtype",
+    type=click.Choice(OLMO_CORE_CONVERT_DTYPES),
+    default=None,
+    help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -101,6 +111,7 @@ def convert_checkpoint(
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     olmo_core_v2_commit_hash: str,
+    huggingface_transformers_git_url: str,
     huggingface_transformers_commit_hash: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
@@ -110,6 +121,7 @@ def convert_checkpoint(
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    dtype: Optional[str] = None,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -124,6 +136,7 @@ def convert_checkpoint(
         huggingface_output_suffix=huggingface_output_suffix,
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
+        huggingface_transformers_git_url=huggingface_transformers_git_url,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
         max_sequence_length=max_sequence_length,
@@ -139,6 +152,7 @@ def convert_checkpoint(
         use_beaker=use_beaker,
         use_system_python=use_system_python,
         skip_validation=skip_validation,
+        dtype=dtype,
     )
 
 
@@ -276,6 +290,13 @@ def convert_checkpoint(
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
 @click.option(
+    "--task-args",
+    type=str,
+    default=[],
+    multiple=True,
+    help="Extra arguments to pass to the task config. Can specify multiple args.",
+)
+@click.option(
     "--model-args",
     type=str,
     default="",
@@ -304,6 +325,12 @@ def convert_checkpoint(
     default=False,
     type=bool,
     help="Whether to use the backend in the run name",
+)
+@click.option(
+    "--backfill/--no-backfill",
+    default=False,
+    type=bool,
+    help="When True, only launch evals that are marked as 'missing' in the workspace.",
 )
 @click.option(
     "--name-suffix",
@@ -349,9 +376,11 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    task_args: list[str],
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
+    backfill: bool,
     name_suffix: str,
     num_shots: int | None,
 ):
@@ -362,6 +391,13 @@ def evaluate_model(
 
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
+    parsed_task_args: dict[str, str] = {}
+    for arg in task_args:
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_task_args[key] = json.loads(value)
 
     parsed_model_args: dict[str, str] = {}
     for arg in model_args.split(","):
@@ -376,6 +412,36 @@ def evaluate_model(
             continue
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
+
+    if backfill:
+        # Get the model's run name using cookbook logic
+        # E.g., "allenai/OLMo-2-1124-13B-SFT" => "OLMo-2-1124-13B-SFT"
+        model_name = make_eval_run_name(
+            checkpoint_path=checkpoint_path,
+            add_bos_token=add_bos_token,
+            num_shots=num_shots,
+            name_suffix=name_suffix.strip(),
+        )
+
+        # Call the dashboard to get all the missing results
+        missing_tasks = get_results(
+            dashboard,
+            model_name,
+            tasks,
+            format='return_missing',
+            sort_by='avg',
+            sort_column_name=None,
+            sort_descending=None,
+            force=False,
+            skip_on_fail=True,
+        )
+
+        # Override our tasks with the missing set
+        if model_name in missing_tasks:
+            tasks = missing_tasks[model_name]
+        else:
+            print(f'Found no missing tasks for {model_name}')
+            return
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
@@ -408,6 +474,7 @@ def evaluate_model(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        task_args=parsed_task_args,
         model_args=parsed_model_args,
         fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
@@ -492,7 +559,7 @@ def get_results(
         columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
-    metrics_table, missing_tasks = make_dashboard_table(
+    metrics_table = make_dashboard_table(
         dashboard=dashboard,
         force=force,
         skip_on_fail=skip_on_fail,
@@ -532,12 +599,35 @@ def get_results(
         rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
         results = results.keep_rows(*rows_filter_models)
 
+    missing_tasks: dict[str, list[str]] = {}
+    for model_row in results.rows:
+        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
+            # check if any of the values are None; if all values are there, this metric is ok,
+            # we have all results!
+            if metric_column_value is not None:
+                continue
+
+            all_tasks_set = set()
+            try:
+                # this is a task group! the get function will return a class that has an expanded_tasks attribute
+                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+            except ValueError:
+                # actually not a task group, just a task name. append as is.
+                all_tasks_set.add(metric_column_name)
+
+            # add missing tasks to the missing_tasks dict
+            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
+
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
         missing_tasks=missing_tasks,
         rows_filter_models=rows_filter_models,
         columns_filter_tasks=columns_filter_tasks,
     )
+
+    if format == 'return_missing':
+        return missing_tasks
+
     # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(
