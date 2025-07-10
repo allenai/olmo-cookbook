@@ -182,6 +182,7 @@ class TransformerConfigBuilder:
     generate_doc_lengths: bool
     weka: bool
     metrics_config: Optional[MetricsConfig]
+    gc_interval: Optional[int]
     max_dp_world_size: int
     eval_interval: int
     save_interval: int
@@ -237,6 +238,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
         metrics_config: Optional[MetricsConfig] = None,
+        gc_interval: Optional[int] = None,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
@@ -263,6 +265,7 @@ class TransformerConfigBuilder:
         self.generate_doc_lengths = generate_doc_lengths
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
+        self.gc_interval = gc_interval
         self.max_dp_world_size = max_dp_world_size
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
@@ -358,7 +361,9 @@ class TransformerConfigBuilder:
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
-            "garbage_collector": GarbageCollectorCallback(),
+            "garbage_collector": GarbageCollectorCallback(
+                **{"gc_interval": self.gc_interval} if self.gc_interval else {}
+            ),
         }
 
         if self.beaker_user is not None:

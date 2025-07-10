@@ -108,6 +108,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     downstream_evaluators: list[DownstreamEvaluatorType] = []  # type: ignore
     max_target_sequence_length: int = 8192
     metrics_config: Optional[MetricsConfig] = MetricsConfig()
+    gc_interval: Optional[int] = None
     preemptible: bool = True
     shared_filesystem: bool = False
     weka: bool = False
