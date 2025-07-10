@@ -1,5 +1,5 @@
-name: "example-olmo3-microanneal"
-description: "OLMo3 7b 10B example microanneal"
+name: "webv19-redditv1-10B-olmo3-microanneal"
+description: "OLMo3 7b 10B web v18 + reddit v1 microanneal"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -19,7 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
 dataset:
   sources:
@@ -27,7 +27,7 @@ dataset:
     target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
-  - name: code 
+  - name: reddit 
     target_ratio: 0.5
     paths:
-    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy

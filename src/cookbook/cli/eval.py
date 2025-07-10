@@ -6,8 +6,8 @@ from typing import Optional
 
 import click
 from rich.console import Console
-from rich.table import Table
 from rich.pretty import pprint
+from rich.table import Table
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
@@ -26,10 +26,10 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
@@ -428,8 +428,8 @@ def evaluate_model(
             dashboard,
             model_name,
             tasks,
-            format='return_missing',
-            sort_by='avg',
+            format="return_missing",
+            sort_by="avg",
             sort_column_name=None,
             sort_descending=None,
             force=False,
@@ -440,7 +440,7 @@ def evaluate_model(
         if model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
-            print(f'Found no missing tasks for {model_name}')
+            print(f"Found no missing tasks for {model_name}")
             return
 
     evaluate_checkpoint(
@@ -545,7 +545,6 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -625,7 +624,7 @@ def get_results(
         columns_filter_tasks=columns_filter_tasks,
     )
 
-    if format == 'return_missing':
+    if format == "return_missing":
         return missing_tasks
 
     # okay we got all results! now time to sort them depending on the user's request
