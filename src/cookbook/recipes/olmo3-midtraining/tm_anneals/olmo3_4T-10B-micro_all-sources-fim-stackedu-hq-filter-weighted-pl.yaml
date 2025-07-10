@@ -24,8 +24,7 @@ load_state: false
 dataset:
   sources:
   - name: hqweb
-    target_ratio: 0.5
-    repetition_factor: 1.5
+    target_ratio: 0.45
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
   - name: code_fim-stackedu-hq-filter-v0
@@ -66,3 +65,4 @@ dataset:
     target_ratio: 0.0025
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
+
