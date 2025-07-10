@@ -11,7 +11,6 @@ model="olmo3_7b_lc_64k_s2pdf-8k-64k_olmo3mix-f60303aa/step4769"
 uv run python -m cookbook.remote \
     gs://ai2-llm/checkpoints/$(whoami)/${model} \
     weka://oe-training-default/ai2-llm/checkpoints/$(whoami)/${model}
-
 ```
 
 
