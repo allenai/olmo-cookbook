@@ -785,7 +785,7 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot (except PopQA)
-        "alpaca_eval_v3::hamish_zs_reasoning",
+        # "alpaca_eval_v3::hamish_zs_reasoning",
         "ifeval::hamish_zs_reasoning",
         "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         MinervaHamishZSReasoningGroup(),
