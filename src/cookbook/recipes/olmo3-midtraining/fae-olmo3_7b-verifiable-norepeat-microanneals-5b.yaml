@@ -36,7 +36,7 @@ dataset:
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
   - name: verifiable 
-    target_ratio: 0.1
+    target_ratio: 0.05
     repetition_factor: 1.4
     paths:
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/verifiable/gpt-41/allenai/dolma2-tokenizer/*.npy
