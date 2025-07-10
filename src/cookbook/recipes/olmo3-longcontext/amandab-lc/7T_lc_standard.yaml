@@ -1,0 +1,45 @@
+# Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
+# Needs updates with actual training dataset and hyperparameters
+# Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
+name: "olmo3-7b-swafix-7T_LC_10B"
+description: "OLMo3 7b swafix @ 7T, 10B tokens at 65k context length"
+budget: "ai2/oe-base"
+workspace: "ai2/long-contexts"
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: urgent
+nodes: 4
+gpus: 8
+seed: 4123
+generate_doc_lengths: true  # enable intra-document masking
+# TODO: update to the actual start checkpoint for Long Context extension
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step467000/model_and_optim/
+load_state: false
+model: "olmo3_7B_swafix"
+tokenizer: "dolma2"
+max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
+global_batch_size: 16777216
+sequence_length: &seq_len 65536
+max_target_sequence_length: *seq_len
+rank_microbatch_size: *seq_len  # must be the same as sequence_length
+scheduler_type: linear
+warmup_steps: 0
+dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+cp_degree: 8
+float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
+eval_interval: 500
+#downstream_evaluators:
+#  - olmo2_dev_1b
+dataset:
+  # TODO: configure target dataset sources
+  sources:
+  - name: LC-s2pdf_8k-64k
+    target_ratio: 0.6666666
+    paths:
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_sample10pct/allenai/dolma2-tokenizer/length_2e15/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_sample10pct/allenai/dolma2-tokenizer/length_2e13/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_sample10pct/allenai/dolma2-tokenizer/length_2e14/*.npy
+  - name: SC-all_dressed-snazzy2
+    target_ratio: 0.3333334
+    paths:
+    - gs://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2/**/*.npy
