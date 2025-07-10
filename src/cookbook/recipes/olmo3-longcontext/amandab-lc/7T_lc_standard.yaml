@@ -2,7 +2,7 @@
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
 name: "olmo3-7b-swafix-7T_LC_10B"
-description: "OLMo3 7b swafix @ 7T, 10B tokens at 65k context length"
+description: "OLMo3 7b swafix @ 7T, 10B tokens at 65k context length, RoPE @8M"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
@@ -13,7 +13,7 @@ gpus: 8
 seed: 4123
 generate_doc_lengths: true  # enable intra-document masking
 # TODO: update to the actual start checkpoint for Long Context extension
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step467000/model_and_optim/
+load_path: "gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step467000/model_and_optim/"
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
@@ -28,6 +28,8 @@ dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
 eval_interval: 500
+model_overrides:
+  - block.attention.rope.theta=8000000
 #downstream_evaluators:
 #  - olmo2_dev_1b
 dataset:
