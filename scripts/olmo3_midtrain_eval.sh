@@ -12,7 +12,7 @@ CHECKPOINT_PATH="$1"
 
 olmo-cookbook-eval evaluate \
   "$CHECKPOINT_PATH" \
-  --tasks olmo3:dev:midtrain:v0 \
+  --tasks olmo3:dev:midtrain:v1 \
   --priority high \
   --cluster aus80g \
   --num-gpus 1 \

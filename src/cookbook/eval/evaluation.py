@@ -1,12 +1,15 @@
-from collections.abc import Mapping
 import json
+import os
 import re
 import shlex
 import subprocess
+import sys
+from collections.abc import Mapping
 from copy import deepcopy
 from hashlib import md5
 from typing import Optional
 from urllib.parse import urlparse
+
 from rich.pretty import pprint
 
 from cookbook.cli.utils import (
@@ -16,13 +19,9 @@ from cookbook.cli.utils import (
     install_oe_eval,
     make_eval_run_name,
 )
-from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
-    FIM_TOKENS,
-    OE_EVAL_LAUNCH_COMMAND,
-    WEKA_MOUNTS,
-)
+from cookbook.constants import BEAKER_KNOWN_CLUSTERS, FIM_TOKENS, OE_EVAL_LAUNCH_COMMAND, WEKA_MOUNTS
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
+from cookbook.eval.results import make_dashboard_table
 
 
 def evaluate_checkpoint(
@@ -85,7 +84,7 @@ def evaluate_checkpoint(
     # processing gantry/task args
     gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
 
-    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else task_args
+    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else (task_args or {})
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -185,25 +184,33 @@ def evaluate_checkpoint(
 
     # these are all the tasks we want to run; note that we can't run regex patterns here,
     # they have to be actual strings
-    all_tasks = sorted(list(set(
-        task
-        for task_group in tasks
-        for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
-        if isinstance(task, str)
-    )))
+    all_tasks = sorted(
+        list(
+            set(
+                task
+                for task_group in tasks
+                for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+                if isinstance(task, str)
+            )
+        )
+    )
 
-    print('Launching evals on the following tasks:')
+    print("Launching evals on the following tasks:")
     pprint(all_tasks)
 
     # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
-    EXCLUDE_FROM_LAUNCH = [
-        r'^mmlu_.*:bpb::olmes$',
-        r'^lambada:bpb$'
-    ]
-    all_tasks = [
-        task for task in all_tasks
-        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
-    ]
+    EXCLUDE_FROM_LAUNCH = [r"^mmlu_.*:bpb::olmes$", r"^lambada:bpb$"]
+    all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
+
+    # DOING SOME PRETTY PRINTING HERE #
+    print(
+        f"\n🏗️ Running following evals for \033[1m{run_name}\033[0m:",
+        file=sys.stderr,
+    )
+    for task in all_tasks:
+        print(f"  - {task}", file=sys.stderr)
+    print(file=sys.stderr)
+    # # # # # # # # # # # # # # # # # #
 
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
@@ -212,6 +219,7 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        # TODO: automatically partition HF tasks --@soldni
         # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
         #     # these tasks don't work with vllm, so we run them on huggingface
         #     partitioned_tasks.setdefault("hf", []).append(task)
@@ -306,8 +314,11 @@ def evaluate_checkpoint(
                 if "stop_sequences" in task_args_dict["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     task_args_dict["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"] 
-                         if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]]
+                        [
+                            stop_tok
+                            for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]
+                        ]
                     )
                 else:
                     task_args_dict["generation_kwargs"].update(infilling_dict["generation_kwargs"])
