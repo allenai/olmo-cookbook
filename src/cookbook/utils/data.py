@@ -76,7 +76,7 @@ def get_token_counts_and_ratios(
         if scheme not in filesystems:
             filesystems[scheme] = get_filesystem_for_scheme(scheme)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
         for source in source_configs:
             # Get the appropriate filesystem for this source
             scheme = next(iter({urlparse(path).scheme for path in source.paths}), "local")
