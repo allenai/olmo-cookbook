@@ -1,7 +1,7 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning-w1"
+name: "olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning-w1_rope50k"
 description: "OLMo3 7B w/ swafix trained up to 64k context length with a natural distribution of sequences between 8k and 64k from s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
