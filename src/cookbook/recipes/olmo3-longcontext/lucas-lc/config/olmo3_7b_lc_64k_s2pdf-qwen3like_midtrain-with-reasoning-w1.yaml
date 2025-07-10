@@ -20,8 +20,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-# TODO: update to the actual start checkpoint for Long Context extension
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B/step297000/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000/model_and_optim/
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
