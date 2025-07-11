@@ -34,7 +34,9 @@ models=(
     # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-klist-841b19ca/step4769'
 )
 
-
+models=(
+    'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-80web-20synthqa-508971fb/step477'
+)
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
