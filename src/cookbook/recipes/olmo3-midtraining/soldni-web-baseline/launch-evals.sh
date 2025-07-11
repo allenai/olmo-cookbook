@@ -29,18 +29,18 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-60web-40synthqa-807fdc92/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-70web-30synthqa-e14c2910/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-90web-10synthqa-508971fb/step477'
+)
+
+models=(
+    'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-80web-20synthqa-508971fb/step477'
     # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-distill-85ff229d/step4769'
     # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-kextract-fb5c70e2/step4769'
     # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-klist-841b19ca/step4769'
 )
 
-models=(
-    'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-80web-20synthqa-508971fb/step477'
-)
-
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
-    uv run python -m cookbook.remote gs://$model weka://oe-training-default/$model
+    uv run python -m cookbook.remote gs://$model weka://oe-training-default/$model --allow-dirty
 done
 
 
