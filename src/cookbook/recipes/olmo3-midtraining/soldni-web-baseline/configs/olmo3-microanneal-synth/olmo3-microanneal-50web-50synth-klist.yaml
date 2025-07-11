@@ -1,0 +1,35 @@
+name: &name "olmo3-microanneal-50web-50synth-klist"
+description: *name
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
+load_state: false
+downstream_evaluators:
+  - olmo2_dev_1b
+dataset:
+  sources:
+  - name: hqweb
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+  - name: nemotron-cc
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=synthetic/kind2=knowledge_list/*.npy
