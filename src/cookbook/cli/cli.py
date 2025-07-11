@@ -62,7 +62,7 @@ def cli():
 @click.option(
     "-y",
     "--yes",
-    destination="skip_confirmation",
+    "skip_confirmation",
     is_flag=True,
     default=False,
     help="Skip confirmation prompt.",
