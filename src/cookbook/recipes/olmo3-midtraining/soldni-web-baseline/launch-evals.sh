@@ -40,13 +40,14 @@ models=(
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
-    uv run python -m cookbook.remote gs://$model weka://oe-training-default/$model --allow-dirty
+    uv run --python 3.12 python -m cookbook.remote gs://$model weka://oe-training-default/$model --allow-dirty
 done
 
 
 # Convert checkpoints
 for model in "${models[@]}"; do
-    uv run olmo-cookbook-eval convert \
+    uv run --python 3.12 \
+        olmo-cookbook-eval convert \
         "/oe-training-default/$model" \
         -t olmo-core-v2 \
         --use-beaker \
