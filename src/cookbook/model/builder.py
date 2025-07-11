@@ -29,7 +29,7 @@ from olmo_core.optim import (
     SkipStepAdamWConfig,
     #WSD,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup, WSD
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BeakerCallback,
