@@ -27,6 +27,7 @@ from olmo_core.optim import (
     OptimGroupOverride,
     Scheduler,
     SkipStepAdamWConfig,
+    WSD,
 )
 from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
@@ -66,7 +67,6 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
-from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,14 @@ class SchedulerState:
     max_pretrain_steps: int
     base_lr: float
     starting_lr: float
+
+
+@dataclass
+class OptimizerState:
+    weight_decay: float
+    betas: Tuple[float, float]
+    foreach: bool
+    optim_group_override: dict | None = None
 
 
 @dataclass
@@ -487,16 +495,27 @@ class TransformerConfigBuilder:
 
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
+        weight_decay = 0.033
+        betas = (0.9, 0.95)
+        foreach = True
+        optim_group_override_dict = dict(params=["embeddings.weight"], opts=dict(weight_decay=0.0))
 
         if self.annealing is not None:
-            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
+            scheduler_state, optimizer_state = self.get_state_from_checkpoint()
+            lr = getattr(self.annealing, "initial_lr", None) or scheduler_state.starting_lr
+            weight_decay = getattr(self.annealing, "weight_decay", None) or optimizer_state.weight_decay
+            betas = getattr(self.annealing, "betas", None) or optimizer_state.betas
+            foreach = getattr(self.annealing, "foreach", None) or optimizer_state.foreach
+            optim_group_override_dict = getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+
+        group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
         return SkipStepAdamWConfig(
             lr=lr,
-            weight_decay=0.033,
-            betas=(0.9, 0.95),
-            group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
-            foreach=True,
+            weight_decay=weight_decay,
+            betas=betas,
+            group_overrides=group_overrides,
+            foreach=foreach,
         )
 
     def get_ac_config(self):
@@ -541,7 +560,7 @@ class TransformerConfigBuilder:
                 resource_path(folder=self.load_path, fname="config.json"),
             )
 
-    def get_state_from_checkpoint(self) -> SchedulerState:
+    def get_state_from_checkpoint(self) -> Tuple[SchedulerState, OptimizerState]:
         state_path, config_path = self.load_state_and_config_from_path()
         train_state = torch.load(state_path, weights_only=False)
 
@@ -612,7 +631,7 @@ class TransformerConfigBuilder:
 
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
-        return SchedulerState(
+        scheduler_state = SchedulerState(
             global_step=last_pretrain_step,
             max_steps=max_pretrain_steps,
             last_pretrain_step=last_pretrain_step,
@@ -620,6 +639,49 @@ class TransformerConfigBuilder:
             base_lr=base_lr,
             starting_lr=starting_lr,
         )
+
+        optimizer_config = config["train_module"]["optim"]
+        optimizer_class = optimizer_config.get("_CLASS_", None).split(".")[-1]
+
+        try:
+            assert optimizer_class == SkipStepAdamWConfig.__name__
+
+            weight_decay = optimizer_config.get("weight_decay", None)
+            assert isinstance(weight_decay, float)
+
+            betas = optimizer_config.get("betas", None)
+            assert isinstance(betas, list) and len(betas) == 2
+
+            foreach = optimizer_config.get("foreach", None)
+            assert isinstance(foreach, bool)
+
+            group_overrides = optimizer_config.get("group_overrides", [])
+
+            optim_group_override = None
+            for group_override in group_overrides:
+                group_override_class = group_override.get("_CLASS_", None).split(".")[-1]
+                if group_override_class == OptimGroupOverride.__name__:
+                    (optim_group_override := {**group_override}).pop("_CLASS_")
+                    break
+            assert optim_group_override is None or isinstance(optim_group_override, dict)
+
+        except Exception as e:
+            logger.error(
+                "Could not load optimizer state from checkpoint. Please ensure the checkpoint is valid. Exiting!",
+                e,
+            )
+            logger.info(optimizer_config)
+            raise e
+
+        optimizer_state = OptimizerState(
+            weight_decay=weight_decay,
+            betas=tuple(betas),
+            foreach=foreach,
+            optim_group_override=optim_group_override,
+        )
+
+        return scheduler_state, optimizer_state
+
 
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()

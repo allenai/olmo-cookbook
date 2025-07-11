@@ -14,13 +14,16 @@ seed: 4123
 
 gc_interval: 200
 
+annealing:
+  enabled: true
+
 metrics_config:
   backend: wandb
   project: "olmo3-7b-long-context"
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
