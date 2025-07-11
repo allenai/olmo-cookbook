@@ -48,4 +48,4 @@ dataset:
   - name: niah
     # should be almost exactly 10B tokens in this subset in total
     target_ratio: 1.0 
-    paths:
+    paths: s3://ai2-llm/preprocessed/long-contexts/RULER-sanity/olmo3-niah/allenai/dolma2-tokenizer/*.npy
