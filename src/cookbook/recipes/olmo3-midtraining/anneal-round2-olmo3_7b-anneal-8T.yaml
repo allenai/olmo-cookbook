@@ -30,7 +30,7 @@ dataset:
   - name: code
     target_ratio: 0.2
     paths:
-    - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
   - name: finemath
     # 10% less the .0269 over 10% for dolminos2math
     target_ratio: 0.0731
