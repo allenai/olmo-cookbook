@@ -1,4 +1,4 @@
-destination: /mnt/raid0/ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_46B/allenai/dolma2-tokenizer
+destination: /mnt/raid0/ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer
 documents:
 - /mnt/raid0/ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/data/adult_content/vigintile_0020/shard_00000007.jsonl.zst
 - /mnt/raid0/ai2-llm/pretraining-data/sources/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/data/adult_content/vigintile_0020/shard_00000022.jsonl.zst
