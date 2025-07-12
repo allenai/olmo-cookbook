@@ -121,6 +121,9 @@ def get_size_of_prefix(
 @click.option("-d", "--data-prefix", type=str, default=DATA_PREFIX)
 @click.option("-o", "--output", type=str, required=True)
 def main(token_count: int, min_vigintile: int, npy_prefix: str, data_prefix: str, output) -> None:
+
+    random.seed(42)
+
     assert 1 <= min_vigintile <= 20, "min vigintile must be between 1 and 20"
     assert token_count > 0, "token count must be greater than 0"
 
@@ -148,12 +151,16 @@ def main(token_count: int, min_vigintile: int, npy_prefix: str, data_prefix: str
     desired_file_total = sampling_ratio * sum(data_prefix_sizes.values())
     print(f"Desired file total: {desired_file_total / 1024 ** 3:.2f} GB")
 
-    list_of_files = sorted(data_prefix_sizes.items())
-    random.shuffle(list_of_files)
+    topic_vig_hier = {}
+    for key, size in data_prefix_sizes.items():
+        *_, topic, vigintile, _ = key.split("/")
+        topic = topic.replace("topic_", "")
+        vigintile = int(vigintile.replace("vigintile_", ""))
+        topic_vig_hier.setdefault(topic, {}).setdefault(vigintile, {})[key] = size
 
     destination = npy_prefix\
         .replace("s3://", "/mnt/raid0/")\
-            .replace("/allenai/dolma2-tokenizer", f"_{token_count // 1024 ** 3}B/allenai/dolma2-tokenizer")
+        .replace("/allenai/dolma2-tokenizer", f"_{token_count // 1024 ** 3}B/allenai/dolma2-tokenizer")
 
     output_obj = {
         "documents": [],
@@ -170,16 +177,23 @@ def main(token_count: int, min_vigintile: int, npy_prefix: str, data_prefix: str
         "sample_ring_prop": True,
         "dtype": "uint32",
     }
-    current_size = 0
-
     with tqdm.tqdm(total=desired_file_total, desc="Selecting files", unit_scale=True) as pbar:
-        for file_name, size in list_of_files:
-            if current_size >= desired_file_total:
-                break
+        for topic, vigintiles in topic_vig_hier.items():
+            for vigintile, files in vigintiles.items():
+                current_file_size = sum(files.values())
+                desired_file_total = sampling_ratio * current_file_size
+                current_files = sorted(files.items())
+                random.shuffle(current_files)
 
-            output_obj["documents"].append(file_name)
-            current_size += size
-            pbar.update(size)
+                current_size = 0
+                for file_path, size in current_files:
+                    if current_size > desired_file_total:
+                        break
+
+                    output_obj["documents"].append(file_path)
+                    current_size += size
+                    pbar.update(size)
+
 
     output_obj["documents"] = sorted(output_obj["documents"])
 
