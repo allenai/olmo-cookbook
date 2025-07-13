@@ -26,18 +26,18 @@ dataset:
   - name: hqweb
     target_ratio: 0.45
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
   - name: code
     target_ratio: 0.2
     paths:
-    - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
   - name: finemath
-    # 10% less the .0269 over 10% for dolminos2math
-    target_ratio: 0.0731
+    # 10% less the .0268 over 10% for dolminos2math
+    target_ratio: 0.0732
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.1269
+    target_ratio: 0.1268
     paths:
     # 10.7B
     - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
