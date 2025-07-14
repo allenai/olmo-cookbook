@@ -28,7 +28,7 @@ dataset:
   - name: hqweb
     target_ratio: 0.45
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B_segment/allenai/dolma2-tokenizer/*.npy
 
   - name: code
     target_ratio: 0.2
