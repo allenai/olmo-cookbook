@@ -317,8 +317,11 @@ def evaluate_checkpoint(
                 if "stop_sequences" in partition_task_args["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     partition_task_args["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
-                         if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]]
+                        [
+                            stop_tok
+                            for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]
+                        ]
                     )
                 else:
                     partition_task_args["generation_kwargs"].update(infilling_dict["generation_kwargs"])
