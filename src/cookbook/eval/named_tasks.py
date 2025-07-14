@@ -785,7 +785,7 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot (except PopQA)
-        "alpaca_eval_v3::hamish_zs_reasoning",
+        # "alpaca_eval_v3::hamish_zs_reasoning",
         "ifeval::hamish_zs_reasoning",
         "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         MinervaHamishZSReasoningGroup(),
@@ -807,13 +807,13 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot
-        "alpaca_eval_v3::hamish_zs_reasoning",
+        # "alpaca_eval_v3::hamish_zs_reasoning",
         "ifeval::hamish_zs_reasoning",
         # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
         # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
-        "ifeval_ood::tulu-thinker",
+        # "ifeval_ood::tulu-thinker", # this is held-out (for now?)
         StyledMath500ThinkerGroup(),
-        StyledAlpacaEvalThinkerGroup(),
+        # StyledAlpacaEvalThinkerGroup(),
         # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
         "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         MinervaHamishZSReasoningGroup(),
@@ -829,7 +829,7 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         "popqa::olmo3:thinker",
         AgiEvalEnglishOLMo3ThinkerGroup(),
         MMLUOLMo3ThinkerGroup(),
-        "simpleqa::tulu-thinker",
+        # "simpleqa::tulu-thinker",
 
         ### Not implemented
         # cruxeval

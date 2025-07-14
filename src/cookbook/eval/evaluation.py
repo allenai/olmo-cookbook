@@ -219,6 +219,8 @@ def evaluate_checkpoint(
             partitioned_tasks.setdefault("rc", []).append(task)
         elif ":mc::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
+        elif "fim_" in task:
+            partitioned_tasks.setdefault("fim", []).append(task)
         # TODO: automatically partition HF tasks --@soldni
         # elif task in {"ultrachat_masked_ppl", "wildchat_masked_ppl"}:
         #     # these tasks don't work with vllm, so we run them on huggingface
@@ -231,6 +233,7 @@ def evaluate_checkpoint(
     for task_group, tasks_names in partitioned_tasks.items():
         for i in range(0, len(tasks_names), partition_size or len(tasks_names)):
             local_flags = deepcopy(flags)
+            partition_task_args = deepcopy(task_args_dict)
 
             # add all tasks in the partition as flag
             partition_tasks = tasks_names[i : i + partition_size] if partition_size else tasks_names
@@ -302,32 +305,32 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            if fim_tokens:
+            if fim_tokens and task_group == "fim":
                 infilling_dict = FIM_TOKENS[fim_tokens]
 
                 # Add FIM tokens to context, preserving other existing kwargs
-                task_args_dict.setdefault("context_kwargs", {})
-                task_args_dict["context_kwargs"].update(infilling_dict["context_kwargs"])
+                partition_task_args.setdefault("context_kwargs", {})
+                partition_task_args["context_kwargs"].update(infilling_dict["context_kwargs"])
 
                 # Add FIM stop sequences, preserving other existing stop sequences
-                task_args_dict.setdefault("generation_kwargs", {})
-                if "stop_sequences" in task_args_dict["generation_kwargs"]:
+                partition_task_args.setdefault("generation_kwargs", {})
+                if "stop_sequences" in partition_task_args["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
-                    task_args_dict["generation_kwargs"]["stop_sequences"].extend(
+                    partition_task_args["generation_kwargs"]["stop_sequences"].extend(
                         [
                             stop_tok
                             for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
-                            if stop_tok not in task_args_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]
                         ]
                     )
                 else:
-                    task_args_dict["generation_kwargs"].update(infilling_dict["generation_kwargs"])
+                    partition_task_args["generation_kwargs"].update(infilling_dict["generation_kwargs"])
 
             if compute_gold_bpb:
-                task_args_dict["compute_gold_bpb"] = True
+                partition_task_args["compute_gold_bpb"] = True
 
-            if task_args_dict:
-                local_flags.append(f"--task-args '{json.dumps(task_args_dict)}'")
+            if partition_task_args:
+                local_flags.append(f"--task-args '{json.dumps(partition_task_args)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
