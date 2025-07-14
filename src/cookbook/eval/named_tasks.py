@@ -794,6 +794,31 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
     ]
 
 
+@NamedTasksGroupRegistry.register("dev:7b:nocodeish")
+class Olmo3Dev7bMainNoCodeGroup(BaseTaskView):
+    tasks = [
+        # re.compile(r"^olmo3:dev:7b:macro:w_avg$"),
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathGroup(),
+        # Olmo3Dev7bCodeGenGroup(),
+        # Olmo3Dev7bCodeFimGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmes",
+        GsmSymbGroup(),
+        MinervaGroup(),
+        "codex_humaneval:3shot::olmo3",
+        "mbpp:3shot::olmo3",
+        # MultiPlEHEGroup(),
+        # MultiPlEMBPPGroup(),
+        # CruxEvalGroup(),
+    ]
+
+
 # This is a legacy group, please use the "v1" version!
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
 class Olmo3DevMidtrainV0MainGroup(BaseTaskView):
