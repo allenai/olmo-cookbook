@@ -3,10 +3,12 @@
 ## Move
 
 ```bash
-model="olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1-b148c0f9/step4769"
-model="olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix-62a97530/step4769"
-model="olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning-w1-ccb7b996/step4769"
-model="olmo3_7b_lc_64k_s2pdf-8k-64k_olmo3mix-f60303aa/step4769"
+models=(
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M-bac53cbd/step597"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix_t8M-5ff97ac3/step4769"
+    "ai2-llm/checkpoints/lucas/olmo3_7B-7T_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M-028f5917/step597"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_t8M-ff85cc8c/step4769"
+)
 
 uv run python -m cookbook.remote \
     gs://ai2-llm/checkpoints/$(whoami)/${model} \
@@ -19,10 +21,6 @@ uv run python -m cookbook.remote \
 
 
 ```bash
-model="olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1-b148c0f9/step4769"
-model="olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix-62a97530/step4769"
-model="olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning-w1-ccb7b996/step4769"
-model="olmo3_7b_lc_64k_s2pdf-8k-64k_olmo3mix-f60303aa/step4769"
 
 olmo-cookbook-eval convert \
     "/oe-training-default/ai2-llm/checkpoints/$(whoami)/${model}" \
