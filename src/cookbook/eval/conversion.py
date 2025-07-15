@@ -403,6 +403,7 @@ def run_checkpoint_conversion(
     beaker_cluster: str,
     beaker_dry_run: bool,
     beaker_gpus: int,
+    beaker_cpus: int,
     beaker_priority: str,
     beaker_workspace: str,
     beaker_preemptible: bool,
@@ -502,6 +503,7 @@ def run_checkpoint_conversion(
             "--no-python",
             f"--workspace {beaker_workspace}",
             f"--priority {beaker_priority}",
+            f"--cpus {beaker_cpus}"
             f"--gpus {beaker_gpus}",
             ("--preemptible" if beaker_preemptible else ""),
             f"--budget {beaker_budget}",

@@ -61,6 +61,7 @@ logger = logging.getLogger(__name__)
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
 @click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
+@click.option("--beaker-cpus", type=int, default=8, help="Number of CPUs for Beaker")
 @click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
 @click.option("--use-system-python", is_flag=True, help="Whether to use system Python or a virtual environment")
 @click.option(
@@ -98,6 +99,7 @@ def convert_checkpoint(
     beaker_cluster: str,
     beaker_dry_run: bool,
     beaker_gpus: int,
+    beaker_cpus: int,
     beaker_priority: str,
     beaker_workspace: str,
     force_venv: bool,
@@ -129,6 +131,7 @@ def convert_checkpoint(
         beaker_cluster=beaker_cluster,
         beaker_dry_run=beaker_dry_run,
         beaker_gpus=beaker_gpus,
+        beaker_cpus=beaker_cpus,
         beaker_preemptible=beaker_preemptible,
         beaker_priority=beaker_priority,
         beaker_workspace=beaker_workspace,
