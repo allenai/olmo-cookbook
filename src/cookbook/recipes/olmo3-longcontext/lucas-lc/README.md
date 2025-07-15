@@ -32,3 +32,19 @@ for model in "${models[@]}"; do
         --huggingface-transformers-commit-hash 5db7e35d42636e86ee37a43f56a1587daadb7c1b
 done
 ```
+
+
+## Eval
+
+```bash
+git clone git@github.com:allenai/HELMET.git code/ai2-helmet
+cd code/ai2-helmet
+uv venv --python 3.12
+uv pip install -r requirements.txt
+uv pip install beaker-gantry
+source .venv/bin/activate
+
+for model in "${models[@]}"; do
+    PRIORITY=urgent ./gantry_eval.sh ${model}$ ai2/titan-cirrascale 2
+done
+```
