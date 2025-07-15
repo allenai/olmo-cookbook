@@ -63,7 +63,6 @@ def evaluate_checkpoint(
     use_backend_in_run_name: bool,
     name_suffix: str,
     num_shots: int | None,
-    special_task_args_str: str,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -295,7 +294,6 @@ def evaluate_checkpoint(
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
 
-            special_task_args = json.loads(special_task_args_str)
             if fim_tokens:
                 infilling_dict = FIM_TOKENS[fim_tokens]
 
@@ -319,9 +317,6 @@ def evaluate_checkpoint(
 
             if task_args_dict:
                 local_flags.append(f"--task-args '{json.dumps(task_args_dict)}'")
-
-            if special_task_args:
-                local_flags.append(f"--task-args '{json.dumps(special_task_args)}'")
 
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"

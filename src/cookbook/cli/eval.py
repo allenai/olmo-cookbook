@@ -337,12 +337,6 @@ def convert_checkpoint(
     default=None,
     help="Number of shots to use for evaluation; by default, the number of shots is part of task def in oe-eval",
 )
-@click.option( 
-    "--special-task-args",
-    type=str,
-    default="",
-    help="Extra arguments to pass to the tasks (will be passed to all tasks run as --task-args)",
-)
 def evaluate_model(
     oe_eval_branch: str,
     oe_eval_commit: str,
@@ -381,7 +375,6 @@ def evaluate_model(
     use_backend_in_run_name: bool,
     name_suffix: str,
     num_shots: int | None,
-    special_task_args: str,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -450,7 +443,6 @@ def evaluate_model(
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
         num_shots=num_shots,
-        special_task_args_str=special_task_args
     )
 
 
