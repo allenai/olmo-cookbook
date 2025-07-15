@@ -112,13 +112,7 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
 
     def combine(self, results: MiniFrame) -> MiniFrame | None:
         filtered_rows = results.keep_cols(*self.expanded_tasks)
-
         combined_table = MiniFrame(title=results.title)
-
-        # Add empty values to all tasks
-        for row in results.rows:
-            for task in self.expanded_tasks:
-                combined_table.add(col=task, row=row.name, val=None)
 
         # each row here is a model
         for row in filtered_rows.rows:
@@ -184,12 +178,12 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
             filtered_rows.add(col=self.name, row=row.name, val=average)
 
         return filtered_rows
-    
+
 
 class BaseTaskView(BaseAverageOfAveragesNamedTasksGroup):
     """
-    Base class for tasks "views". In a task view, only the child tasks are averages 
-    
+    Base class for tasks "views". In a task view, only the child tasks are averages
+
     For example, "olmo3:dev:7b:main" is not a average, but contains "olmo3:dev:7b:mcqa" and "mmlu:mc" are task averages.
     """
     def combine(self, results: MiniFrame) -> MiniFrame | None:
@@ -353,7 +347,7 @@ class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
     tasks = [
-        "gsm8k::olmo1", 
+        "gsm8k::olmo1",
         "gsm8k::olmes",
         [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
     ]
