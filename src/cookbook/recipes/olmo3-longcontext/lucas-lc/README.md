@@ -10,9 +10,12 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_t8M-ff85cc8c/step4769"
 )
 
-uv run python -m cookbook.remote \
-    gs://ai2-llm/checkpoints/$(whoami)/${model} \
-    weka://oe-training-default/ai2-llm/checkpoints/$(whoami)/${model}
+for model in "${models[@]}"; do
+    uv run --python 3.12 python -m cookbook.remote \
+    gs://${model} \
+    weka://oe-training-default/${model} \
+    --allow-dirty
+done
 ```
 
 
