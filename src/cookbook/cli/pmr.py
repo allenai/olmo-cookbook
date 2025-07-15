@@ -304,9 +304,6 @@ sudo "${{PKG_MANAGER}}" install git tmux htop -y
 # install gcc, g++, cmake, openssl-devel
 sudo "${{PKG_MANAGER}}" install gcc g++ cmake openssl-devel -y
 
-# install github cli
-curl -sS https://webi.sh/gh | sh
-
 # install s5cmd
 wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
 tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
