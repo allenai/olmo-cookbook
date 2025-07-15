@@ -29,7 +29,8 @@ for model in "${models[@]}"; do
         --use-beaker \
         --olmo-core-v2-commit-hash  326b7b01cc77750343510919801316d5a5622d87 \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
-        --huggingface-transformers-commit-hash 5db7e35d42636e86ee37a43f56a1587daadb7c1b
+        --huggingface-transformers-commit-hash 5db7e35d42636e86ee37a43f56a1587daadb7c1b \
+        --dtype float32
 done
 ```
 
