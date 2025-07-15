@@ -1,4 +1,5 @@
 import re
+import json
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from functools import partial
@@ -147,6 +148,9 @@ class MiniFrame:
             table.add_row(row.name, *formatted_values)
 
         console.print(table)
+
+    def to_json(self) -> str:
+        return json.dumps(self._data, sort_keys=True)
 
     def to_csv(self) -> str:
         # Header row with just column names, sorted alphabetically
