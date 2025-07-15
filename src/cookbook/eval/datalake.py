@@ -398,7 +398,6 @@ class AddToDashboard(BaseDashboardTransformRequest):
             fn = partial(cls._endpoint_request, experiment_id=run.experiment_id, tags=new_tags, overwrite=False)
             fns.append(fn)
 
-        breakpoint()
         print(f"Adding {len(fns):,} experiments to dashboard {dashboard}")
 
         if (n := cls._thread_number()) >= 0:
