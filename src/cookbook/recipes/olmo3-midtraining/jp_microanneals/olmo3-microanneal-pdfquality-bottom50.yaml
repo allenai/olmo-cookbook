@@ -27,7 +27,7 @@ dataset:
     target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
-  - name: pdf-quality-top10
+  - name: pdf-quality-bottom50
     target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_quality_tagged_partitioned_bottom50microanneal_tokenized/*.npy
