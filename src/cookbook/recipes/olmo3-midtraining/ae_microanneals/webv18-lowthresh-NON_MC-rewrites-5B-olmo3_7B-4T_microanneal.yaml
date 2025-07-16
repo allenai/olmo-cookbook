@@ -1,11 +1,11 @@
-name: "example-olmo3-microanneal"
-description: "OLMo3 7b 10B example microanneal"
+name: "webv18-reddit-lowthresh-nonMC-5B-olmo3-4T-microanneal"
+description: "OLMo3 7b 5B web v18 + reddit lowthresh nonMC rewrites (4T)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 10_000_000_000
+max_tokens: 5_000_000_000
 global_batch_size: 2097152
 sequence_length: 8192
 seed: 1337
@@ -24,10 +24,11 @@ load_state: false
 dataset:
   sources:
   - name: web 
-    target_ratio: 0.5
+    target_ratio: 0.54
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
-  - name: code 
-    target_ratio: 0.5
+  - name: nonMC_reddit_lowthresh
+    target_ratio: 0.46
     paths:
-    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+    #2.32B
+    - s3://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/lowthresh_rewrites_nonmc-tokenized/allenai/dolma2-tokenizer/*.npy
