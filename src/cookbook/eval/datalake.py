@@ -200,6 +200,11 @@ class Metrics:
     def bpb(self) -> float | None:
         return self.bits_per_byte_corr or self.logits_per_byte_corr
 
+    @property
+    def pass_at_10(self) -> float | None:
+        if "pass_at_10" in self.extra_metrics:
+            return self.extra_metrics["pass_at_10"]
+
     @classmethod
     def from_dict(cls, d: dict) -> Self:
         # these are the names of the fields that are shared across tasks

@@ -403,6 +403,16 @@ class MultiPlEMBPPGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.MULTIPL_E_MBPP_TASKS]
 
 
+@NamedTasksGroupRegistry.register("multipl-e-humaneval::pass_at_10")
+class MultiPlEHEPassAt10Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:pass_at_10' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp::pass_at_10")
+class MultiPlEMBPPPassAt10Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:pass_at_10' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
 @NamedTasksGroupRegistry.register("fim")
 class FimGroup(BaseAverageNamedTasksGroup):
     tasks = [f'{task}:temp0.2' for task in constants.FIM_TASKS]
@@ -614,6 +624,19 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
         # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
+    ]
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:pass_at_10")
+class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Code
+        # "bigcodebench:3shot::olmo3", # too expensive for us to compute pass@k
+        "codex_humaneval:3shot::olmo3:pass_at_10",
+        "deepseek_leetcode::olmo3:pass_at_10",
+        # "ds1000:3shot::olmo3", # too expensive for us to compute pass@k
+        "mbpp:3shot::olmo3:pass_at_10",
+        MultiPlEHEPassAt10Group(),
+        MultiPlEMBPPPassAt10Group(),
     ]
 
 

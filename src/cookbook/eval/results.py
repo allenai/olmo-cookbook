@@ -34,6 +34,10 @@ def make_bpb_name(alias: str) -> str | None:
         return f"{alias}:bpb"
 
 
+def make_pass_at_10_name(alias: str) -> str | None:
+    return f"{alias}:pass_at_10"
+    
+
 def make_dashboard_table(
     dashboard: str,
     force: bool = False,
@@ -88,6 +92,10 @@ def make_dashboard_table(
         # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
         if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
             metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+            
+        # @davidh: Hotfix for styled math. Fix here: https://github.com/allenai/oe-eval-internal/pull/592
+        if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
 
         # @davidh: Hotfix for Alpaca Eval tasks. The alpaca eval metric multiplies its score by 100. No PR
         # in oe-eval to avoid messing with adapt's backend.
@@ -102,6 +110,14 @@ def make_dashboard_table(
             if (bpb_alias := make_bpb_name(metric.alias)) is not None:
                 metrics_table.add(col=bpb_alias, row=metric.model_name, val=metric.metrics.bpb)
                 bpb_to_og_metric_name_map[bpb_alias] = metric.alias
+
+        # add pass@10 if available and selected
+        if metric.metrics.pass_at_10 is not None:
+            print(metric.metrics.pass_at_10)
+            print(make_pass_at_10_name(metric.alias))
+            if (pass_at_10_alias := make_pass_at_10_name(metric.alias)) is not None:
+                metrics_table.add(col=pass_at_10_alias, row=metric.model_name, val=metric.metrics.pass_at_10)
+                # bpb_to_og_metric_name_map[pass_at_10_alias] = metric.alias # this isn't used anywhere?
 
     return metrics_table
 
