@@ -27,7 +27,7 @@ dataset:
     target_ratio: 0.54
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
-  - name: faeze_reasoning
+  - name: nonMC_reddit_lowthresh
     target_ratio: 0.46
     paths:
     #2.32B
