@@ -1,0 +1,49 @@
+name: "swarm name"
+description: "swarm description"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 5_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+# SWARM PARAMETERS
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
+load_state: false
+variants: 20
+allow_repetition: false
+mix_temperature: 0.7 # lower temperature = closer to uniform --> this lets us sample more from the sources with lower priors
+minimum_weight: 0.001 
+min_strength: 0.1 # higher strength = sample more closely to the prior
+max_strength: 20
+# dataset
+dataset:
+  sources:
+  - name: web 
+    paths:
+    - ...
+  - name: math 
+    paths:
+    - ...
+  - name: code
+    paths:
+    - ...
+  - name: reasoning
+    paths:
+    - ...
+  - name: pdfs
+    paths:
+    - ...
+  - name: ...
