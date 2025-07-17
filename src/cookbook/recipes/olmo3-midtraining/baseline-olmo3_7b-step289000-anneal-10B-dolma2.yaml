@@ -1,7 +1,7 @@
 name: "baseline-olmo3_7b-step289000-anneal-10B-dolma2"
 description: "Baseline: OLMo3 7B step 289000 (~4.03T tokens) anneal to 10B Tokens with dolma2 mix"
 budget: "ai2/oe-base"
-workspace: "ai2/olmo-3-microanneals"
+workspace: "ai2/oe-data"
 nodes: 4
 gpus: 8
 preemptible: true
