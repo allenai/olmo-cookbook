@@ -1,8 +1,8 @@
-name: "anneal-round1-10B-olmo3_7b_step467000_with-reasoning-anneal"
-description: "OLMo3 step467000 7b anneal to 10B Tokens on midtraining mix WITH reasoning data"
+name: "anneal-round1-10B-olmo3_7b_step467000-merged_with-reasoning-anneal"
+description: "OLMo3 step467000 merged 7b anneal to 10B Tokens on midtraining mix WITH reasoning data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 16
+nodes: 1
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
@@ -19,7 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step467000
+load_path: gs://ai2-llm/checkpoints/amanr/OLMo3-7B-swafix/step467000-merged/model_and_optim
 load_state: false
 dataset:
   sources:
