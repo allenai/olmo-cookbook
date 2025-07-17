@@ -1,4 +1,4 @@
-name: "olmo3-microanneal-pdfquality-top10"
+name: "olmo3-microanneal-pdfquality-bottom50"
 description: "OLMo3 7B microanneal to 10B Tokens from bottom 50th percentile pdf quality"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
