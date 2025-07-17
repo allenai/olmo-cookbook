@@ -24,7 +24,7 @@ load_state: false
 dataset:
   sources:
   - name: hqweb
-    target_ratio: 0.45
+    target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
   - name: code

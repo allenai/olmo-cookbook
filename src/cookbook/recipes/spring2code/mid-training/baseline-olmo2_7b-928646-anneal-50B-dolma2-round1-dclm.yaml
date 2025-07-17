@@ -24,7 +24,7 @@ load_state: false
 dataset:
   sources:
   - name: dclm-baseline-olmo2
-    target_ratio: 0.45
+    target_ratio: 0.5
     paths:
     - gs://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/part-0*-*.npy
   - name: code
