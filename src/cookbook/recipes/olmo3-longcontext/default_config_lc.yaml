@@ -12,6 +12,7 @@ seed: 4123
 
 gc_interval: 200
 
+# use the annealing setup for now: start at end-of-pretraining LR, linear decay to 0 
 annealing:
   enabled: true
 
@@ -30,8 +31,6 @@ global_batch_size: 4_194_304  # 4M tokens
 sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
-scheduler_type: linear
-warmup_steps: 200 # warmup runs for ~840M tokens
 dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: some runs may disable for comparison to non-olmo extensions 
