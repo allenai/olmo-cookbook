@@ -1,5 +1,5 @@
-name: "baseline-olmo2_7b-928646-anneal-50B-dolma2-round1-alldressed"
-description: "Baseline: OLMo2 7B step 928646 (5T) anneal to 50B Tokens with dolma2 midtraining mix (round 1) + alldressed"
+name: "baseline-olmo2_7b-928646-anneal-50B-dolma2-round1-dclm"
+description: "Baseline: OLMo2 7B step 928646 (5T) anneal to 50B Tokens with dolma2 midtraining mix (round 1) + dclm"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 8
@@ -23,10 +23,10 @@ load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646/model
 load_state: false
 dataset:
   sources:
-  - name: hqweb
+  - name: dclm-baseline-olmo2
     target_ratio: 0.45
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/part-0*-*.npy
   - name: code
     target_ratio: 0.2
     paths:
