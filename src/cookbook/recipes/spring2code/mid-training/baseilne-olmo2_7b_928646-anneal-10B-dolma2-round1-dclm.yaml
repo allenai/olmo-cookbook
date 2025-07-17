@@ -1,5 +1,5 @@
-name: "baseline-olmo2_7b-928646-anneal-10B-dolma2-round1"
-description: "Baseline: OLMo2 7B step 928646 (5T) anneal to 10B Tokens with dolma2 midtraining mix (round 1)"
+name: "baseline-olmo2_7b-928646-anneal-10B-dolma2-round1-dclm"
+description: "Baseline: OLMo2 7B step 928646 (5T) anneal to 10B Tokens with dolma2 midtraining mix (round 1) + dclm"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
 nodes: 4
