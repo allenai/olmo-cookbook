@@ -1,0 +1,51 @@
+# Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
+# Needs updates with actual training dataset and hyperparameters
+# Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
+name: "llama3_7b_lc_64k_wikipedia_bs4M"
+description: "Llama3 7B trained up to 64k context length with wikipedia docs only"
+budget: "ai2/oe-base"
+workspace: "ai2/long-contexts"
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: urgent
+nodes: 4
+gpus: 8
+seed: 34521
+
+gc_interval: 200
+
+annealing:
+  enabled: true
+
+metrics_config:
+  backend: wandb
+  project: "datacomp-7b-long-context"
+  entity: "ai2-llm"
+
+generate_doc_lengths: true  # enable intra-document masking
+load_path: gs://ai2-llm/checkpoints/amandab/Meta-Llama-3-8B-Base-redone/
+load_state: false
+model: "llama3_8B"
+tokenizer: "llama3"
+max_tokens: 1_000_000_000  # 1B tokens TODO: update if needed
+# global_batch_size: 2_097_152  # switched to 2M batch size to match midtraining
+global_batch_size: 4_194_304  # 4M tokens like prior run
+sequence_length: &seq_len 65536
+max_target_sequence_length: *seq_len
+rank_microbatch_size: *seq_len  # must be the same as sequence_length
+scheduler_type: linear
+warmup_steps: 0
+dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+cp_degree: 8
+learning_rate: 1.0e-5
+float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
+eval_interval: 500
+model_overrides:
+  - block.attention.rope.theta=8000000
+dataset:
+  sources:
+  - name: wikipedia
+    # only ~3B tokens in this subset in total; will need to repeat
+    target_ratio: 1.0 
+    paths:
+    - s3://ai2-llm/preprocessed/wikipedia/allenai/dolma2-tokenizer/*.npy
