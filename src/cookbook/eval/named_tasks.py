@@ -374,6 +374,11 @@ class GsmSymbN8Group(BaseAverageNamedTasksGroup):
     tasks = [f'{task}:n8' for task in constants.ALL_GSM_SYMB_TASKS]
 
 
+@NamedTasksGroupRegistry.register("gsm-symb:n8:pass_at_4")
+class GsmSymbN8PassAt4Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:pass_at_4' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
 @NamedTasksGroupRegistry.register("code")
 class CodeGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.ALL_CODEX_TASKS]
@@ -427,6 +432,16 @@ class MultiPlEHEN32Group(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("multipl-e-mbpp:n32")
 class MultiPlEMBPPN32Group(BaseAverageNamedTasksGroup):
     tasks = [f'{task}:n32' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:pass_at_16")
+class MultiPlEHEN32PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:pass_at_16' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:pass_at_16")
+class MultiPlEMBPPN32PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:pass_at_16' for task in constants.MULTIPL_E_MBPP_TASKS]
 
 
 @NamedTasksGroupRegistry.register("fim")
@@ -632,7 +647,7 @@ class Olmo3Dev7bMathGroup(BaseAverageOfAveragesNamedTasksGroup):
 class Olmo3Dev7bMathV1Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Math
-        "gsm8k::olmes:n8",
+        "gsm8k::olmo3:n8",
         GsmSymbN8Group(),
         MinervaN4Group(),
     ]
@@ -660,8 +675,8 @@ class Olmo3Dev7bCodeGenV1Group(BaseAverageOfAveragesNamedTasksGroup):
         "deepseek_leetcode::olmo3:n32",
         "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3:n32",
-        MultiPlEHEGroup(),
-        MultiPlEMBPPGroup(),
+        MultiPlEHEN32Group(),
+        MultiPlEMBPPN32Group(),
     ]
 
 
@@ -669,11 +684,23 @@ class Olmo3Dev7bCodeGenV1Group(BaseAverageOfAveragesNamedTasksGroup):
 class Olmo3Dev7bCodeGenMiniV1N32Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # We only use a subset of code gen benchmarks for pass@k for speed
-        "bigcodebench:3shot::olmo3:n32",
+        "deepseek_leetcode::olmo3:n32",
         "codex_humaneval:3shot::olmo3:n32",
         "mbpp:3shot::olmo3:n32",
         MultiPlEHEN32Group(),
         MultiPlEMBPPN32Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v1:n32:pass_at_16")
+class Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # We only use a subset of code gen benchmarks for pass@k for speed
+        "deepseek_leetcode::olmo3:n32:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:pass_at_16",
+        "mbpp:3shot::olmo3:n32:pass_at_16",
+        MultiPlEHEN32PassAt16Group(),
+        MultiPlEMBPPN32PassAt16Group(),
     ]
 
 
@@ -844,6 +871,7 @@ class Olmo3Dev7bV1MainGroup(BaseTaskView):
         Olmo3Dev7bMathV1Group(),
         Olmo3Dev7bCodeGenV1Group(),
         Olmo3Dev7bCodeGenMiniV1N32Group(),
+        Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(),
         Olmo3Dev7bCodeFimGroup(),
         ARCMCXlargeGroup(),
         MMLUMCGroup(),
@@ -851,8 +879,10 @@ class Olmo3Dev7bV1MainGroup(BaseTaskView):
         BasicRCGroup(),
         "gsm8k::olmo3:n8",
         GsmSymbN8Group(),
+        GsmSymbN8PassAt4Group(),
         MinervaN4Group(),
         "minerva_math_500::olmo3:n32",
+        "minerva_math_500::olmo3:n32:pass_at_16",
         "codex_humaneval:3shot::olmo3:n32",
         "mbpp:3shot::olmo3:n32",
         MultiPlEHEN32Group(),
