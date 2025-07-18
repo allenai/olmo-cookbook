@@ -150,7 +150,7 @@ class MiniFrame:
 
     def to_csv(self) -> str:
         # Header row with just column names, sorted using the original table order
-        columns = list(self.columns)
+        columns = sorted(self.columns)
         header = ",".join(["name"] + columns)
         # Data rows with formatted values
         rows = []
