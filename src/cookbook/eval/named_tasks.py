@@ -849,7 +849,7 @@ class Olmo3Dev7bV1MainGroup(BaseTaskView):
         MMLUMCGroup(),
         GenXlargeGroup(),
         BasicRCGroup(),
-        "gsm8k::olmes:n8",
+        "gsm8k::olmo3:n8",
         GsmSymbN8Group(),
         MinervaN4Group(),
         "minerva_math_500::olmo3:n32",
