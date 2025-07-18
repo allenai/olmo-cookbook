@@ -4,6 +4,7 @@ from typing import Callable, ClassVar, Type, TypeVar, Union
 
 from cookbook import constants
 from cookbook.eval.miniframe import MiniFrame
+from cookbook.eval.results import make_bpb_name
 
 
 T = TypeVar("T", bound=Type["BaseNamedTasksGroup"])
@@ -243,6 +244,25 @@ class MMLUOtherMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"mmlu_{category}:mc::olmes" for category in constants.MMLU_SUBCATEGORIES["other"]]
 
 
+@NamedTasksGroupRegistry.register("mmlu_stem:mc:bpb")
+class MMLUStemMCBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [make_bpb_name(f"mmlu_{category}:mc::olmes") for category in constants.MMLU_SUBCATEGORIES["stem"]]
+
+@NamedTasksGroupRegistry.register("mmlu_humanities:mc:bpb")
+class MMLUHumanitiesMCBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [make_bpb_name(f"mmlu_{category}:mc::olmes") for category in constants.MMLU_SUBCATEGORIES["humanities"]]
+
+
+@NamedTasksGroupRegistry.register("mmlu_social_sciences:mc:bpb")
+class MMLUSocialSciencesMCBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [make_bpb_name(f"mmlu_{category}:mc::olmes") for category in constants.MMLU_SUBCATEGORIES["social_sciences"]]
+
+
+@NamedTasksGroupRegistry.register("mmlu_other:mc:bpb")
+class MMLUOtherMCBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [make_bpb_name(f"mmlu_{category}:mc::olmes") for category in constants.MMLU_SUBCATEGORIES["other"]]
+
+
 @NamedTasksGroupRegistry.register("mmlu:cot::hamish_zs_reasoning")
 class MMLUHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:cot::hamish_zs_reasoning" for category in constants.MMLU_CATEGORIES]
@@ -301,6 +321,11 @@ class ARCRCXlargeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("arc:mc::xlarge")
 class ARCMCXlargeGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::xlarge" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("arc:mc:bpb::xlarge")
+class ARCMCXlargeBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [make_bpb_name(f"{category}:mc::xlarge") for category in constants.ARC_TASKS]
 
 
 @NamedTasksGroupRegistry.register("basic:rc")
@@ -367,6 +392,11 @@ class MathGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("gsm-symb")
 class GsmSymbGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:bpb")
+class GsmSymbBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [make_bpb_name(task) for task in constants.ALL_GSM_SYMB_TASKS]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb:n8")
@@ -643,6 +673,16 @@ class Olmo3Dev7bMathGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math:bpb")
+class Olmo3Dev7bMathBPBGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Math
+        make_bpb_name("gsm8k::olmes"),
+        GsmSymbBpbGroup(),
+        MinervaBpbGroup(),
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v1")
 class Olmo3Dev7bMathV1Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -664,6 +704,14 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
         # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:bpb")
+class Olmo3Dev7bCodeGenBPBGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "codex_humaneval:3shot:bpb::olmo3",
+        "mbpp:3shot:bpb::olmo3",
     ]
 
 
@@ -728,6 +776,17 @@ class Olmo3Dev7bMcqaSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:stem:bpb")
+class Olmo3Dev7bMcqaSTEMBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        ARCMCXlargeBpbGroup(),
+        MMLUStemMCBpbGroup(),
+        make_bpb_name("medmcqa:mc::none"),
+        make_bpb_name("medqa_en:mc::none"),
+        make_bpb_name("sciq:mc::xlarge"),
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:non_stem")
 class Olmo3Dev7bMcqaNonSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -742,6 +801,23 @@ class Olmo3Dev7bMcqaNonSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
         "jeopardy:mc::gen2mc",
         "naturalqs:mc::gen2mc",
         "squad:mc::gen2mc",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:non_stem:bpb")
+class Olmo3Dev7bMcqaNonSTEMBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        MMLUHumanitiesMCBpbGroup(),
+        MMLUSocialSciencesMCBpbGroup(),
+        MMLUOtherMCBpbGroup(),
+        make_bpb_name("csqa:mc::xlarge"),
+        make_bpb_name("piqa:mc::xlarge"),
+        make_bpb_name("socialiqa:mc::xlarge"),
+        make_bpb_name("coqa:mc::gen2mc"),
+        make_bpb_name("drop:mc::gen2mc"),
+        make_bpb_name("jeopardy:mc::gen2mc"),
+        make_bpb_name("naturalqs:mc::gen2mc"),
+        make_bpb_name("squad:mc::gen2mc"),
     ]
 
 
@@ -846,6 +922,11 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
         CruxEvalGroup(),
+        
+        Olmo3Dev7bMathBPBGroup(),
+        Olmo3Dev7bCodeGenBPBGroup(),
+        Olmo3Dev7bMcqaSTEMBpbGroup(),
+        Olmo3Dev7bMcqaNonSTEMBpbGroup()
     ]
 
 

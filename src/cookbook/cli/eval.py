@@ -644,6 +644,8 @@ def get_results(
     # output according to format requested by the user
     if format == "json":
         print(json.dumps(results._data))
+    elif format == 'return_all':
+        return results._data
     elif format == "table":
         results.show()
     elif format == "csv":
