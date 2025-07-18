@@ -1148,6 +1148,13 @@ def common_cli_options(f: T) -> T:
         click.option("-N", "--number", type=int, default=1, help="Number of instances"),
         click.option("-r", "--region", type=str, default="us-east-1", help="Region"),
         click.option("-T", "--timeout", type=int, default=None, help="Timeout for the command"),
+        # This option is useful for staggered initialization to prevent stampedes on shared resources like S3 prefixes
+        click.option(
+            "--sleep-between-seconds",
+            type=int,
+            default=0,
+            help="Number of seconds to sleep between running command on each instance (default: 0)",
+        ),
         click.option(
             "-o",
             "--owner",
@@ -1532,6 +1539,7 @@ def run_command(
     detach: bool,
     spindown: bool,
     timeout: int | None = None,
+    sleep_between_seconds: int = 0,
     **kwargs,
 ):
     """
@@ -1569,7 +1577,7 @@ def run_command(
         logger.info(f"After filtering, command will run on {len(instances)} instances")
 
     # Process each instance
-    for instance in instances:
+    for idx, instance in enumerate(instances):
         logger.info(f"Running command on instance {instance.instance_id} ({instance.name})")
 
         # Convert script to command if script is provided
@@ -1599,6 +1607,11 @@ def run_command(
         print(f"Instance {instance.instance_id}:")
         print(output_)
         print()
+
+        # Sleep between instances if specified (but not after the last instance)
+        if sleep_between_seconds > 0 and idx < len(instances) - 1:
+            logger.info(f"Sleeping {sleep_between_seconds} seconds before next instance...")
+            time.sleep(sleep_between_seconds)
 
     logger.info(f"Command execution completed on {len(instances)} instances")
 
