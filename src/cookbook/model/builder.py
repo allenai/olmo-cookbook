@@ -368,7 +368,6 @@ class TransformerConfigBuilder:
                     project=self.metrics_config.project.strip(),
                     entity=self.metrics_config.entity.strip(),
                     group=self.group_id.strip(),
-                    cancel_check_interval=self.cancel_check_interval,
                     enabled=True,
                 )
             if MetricBackend.comet in self.metrics_config.backends:
@@ -384,8 +383,7 @@ class TransformerConfigBuilder:
                     name=self.run_name.strip(),
                     workspace=self.metrics_config.workspace.strip(),
                     project=self.metrics_config.project.strip(),
-                    enabled=True,
-                    cancel_check_interval=self.cancel_check_interval,
+                    enabled=True
                 )
 
         if self.lm_evaluator:
