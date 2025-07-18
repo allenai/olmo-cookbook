@@ -2,7 +2,7 @@ name: "anneal-round1-10B-olmo3_7b_step467000-merged_with-reasoning-anneal"
 description: "OLMo3 step467000 merged 7b anneal to 10B Tokens on midtraining mix WITH reasoning data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 1
+nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
