@@ -20,9 +20,17 @@ except ImportError:
     Priority = str
 
 
+class TopicConfig(BaseModel):
+    name: str
+    paths: List[str]
+    target_ratio: Optional[float] = None
+    repetition_factor: float = 1.0
+    max_topic_ratio: float = 1.0
+
 class SourceConfig(BaseModel):
     name: str
     paths: list[str]
+    topics: Optional[list[TopicConfig]] = None
     target_ratio: Optional[float] = None
     repetition_factor: float = 1.0
     max_source_ratio: float = 1.0
@@ -127,6 +135,15 @@ class ExperimentConfig(BaseModel, extra="forbid"):
         if value is not None and info.data.get("load_path") is None:
             raise ValueError("If annealing is enabled, load_path must be specified.")
         return value
+
+
+class SwarmConfig(ExperimentConfig):
+    """Additional configuration for launching a mixing swarm."""
+    variants: int = 1  # number of variants to generate
+    allow_repetition: bool = False  # whether to allow repetition of sources in mixtures
+    minimum_weight: float = 0.05  # minimum weight for sources in mixtures
+    fixed_source_weights: Optional[dict[str, float]] = None  # fixed weights for sources in mixtures
+    sample_multiplier: int = 10  # multiplier for the number of samples per source
 
 
 class ExperimentInstance(BaseModel):
