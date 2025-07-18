@@ -201,7 +201,8 @@ def evaluate_checkpoint(
     #          it's just the task alias that does not exist.
     EXCLUDE_FROM_LAUNCH = [
         r'^mmlu_.*:bpb::olmes$',
-        r'^lambada:bpb$'
+        r'^lambada:bpb$',
+        r'^.*:pass_at_.*$',
     ]
     all_tasks = [
         task for task in all_tasks
