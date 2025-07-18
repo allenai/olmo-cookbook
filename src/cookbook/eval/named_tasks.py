@@ -680,18 +680,6 @@ class Olmo3Dev7bCodeGenV1Group(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v1:n32")
-class Olmo3Dev7bCodeGenMiniV1N32Group(BaseAverageOfAveragesNamedTasksGroup):
-    tasks = [
-        # We only use a subset of code gen benchmarks for pass@k for speed
-        "deepseek_leetcode::olmo3:n32",
-        "codex_humaneval:3shot::olmo3:n32",
-        "mbpp:3shot::olmo3:n32",
-        MultiPlEHEN32Group(),
-        MultiPlEMBPPN32Group(),
-    ]
-
-
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v1:n32:pass_at_16")
 class Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -870,7 +858,6 @@ class Olmo3Dev7bV1MainGroup(BaseTaskView):
         Olmo3Dev7bGenGroup(),
         Olmo3Dev7bMathV1Group(),
         Olmo3Dev7bCodeGenV1Group(),
-        Olmo3Dev7bCodeGenMiniV1N32Group(),
         Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(),
         Olmo3Dev7bCodeFimGroup(),
         ARCMCXlargeGroup(),
