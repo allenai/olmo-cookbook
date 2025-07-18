@@ -1858,11 +1858,20 @@ def setup_decon(
         base64_encoded_setup_command = base64.b64encode(decon_setup_script.encode("utf-8")).decode("utf-8")
 
         # Create command to write and execute the setup script
-        command = [
-            f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
-            "chmod +x setup.sh",
-            "./setup.sh",
-        ]
+        # When running in detached mode, we need to ensure the script continues running
+        # after the screen detaches, so we use bash -c to create a subshell
+        if detach:
+            command = [
+                f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
+                "chmod +x setup.sh",
+                "bash -c './setup.sh > setup.log 2>&1'",
+            ]
+        else:
+            command = [
+                f"echo '{base64_encoded_setup_command}' | base64 -d > setup.sh",
+                "chmod +x setup.sh",
+                "./setup.sh",
+            ]
 
         # Run the setup command on this specific instance
         run_command(
