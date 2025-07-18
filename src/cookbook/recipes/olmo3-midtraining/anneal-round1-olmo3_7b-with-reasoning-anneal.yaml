@@ -12,14 +12,15 @@ seed: 1337
 model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
 priority: urgent
-cluster: ai2/jupiter-cirrascale-2
+cluster: ai2/augusta-google-1
 rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-load_path: gs://ai2-llm/checkpoints/amanr/OLMo3-7B-swafix/step467000-merged/model_and_optim
+  initial_lr: 0.000088
+load_path: gs://ai2-llm/checkpoints/amanr/OLMo3-7B-swafix/step467000-merged
 load_state: false
 dataset:
   sources:
