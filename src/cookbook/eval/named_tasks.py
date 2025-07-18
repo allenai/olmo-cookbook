@@ -655,9 +655,9 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v1")
 class Olmo3Dev7bCodeGenV1Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        "bigcodebench:3shot::olmo3:n32",
+        "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3:n32",
-        "deepseek_leetcode::olmo3",
+        "deepseek_leetcode::olmo3:n32",
         "ds1000:3shot::olmo3",
         "mbpp:3shot::olmo3:n32",
         MultiPlEHEGroup(),
