@@ -34,9 +34,21 @@ def _count_tokens_for_file(path: PathOrStr, dtype: NumpyDatasetDType) -> int:
     return _bytes_to_tokens(get_file_size(path), dtype)
 
 
+def get_leaf_configs(source_config: SourceConfig) -> List[Tuple[str, List[str]]]:
+    """Return a list of (name, paths) tuples representing the leaf nodes.
+       This is important when we have data sources that are divided into topics.
+    """
+    if source_config.topics:
+        return [
+            (f"{source_config.name}:{topic.name}", topic.paths)
+            for topic in source_config.topics
+        ]
+    else:
+        return [(source_config.name, source_config.paths)]
+
 def get_token_counts_and_ratios(
     source_configs: list[SourceConfig], dtype: NumpyDatasetDType, use_cache: bool
-) -> Tuple[dict[str, float], int]:
+) -> Tuple[dict[str, float], int, dict[str, int]]:
     config_hash = hashlib.md5(
         json.dumps(
             [(sc.name, sc.paths) for sc in source_configs],
@@ -52,13 +64,20 @@ def get_token_counts_and_ratios(
                     "Source distribution cache found, using cached values! This can be disabled by setting use_cache=False."
                 )
                 obj = json.load(f)
-                return (obj["relative_sizes"], obj["total_tokens"])
+                return (obj["relative_sizes"], obj["total_tokens"], obj["token_counts"])
         except FileNotFoundError:
             logger.info("No cache file found, calculating from source files...")
 
     token_counts = defaultdict(int)
 
     filesystems = {}
+    leaf_configs: list[SourceConfig] = [] 
+    for sc in source_configs:                         
+        leaf_configs.extend(
+            SourceConfig(name=leaf_name, paths=leaf_paths)
+            for leaf_name, leaf_paths in get_leaf_configs(sc)
+        )
+    source_configs = leaf_configs
 
     # Pre-check each source for mixed schemes and create appropriate filesystem clients
     for source in source_configs:
@@ -103,6 +122,7 @@ def get_token_counts_and_ratios(
 
     # Calculate relative sizes
     total_tokens = sum(token_counts.values())
+    token_counts = dict(sorted(token_counts.items()))
 
     if total_tokens == 0:
         raise Exception(f"Error processing config, no tokens found!")
@@ -112,9 +132,9 @@ def get_token_counts_and_ratios(
     if use_cache:
         os.makedirs(os.path.dirname(cache_path), exist_ok=True)
         with open(cache_path, "w") as f:
-            json.dump({"relative_sizes": relative_sizes, "total_tokens": total_tokens}, f)
+            json.dump({"relative_sizes": relative_sizes, "total_tokens": total_tokens, "token_counts": token_counts}, f)
 
-    return (relative_sizes, total_tokens)
+    return (relative_sizes, total_tokens, token_counts)
 
 
 def expand_globs(

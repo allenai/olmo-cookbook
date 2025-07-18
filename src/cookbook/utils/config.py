@@ -39,10 +39,10 @@ def config_from_path(config: Path) -> ExperimentConfig:
 
 
 def mk_source_instances(
-    sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
+    sources: list[SourceConfig], priors: Tuple[dict[str, float], int, dict[str, float]] | None = None
 ) -> list[SourceInstance]:
     if priors:
-        ratios_by_source, total_tokens = priors
+        ratios_by_source, total_tokens, token_counts = priors
     else:
         ratios_by_source = {}
 
@@ -62,7 +62,7 @@ def mk_source_instances(
 
 
 def mk_experiments(
-    config: ExperimentConfig, group_id: str, priors: Tuple[dict[str, float], int]
+    config: ExperimentConfig, group_id: str, priors: Tuple[dict[str, float], int, dict[str, float]]
 ) -> list[ExperimentInstance]:
     """Generate source instances from a config."""
     return [
@@ -74,7 +74,7 @@ def mk_experiments(
 
 
 def mk_experiment_group(
-    config: ExperimentConfig, priors: Tuple[dict[str, float], int], group_id: str
+    config: ExperimentConfig, priors: Tuple[dict[str, float], int, dict[str, float]], group_id: str
 ) -> ExperimentGroup:
     """Build an experiment group from an experiment config."""
 
@@ -83,6 +83,72 @@ def mk_experiment_group(
         group_id=group_id,
         instances=mk_experiments(config, group_id, priors),
     )
+
+
+def mk_swarm_source_instances(
+    sources: list[SourceConfig], mix_map: dict[str, tuple[float, float]]
+) -> list[SourceInstance]:
+    instances = []
+
+    for source in sources:
+        if source.topics:
+            for topic in source.topics:
+                full_name = f"{source.name}:{topic.name}"
+                if full_name not in mix_map or mix_map[full_name][0] == 0:
+                    continue
+                instances.append(
+                    SourceInstance(
+                        name=full_name,
+                        paths=topic.paths,
+                        ratio=mix_map[full_name][0],
+                        repetition_factor=mix_map[full_name][1],
+                    )
+                )
+        else:
+            if source.name not in mix_map or mix_map[source.name][0] == 0:
+                continue
+            instances.append(
+                SourceInstance(
+                    name=source.name,
+                    paths=source.paths,
+                    ratio=mix_map[source.name][0],
+                    repetition_factor=mix_map[source.name][1],
+                )
+            )
+
+    return instances
+
+
+def mk_swarm_experiments(
+    config: ExperimentConfig, mixes: list[dict[str, tuple[float, float]]], group_id: str
+) -> list[ExperimentInstance]:
+    """Generate source instances from a config."""
+    return [
+        ExperimentInstance(
+            name=f"{config.name}-{group_id}-{idx:02}",
+            sources=mk_swarm_source_instances(config.dataset.sources, mix),
+        )
+        for idx, mix in enumerate(mixes)
+    ]
+
+
+
+
+def mk_swarm_experiment_group(
+    config: ExperimentConfig, mixes: list[dict[str, tuple[float, float]]], group_id: str
+) -> ExperimentGroup:
+    """Build an experiment group from an experiment config."""
+
+    return ExperimentGroup(
+        config=config,
+        group_id=group_id,
+        instances=mk_swarm_experiments(config, mixes, group_id),
+    )
+
+
+
+
+
 
 
 def mk_instance_cmd(
