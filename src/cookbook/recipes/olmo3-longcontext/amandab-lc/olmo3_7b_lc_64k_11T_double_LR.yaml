@@ -1,7 +1,7 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3_7B-7T_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M"
+name: "olmo3_7B-7T_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M_double_LR"
 description: "OLMo3 7B w/ swafix trained w/ double LR up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -34,7 +34,7 @@ sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
 scheduler_type: linear
-warmup_steps: 0
+warmup_steps: 200
 dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
