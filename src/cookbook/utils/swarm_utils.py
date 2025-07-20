@@ -8,7 +8,7 @@ from typing import Tuple, Optional, List, Iterator
 from copy import deepcopy
 import yaml 
 from scipy.spatial.distance import pdist, squareform
-
+import math
 
 import numpy as np
 import s3fs
@@ -42,195 +42,16 @@ class ConfigDefaults:
     minimum_weight: float = 2e-3  # 0.002
 
 
-def leaf_to_source(leaf_weights: np.ndarray, domains: list[str]) -> dict[str, float]:
-    """
-    Given a flat vector of weights at the leaf level (like 'dclm:math' or 'wikipedia'),
-    return a dict mapping each source to its total weight.
-    """
-    assert len(leaf_weights) == len(domains), "Vector and domain lengths must match"
-    source_dist = defaultdict(float)
-    for weight, domain in zip(leaf_weights, domains):
-        source = domain.split(':', 1)[0]  # supports both 'source' and 'source:topic'
-        source_dist[source] += weight
-    return dict(source_dist)
-
-
-def clip_candidates_by_level(
-    candidates,
-    idx_to_level,
-    domains,
-    minimum_source_weight,
-    minimum_topic_weight,
-    fixed_topic_weights,
-):
-    assert len(candidates[0]) == len(idx_to_level), "Mismatch between weights and level types."
-
-    # get the weight per source 
-    source_totals = leaf_to_source(candidates[0], domains)
-
-    # we clip topics to be minimum_topic_weight * source_totals[source] (relative), and we clip sources to be minimum_source_weight (absolute)
-    for idx, level in enumerate(idx_to_level):
-        weight = candidates[0][idx]
-        domain = domains[idx]
-        source = domain.split(':', 1)[0] if ':' in domain else domain
-
-        if source in fixed_topic_weights:
-            # this source has fixed topic weights, so we don't clip it
-            continue 
-
-        if level == "source" and weight < minimum_source_weight:
-            candidates[0][idx] = 0.0
-        elif level == "topic":
-            threshold = minimum_topic_weight * source_totals[source]
-            if weight < threshold:
-                candidates[0][idx] = 0.0
-
-    # normalize
-    total = candidates.sum()
-    if total > 0:
-        candidates /= total
-    else:
-        raise ValueError("All weights were clipped to zero.")
-
-    return candidates
-
-
-def sample_has_required_sources(
-    sample_vector,
-    domains,
-    nonzero_sources,
-    minimum_source_weight,
-    minimum_topic_weight 
-):
-    # Convert leaf-level weights to source and topic level weights
-    source_weights = leaf_to_source(sample_vector, domains)
-    topic_weights = defaultdict(list)  # source -> list of (idx, weight)
-
-    for idx, weight in enumerate(sample_vector):
-        domain = domains[idx]
-        source = domain.split(':', 1)[0] if ':' in domain else domain
-        topic_weights[source].append((idx, weight))
-
-    # Only count topics that are above the minimum topic weight * source_weights[source] towards the source weight.
-    clipped_source_sums = defaultdict(float)
-    for source, topics in topic_weights.items():
-        total = source_weights[source]
-        threshold = minimum_topic_weight * total
-        for _, weight in topics:
-            if weight >= threshold:
-                clipped_source_sums[source] += weight
-
-    # Check that all nonzero sources pass threshold
-    return all(
-        clipped_source_sums[source] > minimum_source_weight
-        for source in nonzero_sources
-    )
-
-def sample_has_required_sources_and_topics(
-    sample_vector,
-    domains,
-    nonzero_domains,
-    minimum_source_weight,
-    minimum_topic_weight 
-):    
-    # Compute source-level totals
-    source_weights = leaf_to_source(sample_vector, domains)
-
-    # Group topic weights under their sources
-    topic_weights = defaultdict(list)  # source -> list of (idx, weight)
-    for idx, weight in enumerate(sample_vector):
-        domain = domains[idx]
-        source = domain.split(':', 1)[0] if ':' in domain else domain
-        topic_weights[source].append((idx, weight))
-
-    # Clip topic weights below the dynamic per-topic threshold
-    clipped_source_sums = defaultdict(float)
-    topic_above_threshold = set()
-    for source, topics in topic_weights.items():
-        total = source_weights[source]
-        threshold = minimum_topic_weight * total
-        for idx, weight in topics:
-            if weight >= threshold:
-                clipped_source_sums[source] += weight
-                topic_above_threshold.add(domains[idx])
-
-    # Check all nonzero constraints
-    for required in nonzero_domains:
-        if ':' in required:
-            # Topic-level requirement
-            if required not in topic_above_threshold:
-                return False
-        else:
-            # Source-level requirement
-            if clipped_source_sums[required] <= minimum_source_weight:
-                return False
-
-    return True
-
-
-def _compositions(total: int, d: int) -> Iterator[Tuple[int, ...]]:
-    """Yields all d-tuples of nonnegative integers that add up to total.
-       Later on, we will divide this tuple by m to get our grid.
-       The tuples are constructed via stars-and-bars.
-    """
-    for cuts in combinations(range(total + d - 1), d - 1):
-        sent = (-1,) + cuts + (total + d - 1,)
-        yield tuple(sent[i + 1] - sent[i] - 1 for i in range(d))
-
-
-def grid_on_simplex(
-    n_domains: int,
-    n_target_samples: int,
-    *,
-    minimum_weight: float = 0.0, 
-) -> np.ndarray:
-    """
-    Return `n` uniformly-spaced lattice points on Δ_{d-1} such that
-        x_i >= minimum_weight   for all coordinates.
-
-    • Chooses the smallest lattice level m that satisfies the constraint
-      and still offers ≥ n points.
-    • Subsamples exactly n via reservoir sampling (one pass, O(n) memory).
-    """
-    if not 0 <= minimum_weight < 1 / n_domains:
-        raise ValueError(f"Minimum weight is too high, must be less than 1/n_domains: {1 / n_domains}")
-
-    # determine grid size that allows for us to construct n_target_samples
-    grid_size = 1 
-    while True:
-        k_min = ceil(minimum_weight * grid_size)
-        remainder = grid_size - n_domains * k_min # remaining amount to be allocated after minimum_weight              
-        if remainder >= 0 and comb(remainder + n_domains - 1, n_domains - 1) >= n_target_samples:
-            break                        
-        grid_size += 1
-
-    reservoir: List[Tuple[int, ...]] = []
-    total_seen = 0
-
-    # we enumerate over all points on the grid and sample uniformly to clip down to n_target_samples
-    for r in _compositions(remainder, n_domains):        
-        ks = tuple(k_min + ri for ri in r) # add back in the remainder allocation to the minimum weight
-        if total_seen < n_target_samples:
-            reservoir.append(ks)
-        else:
-            # randomly select a point to replace
-            j = random.randint(0, total_seen)
-            if j < n_target_samples:
-                reservoir[j] = ks
-        total_seen += 1
-
-    # normalise by grid size
-    return np.asarray(reservoir, dtype=float) / grid_size
-
-
-
-
 def generate_weights_grid( 
     sources: list[SourceConfig],
     leaf_distr: dict[str, float],
     num_samples_out: int,
     allow_repetition: bool,
     minimum_weight: float,
+    min_source_strength: float, 
+    max_source_strength: float,
+    min_topic_strength: float,
+    max_topic_strength: float,
     max_tokens: int,
     available_tokens: int,
     sample_multiplier: Optional[int],
@@ -257,60 +78,107 @@ def generate_weights_grid(
 
     fixed_topic_weights = {}
     some_fixed_topic_weights = False
-    for source in sources:
-        if source.topics:
-            if source.topics[0].target_ratio is not None:
-                some_fixed_topic_weights = True
-                # this source has topics with a fixed weight, so we use that weight as the prior
-                conditional_weight = np.array([[topic.target_ratio for topic in source.topics]])
-                logger.info(f"Using fixed topic weights for source '{source.name}': {conditional_weight[0]}")
-                fixed_topic_weights[source.name] = conditional_weight
-            else:
-                if some_fixed_topic_weights:
-                    raise NotImplementedError(
-                        f"Source '{source.name}' has topics without fixed weights, but some other source has fixed topic weights. "
-                        "This is not supported yet, because it is unclear how to best do grid sampling to create mixes on sources and topics simultaneously."
-                    )
+    topic_priors = {}
+
+    has_topics = any([source.topics for source in sources])
+
+    if has_topics:
+        for source in sources:
+            if source.topics:
+                if source.topics[0].target_ratio is not None:
+                    some_fixed_topic_weights = True
+                    # this source has topics with a fixed weight, so we use that weight as the prior
+                    conditional_weight = np.array([[topic.target_ratio for topic in source.topics]])
+                    logger.info(f"Using fixed topic weights for source '{source.name}': {conditional_weight[0]}")
+                    fixed_topic_weights[source.name] = conditional_weight
+                else:
+                    if some_fixed_topic_weights:
+                        raise NotImplementedError(
+                            f"Source '{source.name}' has topics without fixed weights, but some other source has fixed topic weights. "
+                            "This is not supported yet, because it is unclear how to best do grid sampling to create mixes on sources and topics simultaneously."
+                        )
+
+                topic_priors[source.name] = np.ones(len(source.topics))
+
+
 
     if fixed_source_weights is not None:
         fixed_source_weights = [fixed_source_weights[source_config.name] for source_config in sorted(sources, key=lambda x: x.name)]
 
+    sample_multiplier = sample_multiplier if sample_multiplier else ConfigDefaults.sample_multiplier
+    total_samples = num_samples_out * sample_multiplier
+
+    n_strength_buckets = 15 if min_source_strength != max_source_strength else 1
+    n_samples_per_strength = math.ceil(total_samples / n_strength_buckets)
+
+
+    source_prior = np.ones(len(sources))
     if fixed_source_weights is not None:
-        raise NotImplementedError(
-            "Fixed source weights are not supported yet in grid sampling. "
-        )
+        source_samples = np.array([fixed_source_weights] * total_samples)
     else:
-        # we mix at the leaf level
-        sample_multiplier = sample_multiplier if sample_multiplier else ConfigDefaults.sample_multiplier
-        oversampling = num_samples_out * sample_multiplier 
-        
-        # Step 1: Oversample from Dirichlet distribution
-        candidates = np.random.dirichlet(np.ones(len(domains)), oversampling)
-        
-        # Step 2: Filter candidates by bounds and clip to minimum weight
-        filtered_candidates = np.array([
-            sample
-            for sample in candidates
-            if all(
-                lower <= sample[idx] <= upper
-                for idx, (lower, upper) in enumerate(weight_bounds)
-            )
-        ])
+        if min_source_strength == max_source_strength:
+            source_samples = np.random.dirichlet(source_prior * min_source_strength, total_samples).tolist()
+        else:
+            source_samples = []
+            min_source_strength_log = np.log10(min_source_strength)
+            max_source_strength_log = np.log10(max_source_strength)
+            for strength in np.logspace(min_source_strength_log, max_source_strength_log, n_strength_buckets):
+                samples_per_strength = np.random.dirichlet(source_prior * strength, n_samples_per_strength)
+                source_samples.extend(samples_per_strength.tolist())
+                print(f"Generated {len(samples_per_strength)} samples for strength {strength:.2f}")
 
-        # Step 3: Hierarchically merge points
-        if len(filtered_candidates) < num_samples_out:
-            raise ValueError(f"Not enough candidates after filtering: {len(filtered_candidates)} < {num_samples_out}. "
-                                "Consider increasing sample_multiplier.") 
 
-        while len(filtered_candidates) > num_samples_out:
-            distances = squareform(pdist(filtered_candidates))
-            np.fill_diagonal(distances, np.inf)
-            closest_pair = np.unravel_index(np.argmin(distances), distances.shape)
-            midpoint = (filtered_candidates[closest_pair[0]] + filtered_candidates[closest_pair[1]]) / 2
-            filtered_candidates = np.delete(filtered_candidates, closest_pair, axis=0)
-            filtered_candidates = np.vstack([filtered_candidates, midpoint])
+    if has_topics:
+        topic_samples = defaultdict(list)
+        for source, topic_prior in topic_priors.items():
+            if source in fixed_topic_weights:
+                # this source has fixed topic weights, so we use those
+                conditional_weight = fixed_topic_weights[source]
+                topic_samples[source].extend([conditional_weight] * total_samples)
+            else:
+                if min_topic_strength == max_topic_strength:
+                    topic_samples[source].extend(np.random.dirichlet(topic_prior * min_topic_strength, total_samples).tolist())
+                else:
+                    min_topic_strength_log = np.log10(min_topic_strength)
+                    max_topic_strength_log = np.log10(max_topic_strength)
+                    for strength in np.logspace(min_topic_strength_log, max_topic_strength_log, n_strength_buckets):
+                        samples_per_strength = np.random.dirichlet(topic_prior * strength, n_samples_per_strength)
+                        topic_samples[source].extend(samples_per_strength.tolist())
 
-    
+    # convert from source_samples and topic_samples back to a set of leaf-level samples 
+    candidates = []
+
+    if has_topics:
+        for i, source_sample in enumerate(source_samples):
+            leaf_level_sample = {source: samples[i][0]*source_sample[0, j] for j, (source, samples) in enumerate(topic_samples.items())}
+            flattened_sample = np.concatenate([arr for arr in list(leaf_level_sample.values())]).reshape(1, -1)
+            candidates.append(flattened_sample)
+    else:
+        candidates.extend(source_samples)
+
+    filtered_candidates = np.array([
+        sample
+        for sample in candidates
+        if all(
+            lower <= sample[idx] <= upper
+            for idx, (lower, upper) in enumerate(weight_bounds)
+        )
+    ])
+
+    # Step 3: Hierarchically merge points
+    if len(filtered_candidates) < num_samples_out:
+        raise ValueError(f"Not enough candidates after filtering: {len(filtered_candidates)} < {num_samples_out}. "
+                            "Consider increasing sample_multiplier.") 
+
+    while len(filtered_candidates) > num_samples_out:
+        distances = squareform(pdist(filtered_candidates))
+        np.fill_diagonal(distances, np.inf)
+        closest_pair = np.unravel_index(np.argmin(distances), distances.shape)
+        midpoint = (filtered_candidates[closest_pair[0]] + filtered_candidates[closest_pair[1]]) / 2
+        filtered_candidates = np.delete(filtered_candidates, closest_pair, axis=0)
+        filtered_candidates = np.vstack([filtered_candidates, midpoint])
+
+
     selected_samples = [(candidate, np.ones(len(candidates)))for candidate in filtered_candidates]
     if allow_repetition:
         selected_samples = [] 
@@ -619,12 +487,22 @@ def mk_mixtures(
     leaf_items = list(leaf_distr.items())
     domains = [k for k, _ in leaf_items]
 
+    min_source_strength = config.min_source_strength if config.min_source_strength else config.min_strength
+    max_source_strength = config.max_source_strength if config.max_source_strength else config.max_strength
+
+    min_topic_strength = config.min_topic_strength if config.min_topic_strength else config.min_strength
+    max_topic_strength = config.max_topic_strength if config.max_topic_strength else config.max_strength
+
     mixtures = generate_weights_grid(
         sources=sources,
         leaf_distr=leaf_distr,
         num_samples_out=num_samples,
         allow_repetition=config.allow_repetition,
         minimum_weight=config.minimum_weight,
+        min_source_strength=min_source_strength,
+        max_source_strength=max_source_strength,
+        min_topic_strength=min_topic_strength,
+        max_topic_strength=max_topic_strength,
         max_tokens=config.max_tokens,
         available_tokens=available_tokens,
         fixed_source_weights=config.fixed_source_weights,
@@ -710,156 +588,3 @@ def mk_mixes(
         nested_mixes.append(nested)
     logger.info(nested_mixes)
     return mixes
-
-
-def _bytes_to_tokens(num_bytes: int, dtype: NumpyDatasetDType) -> int:
-    """
-    Convert bytes to tokens based on the dtype.
-    """
-    npdtype = dtype.as_np_dtype()
-    return num_bytes // npdtype(int(0)).itemsize
-
-
-def _count_tokens_for_file(path: PathOrStr, dtype: NumpyDatasetDType) -> int:
-    return _bytes_to_tokens(get_file_size(path), dtype)
-
-
-def count_tokens(paths: list[str], dtype: NumpyDatasetDType, fs) -> int:
-    """Helper to count tokens across a list of paths using glob expansion."""
-    total = 0
-    for path in paths:
-        matches = fs.glob(path)
-        for match in matches:
-            total += _count_tokens_for_file(f"s3://{match}", dtype)
-    return total
-
-
-def get_leaf_configs(source_config):
-    """Return a list of (name, paths) tuples representing the leaf nodes."""
-    if source_config.topics:
-        return [
-            (f"{source_config.name}:{topic.name}", topic.paths)
-            for topic in source_config.topics
-        ]
-    else:
-        return [(source_config.name, source_config.paths)]
-
-
-def calculate_priors(
-    source_configs: list[SourceConfig], dtype: NumpyDatasetDType, use_cache: bool
-) -> Tuple[dict[str, float], int, dict[str, int]]:
-    config_hash = hashlib.md5(
-        json.dumps(
-            [(sc.name, sc.paths) for sc in source_configs],
-            sort_keys=True,
-        ).encode("utf-8")
-    ).hexdigest()
-
-    Path("cache/").mkdir(parents=True, exist_ok=True)
-    cache_path = Path(f"cache/priors_cache_{config_hash}.json")
-    if use_cache:
-        try:
-            with open(cache_path, "r") as f:
-                logger.info(
-                    f"Source distribution cache found, using cached values at {cache_path}! This can be disabled by setting use_cache=False."
-                )
-                obj = json.load(f)
-                return (obj["relative_sizes"], obj["total_tokens"], obj["token_counts"])
-        except FileNotFoundError:
-            logger.info("No cache file found, calculating from source files...")
-
-    fs = s3fs.S3FileSystem(anon=False)
-
-    token_counts = defaultdict(int)
-    # Count tokens in each "leaf": the prior distribution is represented at the leaf level.
-    leaf_configs = []
-    for source_config in source_configs:
-        leaf_configs.extend(get_leaf_configs(source_config))
-
-    # Multithreaded token counting at leaf level
-    with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
-        future_to_leaf = {
-            executor.submit(count_tokens, paths, dtype, fs): name
-            for name, paths in leaf_configs
-        }
-
-        for future in tqdm(
-            concurrent.futures.as_completed(future_to_leaf),
-            total=len(future_to_leaf),
-            desc="Counting tokens (leaf level)",
-        ):
-            name = future_to_leaf[future]
-            try:
-                count = future.result()
-                token_counts[name] = count
-            except Exception as e:
-                logger.info(f"Error processing {name}: {str(e)}, exiting!")
-                raise e
-
-    # Calculate relative sizes
-    total_tokens = sum(token_counts.values())
-
-    token_counts = dict(sorted(token_counts.items()))
-
-    if total_tokens == 0:
-        raise Exception(f"Error processing config, no tokens found for sources!")
-
-    relative_sizes = {path: count / total_tokens for path, count in token_counts.items()}
-
-    if use_cache:
-        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-        with open(cache_path, "w") as f:
-            json.dump(
-                {
-                    "relative_sizes": relative_sizes,
-                    "total_tokens": total_tokens,
-                    "token_counts": token_counts,
-                },
-                f,
-            )
-
-    return (relative_sizes, total_tokens, token_counts)
-
-def sort_and_deduplicate(
-    samples: list[Tuple[np.ndarray, np.ndarray]], threshold=1e-5
-) -> list[Tuple[np.ndarray, np.ndarray]]:
-    """
-    Remove identical configs to avoid duplicated training.
-    """
-    unique_samples = []
-    for sample in tqdm(samples):
-        is_duplicate = any(
-            np.allclose(sample[0], unique_sample[0], atol=threshold)
-            for unique_sample in unique_samples
-        )
-        if not is_duplicate:
-            unique_samples.append(sample)
-
-    logger.info(
-        f"Filtered {len(samples) - len(unique_samples)} duplicate distributions from candidate pool..."
-    )
-    return unique_samples
-
-
-
-def sort_and_deduplicate_with_hash(
-    samples: list[Tuple[np.ndarray, np.ndarray]], threshold=1e-5
-) -> list[Tuple[np.ndarray, np.ndarray]]:
-    """
-    Remove near-identical configs efficiently to avoid duplicated training.
-    """
-    unique_samples = []
-    seen_hashes = set()
-
-    for sample in tqdm(samples):
-        vec = sample[0]
-        rounded = tuple(np.round(vec / threshold).astype(int))
-
-        if rounded not in seen_hashes:
-            seen_hashes.add(rounded)
-            unique_samples.append(sample)
-
-    logger.info(
-        f"Filtered {len(samples) - len(unique_samples)} duplicate distributions from candidate pool..."
-    )
-    return unique_samples

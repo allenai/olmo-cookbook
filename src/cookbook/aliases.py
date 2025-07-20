@@ -144,6 +144,12 @@ class SwarmConfig(ExperimentConfig):
     minimum_weight: float = 0.05  # minimum weight for sources in mixtures
     fixed_source_weights: Optional[dict[str, float]] = None  # fixed weights for sources in mixtures
     sample_multiplier: int = 10  # multiplier for the number of samples per source
+    min_source_strength: Optional[float] = None  # minimum strength for sources
+    max_source_strength: Optional[float] = None  # maximum strength for sources
+    min_topic_strength: Optional[float] = None  # minimum strength for topics
+    max_topic_strength: Optional[float] = None  # maximum strength for topics
+    min_strength: float = 0.1  # minimum strength for sources and topics
+    max_strength: float = 5.0  # maximum strength for sources and topics
 
 
 class ExperimentInstance(BaseModel):

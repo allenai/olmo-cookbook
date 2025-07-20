@@ -13,7 +13,7 @@ from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
 
-from cookbook.aliases import SwarmConfig, LaunchGroup, validate_sources
+from cookbook.aliases import SwarmConfig, ExperimentConfig, LaunchGroup, validate_sources
 from cookbook.cli.core import estimate_batch_size
 from cookbook.utils.config import (
 
@@ -34,7 +34,7 @@ def cli():
 @cli.command()
 @click.option(
     "-c",
-    "--swarm-config",
+    "--config",
     type=click.Path(exists=True),
     required=True,
     help="Relative path to the experiment configuration file.",
@@ -58,31 +58,25 @@ def cli():
     default=None,
     help="Overrides the generated run group_id, allows for restarts with config changes or similar",
 )
-def swarm(swarm_config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
+def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] = None):
     """Launch an experiment."""
 
-    with open(swarm_config, "r") as f:
+    with open(config, "r") as f:
         data = yaml.safe_load(f)
 
-    experiment_config = SwarmConfig(**data, path=swarm_config)
-    validate_sources(experiment_config.dataset.sources)
+    swarm_config = SwarmConfig(**data, path=config)
+    validate_sources(swarm_config.dataset.sources)
 
-
-
-    token_universe = get_token_counts_and_ratios(
-        experiment_config.dataset.sources, experiment_config.dataset.dtype, not no_cache
-    )
-
-    sequence_length = experiment_config.sequence_length
-    max_tokens = experiment_config.max_tokens
+    sequence_length = swarm_config.sequence_length
+    max_tokens = swarm_config.max_tokens
 
     suggested_batch_size_tokens = (
         estimate_batch_size(sequence_length=sequence_length, total_tokens=max_tokens)
-        * experiment_config.sequence_length
+        * swarm_config.sequence_length
     )
 
-    if experiment_config.global_batch_size:
-        if suggested_batch_size_tokens != experiment_config.global_batch_size:
+    if swarm_config.global_batch_size:
+        if suggested_batch_size_tokens != swarm_config.global_batch_size:
             logger.warning(
                 f"Suggested global batch size {suggested_batch_size_tokens:,} is different from the configured global batch size {experiment_config.global_batch_size:,}. "
                 "This may lead to suboptimal performance. Consider adjusting the batch size."
@@ -97,14 +91,24 @@ def swarm(swarm_config: Path, dry_run: bool, no_cache: bool, group_id: Optional[
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
 
     logger.info("Generating experiment group from the following config...")
-    logger.info(experiment_config)
+    logger.info(swarm_config)
     if not click.confirm("Proceed with this configuration?", default=False):
         logger.info("Launch cancelled!")
         return
     
 
 
-    mixes = mk_mixes(experiment_config, use_cache=(no_cache == False))
+    mixes = mk_mixes(swarm_config, use_cache=(no_cache == False))
+    
+    experiment_fields = set(ExperimentConfig.model_fields.keys())
+
+    # Create a copy of the SwarmConfig without Swarm-specific fields
+    experiment_config_data = swarm_config.model_dump(include=experiment_fields)
+
+    # Construct a new ExperimentConfig
+    experiment_config = ExperimentConfig(**experiment_config_data)
+
+
     if click.confirm("Launch experiment with this set of mixtures?", default=False):
         with yaspin(text="Building experiment group...", color="yellow") as spinner:
             launch_group = LaunchGroup(

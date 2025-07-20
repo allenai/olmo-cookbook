@@ -39,10 +39,10 @@ def config_from_path(config: Path) -> ExperimentConfig:
 
 
 def mk_source_instances(
-    sources: list[SourceConfig], priors: Tuple[dict[str, float], int, dict[str, float]] | None = None
+    sources: list[SourceConfig], priors: Tuple[dict[str, float], int] | None = None
 ) -> list[SourceInstance]:
     if priors:
-        ratios_by_source, total_tokens, token_counts = priors
+        ratios_by_source, total_tokens = priors
     else:
         ratios_by_source = {}
 
@@ -62,7 +62,7 @@ def mk_source_instances(
 
 
 def mk_experiments(
-    config: ExperimentConfig, group_id: str, priors: Tuple[dict[str, float], int, dict[str, float]]
+    config: ExperimentConfig, group_id: str, priors: Tuple[dict[str, float], int]
 ) -> list[ExperimentInstance]:
     """Generate source instances from a config."""
     return [
@@ -74,7 +74,7 @@ def mk_experiments(
 
 
 def mk_experiment_group(
-    config: ExperimentConfig, priors: Tuple[dict[str, float], int, dict[str, float]], group_id: str
+    config: ExperimentConfig, priors: Tuple[dict[str, float], int], group_id: str
 ) -> ExperimentGroup:
     """Build an experiment group from an experiment config."""
 
@@ -118,7 +118,6 @@ def mk_swarm_source_instances(
 
     return instances
 
-
 def mk_swarm_experiments(
     config: ExperimentConfig, mixes: list[dict[str, tuple[float, float]]], group_id: str
 ) -> list[ExperimentInstance]:
@@ -131,9 +130,6 @@ def mk_swarm_experiments(
         for idx, mix in enumerate(mixes)
     ]
 
-
-
-
 def mk_swarm_experiment_group(
     config: ExperimentConfig, mixes: list[dict[str, tuple[float, float]]], group_id: str
 ) -> ExperimentGroup:
@@ -144,12 +140,6 @@ def mk_swarm_experiment_group(
         group_id=group_id,
         instances=mk_swarm_experiments(config, mixes, group_id),
     )
-
-
-
-
-
-
 
 def mk_instance_cmd(
     instance: ExperimentInstance, config: ExperimentConfig, group_id: str, beaker_user: str

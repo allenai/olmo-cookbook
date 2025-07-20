@@ -48,7 +48,7 @@ def get_leaf_configs(source_config: SourceConfig) -> List[Tuple[str, List[str]]]
 
 def get_token_counts_and_ratios(
     source_configs: list[SourceConfig], dtype: NumpyDatasetDType, use_cache: bool
-) -> Tuple[dict[str, float], int, dict[str, int]]:
+) -> Tuple[dict[str, float], int]:
     config_hash = hashlib.md5(
         json.dumps(
             [(sc.name, sc.paths) for sc in source_configs],
@@ -64,7 +64,7 @@ def get_token_counts_and_ratios(
                     "Source distribution cache found, using cached values! This can be disabled by setting use_cache=False."
                 )
                 obj = json.load(f)
-                return (obj["relative_sizes"], obj["total_tokens"], obj["token_counts"])
+                return (obj["relative_sizes"], obj["total_tokens"])
         except FileNotFoundError:
             logger.info("No cache file found, calculating from source files...")
 
@@ -122,7 +122,6 @@ def get_token_counts_and_ratios(
 
     # Calculate relative sizes
     total_tokens = sum(token_counts.values())
-    token_counts = dict(sorted(token_counts.items()))
 
     if total_tokens == 0:
         raise Exception(f"Error processing config, no tokens found!")
@@ -132,9 +131,9 @@ def get_token_counts_and_ratios(
     if use_cache:
         os.makedirs(os.path.dirname(cache_path), exist_ok=True)
         with open(cache_path, "w") as f:
-            json.dump({"relative_sizes": relative_sizes, "total_tokens": total_tokens, "token_counts": token_counts}, f)
+            json.dump({"relative_sizes": relative_sizes, "total_tokens": total_tokens}, f)
 
-    return (relative_sizes, total_tokens, token_counts)
+    return (relative_sizes, total_tokens)
 
 
 def expand_globs(
