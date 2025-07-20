@@ -480,7 +480,7 @@ def mk_mixtures(
 
     num_samples = config.variants
     sources = config.dataset.sources
-    leaf_distr, available_tokens, leaf_tokens = get_token_counts_and_ratios(
+    leaf_distr, available_tokens = get_token_counts_and_ratios(
         sources, config.dataset.dtype, use_cache=use_cache
     )
 
