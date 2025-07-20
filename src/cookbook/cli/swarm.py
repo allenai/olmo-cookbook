@@ -117,6 +117,7 @@ def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] =
                         group_id=group_uuid,
                     ),
                     beaker_user=beaker_user,
+                    swarm=True,
                 )
             )
 

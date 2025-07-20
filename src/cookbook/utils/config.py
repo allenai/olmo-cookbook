@@ -142,11 +142,11 @@ def mk_swarm_experiment_group(
     )
 
 def mk_instance_cmd(
-    instance: ExperimentInstance, config: ExperimentConfig, group_id: str, beaker_user: str
+    instance: ExperimentInstance, config: ExperimentConfig, group_id: str, beaker_user: str, swarm: bool
 ) -> List[str]:
     """Build a command for launching an experiment instance."""
 
-    return [
+    cmd = [
         "src/cookbook/train.py",
         "train",
         "-n",
@@ -158,6 +158,18 @@ def mk_instance_cmd(
         "-C",
         str(config.path),
     ]
+
+    if swarm:
+        sources = []
+        for source in instance.sources:
+            paths = [f'"{path}"' for path in source.paths]
+            source_str = (
+                f'-s ("{source.name}",[{",".join(paths)}],{source.ratio},{source.repetition_factor})'
+            )
+            sources.append(source_str)
+        cmd.extend(sources)
+
+    return cmd
 
 
 _REMOTE_FS_CACHE: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] | None = None
@@ -282,7 +294,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     return trainer
 
 
-def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLaunchConfig]:
+def mk_launch_configs(group: ExperimentGroup, beaker_user: str, swarm: bool=False) -> list[BeakerLaunchConfig]:
     """Build a beaker launch config from an experiment group."""
 
     weka_buckets: List[BeakerWekaBucket] = []
@@ -294,7 +306,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             name=f"{experiment.name}",
             description=group.config.description,
             task_name=experiment.name,
-            cmd=mk_instance_cmd(experiment, group.config, group.group_id, beaker_user),
+            cmd=mk_instance_cmd(experiment, group.config, group.group_id, beaker_user, swarm),
             clusters=[group.config.cluster],
             num_nodes=group.config.nodes,
             num_gpus=group.config.gpus,
