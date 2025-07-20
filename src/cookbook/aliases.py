@@ -82,7 +82,7 @@ class AnnealConfig(BaseModel):
     initial_lr: Optional[float] = None
 
 
-class ExperimentConfig(BaseModel, extra="forbid"):
+class ExperimentConfig(BaseModel, extra="ignore"):
     name: str
     description: str
     budget: str

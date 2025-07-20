@@ -100,21 +100,19 @@ def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] =
 
     mixes = mk_mixes(swarm_config, use_cache=(no_cache == False))
     
-    experiment_fields = set(ExperimentConfig.model_fields.keys())
+    #experiment_fields = set(ExperimentConfig.model_fields.keys())
 
     # Create a copy of the SwarmConfig without Swarm-specific fields
-    experiment_config_data = swarm_config.model_dump(include=experiment_fields)
+    #experiment_config_data = swarm_config.model_dump(include=experiment_fields)
 
     # Construct a new ExperimentConfig
-    experiment_config = ExperimentConfig(**experiment_config_data)
-
-
+    #experiment_config = ExperimentConfig(**experiment_config_data)
     if click.confirm("Launch experiment with this set of mixtures?", default=False):
         with yaspin(text="Building experiment group...", color="yellow") as spinner:
             launch_group = LaunchGroup(
                 instances=mk_launch_configs(
                     group=mk_swarm_experiment_group(
-                        config=experiment_config,
+                        config=swarm_config,
                         mixes=mixes,
                         group_id=group_uuid,
                     ),
