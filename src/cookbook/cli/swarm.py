@@ -1,26 +1,22 @@
 import concurrent.futures
 import logging
-import os
 from pathlib import Path
 from typing import Optional
 
 import click
 import yaml
 from beaker import Beaker
-from beaker.exceptions import SecretNotFound
-from beaker.services.job import JobClient
 from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
 
-from cookbook.aliases import SwarmConfig, ExperimentConfig, LaunchGroup, validate_sources
+from cookbook.aliases import SwarmConfig, LaunchGroup, validate_sources
 from cookbook.cli.core import estimate_batch_size
 from cookbook.utils.config import (
 
     mk_swarm_experiment_group,
     mk_launch_configs,
 )
-from cookbook.utils.data import get_token_counts_and_ratios
 from cookbook.utils.swarm_utils import mk_mixes 
 
 logger = logging.getLogger(__name__)
@@ -96,17 +92,7 @@ def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] =
         logger.info("Launch cancelled!")
         return
     
-
-
-    mixes = mk_mixes(swarm_config, use_cache=(no_cache == False))
-    
-    #experiment_fields = set(ExperimentConfig.model_fields.keys())
-
-    # Create a copy of the SwarmConfig without Swarm-specific fields
-    #experiment_config_data = swarm_config.model_dump(include=experiment_fields)
-
-    # Construct a new ExperimentConfig
-    #experiment_config = ExperimentConfig(**experiment_config_data)
+    mixes = mk_mixes(swarm_config, group_uuid, use_cache=(no_cache == False))
     if click.confirm("Launch experiment with this set of mixtures?", default=False):
         with yaspin(text="Building experiment group...", color="yellow") as spinner:
             launch_group = LaunchGroup(
@@ -120,7 +106,6 @@ def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] =
                     swarm=True,
                 )
             )
-
 
         with yaspin(text="Launching experiment group...", color="yellow") as spinner:
             try:
@@ -153,8 +138,6 @@ def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] =
                 logger.warning(
                     "\nAborting experiment group launch! You may need to manually stop the launched experiments."
                 )
-
-
 
 if __name__ == "__main__":
     cli({})

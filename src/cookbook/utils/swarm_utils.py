@@ -545,13 +545,13 @@ def prettify_mixes(mixes: list[dict[str, Tuple[float, float]]]):
 
 
 def mk_mixes(
-    config: SwarmConfig, output: Optional[Path] = None, use_cache: bool = True
+    config: SwarmConfig, group_uuid: str, output: Optional[Path] = None, use_cache: bool = True
 ) -> list[dict[str, Tuple[float, float]]]:
     mixes = mk_mixtures(config, use_cache=use_cache)
     mix_string = prettify_mixes(mixes)
 
     if not output:
-        output = Path(f"cache/swarms/{config.name}_{generate_uuid()[:6]}.json")
+        output = Path(f"cache/swarms/{config.name}_{group_uuid}.json")
 
     if output:
         os.makedirs(os.path.dirname(output), exist_ok=True)
