@@ -177,9 +177,9 @@ def run_olmo_cookbook(weka_path):
         "--huggingface-transformers-git-url",
         "https://github.com/2015aroras/transformers.git",
         "--huggingface-transformers-commit-hash",
-        "ca728b8879ce5127ea3e2f8d309c2c5febab5dc5",
+        "ae3889ced6ed7362e5883671fc6dc4cb4fece5fa",
         "--olmo-core-v2-commit-hash",
-        "013ef7b54aa2d583f9811ec6211a536da407a4b1",
+        "57a04d0b69047d797c96eede056a211e75b5914a",
     ]
     print(f"Running: {' '.join(cmd)}")
 
