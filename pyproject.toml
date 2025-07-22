@@ -28,6 +28,7 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
+    "ai2-olmo-core",
 ]
 
 [project.optional-dependencies]
@@ -150,3 +151,6 @@ filterwarnings = [
     'ignore::DeprecationWarning:google\.rpc',
     'ignore::FutureWarning:torch\.distributed\.checkpoint\.default_planner',
 ]
+
+[tool.uv.sources]
+ai2-olmo-core = { git = "https://github.com/allenai/OLMo-core.git", rev = "df9328bbb3594a0c1177a8f85429593c42bdecdf" }
