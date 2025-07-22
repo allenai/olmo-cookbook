@@ -1,4 +1,4 @@
-name: "olmo3_7b_with-reasoning-anneal-round2mix-12T-10B-1337"
+name: "olmo3_7b_with-reasoning-anneal-round2mix-12T-20B-1337"
 description: "OLMo3 7b microanneal to 10B Tokens on midtraining mix WITH reasoning data"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
