@@ -100,7 +100,7 @@ dataset:
     paths:
       - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_quality_tagged_partitioned_category_sample_tokenized/religion/*.npy
   - name: pdf-quality-top50-science_tech
-    target_ratio: 0.29755
+    target_ratio: 0.2976
     paths:
       - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_quality_tagged_partitioned_category_sample_tokenized/science_tech/*.npy
   # - name: pdf-quality-top50-social_life
@@ -116,7 +116,7 @@ dataset:
     paths:
       - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_quality_tagged_partitioned_category_sample_tokenized/software_dev/*.npy
   - name: pdf-quality-top50-sports_fitness
-    target_ratio: 0.00185
+    target_ratio: 0.0019
     paths:
       - s3://ai2-llm/preprocessed/s2pdf/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_quality_tagged_partitioned_category_sample_tokenized/sports_fitness/*.npy
   - name: pdf-quality-top50-transportation
