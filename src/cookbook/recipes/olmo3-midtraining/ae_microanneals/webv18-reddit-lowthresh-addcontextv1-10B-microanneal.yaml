@@ -30,4 +30,4 @@ dataset:
   - name: reddit 
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/lowthresh_rewrites_addcontext-v1_tokenized/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/lowthresh_addcontext-v1_tokenized/allenai/dolma2-tokenizer/*.npy
