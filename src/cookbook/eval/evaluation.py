@@ -198,9 +198,18 @@ def evaluate_checkpoint(
     print("Launching evals on the following tasks:")
     pprint(all_tasks)
 
-    # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
-    EXCLUDE_FROM_LAUNCH = [r"^mmlu_.*:bpb::olmes$", r"^lambada:bpb$"]
-    all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
+    # @davidh: we have a few specific tasks that are not implemented in oe-eval as standalone tasks
+    # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
+    #          it's just the task alias that does not exist.
+    EXCLUDE_FROM_LAUNCH = [
+        r'^mmlu_.*:bpb::olmes$',
+        r'^lambada:bpb$',
+        r'^.*:pass_at_.*$',
+    ]
+    all_tasks = [
+        task for task in all_tasks
+        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
+    ]
 
     # DOING SOME PRETTY PRINTING HERE #
     print(
