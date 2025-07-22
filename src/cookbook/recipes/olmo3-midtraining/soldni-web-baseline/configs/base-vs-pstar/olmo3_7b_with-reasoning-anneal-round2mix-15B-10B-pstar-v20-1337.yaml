@@ -1,6 +1,6 @@
 name: "olmo3_7b_with-reasoning-anneal-round2mix-15B-10B-pstar-v20-1337"
 description: "OLMo3 7b 15B ckpt microanneal to 10B Tokens on midtraining mix WITH reasoning data, pstar web distribution"
-budget: "ai2/oe-training"
+budget: "ai2/oe-base"
 workspace: "ai2/oe-data"
 nodes: 2
 gpus: 8
