@@ -51,7 +51,7 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@tylerr/olmo3-scripts-swafix-foreachopt",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@806ed704c9ccce4449a6b4e4b6a6248d9e07d7a4",
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
