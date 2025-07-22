@@ -80,7 +80,8 @@ def get_size_of_prefix(
 @click.command()
 @click.option("-t", "--token-count", type=int, required=True)
 @click.option("-m", "--min-vigintile", type=int, required=True)
-def main(token_count: int, min_vigintile: int):
+@click.option("-p", "--prefix", type=str, default=PREFIX)
+def main(token_count: int, min_vigintile: int, prefix: str):
     assert 1 <= min_vigintile <= 20, "min vigintile must be between 1 and 20"
     assert token_count > 0, "token count must be greater than 0"
 
@@ -93,7 +94,7 @@ def main(token_count: int, min_vigintile: int):
         vig_num = int(vig_name.group(1))
         return _min_vigintile <= vig_num
 
-    prefix_sizes = get_size_of_prefix(PREFIX, filter_fn=vigintile_filter)
+    prefix_sizes = get_size_of_prefix(prefix, filter_fn=vigintile_filter)
 
     current_tokens = sum(prefix_sizes.values()) // 4
 

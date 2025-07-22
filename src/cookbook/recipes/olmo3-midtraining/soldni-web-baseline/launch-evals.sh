@@ -21,6 +21,9 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-with-reasoning-web-nemotron-cc-b3c3561d/step4769'
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-qa-92abe47c/step4769'
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-wrap-55f2ddc7/step4769'
+)
+
+models=(
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-10web-90synthqa-06e59598/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-20web-80synthqa-1d1ad922/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-30web-70synthqa-fc122193/step477'
@@ -28,15 +31,16 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-50web-50synthqa-63696db9/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-60web-40synthqa-807fdc92/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-70web-30synthqa-e14c2910/step477'
+    'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-80web-20synthqa-2fe983a9/step477'
     'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-90web-10synthqa-508971fb/step477'
 )
 
 models=(
-    'ai2-llm/checkpoints/lucas/olmo3-nanonanneal-80web-20synthqa-508971fb/step477'
-    # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-distill-85ff229d/step4769'
-    # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-kextract-fb5c70e2/step4769'
-    # 'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-klist-841b19ca/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-distill-85ff229d/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-kextract-fb5c70e2/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-klist-841b19ca/step4769'
 )
+
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
@@ -57,11 +61,13 @@ for model in "${models[@]}"; do
 done
 
 
+
 # Launch regular evals
+dashboard="olmo3-midtraining-web"
 for model in "${models[@]}"; do
     uv run olmo-cookbook-eval evaluate \
         "/oe-training-default/${model}-hf" \
-        --tasks olmo3:dev:7b:main \
+        --tasks dev:7b:nocodeish \
         --priority high \
         --cluster aus80g \
         --partition-size 8 \
@@ -69,7 +75,7 @@ for model in "${models[@]}"; do
         --model-backend vllm \
         --model-args trust_remote_code=true,max_length=4096 \
         --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
-        --dashboard olmo3-midtraining-web \
+        --dashboard ${dashboard} \
         --workspace ai2/oe-data
 done
 

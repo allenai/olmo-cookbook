@@ -181,3 +181,4 @@ cython_debug/
 tmp/
 temp/
 uv.lock
+.ruff_cache/
