@@ -1,14 +1,14 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3_7B-11T_global-only_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M"
-description: "OLMo3 7B @11T w/ swafix + global layers RoPE adjustment only trained up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
+name: "olmo3_7B-4T_global-only_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M"
+description: "OLMo3 7B @4T w/ swafix + global layers RoPE adjustment only trained up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 4
+nodes: 8
 gpus: 8
 seed: 4123
 
@@ -23,7 +23,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step706000
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
