@@ -19,6 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
+  initial_lr: 0.0001
 load_path: gs://ai2-llm/checkpoints/yapeic/OLMo3-7B-swafix/step289000-reinit/model_and_optim
 load_state: false
 dataset:
