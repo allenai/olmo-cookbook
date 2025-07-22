@@ -1,0 +1,80 @@
+name: "anneal-round2-100B-olmo3_7b_with-reasoning-anneal-12T"
+description: "OLMo3 7b anneal to 100B Tokens from 12T ckpt -- round 2 data mix"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 8
+gpus: 8
+preemptible: true
+max_tokens: 100_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906
+load_state: false
+dataset:
+  sources:
+  - name: hqweb
+    target_ratio: 0.45
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
+  - name: code
+    target_ratio: 0.2
+    paths:
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
+  - name: finemath
+    # 10% less the .0268 over 10% for dolminos2math
+    target_ratio: 0.0732
+    paths:
+    - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+  - name: dolminos2math
+    target_ratio: 0.1268
+    paths:
+    # 10.7B
+    - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
+    # 1.99B
+    # 850,859,688
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/allenai/dolma2-tokenizer/*.npy
+    # 898,733,958
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
+    # 240,590,634
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
+  - name: reddit
+    target_ratio: 0.089
+    paths:
+    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
+  - name: instruction
+    target_ratio: 0.011
+    paths:
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
+  - name: r1_reasoning
+    target_ratio: 0.01875
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
+  - name: qwq_reasoning
+    target_ratio: 0.01875
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-traces/dolma2-tokenizer/*.npy
+  - name: gemini_reasoning
+    target_ratio: 0.0025
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
+  - name: faeze_reasoning
+    target_ratio: .01
+    paths:
+    #3.166B
+    #1,144,531,442
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+    #366,757,554
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/verifiable/gpt-41/allenai/dolma2-tokenizer/*.npy
+    #1,198,181,281
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
