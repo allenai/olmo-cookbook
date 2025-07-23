@@ -181,11 +181,11 @@ def run_checkpoint_conversion_from_hf(
             f"--huggingface-transformers-git-url {huggingface_transformers_git_url}",
             f"--huggingface-transformers-commit-hash {huggingface_transformers_commit_hash}",
             (
-                f"--huggingface-model-id {huggingface_transformers_model_id}"
+                f"--huggingface-transformers-model-id {huggingface_transformers_model_id}"
                 if huggingface_transformers_model_id
                 else ""
             ),
-            f"--huggingface-revision {huggingface_transformers_revision}",
+            f"--huggingface-transformers-revision {huggingface_transformers_revision}",
             "--use-system-python",
             ("--skip-validation" if skip_validation else ""),
             ("--debug-validation" if debug_validation else ""),
