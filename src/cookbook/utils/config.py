@@ -210,8 +210,6 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "s3://"))
 
     else:
-        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
-
         if base_config.load_path:
             # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
             base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
@@ -226,6 +224,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
                 )
             )
     else:
+        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
         source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
