@@ -1,4 +1,3 @@
-
 models=(
     "/ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50wiki-8a9b662c/step4769"
     "/ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50wiki-2618a292/step4769"
