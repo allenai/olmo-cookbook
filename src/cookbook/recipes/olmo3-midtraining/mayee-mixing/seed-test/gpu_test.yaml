@@ -6,14 +6,14 @@ nodes: 1
 gpus: 4
 preemptible: true
 max_tokens: 1_000_000_000
-global_batch_size: 131072 #2097152
+global_batch_size: 8192 #2097152
 sequence_length: 8192
 seed: 1337
 model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/augusta-google-1
-rank_microbatch_size: 16384
+rank_microbatch_size: 8192
 scheduler_type: linear
 warmup_steps: 0
 activation_checkpointing: true
