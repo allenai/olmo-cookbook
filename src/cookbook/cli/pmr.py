@@ -533,7 +533,9 @@ class InstanceInfo:
         statuses = statuses or InstanceStatus.active()
 
         # Use provided client or create a new one with the specified region
-        client = client or boto3.client("ec2", region_name=region or cls.region)
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ec2", region_name=region or cls.region)
 
         filters = []
 
@@ -600,7 +602,10 @@ class InstanceInfo:
         Returns:
             InstanceInfo object containing the instance details
         """
-        client = client or boto3.client("ec2", region_name=region or cls.region)
+        # Use provided client or create a new one with the specified region
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ec2", region_name=region or cls.region)
         assert client, "EC2 client is required"
 
         response = client.describe_instances(InstanceIds=[instance_id])
@@ -617,7 +622,10 @@ class InstanceInfo:
         Returns:
             True if pause was successful, False otherwise
         """
-        client = client or boto3.client("ec2", region_name=self.region)
+        # Use provided client or create a new one with the specified region
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ec2", region_name=self.region)
         assert client, "EC2 client is required"
 
         # check if the instance is already paused
@@ -654,7 +662,10 @@ class InstanceInfo:
         Returns:
             True if resume was successful, False otherwise
         """
-        client = client or boto3.client("ec2", region_name=self.region)
+        # Use provided client or create a new one with the specified region
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ec2", region_name=self.region)
         assert client, "EC2 client is required"
 
         # check if the instance is already running
@@ -691,7 +702,10 @@ class InstanceInfo:
         Returns:
             True if termination was successful, False otherwise
         """
-        client = client or boto3.client("ec2", region_name=self.region)
+        # Use provided client or create a new one with the specified region
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ec2", region_name=self.region)
         assert client, "EC2 client is required"
 
         try:
@@ -730,7 +744,10 @@ class InstanceInfo:
         else:
             image_id = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 
-        client = client or boto3.client("ssm")
+        # Use provided client or create a new one with the specified region
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ssm", region_name=os.getenv("AWS_REGION", "us-east-1"))
         assert client, "SSM client is required"
 
         parameter = client.get_parameter(Name=image_id, WithDecryption=False)
@@ -771,8 +788,14 @@ class InstanceInfo:
             InstanceInfo object representing the newly created EC2 instance
         """
         # Initialize the EC2 client with the specified region
-        client = client or boto3.client("ec2", region_name=region)
+        if not client:
+            session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+            client = session.client("ec2", region_name=region or cls.region)
         assert client, "EC2 client is required"
+
+        vpcs = client.describe_vpcs()["Vpcs"]
+        vpc_id = vpcs[0]["VpcId"]
+        print(f"Using VPC ID: {vpc_id}")
 
         # If AMI ID is not provided, use a default Amazon Linux 2023 AMI (x86_64 or arm64 based on instance type)
         ami_id = ami_id or cls.get_latest_ami_id(instance_type)
@@ -994,8 +1017,8 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
     Returns:
         The key pair ID if the import was successful.
     """
-    # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
+    session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+    ec2_client = session.client("ec2", region_name=region or os.getenv("AWS_REGION", "us-east-1"))
 
     # Use default SSH private key path if not specified
     if not private_key_path:
@@ -1303,7 +1326,8 @@ def create_instances(
         logger.info("No existing instances found. Starting with index 0")
 
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
+    session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+    ec2_client = session.client("ec2", region_name=region)
     logger.debug(f"Initialized EC2 client for region {region}")
 
     instances = []
@@ -1350,7 +1374,8 @@ def list_instances(
     """
     logger.info(f"Listing instances with project={name} in region {region}")
 
-    client = boto3.client("ec2", region_name=region)
+    session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+    client = session.client("ec2", region_name=region)
 
     # Retrieve matching instances
     instances = InstanceInfo.describe_instances(
@@ -1399,7 +1424,8 @@ def terminate_instances(
     """
     logger.info(f"Terminating instances with project={name} in region {region}")
 
-    client = boto3.client("ec2", region_name=region)
+    session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+    client = session.client("ec2", region_name=region)
 
     # Retrieve instances matching the project and owner tags
     instances = InstanceInfo.describe_instances(
@@ -1447,7 +1473,8 @@ def pause_instances(
     """
     logger.info(f"Pausing instances with project={name} in region {region}")
 
-    client = boto3.client("ec2", region_name=region)
+    session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+    client = session.client("ec2", region_name=region)
 
     # Retrieve instances matching the project and owner tags
     instances = InstanceInfo.describe_instances(
@@ -1491,7 +1518,9 @@ def resume_instances(
         instance_id: Optional list of specific instance IDs to resume
         detach: Whether to return immediately without waiting for resume to complete
     """
-    client = boto3.client("ec2", region_name=region)
+
+    session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", "default"))
+    client = session.client("ec2", region_name=region)
 
     logger.info(f"Resuming instances with project={name} in region {region}")
 
