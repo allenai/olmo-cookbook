@@ -140,7 +140,7 @@ def convert_olmo_core_v2(
                 text=True,
             )
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Conversion failed with output: {e.output}") from e
+            raise RuntimeError(f"Conversion failed with output: \n{e.output}\n Stderr: {e.stderr}") from e
 
         print(f"Completed conversion of OLMo core V2 checkpoint. Huggingface model at {huggingface_output_dir}.")
 
