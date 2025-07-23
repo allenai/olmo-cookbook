@@ -21,7 +21,7 @@ annealing:
   enabled: true
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906 # 12T tokens
 load_state: false
-variants: 8
+variants: 16
 allow_repetition: false
 minimum_weight: 0.001 
 sample_multiplier: 50
@@ -38,6 +38,9 @@ dataset:
     - name: stackedu
       paths:
       - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+    - name: swallowcode
+      paths:
+      - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/original_data/allenai/dolma2-tokenizer/*.npy
 fixed_source_weights:
   hqweb: 0.50
   code: 0.50
