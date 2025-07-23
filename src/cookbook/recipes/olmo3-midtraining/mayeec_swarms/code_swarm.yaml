@@ -21,7 +21,7 @@ annealing:
   enabled: true
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906 # 12T tokens
 load_state: false
-variants: 1
+variants: 8
 allow_repetition: false
 minimum_weight: 0.001 
 sample_multiplier: 50
