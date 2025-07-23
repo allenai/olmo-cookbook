@@ -82,7 +82,7 @@ def convert_hf_to_olmo_core_v2(
                 text=True,
             )
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Conversion failed with output: {e.output}") from e
+            raise RuntimeError(f"Conversion failed with output: \n{e.output}\nStderr: \n{e.stderr}") from e
 
         print(f"Completed conversion of HF model. OLMo core v2 model at {output_dir}.")
 
