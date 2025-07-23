@@ -1,0 +1,33 @@
+name: "olmo3-microanneal-s2orc-natural"
+description: "OLMo3 7B microanneal to 10B Tokens with no filtering"
+budget: "ai2/oe-training"
+workspace: "ai2/oe-data"
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
+load_state: false
+dataset:
+  sources:
+  - name: web 
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
+  - name: s2orc_natural
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/s2orc_full_0625_fos_tagged_partitioned_take34_36_37_filtered_tokenized/**/*.npy
