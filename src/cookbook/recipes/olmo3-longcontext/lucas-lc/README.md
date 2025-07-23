@@ -11,10 +11,10 @@ models=(
 )
 
 models=(
-    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning_12T-eb8d9932"
-    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-8k-64k_olmo3mix_12T-51da76dd"
-    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning_12T-efbfbe1d"
-    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix_12T-02361a85"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning_12T-eb8d9932/step2385"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-8k-64k_olmo3mix_12T-51da76dd/step2385"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning_12T-efbfbe1d/step2385"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix_12T-02361a85/step2385"
 )
 
 for model in "${models[@]}"; do
