@@ -2,7 +2,7 @@ name: &name "olmo3-microanneal-50web-50wiki"
 description: *name
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
-nodes: 4
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
