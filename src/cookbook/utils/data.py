@@ -61,7 +61,7 @@ def get_token_counts_and_ratios(
         try:
             with open(cache_path, "r") as f:
                 logger.info(
-                    "Source distribution cache found, using cached values! This can be disabled by setting use_cache=False."
+                    f"Source distribution cache found at {cache_path}, using cached values! This can be disabled by setting use_cache=False."
                 )
                 obj = json.load(f)
                 return (obj["relative_sizes"], obj["total_tokens"])

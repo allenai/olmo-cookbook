@@ -97,8 +97,9 @@ def generate_weights_grid(
                             f"Source '{source.name}' has topics without fixed weights, but some other source has fixed topic weights. "
                             "This is not supported yet, because it is unclear how to best do grid sampling to create mixes on sources and topics simultaneously."
                         )
-
                 topic_priors[source.name] = np.ones(len(source.topics))
+            else:
+                topic_priors[source.name] = np.array([1.0])  # no topics, so we use a uniform prior
 
 
 
@@ -117,14 +118,14 @@ def generate_weights_grid(
         source_samples = np.array([fixed_source_weights] * total_samples)
     else:
         if min_source_strength == max_source_strength:
-            source_samples = np.random.dirichlet(source_prior * min_source_strength, total_samples).tolist()
+            source_samples = np.random.dirichlet(source_prior * min_source_strength, total_samples)
         else:
             source_samples = []
             min_source_strength_log = np.log10(min_source_strength)
             max_source_strength_log = np.log10(max_source_strength)
             for strength in np.logspace(min_source_strength_log, max_source_strength_log, n_strength_buckets):
                 samples_per_strength = np.random.dirichlet(source_prior * strength, n_samples_per_strength)
-                source_samples.extend(samples_per_strength.tolist())
+                source_samples.extend(samples_per_strength)
                 print(f"Generated {len(samples_per_strength)} samples for strength {strength:.2f}")
 
 
@@ -134,24 +135,24 @@ def generate_weights_grid(
             if source in fixed_topic_weights:
                 # this source has fixed topic weights, so we use those
                 conditional_weight = fixed_topic_weights[source]
-                topic_samples[source].extend([conditional_weight] * total_samples)
+                topic_samples[source].extend(np.array([conditional_weight] * total_samples))
             else:
                 if min_topic_strength == max_topic_strength:
-                    topic_samples[source].extend(np.random.dirichlet(topic_prior * min_topic_strength, total_samples).tolist())
+                    topic_samples[source].extend(np.random.dirichlet(topic_prior * min_topic_strength, total_samples))
                 else:
                     min_topic_strength_log = np.log10(min_topic_strength)
                     max_topic_strength_log = np.log10(max_topic_strength)
                     for strength in np.logspace(min_topic_strength_log, max_topic_strength_log, n_strength_buckets):
                         samples_per_strength = np.random.dirichlet(topic_prior * strength, n_samples_per_strength)
-                        topic_samples[source].extend(samples_per_strength.tolist())
+                        topic_samples[source].extend(samples_per_strength)
 
     # convert from source_samples and topic_samples back to a set of leaf-level samples 
     candidates = []
 
     if has_topics:
         for i, source_sample in enumerate(source_samples):
-            leaf_level_sample = {source: samples[i][0]*source_sample[0, j] for j, (source, samples) in enumerate(topic_samples.items())}
-            flattened_sample = np.concatenate([arr for arr in list(leaf_level_sample.values())]).reshape(1, -1)
+            leaf_level_sample = {source: samples[i]*source_sample[j] for j, (source, samples) in enumerate(topic_samples.items())}
+            flattened_sample = np.concatenate([arr for arr in list(leaf_level_sample.values())])
             candidates.append(flattened_sample)
     else:
         candidates.extend(source_samples)

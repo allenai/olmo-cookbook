@@ -29,7 +29,7 @@ class TopicConfig(BaseModel):
 
 class SourceConfig(BaseModel):
     name: str
-    paths: list[str]
+    paths: Optional[list[str]] = None
     topics: Optional[list[TopicConfig]] = None
     target_ratio: Optional[float] = None
     repetition_factor: float = 1.0
