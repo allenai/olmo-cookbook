@@ -46,6 +46,6 @@ uv pip install beaker-gantry
 source .venv/bin/activate
 
 for model in "${models[@]}"; do
-    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=2 WORKSPACE=ai2/long-contexts ./gantry_eval.sh /weka/oe-training-default/${model}-hf ai2/jupiter-cirrascale-2
+    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=4 WORKSPACE=ai2/long-contexts ./gantry_eval.sh /weka/oe-training-default/${model}-hf ai2/jupiter-cirrascale-2
 done
 ```
