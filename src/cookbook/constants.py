@@ -634,28 +634,30 @@ MULTITURN_ALPACAEVAL_TASKS = [
     "self_compare_split_prompts",
 ]
 
+# For now, adapt has disabled some of the styled subtasks
+# https://github.com/allenai/oe-eval-internal/pull/601
 STYLED_TASKS = [
     "missense",
     "leetspeak",
     "grammar",
     "random_case",
-    "lower",
-    "upper",
+    # "lower",
+    # "upper",
     "keywords",
     "phonetic",
     "mechanical",
     "aae",
     "informal",
     "afrikaans_backtranslated",
-    "japanese_backtranslated",
-    "swahili_backtranslated",
+    # "japanese_backtranslated",
+    # "swahili_backtranslated",
 ]
 
 STYLED_TASKS_POPQA = [
     "leetspeak",
     "random_case",
-    "lower",
-    "upper",
+    # "lower",
+    # "upper",
     "phonetic",
     "mechanical",
 ]
