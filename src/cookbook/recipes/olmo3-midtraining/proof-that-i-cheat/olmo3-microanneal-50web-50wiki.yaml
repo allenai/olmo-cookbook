@@ -31,5 +31,6 @@ dataset:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
   - name: wikipedia
     target_ratio: 0.5
+    repetition_factor: 10
     paths:
     - s3://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/wikipedia/*.npy
