@@ -166,7 +166,7 @@ def run_checkpoint_conversion_from_hf(
 
         remote_command = [
             "pip install uv && uv pip install . --system &&",
-            "olmo-cookbook-eval convert",
+            "olmo-cookbook-eval convert-from-hf",
             f"{input_dir}",
             (f"--output-dir {output_dir}" if output_dir else ""),
             f"--output-suffix {output_suffix}",
