@@ -41,6 +41,14 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-klist-841b19ca/step4769'
 )
 
+models=(
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-distill-85ff229d/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-kextract-fb5c70e2/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-klist-841b19ca/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-qa-92abe47c/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-wrap-55f2ddc7/step4769'
+)
+
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
