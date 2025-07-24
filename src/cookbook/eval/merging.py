@@ -120,8 +120,8 @@ def _run_merge_locally(
     
     merger.merge_models(methods=methods)
     
-    logger.info("✅ Model merging completed successfully!")
-    logger.info(f"📁 Output directory: {output_dir}")
+    logger.info("Model merging completed successfully!")
+    logger.info(f"Output directory: {output_dir}")
 
 
 def _run_merge_on_beaker(
