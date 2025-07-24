@@ -338,12 +338,14 @@ def _build_beaker_cli_command(
         yaml.dump(spec, f, default_flow_style=False)
         spec_file = f.name
     
-    # Build beaker command
+    # Build beaker command with unique timestamp
+    import time
+    timestamp = int(time.time())
     cmd = [
         "beaker", "experiment", "create",
         spec_file,
         "--workspace", workspace,
-        "--name", f"merge-{Path(merge_command[4]).name}-{Path(merge_command[5]).name}"[:50]
+        "--name", f"merge-{Path(merge_command[4]).name}-{Path(merge_command[5]).name}-{timestamp}"[:50]
     ]
     
     return cmd, spec_file
