@@ -28,6 +28,7 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
+    "transformers",
 ]
 
 [project.optional-dependencies]
@@ -61,6 +62,7 @@ all = [
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
 olmo-cookbook-core = "cookbook.cli:core.cli"
+olmo-cookbook-merge = "cookbook.cli:merge.cli"
 poormanray = "cookbook.cli:pmr.cli"
 
 
