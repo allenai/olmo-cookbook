@@ -1,5 +1,5 @@
-name: "continue-microanneal-meta-reasoning-olmo3-microanneal-100b-5b"
-description: "OLMo3 7b 5B math meta-reasoning microanneal - continue from 100B"
+name: "continue-microanneal-meta-reasoning-olmo3-microanneal-100b-5b-lr8.8e-05"
+description: "OLMo3 7b 5B math meta-reasoning microanneal - continue from 100B - lr 8.8e-05"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
