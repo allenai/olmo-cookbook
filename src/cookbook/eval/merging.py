@@ -297,7 +297,7 @@ def _build_beaker_cli_command(
         "--no-python",
         f"--workspace {workspace}",
         f"--priority {priority}",
-        f"--gpus {gpus}",
+        f"--gpus 0",
         f"--budget {budget}",
         "--yes",
         " ".join(gantry_flags),
