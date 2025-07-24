@@ -13,15 +13,6 @@ class ModelMerger:
     
     def __init__(self, checkpoint_paths: List[Union[str, Path]], output_dir: str, 
                  alpha: float = 0.2, force_safetensors: bool = None):
-        """
-        Initialize the ModelMerger.
-        
-        Args:
-            checkpoint_paths: List of paths to model checkpoints (can be GCP/Weka/local paths)
-            output_dir: Directory to save merged models
-            alpha: Smoothing factor for EMA (default: 0.2)
-            force_safetensors: Force output format (True=safetensors, False=pytorch, None=auto-detect)
-        """
         self.checkpoint_paths = [Path(p) for p in checkpoint_paths]
         self.output_dir = Path(output_dir)
         self.alpha = alpha 
@@ -32,7 +23,6 @@ class ModelMerger:
             raise ValueError(f"Need at least 2 checkpoints for merging, got {len(self.checkpoint_paths)}")
         
     def validate_checkpoints(self) -> List[Path]:
-        """Validate that all checkpoint paths exist and contain model files."""
         import glob
         valid_checkpoints = []
         
@@ -139,7 +129,6 @@ class ModelMerger:
         logger.info(f"Saved merged model to {output_path}")
     
     def simple_moving_average(self, state_dicts: List[Dict[str, torch.Tensor]]) -> Dict[str, torch.Tensor]:
-        """Compute Simple Moving Average of model weights."""
         logger.info("Computing Simple Moving Average (SMA)")
         N = len(state_dicts)
         merged_dict = {}
@@ -170,8 +159,7 @@ class ModelMerger:
         return merged_dict
     
     def exponential_moving_average(self, state_dicts: List[Dict[str, torch.Tensor]]) -> Dict[str, torch.Tensor]:
-        """Compute Exponential Moving Average with specified alpha."""
-        logger.info(f"Computing Exponential Moving Average (EMA) with α={self.alpha}")
+        logger.info(f"Computing Exponential Moving Average (EMA) with alpha={self.alpha}")
         N = len(state_dicts)
         
         weights = []
@@ -196,13 +184,6 @@ class ModelMerger:
         return merged_dict
     
     def merge_models(self, methods: List[str] = None):
-        """
-        Merge checkpoints using specified methods.
-        
-        Args:
-            methods: List of methods to use. Options: ['sma', 'wma', 'ema']
-                    If None, uses all methods.
-        """
         if methods is None:
             methods = ['sma', 'wma', 'ema']
             
