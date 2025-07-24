@@ -2,7 +2,7 @@ name: "olmo3-microanneal-4T-round1-flan-synthqa"
 description: "OLMo3 7b microanneal from 4T checkpoint, round 1 mix, adjusted with 10% flan, 10% synthqa"
 budget: "ai2/oe-training"
 workspace: "ai2/oe-data"
-nodes: 2
+nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
