@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cookbook.cli.utils import PythonEnv, find_repository_root
+from cookbook.constants import BEAKER_KNOWN_CLUSTERS
 
 logger = logging.getLogger(__name__)
 
@@ -144,16 +145,10 @@ def _run_merge_on_beaker(
     dry_run: bool,
     allow_dirty: bool,
 ):
-    """Run model merging on Beaker."""
-    try:
-        import beaker
-        from beaker import Beaker
-    except ImportError:
-        raise ImportError("beaker-py must be installed to use Beaker functionality")
-    
+    """Run model merging on Beaker using beaker CLI."""
     logger.info("🚀 Launching model merge job on Beaker")
     
-    # Create the merge command
+    # Create the merge command that will run inside Beaker
     merge_cmd = _build_merge_command(
         checkpoint_paths=checkpoint_paths,
         output_dir=output_dir,
@@ -163,9 +158,9 @@ def _run_merge_on_beaker(
         verbose=verbose,
     )
     
-    # Build Beaker job specification
-    job_spec = _build_beaker_job_spec(
-        command=merge_cmd,
+    # Build the beaker CLI command
+    beaker_cmd, spec_file = _build_beaker_cli_command(
+        merge_command=merge_cmd,
         workspace=workspace,
         priority=priority,
         cluster=cluster,
@@ -176,27 +171,53 @@ def _run_merge_on_beaker(
     )
     
     if dry_run:
-        logger.info("🧪 Dry run mode - would submit the following job:")
-        logger.info(json.dumps(job_spec, indent=2))
+        logger.info("🧪 Dry run mode - would run the following command:")
+        logger.info(" ".join(beaker_cmd))
+        logger.info(f"Using spec file: {spec_file}")
+        # Clean up spec file
+        os.unlink(spec_file)
         return
     
-    # Submit job to Beaker
-    client = Beaker.from_env(default_workspace=workspace)
-    
+    # Submit job using beaker CLI
     try:
-        job = client.job.submit(
-            spec=beaker.JobSpec.from_dict(job_spec),
-            name=f"merge-{'-'.join(Path(p).name for p in checkpoint_paths[:3])}"[:50]
+        logger.info(f"Running: {' '.join(beaker_cmd)}")
+        result = subprocess.run(
+            beaker_cmd,
+            capture_output=True,
+            text=True,
+            check=True
         )
         
-        logger.info(f"✅ Beaker job submitted: {job.id}")
-        logger.info(f"🔗 View job at: https://beaker.org/job/{job.id}")
+        # Extract experiment ID from output
+        output_lines = result.stdout.strip().split('\n')
+        experiment_id = None
+        for line in output_lines:
+            if 'experiment' in line.lower() and ('created' in line.lower() or 'submitted' in line.lower()):
+                # Try to extract experiment ID from output
+                import re
+                match = re.search(r'[a-f0-9]{8}', line)
+                if match:
+                    experiment_id = match.group(0)
+                    break
         
-        return job.id
+        if experiment_id:
+            logger.info(f"✅ Beaker experiment created: {experiment_id}")
+            logger.info(f"🔗 View experiment at: https://beaker.org/ex/{experiment_id}")
+            return experiment_id
+        else:
+            logger.info("✅ Beaker experiment submitted successfully")
+            logger.info(f"Output: {result.stdout}")
+            return "submitted"
         
-    except Exception as e:
-        logger.error(f"❌ Failed to submit Beaker job: {e}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"❌ Failed to submit Beaker experiment: {e}")
+        logger.error(f"stdout: {e.stdout}")
+        logger.error(f"stderr: {e.stderr}")
         raise
+    finally:
+        # Clean up spec file
+        if os.path.exists(spec_file):
+            os.unlink(spec_file)
 
 
 def _build_merge_command(
@@ -232,8 +253,8 @@ def _build_merge_command(
     return cmd
 
 
-def _build_beaker_job_spec(
-    command: List[str],
+def _build_beaker_cli_command(
+    merge_command: List[str],
     workspace: str,
     priority: str,
     cluster: str,
@@ -241,22 +262,14 @@ def _build_beaker_job_spec(
     gpus: int,
     image: str,
     allow_dirty: bool,
-) -> dict:
-    """Build Beaker job specification."""
+) -> tuple[List[str], str]:
+    """Build beaker CLI command and spec file to submit the job."""
+    import tempfile
+    import yaml
     
-    # Get repository information
+    # Check git state
     try:
         repo_root = find_repository_root()
-        
-        # Get current commit hash
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        commit_hash = result.stdout.strip()
         
         # Check if repository is dirty
         result = subprocess.run(
@@ -272,27 +285,35 @@ def _build_beaker_job_spec(
             raise RuntimeError("Repository has uncommitted changes. Use --beaker-allow-dirty to override.")
             
     except Exception as e:
+        if not allow_dirty:
+            raise RuntimeError(f"Could not determine git state: {e}")
         logger.warning(f"Could not determine git state: {e}")
-        commit_hash = "unknown"
     
-    # Build job specification
+    # Map cluster name to actual Beaker cluster names
+    if cluster in BEAKER_KNOWN_CLUSTERS:
+        actual_clusters = BEAKER_KNOWN_CLUSTERS[cluster]
+    else:
+        # Assume it's already a full cluster name
+        actual_clusters = [cluster]
+    
+    # Create experiment spec
     spec = {
         "version": "v2",
-        "description": f"Model merging job - commit {commit_hash[:8]}",
+        "description": "Model merging job",
+        "budget": budget,
         "tasks": [
             {
                 "name": "merge",
                 "image": {"beaker": image},
-                "command": command,
+                "command": merge_command,
                 "resources": {
                     "gpuCount": gpus,
                 },
                 "context": {
-                    "cluster": cluster,
                     "priority": priority,
                 },
                 "constraints": {
-                    "cluster": [cluster]
+                    "cluster": actual_clusters
                 },
                 "datasets": [
                     {
@@ -307,8 +328,20 @@ def _build_beaker_job_spec(
                     }
                 ]
             }
-        ],
-        "budget": budget,
+        ]
     }
     
-    return spec
+    # Create temporary spec file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        yaml.dump(spec, f, default_flow_style=False)
+        spec_file = f.name
+    
+    # Build beaker command
+    cmd = [
+        "beaker", "experiment", "create",
+        spec_file,
+        "--workspace", workspace,
+        "--name", f"merge-{Path(merge_command[4]).name}-{Path(merge_command[5]).name}"[:50]
+    ]
+    
+    return cmd, spec_file

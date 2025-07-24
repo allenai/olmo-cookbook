@@ -1,15 +1,10 @@
-#!/usr/bin/env python3
-"""
-CLI for model merging functionality in olmo-cookbook.
-
-Supports merging multiple checkpoints from different paths (GCP/Weka/local) using
-SMA, WMA, and EMA strategies.
-"""
-
 import click
 import logging
 from pathlib import Path
 from typing import List
+
+from cookbook.model.merging import ModelMerger
+import glob
 
 from cookbook.model.merging import ModelMerger
 from olmo_core.utils import prepare_cli_environment
@@ -35,7 +30,6 @@ def cli():
               help='Output format: safetensors, pytorch, or auto-detect')
 @click.option('--verbose', '-v', is_flag=True,
               help='Enable verbose logging')
-# Beaker options
 @click.option('-b', '--use-beaker', is_flag=True, help='Use Beaker to run merge job')
 @click.option('--beaker-workspace', type=str, default='ai2/oe-data', help='Beaker workspace')
 @click.option('--beaker-priority', type=str, default='high', help='Beaker priority')
@@ -76,18 +70,15 @@ def merge(checkpoint_paths: tuple, output_dir: str, methods: tuple, alpha: float
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    # Validate inputs
     if len(checkpoint_paths) < 2:
         raise click.BadParameter(f"Need at least 2 checkpoints for merging, got {len(checkpoint_paths)}")
     
     if not 0 < alpha < 1:
         raise click.BadParameter(f"Alpha must be between 0 and 1, got {alpha}")
     
-    # Default to all methods if none specified
     if not methods:
         methods = ['sma', 'wma', 'ema']
     
-    # Determine force_safetensors parameter
     force_safetensors = None
     if format == "safetensors":
         force_safetensors = True
@@ -97,8 +88,6 @@ def merge(checkpoint_paths: tuple, output_dir: str, methods: tuple, alpha: float
     
     try:
         from cookbook.eval.merging import run_merge_job
-        
-        # Run merge job (either locally or on Beaker)
         result = run_merge_job(
             checkpoint_paths=list(checkpoint_paths),
             output_dir=output_dir,
@@ -118,10 +107,10 @@ def merge(checkpoint_paths: tuple, output_dir: str, methods: tuple, alpha: float
         )
         
         if use_beaker and not beaker_dry_run:
-            click.echo(f"✅ Beaker job submitted: {result}")
+            click.echo(f"Beaker job submitted: {result}")
         elif not use_beaker:
-            click.echo(f"✅ Model merging completed successfully!")
-            click.echo(f"📁 Output directory: {output_dir}")
+            click.echo(f"Model merging completed successfully!")
+            click.echo(f"Output directory: {output_dir}")
         
     except Exception as e:
         logger.error(f"Merging failed: {str(e)}")
@@ -130,25 +119,16 @@ def merge(checkpoint_paths: tuple, output_dir: str, methods: tuple, alpha: float
 @cli.command()
 @click.argument('checkpoint_path')
 def validate(checkpoint_path: str):
-    """
-    Validate that a checkpoint directory contains the required model files.
-    
-    CHECKPOINT_PATH: Path to checkpoint directory to validate
-    """
-    from cookbook.model.merging import ModelMerger
-    import glob
-    
     path = Path(checkpoint_path)
     
     if not path.exists():
-        click.echo(f"❌ Path does not exist: {checkpoint_path}")
+        click.echo(f"Path does not exist: {checkpoint_path}")
         return
     
     if not path.is_dir():
-        click.echo(f"❌ Path is not a directory: {checkpoint_path}")
+        click.echo(f"Path is not a directory: {checkpoint_path}")
         return
-    
-    # Check for model files
+
     has_model = (
         (path / "pytorch_model.bin").exists() or
         (path / "model.safetensors").exists() or
@@ -157,11 +137,10 @@ def validate(checkpoint_path: str):
     )
     
     if not has_model:
-        click.echo(f"❌ No model files found in {checkpoint_path}")
+        click.echo(f"No model files found in {checkpoint_path}")
         click.echo("Expected one of: model.safetensors, pytorch_model.bin, pytorch_model-*.bin, model-*-of-*.safetensors")
         return
-    
-    # Check for config files
+
     config_files = ["config.json", "tokenizer_config.json"]
     missing_configs = []
     
@@ -169,9 +148,7 @@ def validate(checkpoint_path: str):
         if not (path / config_file).exists():
             missing_configs.append(config_file)
     
-    click.echo(f"✅ Valid checkpoint found at: {checkpoint_path}")
-    
-    # Show what files are present
+    click.echo(f"Valid checkpoint found at: {checkpoint_path}")
     model_files = []
     if (path / "model.safetensors").exists():
         model_files.append("model.safetensors")
@@ -186,10 +163,10 @@ def validate(checkpoint_path: str):
     if sharded_pytorch:
         model_files.append(f"{len(sharded_pytorch)} sharded pytorch files")
     
-    click.echo(f"📁 Model files: {', '.join(model_files)}")
+    click.echo(f"Model files: {', '.join(model_files)}")
     
     if missing_configs:
-        click.echo(f"⚠️  Missing config files: {', '.join(missing_configs)}")
+        click.echo(f"Missing config files: {', '.join(missing_configs)}")
 
 if __name__ == "__main__":
     cli()
