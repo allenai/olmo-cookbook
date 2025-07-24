@@ -13,7 +13,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Optional
 
-from cookbook.cli.utils import PythonEnv, find_repository_root
+from cookbook.cli.utils import PythonEnv, find_repository_root, discover_weka_mount
 from cookbook.constants import BEAKER_KNOWN_CLUSTERS
 
 logger = logging.getLogger(__name__)
@@ -86,24 +86,20 @@ def _run_merge_locally(
     format: str,
     verbose: bool,
 ):
-    """Run model merging locally."""
     from cookbook.model.merging import ModelMerger
     
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    # Validate inputs
     if len(checkpoint_paths) < 2:
         raise ValueError(f"Need at least 2 checkpoints for merging, got {len(checkpoint_paths)}")
     
     if not 0 < alpha < 1:
         raise ValueError(f"Alpha must be between 0 and 1, got {alpha}")
     
-    # Default to all methods if none specified
     if not methods:
         methods = ['sma', 'wma', 'ema']
-    
-    # Determine force_safetensors parameter
+
     force_safetensors = None
     if format == "safetensors":
         force_safetensors = True
@@ -111,7 +107,6 @@ def _run_merge_locally(
         force_safetensors = False
     # else: auto-detect (force_safetensors = None)
     
-    # Create merger and run
     merger = ModelMerger(
         checkpoint_paths=checkpoint_paths,
         output_dir=output_dir,
@@ -145,10 +140,8 @@ def _run_merge_on_beaker(
     dry_run: bool,
     allow_dirty: bool,
 ):
-    """Run model merging on Beaker using beaker CLI."""
-    logger.info("🚀 Launching model merge job on Beaker")
+    logger.info("Launching model merge job on Beaker")
     
-    # Create the merge command that will run inside Beaker
     merge_cmd = _build_merge_command(
         checkpoint_paths=checkpoint_paths,
         output_dir=output_dir,
@@ -157,8 +150,6 @@ def _run_merge_on_beaker(
         format=format,
         verbose=verbose,
     )
-    
-    # Build the gantry command
     gantry_cmd, _ = _build_beaker_cli_command(
         merge_command=merge_cmd,
         workspace=workspace,
@@ -168,14 +159,14 @@ def _run_merge_on_beaker(
         gpus=gpus,
         image=image,
         allow_dirty=allow_dirty,
+        checkpoint_paths=checkpoint_paths,
+        output_dir=output_dir,
     )
     
     if dry_run:
-        logger.info("🧪 Dry run mode - would run the following command:")
+        logger.info("Dry run mode - would run the following command:")
         logger.info(" ".join(gantry_cmd))
         return
-    
-    # Submit job using gantry
     try:
         gantry_command_str = " ".join(gantry_cmd)
         logger.info(f"Running: {gantry_command_str}")
@@ -188,13 +179,12 @@ def _run_merge_on_beaker(
             check=True,
             env=env.path()
         )
-        
-        logger.info("✅ Gantry job submitted successfully")
+        logger.info("Gantry job submitted successfully")
         logger.info(f"Output: {result.stdout}")
         return "submitted"
         
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Failed to submit gantry job: {e}")
+        logger.error(f"Failed to submit gantry job: {e}")
         logger.error(f"stdout: {e.stdout}")
         logger.error(f"stderr: {e.stderr}")
         raise
@@ -208,18 +198,12 @@ def _build_merge_command(
     format: str,
     verbose: bool,
 ) -> List[str]:
-    """Build the command to run merge locally within Beaker."""
-    
-    # Build command following the same pattern as conversion.py
     cmd = [
         "pip install uv && uv pip install .[all] --system &&",
         "olmo-cookbook-merge merge"
     ]
-    
-    # Add checkpoint paths
+
     cmd.extend(checkpoint_paths)
-    
-    # Add options
     cmd.extend(["--output-dir", output_dir])
     
     if methods:
@@ -244,19 +228,14 @@ def _build_beaker_cli_command(
     gpus: int,
     image: str,
     allow_dirty: bool,
+    checkpoint_paths: List[str],
+    output_dir: str,
 ) -> tuple[List[str], str]:
-    """Build gantry command to submit the job, following conversion.py pattern."""
     from cookbook.cli.utils import install_beaker_py
-    
-    # Install beaker and gantry clients
     env = PythonEnv.null()
     install_beaker_py(env=env)
-    
-    # Check git state
     try:
         repo_root = find_repository_root()
-        
-        # Check if repository is dirty
         result = subprocess.run(
             ["git", "status", "--porcelain"],
             cwd=repo_root,
@@ -273,21 +252,26 @@ def _build_beaker_cli_command(
         if not allow_dirty:
             raise RuntimeError(f"Could not determine git state: {e}")
         logger.warning(f"Could not determine git state: {e}")
-    
-    # Build gantry flags
+
+    weka_mounts = [
+        mount
+        for mount in (
+            *[discover_weka_mount(path) for path in checkpoint_paths],
+            discover_weka_mount(output_dir),
+        )
+        if mount is not None
+    ]
+
     gantry_flags = []
-    
-    # Add weka mount for /oe-training-default
-    gantry_flags.append("--weka oe-training-default:/oe-training-default")
-    
-    # Add cluster constraints
+
+    for weka_path in set(weka_mounts):
+        gantry_flags.append(f"--weka {weka_path}:/{weka_path}")
+
     for cluster_name in BEAKER_KNOWN_CLUSTERS.get(cluster, [cluster]):
         gantry_flags.append(f"--cluster {cluster_name}")
-    
-    # Build remote command string
+
     remote_command_str = " ".join(merge_command)
-    
-    # Build gantry command
+
     import time
     timestamp = int(time.time())
     gantry_command = [
