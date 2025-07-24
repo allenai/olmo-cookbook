@@ -75,7 +75,7 @@ def evaluate_checkpoint(
     #    is_editable=use_gantry,
     #)
 
-    oe_eval_dir = "/tmp/tmp_etwquow"
+    oe_eval_dir = "/tmp/tmpbcwcooad"
 
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
