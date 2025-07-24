@@ -19,7 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-  initial_lr: 0.00024890158
+  initial_lr: 8.8e-05
 load_path: gs://ai2-llm/checkpoints/ai2-tylerm/anneal-round1-100B-olmo3_7b_with-reasoning-anneal-7T-157bcab3/step47684
 load_state: false
 dataset:
