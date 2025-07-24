@@ -75,7 +75,7 @@ dashboard="olmo3-midtraining-web"
 for model in "${models[@]}"; do
     uv run olmo-cookbook-eval evaluate \
         "/oe-training-default/${model}-hf" \
-        --tasks dev:7b:nocodeish \
+        --tasks dev:7b:main \
         --priority high \
         --cluster aus80g \
         --partition-size 8 \
