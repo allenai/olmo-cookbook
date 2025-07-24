@@ -109,7 +109,7 @@ def merge(checkpoint_paths: tuple, output_dir: str, methods: tuple, alpha: float
         if use_beaker and not beaker_dry_run:
             click.echo(f"Beaker job submitted: {result}")
         elif not use_beaker:
-            click.echo(f"Model merging completed successfully!")
+            click.echo("Model merging completed successfully!")
             click.echo(f"Output directory: {output_dir}")
         
     except Exception as e:

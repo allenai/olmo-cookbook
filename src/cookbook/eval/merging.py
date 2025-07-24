@@ -231,7 +231,9 @@ def _build_merge_command(
     """Build the command to run merge locally within Beaker."""
     
     cmd = [
-        "python", "-m", "cookbook.cli.merge", "merge"
+        "python", "-c", 
+        "import sys; sys.path.insert(0, '/workdir/src'); import cookbook.cli.merge; cookbook.cli.merge.cli()",
+        "merge"
     ]
     
     # Add checkpoint paths
