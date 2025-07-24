@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 0.000088
-load_path: gs://ai2-llm/checkpoints/amanr/OLMo3-7B-swafix/step756906_merged
+load_path: gs://ai2-llm/checkpoints/amanr/OLMo3-7B-swafix/step756906_merged/model_and_optim/
 load_state: false
 dataset:
   sources:
