@@ -41,28 +41,7 @@ def merge(checkpoint_paths: tuple, output_dir: str, methods: tuple, alpha: float
           beaker_priority: str, beaker_cluster: str, beaker_budget: str,
           beaker_gpus: int, beaker_image: str, beaker_dry_run: bool, 
           beaker_allow_dirty: bool):
-    """
-    Merge model checkpoints using various averaging strategies.
     
-    CHECKPOINT_PATHS: Space-separated list of checkpoint paths (can be GCP/Weka/local paths)
-    
-    Examples:
-    
-    \b
-    # Merge 3 checkpoints using all methods
-    olmo-cookbook-merge merge /path/to/checkpoint1 /path/to/checkpoint2 /path/to/checkpoint3 \\
-        --output-dir /path/to/output
-    
-    \b
-    # Merge using only EMA with custom alpha
-    olmo-cookbook-merge merge /path/to/checkpoint1 /path/to/checkpoint2 \\
-        --output-dir /path/to/output --methods ema --alpha 0.3
-    
-    \b
-    # Merge GCP checkpoints with specific format
-    olmo-cookbook-merge merge gs://bucket/checkpoint1 gs://bucket/checkpoint2 \\
-        --output-dir /local/output --format safetensors --verbose
-    """
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
