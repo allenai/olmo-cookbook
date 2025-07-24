@@ -846,7 +846,6 @@ class Olmo3DevMidtrainV0MainGroup(BaseTaskView):
             "\033[1;31mThe `olmo3:dev:midtrain:v0` group is deprecated. "
             "Please use `olmo3:dev:midtrain:v1` instead.\033[0m"
         )
-        breakpoint()
         super().__init__(*args, **kwargs)
 
 

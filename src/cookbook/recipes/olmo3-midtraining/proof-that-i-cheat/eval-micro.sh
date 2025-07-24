@@ -1,6 +1,6 @@
 models=(
-    "/ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50wiki-8a9b662c/step4769"
-    "/ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50wiki-2618a292/step4769"
+    "/ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50wiki-8a9b662c/step4769"   # rewritten, 10x rep
+    "/ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50wiki-2618a292/step4769"   # as-is, 2x rep
 )
 
 # Moving checkpoints to weka
@@ -28,36 +28,14 @@ dashboard="olmo3-midtraining-web"
 for model in "${models[@]}"; do
     uv run olmo-cookbook-eval evaluate \
         "/oe-training-default/${model}-hf" \
-        --tasks dev:7b:nocodeish \
+        --tasks  olmo3:dev:7b:gen \
         --priority high \
         --cluster aus80g \
-        --partition-size 8 \
+        --partition-size 4 \
         --num-gpus 1 \
         --model-backend vllm \
         --model-args trust_remote_code=true,max_length=4096 \
         --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
         --dashboard ${dashboard} \
-        --workspace ai2/oe-data
-done
-
-
-# Launch reasoning evals
-for model in "${models[@]}"; do
-    uv run olmo-cookbook-eval evaluate \
-        "/oe-training-default/${model}-hf" \
-        --tasks olmo3:dev:midtrain:v0 \
-        --priority high \
-        --cluster aus80g \
-        --num-gpus 1 \
-        --partition-size 8 \
-        --model-backend vllm \
-        --no-compute-gold-bpb \
-        --model-args chat_template=basic_answer,trust_remote_code=true,max_length=8192 \
-        --use-gantry \
-        --gantry-args env-secret="OPENAI_API_KEY=openai_api_key" \
-        --task-args chat_overrides="{\"generation_kwargs\": {\"stop_sequences\": [\"Problem:\", \"Answer:\", \"Question:\", \"</s>\", \"<|eot_id|>\"]}}" \
-        --oe-eval-branch davidh/head-qk-norm \
-        --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
-        --dashboard olmo3-midtraining-web \
         --workspace ai2/oe-data
 done
