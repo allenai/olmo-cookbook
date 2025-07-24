@@ -28,7 +28,6 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
-    "transformers",
 ]
 
 [project.optional-dependencies]

@@ -424,7 +424,7 @@ def _build_merge_command(
     format: str,
     verbose: bool,
 ) -> List[str]:
-    cmd = ["pip install uv && uv pip install .[all] --system &&", "olmo-cookbook-merge merge"]
+    cmd = ["pip install uv && uv pip install .[all] --system && uv pip install transformers --system &&", "olmo-cookbook-merge merge"]
 
     cmd.extend(checkpoint_paths)
     cmd.extend(["--output-dir", output_dir])
