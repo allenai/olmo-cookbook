@@ -158,8 +158,8 @@ def _run_merge_on_beaker(
         verbose=verbose,
     )
     
-    # Build the beaker CLI command
-    beaker_cmd, spec_file = _build_beaker_cli_command(
+    # Build the gantry command
+    gantry_cmd, _ = _build_beaker_cli_command(
         merge_command=merge_cmd,
         workspace=workspace,
         priority=priority,
@@ -172,52 +172,32 @@ def _run_merge_on_beaker(
     
     if dry_run:
         logger.info("🧪 Dry run mode - would run the following command:")
-        logger.info(" ".join(beaker_cmd))
-        logger.info(f"Using spec file: {spec_file}")
-        # Clean up spec file
-        os.unlink(spec_file)
+        logger.info(" ".join(gantry_cmd))
         return
     
-    # Submit job using beaker CLI
+    # Submit job using gantry
     try:
-        logger.info(f"Running: {' '.join(beaker_cmd)}")
+        gantry_command_str = " ".join(gantry_cmd)
+        logger.info(f"Running: {gantry_command_str}")
+        
+        env = PythonEnv.null()
         result = subprocess.run(
-            beaker_cmd,
+            shlex.split(gantry_command_str),
             capture_output=True,
             text=True,
-            check=True
+            check=True,
+            env=env.path()
         )
         
-        # Extract experiment ID from output
-        output_lines = result.stdout.strip().split('\n')
-        experiment_id = None
-        for line in output_lines:
-            if 'experiment' in line.lower() and ('created' in line.lower() or 'submitted' in line.lower()):
-                # Try to extract experiment ID from output
-                import re
-                match = re.search(r'[a-f0-9]{8}', line)
-                if match:
-                    experiment_id = match.group(0)
-                    break
-        
-        if experiment_id:
-            logger.info(f"✅ Beaker experiment created: {experiment_id}")
-            logger.info(f"🔗 View experiment at: https://beaker.org/ex/{experiment_id}")
-            return experiment_id
-        else:
-            logger.info("✅ Beaker experiment submitted successfully")
-            logger.info(f"Output: {result.stdout}")
-            return "submitted"
+        logger.info("✅ Gantry job submitted successfully")
+        logger.info(f"Output: {result.stdout}")
+        return "submitted"
         
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Failed to submit Beaker experiment: {e}")
+        logger.error(f"❌ Failed to submit gantry job: {e}")
         logger.error(f"stdout: {e.stdout}")
         logger.error(f"stderr: {e.stderr}")
         raise
-    finally:
-        # Clean up spec file
-        if os.path.exists(spec_file):
-            os.unlink(spec_file)
 
 
 def _build_merge_command(
@@ -230,10 +210,10 @@ def _build_merge_command(
 ) -> List[str]:
     """Build the command to run merge locally within Beaker."""
     
+    # Build command following the same pattern as conversion.py
     cmd = [
-        "python", "-c", 
-        "import sys; sys.path.insert(0, '/workdir/src'); import cookbook.cli.merge; cookbook.cli.merge.cli()",
-        "merge"
+        "pip install uv && uv pip install . --system &&",
+        "olmo-cookbook-merge merge"
     ]
     
     # Add checkpoint paths
@@ -265,9 +245,12 @@ def _build_beaker_cli_command(
     image: str,
     allow_dirty: bool,
 ) -> tuple[List[str], str]:
-    """Build beaker CLI command and spec file to submit the job."""
-    import tempfile
-    import yaml
+    """Build gantry command to submit the job, following conversion.py pattern."""
+    from cookbook.cli.utils import install_beaker_py
+    
+    # Install beaker and gantry clients
+    env = PythonEnv.null()
+    install_beaker_py(env=env)
     
     # Check git state
     try:
@@ -291,61 +274,34 @@ def _build_beaker_cli_command(
             raise RuntimeError(f"Could not determine git state: {e}")
         logger.warning(f"Could not determine git state: {e}")
     
-    # Map cluster name to actual Beaker cluster names
-    if cluster in BEAKER_KNOWN_CLUSTERS:
-        actual_clusters = BEAKER_KNOWN_CLUSTERS[cluster]
-    else:
-        # Assume it's already a full cluster name
-        actual_clusters = [cluster]
+    # Build gantry flags
+    gantry_flags = []
     
-    # Create experiment spec
-    spec = {
-        "version": "v2",
-        "description": "Model merging job",
-        "budget": budget,
-        "tasks": [
-            {
-                "name": "merge",
-                "image": {"beaker": image},
-                "command": merge_command,
-                "resources": {
-                    "gpuCount": gpus,
-                },
-                "context": {
-                    "priority": priority,
-                },
-                "constraints": {
-                    "cluster": actual_clusters
-                },
-                "datasets": [
-                    {
-                        "mountPath": "/oe-training-default",
-                        "source": {"weka": "oe-training-default"}
-                    }
-                ],
-                "envVars": [
-                    {
-                        "name": "WANDB_DISABLED", 
-                        "value": "true"
-                    }
-                ]
-            }
-        ]
-    }
+    # Add weka mount for /oe-training-default
+    gantry_flags.append("--weka oe-training-default:/oe-training-default")
     
-    # Create temporary spec file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
-        yaml.dump(spec, f, default_flow_style=False)
-        spec_file = f.name
+    # Add cluster constraints
+    for cluster_name in BEAKER_KNOWN_CLUSTERS.get(cluster, [cluster]):
+        gantry_flags.append(f"--cluster {cluster_name}")
     
-    # Build beaker command with unique timestamp
+    # Build remote command string
+    remote_command_str = " ".join(merge_command)
+    
+    # Build gantry command
     import time
     timestamp = int(time.time())
-    cmd = [
-        "beaker", "experiment", "create",
-        spec_file,
-        "--workspace", workspace,
-        "--name", f"merge-{Path(merge_command[4]).name}-{Path(merge_command[5]).name}-{timestamp}"[:50]
+    gantry_command = [
+        "gantry run",
+        f"--description 'Model merging job {timestamp}'",
+        ("--allow-dirty" if allow_dirty else ""),
+        "--no-python",
+        f"--workspace {workspace}",
+        f"--priority {priority}",
+        f"--gpus {gpus}",
+        f"--budget {budget}",
+        "--yes",
+        " ".join(gantry_flags),
+        f"-- /bin/bash -c '{remote_command_str}'",
     ]
     
-    return cmd, spec_file
+    return gantry_command, ""
