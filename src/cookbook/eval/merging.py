@@ -212,7 +212,7 @@ def _build_merge_command(
     
     # Build command following the same pattern as conversion.py
     cmd = [
-        "pip install uv && uv pip install . --system && uv pip install torch --system &&",
+        "pip install uv && uv pip install .[all] --system &&",
         "olmo-cookbook-merge merge"
     ]
     
