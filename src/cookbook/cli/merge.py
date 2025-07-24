@@ -3,10 +3,8 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cookbook.model.merging import ModelMerger
 import glob
 
-from cookbook.model.merging import ModelMerger
 from olmo_core.utils import prepare_cli_environment
 
 logger = logging.getLogger(__name__)
