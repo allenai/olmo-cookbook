@@ -12,8 +12,6 @@ nodes: 4
 gpus: 8
 seed: 4123
 
-gc_interval: 200
-
 annealing:
   enabled: true
 
