@@ -131,7 +131,7 @@ echo "All experiments completed."
 
 
 
-experiments=(
+: 'experiments=(
   olmo3_7b_web-only-anneal-round2mix-12T-10B-pstar-v20-1337-2917a773
   olmo3_7b_web-only-anneal-round2mix-12T-10B-1337-324106e0
   olmo3_7b_with-reasoning-anneal-round2mix-15B-10B-pstar-v20-1337-73232ce4
@@ -144,4 +144,45 @@ for exp_id in "${experiments[@]}"; do
         weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step4769 \
         --allow-dirty \
         --workspace ai2/dolma2
+done'
+
+
+: 'experiments=(
+  olmo3_7b_with-reasoning-anneal-round2mix-1T-10B-pstar-v20-1337-99896a16
+  olmo3_7b_with-reasoning-anneal-round2mix-1T-10B-1337-63a93548	
+)
+for exp_id in "${experiments[@]}"; do
+  echo "Converting: $exp_id"
+    python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step4769 \
+        weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step4769 \
+        --allow-dirty \
+        --workspace ai2/dolma2
+done'
+
+
+
+count_jobs() {
+    jobs -r | wc -l
+}
+
+for i in $(seq -w 0 31); do
+  while [ $(count_jobs) -ge 12 ]; do
+    sleep 5
+  done
+
+  echo "Starting experiment for index $i" 
+  {
+    exp_id="olmo3_7b-12T-5B-reasoning-swarm-870881c8-$i"
+    echo $exp_id
+    python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        --allow-dirty \
+        --workspace ai2/dolma2
+    echo "Completed experiment for index $i"
+  } &
 done
+
+wait 
+echo "All experiments completed."
