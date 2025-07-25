@@ -29,16 +29,16 @@ dataset:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
   - name: sponge
     target_ratio: 0.05
-    paths:
-    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/*.npy
+    paths: # Todo confirm which variant
+    - s3://ai2-llm/preprocessed/sponge/decon_variants/sponge-robert/*.npy
   - name: code
     target_ratio: 0.2
-    paths:
+    paths: # trying to use s3://ai2-llm/pretraining-data/sources/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/
     - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
   - name: megamath
     # 10% less the .0268 over 10% for dolminos2math
     target_ratio: 0.0732
-    paths:
+    paths: # assuming this is s3://ai2-llm/pretraining-data/sources/megamath_web_pro_max/llama_rewrites/ per allison
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
     target_ratio: 0.1268
