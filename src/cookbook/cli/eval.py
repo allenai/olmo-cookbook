@@ -1,13 +1,10 @@
 import json
 import logging
-from pprint import PrettyPrinter
 import re
-import sys
 from typing import Optional
 
 import click
 from rich.console import Console
-from rich.pretty import pprint
 from rich.table import Table
 
 from cookbook.cli.utils import (
@@ -27,6 +24,8 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
+from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
@@ -34,6 +33,147 @@ from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegist
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
+
+
+@click.argument("input_dir", type=str)
+@click.option("--output-dir", type=str, default=None, help="Output directory")
+@click.option("--output-suffix", type=str, default="olmo_core", help="Output suffix")
+@click.option(
+    "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
+)
+@click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
+@click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
+@click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
+@click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
+@click.option("--beaker-workspace", type=str, default="ai2/oe-data", help="Beaker workspace")
+@click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
+@click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
+@click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
+@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option(
+    "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
+)
+@click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
+@click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
+@click.option("--use-system-python", is_flag=True, help="Whether to use system Python or a virtual environment")
+@click.option(
+    "--force-venv",
+    is_flag=True,
+    help="Force creation of new virtual environment",
+    default=False,
+)
+@click.option(
+    "--env-name",
+    type=str,
+    default="oe-conversion-from-hf-venv",
+    help="Name of the environment to use for conversion",
+)
+@click.option(
+    "--olmo-core-v2-experiment-json-path",
+    default=None,
+    help="Path to the OLMo core v2 experiment config json.",
+)
+@click.option(
+    "--olmo-core-v2-model-arch",
+    default=None,
+    help=(
+        "OLMo Core v2 model architecture corresponding to the HF model. "
+        "New architectures should be added to ``_get_transformer_config`` in ``convert_checkpoint_from_hf.py`` of OLMo core. "
+        "This is required for OLMo Core v2 when an experiment config is not provided."
+    ),
+)
+@click.option(
+    "--olmo-core-v2-tokenizer",
+    default=None,
+    help=(
+        "OLMo Core v2 tokenizer corresponding to the HF model. "
+        "New architectures should be added to ``_get_transformer_config`` in ``convert_checkpoint_from_hf.py`` of OLMo core. "
+        "This is required for OLMo Core v2 when an experiment config is not provided."
+    ),
+)
+@click.option(
+    "--huggingface-transformers-model-id",
+    default=None,
+    help="Model id of the HF Hub repo corresponding to the model. Use to get model specific mappings in :mod:`olmo_core.nn.hf.convert`",
+)
+@click.option(
+    "--huggingface-transformers-revision",
+    default="main",
+    help="Huggingface model revision/branch.",
+)
+@click.option(
+    "--skip-validation",
+    is_flag=True,
+    help="Skip validation of the model after conversion.",
+)
+@click.option(
+    "--debug-validation",
+    is_flag=True,
+    help="Provide extra debug logs during validation of the model after conversion.",
+)
+@click.option(
+    "--torch-device",
+    default=None,
+    help="The torch device on which to run conversion and validation.",
+)
+def convert_checkpoint_from_hf(
+    beaker_allow_dirty: bool,
+    beaker_budget: str,
+    beaker_cluster: str,
+    beaker_dry_run: bool,
+    beaker_gpus: int,
+    beaker_priority: str,
+    beaker_workspace: str,
+    force_venv: bool,
+    huggingface_token: Optional[str],
+    input_dir: str,
+    output_dir: Optional[str],
+    output_suffix: str,
+    olmo_core_v2_commit_hash: str,
+    olmo_core_v2_experiment_json_path: Optional[str],
+    olmo_core_v2_model_arch: Optional[str],
+    olmo_core_v2_tokenizer: Optional[str],
+    huggingface_transformers_git_url: str,
+    huggingface_transformers_commit_hash: str,
+    huggingface_transformers_model_id: Optional[str],
+    huggingface_transformers_revision: str,
+    use_system_python: bool,
+    use_beaker: bool,
+    env_name: str,
+    beaker_preemptible: bool,
+    skip_validation: bool,
+    debug_validation: bool,
+    torch_device: Optional[str],
+):
+    run_checkpoint_conversion_from_hf(
+        beaker_allow_dirty=beaker_allow_dirty,
+        beaker_budget=beaker_budget,
+        beaker_cluster=beaker_cluster,
+        beaker_dry_run=beaker_dry_run,
+        beaker_gpus=beaker_gpus,
+        beaker_preemptible=beaker_preemptible,
+        beaker_priority=beaker_priority,
+        beaker_workspace=beaker_workspace,
+        huggingface_token=huggingface_token,
+        huggingface_transformers_git_url=huggingface_transformers_git_url,
+        huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
+        huggingface_transformers_model_id=huggingface_transformers_model_id,
+        huggingface_transformers_revision=huggingface_transformers_revision,
+        input_dir=input_dir.rstrip("/"),
+        output_dir=output_dir,
+        output_suffix=output_suffix,
+        olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
+        olmo_core_v2_experiment_json_path=olmo_core_v2_experiment_json_path,
+        olmo_core_v2_model_arch=olmo_core_v2_model_arch,
+        olmo_core_v2_tokenizer=olmo_core_v2_tokenizer,
+        python_venv_force=force_venv,
+        python_venv_name=env_name,
+        use_beaker=use_beaker,
+        use_system_python=use_system_python,
+        skip_validation=skip_validation,
+        debug_validation=debug_validation,
+        torch_device=torch_device,
+    )
 
 
 @click.argument("input_dir", type=str)
@@ -784,6 +924,7 @@ def cli():
     pass
 
 
+cli.command("convert-from-hf")(convert_checkpoint_from_hf)
 cli.command("convert")(convert_checkpoint)
 cli.command("evaluate")(evaluate_model)
 cli.command("results")(get_results)
