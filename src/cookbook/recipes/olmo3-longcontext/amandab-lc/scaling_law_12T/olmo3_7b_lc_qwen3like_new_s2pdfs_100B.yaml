@@ -1,14 +1,14 @@
 # Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
-name: "olmo3_7B-12T_50B_global_lc_64k_new_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs4M_warmup"
-description: "OLMo3 7B @12T w/ swafix trained w/ 4M batch size for 50B tokens up to 64k context length with a Qwen3-like mix of (NEW) s2pdfs and midtraining recipe from week 1"
+name: "olmo3_7B-12T_100B_global_lc_64k_new_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs4M_warmup"
+description: "OLMo3 7B @12T w/ swafix trained w/ 4M batch size for 100B tokens up to 64k context length with a Qwen3-like mix of (NEW) s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
-priority: low
-nodes: 8
+priority: urgent
+nodes: 16
 gpus: 8
 seed: 4123
 
@@ -27,7 +27,7 @@ load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
-max_tokens: 50_000_000_000  # 50B tokens
+max_tokens: 100_000_000_000  # 100B tokens
 # global_batch_size: 2_097_152  # switched to 2M batch size to match midtraining
 global_batch_size: 4_194_304  # 4M tokens 
 sequence_length: &seq_len 65536
