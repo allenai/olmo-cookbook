@@ -84,22 +84,11 @@ dataset:
     target_ratio: 0.008
     paths:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
-  - name: r1_reasoning
-    target_ratio: 0.019375
-    paths:
+  - name: reasoning
+    target_ratio: 0.05
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
-  - name: qwq_reasoning
-    target_ratio: 0.019375
-    paths:
     - s3://ai2-llm/preprocessed/thinking-data/qwq-traces/dolma2-tokenizer/*.npy
-  - name: gemini_reasoning
-    target_ratio: 0.00125
-    paths:
     - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
-  - name: faeze_reasoning
-    target_ratio: .01
-    paths:
-    #3.166B
     #1,144,531,442
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
     #366,757,554
