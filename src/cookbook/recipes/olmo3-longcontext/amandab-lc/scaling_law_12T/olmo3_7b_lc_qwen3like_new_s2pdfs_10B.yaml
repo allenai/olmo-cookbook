@@ -101,16 +101,15 @@ dataset:
   # - 75% of tokens are between 32,768 and 65,536 tokens in length
   # - 25% of tokens are between 8,192 and 32,768 tokens in length
 
-
   - name: LC-s2pdf_32k-64k
-    # 14.07B tokens in this subset in total
+    # 14.07B * 10 (?) tokens in this subset in total
     target_ratio: 0.4999999 # 75% of 66.6%
     paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_sample10pct/allenai/dolma2-tokenizer/length_2e15/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e15/*/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf_8k-32k
-    # 19.87B (2e13) + 15.38B (2e14) tokens in this subset
+    # 19.87B (2e13) * 10 (?)  + 15.38B (2e14) * 10 (?) tokens in this subset
     target_ratio: 0.1666667 # 25% of 66.6%
     paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_sample10pct/allenai/dolma2-tokenizer/length_2e13/*.npy
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_sample10pct/allenai/dolma2-tokenizer/length_2e14/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e13/*/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e14/*/allenai/dolma2-tokenizer/*.npy
