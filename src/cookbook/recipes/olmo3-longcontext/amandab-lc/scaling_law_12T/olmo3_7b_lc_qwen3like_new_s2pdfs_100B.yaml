@@ -17,7 +17,6 @@ gc_interval: 200
 annealing:
   enabled: true
 
-save_async: false
 
 metrics_config:
   backend: wandb
