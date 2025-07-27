@@ -46,7 +46,6 @@ model_overrides:
   - block.attention.rope.theta=8000000
 
 dataset:
-
   sources:
   - name: SC-hqweb
     target_ratio: 0.141666667
