@@ -109,7 +109,7 @@ dataset:
     #1,198,181,281
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
 
-  # We wanna follow a qwen-3 like setup. From their tech report:
+  wen-3 like setup. From their tech report:
   #
   # > All models are pre-trained on hundreds of billions of tokens with a sequence length of 32,768
   # > tokens. The long context corpus includes 75% of text between 16,384 to 32,768 tokens in length,
@@ -122,7 +122,7 @@ dataset:
 
   - name: LC-s2pdf_32k-64k
     # 14.07B tokens in this subset in total
-    target_ratio: 0.4999999666 # 75% of 66.6%
+    target_ratio: 0.4999999 # 75% of 66.6%
     paths:
     -  s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e15/**/*.npy
 

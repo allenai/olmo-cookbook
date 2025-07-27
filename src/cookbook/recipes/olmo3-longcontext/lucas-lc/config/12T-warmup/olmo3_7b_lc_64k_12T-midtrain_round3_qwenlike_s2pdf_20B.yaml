@@ -49,15 +49,15 @@ dataset:
 
   sources:
   - name: SC-hqweb
-    target_ratio: 0.1333333333
+    target_ratio: 0.13333335
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
   - name: SC-sponge
-    target_ratio: 0.0166666667
+    target_ratio: 0.01666667
     paths:
     - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/*.npy
   - name: SC-code
-    target_ratio: 0.0666666667
+    target_ratio: 0.06666667
     paths:
     - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
   - name: SC-megamath
@@ -66,7 +66,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
   - name: SC-dolminos2math
-    target_ratio: 0.0422666667
+    target_ratio: 0.04226667
     paths:
     # 10.7B
     - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
@@ -78,12 +78,12 @@ dataset:
     # 240,590,634
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
   - name: SC-reddit
-    target_ratio: 0.0296666667
+    target_ratio: 0.02966667
     paths:
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/allenai/dolma2-tokenizer/*.npy
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/allenai/dolma2-tokenizer/*.npy
   - name: SC-instruction
-    target_ratio: 0.0036666667
+    target_ratio: 0.00366667
     paths:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
   - name: SC-r1_reasoning
@@ -95,11 +95,11 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/qwq-traces/dolma2-tokenizer/*.npy
   - name: SC-gemini_reasoning
-    target_ratio: 0.0008333333
+    target_ratio: 0.00083335
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
   - name: SC-faeze_reasoning
-    target_ratio: 0.0033333333
+    target_ratio: 0.00333335
     paths:
     #3.166B
     #1,144,531,442
@@ -109,7 +109,7 @@ dataset:
     #1,198,181,281
     - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
 
-  # We wanna follow a qwen-3 like setup. From their tech report:
+  wen-3 like setup. From their tech report:
   #
   # > All models are pre-trained on hundreds of billions of tokens with a sequence length of 32,768
   # > tokens. The long context corpus includes 75% of text between 16,384 to 32,768 tokens in length,
@@ -122,7 +122,7 @@ dataset:
 
   - name: LC-s2pdf_32k-64k
     # 14.07B tokens in this subset in total
-    target_ratio: 0.4999999666 # 75% of 66.6%
+    target_ratio: 0.4999999 # 75% of 66.6%
     paths:
     -  s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e15/**/*.npy
 
