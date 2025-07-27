@@ -12,8 +12,8 @@ seed: 4123
 
 gc_interval: 200
 
-annealing:
-  enabled: true
+# annealing:
+#   enabled: true
 
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 warmup_steps: 200
