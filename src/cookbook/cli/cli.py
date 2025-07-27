@@ -102,7 +102,7 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
 
     beaker_user = (Beaker.from_env().account.whoami().name).upper()  # pyright: ignore
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
-
+    experiment_config.name = experiment_config.name+"v2"
     logger.info(experiment_config)
     logger.info("Token distribution by source:")
     logger.info(token_universe)
