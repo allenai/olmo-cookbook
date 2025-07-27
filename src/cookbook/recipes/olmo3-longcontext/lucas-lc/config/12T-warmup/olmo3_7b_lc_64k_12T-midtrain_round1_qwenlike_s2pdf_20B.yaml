@@ -1,0 +1,115 @@
+
+name: &name "olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_20B"
+description: *name
+budget: "ai2/oe-base"
+workspace: "ai2/long-contexts"
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: urgent
+nodes: 4
+gpus: 8
+seed: 4123
+
+gc_interval: 200
+
+annealing:
+  enabled: true
+
+# because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
+warmup_steps: 200
+learning_rate: 8.8e-5
+
+metrics_config:
+  backend: wandb
+  project: "olmo3-7b-long-context"
+  entity: "ai2-llm"
+
+generate_doc_lengths: true  # enable intra-document masking
+load_path: gs://ai2-llm/checkpoints/allysone/anneal-round3-webround2-100B-olmo3_7b_with-reasoning-anneal-12T-302b1ae8/step47684
+load_state: false
+model: "olmo3_7B_swafix"
+tokenizer: "dolma2"
+max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
+global_batch_size: 4_194_304
+sequence_length: &seq_len 65536
+max_target_sequence_length: *seq_len
+rank_microbatch_size: *seq_len  # must be the same as sequence_length
+scheduler_type: linear
+
+dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+cp_degree: 8
+float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
+eval_interval: 500
+# downstream_evaluators:
+#   - olmo2_dev_1b
+model_overrides:
+  - block.attention.rope.theta=8000000
+dataset:
+  sources:
+  # This is the best midtraining mix so far (as of 2025-06-30); i've reduced to 1/3 to have 2/3 of LC
+  # https://github.com/allenai/olmo-cookbook/blob/13ef591fe202b5657f53f9aa08aec7b470d4c837/src/cookbook/recipes/olmo3-midtraining/anneal-round1-olmo3_7b-with-reasoning-anneal.yaml
+  - name: SC-hqweb
+    target_ratio: 0.1500000 # was 0.45
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+  - name: SC-code
+    target_ratio: 0.0666667 # was 0.2
+    paths:
+    - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
+  - name: SC-finemath
+    target_ratio: 0.0268667 # was 0.0806
+    paths:
+    - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+  - name: SC-dolminos2math
+    target_ratio: 0.0398000 # was 0.1194
+    paths:
+    # 10.7B
+    - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
+    # 1.25B
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/mj_intermediate_math/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
+  - name: SC-reddit
+    target_ratio: 0.0296666 # was 0.089
+    paths:
+    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
+  - name: SC-instruction
+    target_ratio: 0.0036667 # was 0.011
+    paths:
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
+  - name: SC-r1_reasoning
+    target_ratio: 0.0079167 # was 0.02375
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
+  - name: SC-qwq_reasoning
+    target_ratio: 0.0079167 # was 0.02375
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-traces/dolma2-tokenizer/*.npy
+  - name: SC-gemini_reasoning
+    target_ratio: 0.0008333 # was 0.0025
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
+
+  # We wanna follow a qwen-3 like setup. From their tech report:
+  #
+  # > All models are pre-trained on hundreds of billions of tokens with a sequence length of 32,768
+  # > tokens. The long context corpus includes 75% of text between 16,384 to 32,768 tokens in length,
+  # > and 25% of text between 4,096 to 16,384 in length.
+  #
+  # Our model was pretrained with 8k length and we want to extend to 64k, so we tweak the recipe to:
+  #
+  # - 75% of tokens are between 32,768 and 65,536 tokens in length
+  # - 25% of tokens are between 8,192 and 32,768 tokens in length
+
+  - name: LC-s2pdf_32k-64k
+    # 14.07B tokens in this subset in total
+    target_ratio: 0.4999999 # 75% of 66.6%
+    paths:
+    -  s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e15/*.npy
+
+  - name: LC-s2pdf_8k-32k
+    # 19.87B (2e13) + 15.38B (2e14) tokens in this subset
+    target_ratio: 0.1666667 # 25% of 66.6%
+    paths:
+    -  s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e13/*.npy
+    -  s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e14/*.npy
