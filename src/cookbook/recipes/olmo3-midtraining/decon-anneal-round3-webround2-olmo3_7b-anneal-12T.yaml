@@ -29,7 +29,7 @@ dataset:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
   - name: sponge
     target_ratio: 0.05
-    paths: # Todo confirm which variant
+    paths:
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/dolma2-tokenizer/*.npy
   - name: code
     target_ratio: 0.2
@@ -39,7 +39,7 @@ dataset:
     # 10% less the .0268 over 10% for dolminos2math
     target_ratio: 0.0732
     paths: # assuming this is s3://ai2-llm/pretraining-data/sources/megamath_web_pro_max/llama_rewrites/ per allison
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/llama_rewrites-decon-2/dolma2-tokenizer/*.npy
   - name: dolminos2math
     target_ratio: 0.1268
     paths:
@@ -59,8 +59,8 @@ dataset:
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/documents-decon-2/dolma2-tokenizer/*.npy
   - name: instruction
     target_ratio: 0.011
-    paths: # todo fix this tokenization
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/dolma2-tokenizer/*.npy
+    paths:
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-no-generation-prompt/dolma2-tokenizer/*.npy
   - name: r1_reasoning
     target_ratio: 0.01875
     paths:
