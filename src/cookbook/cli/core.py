@@ -379,6 +379,8 @@ def launch(
     new_rank_microbatch_size = new_global_batch_size // (
         config_lengths.global_batch_size // config_lengths.rank_microbatch_size
     )
+    flags.append(f"--data_loader.num_threads=0")
+    flags.append(f"--data_loader.num_workers=0")
     flags.append(f"--data_loader.global_batch_size={new_global_batch_size}")
     flags.append(f"--train_module.rank_microbatch_size={new_rank_microbatch_size}")
 
