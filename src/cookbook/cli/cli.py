@@ -102,12 +102,14 @@ def launch(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] 
 
     beaker_user = (Beaker.from_env().account.whoami().name).upper()  # pyright: ignore
     logger.info(f"Launching experiment group '{group_uuid}' as user '{beaker_user}'")
-    experiment_config.name = experiment_config.name+"v2"
     logger.info(experiment_config)
+    experiment_config.name = experiment_config.name+"v2"
+
     logger.info("Token distribution by source:")
     logger.info(token_universe)
     logger.info(f"Running with trainer config:")
     logger.info(build_train_config(config, experiment_config.name, group_uuid, beaker_user, dry_run=True))
+
     if not skip_confirmation and not click.confirm("Proceed with this configuration?", default=False):
         logger.info("Launch cancelled!")
         return

@@ -295,12 +295,12 @@ class TransformerConfigBuilder:
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
 
         if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = "/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
 
         self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
