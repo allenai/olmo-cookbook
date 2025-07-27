@@ -302,7 +302,7 @@ class TransformerConfigBuilder:
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
             self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
 
-        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
+        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name.strip('v2')}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
