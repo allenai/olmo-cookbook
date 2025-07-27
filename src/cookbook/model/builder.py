@@ -88,11 +88,6 @@ class OptimizerState:
     foreach: bool
     optim_group_override: dict | None = None
 
-
-
-VALID_SCHEDULER_CLASSES = [CosWithWarmup, WSD, LinearWithWarmup]
-
-
 @dataclass
 class TransformerConfigBuilder:
     """
@@ -608,27 +603,15 @@ class TransformerConfigBuilder:
 
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
-
-
-        if not any(scheduler_class == cls.__name__ for cls in VALID_SCHEDULER_CLASSES):
-            raise ValueError(f"Unsupported scheduler: {scheduler_class}. Valid: {VALID_SCHEDULER_CLASSES}")
-
-        try:
-            if scheduler_class == WSD.__name__:
-                if not scheduler_config.get("decay_fraction", None):
-                    scheduler_config["decay_fraction"] = None
-                scheduler = WSD(**scheduler_config)
-            elif scheduler_class == CosWithWarmup.__name__:
-                scheduler = CosWithWarmup(**scheduler_config)
-            else:
-                raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
-        except Exception as e:
-            logger.error(
-                "Could not instantiate scheduler from config. Please ensure the checkpoint is valid. Unable to load scheduler state.",
-                e,
-            )
-            logger.info(scheduler_config)
-            raise e
+        if scheduler_class == WSD.__name__:
+            decay_fraction = scheduler_config.pop("decay_fraction", None)
+            scheduler = WSD(**scheduler_config, decay_fraction=decay_fraction)
+        elif scheduler_class == CosWithWarmup.__name__:
+            scheduler = CosWithWarmup(**scheduler_config)
+        elif scheduler_class == LinearWithWarmup.__name__:
+            scheduler = LinearWithWarmup(**scheduler_config)
+        else:
+            raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
 
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 

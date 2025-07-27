@@ -15,7 +15,9 @@ gc_interval: 200
 annealing:
   enabled: true
 
+# because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 warmup_steps: 200
+learning_rate: 8.8e-5
 
 metrics_config:
   backend: wandb
