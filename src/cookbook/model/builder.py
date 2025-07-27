@@ -84,9 +84,13 @@ class SchedulerState:
 @dataclass
 class OptimizerState:
     weight_decay: float
-    betas: Tuple[float, float]
+    betas: tuple[float, float]
     foreach: bool
     optim_group_override: dict | None = None
+
+
+
+VALID_SCHEDULER_CLASSES = [CosWithWarmup, WSD, LinearWithWarmup]
 
 
 @dataclass
@@ -604,13 +608,10 @@ class TransformerConfigBuilder:
 
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
-        try:
-            assert scheduler_class == CosWithWarmup.__name__ or scheduler_class == WSD.__name__
-        except AssertionError as e:
-            logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__} or {WSD.__name__}, but got {scheduler_class}: Anneals from a base LR cannot be inferred from this scheduler type. Exiting!"
-            )
-            raise e
+
+
+        if not any(scheduler_class == cls.__name__ for cls in VALID_SCHEDULER_CLASSES):
+            raise ValueError(f"Unsupported scheduler: {scheduler_class}. Valid: {VALID_SCHEDULER_CLASSES}")
 
         try:
             if scheduler_class == WSD.__name__:
