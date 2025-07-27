@@ -726,7 +726,7 @@ class TransformerConfigBuilder:
             load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
-            save_overwrite=True,
+            save_overwrite=False,
             metrics_collect_interval=10,
             cancel_check_interval=5,
             max_duration=Duration.tokens(self.max_tokens),
