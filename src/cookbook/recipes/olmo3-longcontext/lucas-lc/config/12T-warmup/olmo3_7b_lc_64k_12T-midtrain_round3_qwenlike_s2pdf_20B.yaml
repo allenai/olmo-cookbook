@@ -1,12 +1,12 @@
 
-name: &name "olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_20B"
+name: &name "olmo3_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_20B"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 8
+nodes: 4
 gpus: 8
 seed: 4123
 
@@ -29,7 +29,7 @@ load_path: gs://ai2-llm/checkpoints/allysone/anneal-round3-webround2-100B-olmo3_
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
-max_tokens: 20_000_000_000  # 10B tokens TODO: update if needed
+max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
 sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
@@ -44,51 +44,70 @@ eval_interval: 500
 #   - olmo2_dev_1b
 model_overrides:
   - block.attention.rope.theta=8000000
+
 dataset:
+
   sources:
-  # This is the best midtraining mix so far (as of 2025-06-30); i've reduced to 1/3 to have 2/3 of LC
-  # https://github.com/allenai/olmo-cookbook/blob/13ef591fe202b5657f53f9aa08aec7b470d4c837/src/cookbook/recipes/olmo3-midtraining/anneal-round1-olmo3_7b-with-reasoning-anneal.yaml
   - name: SC-hqweb
-    target_ratio: 0.1500000 # was 0.45
+    target_ratio: 0.1333333333
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes_50B/allenai/dolma2-tokenizer/*.npy
+  - name: SC-sponge
+    target_ratio: 0.0166666667
+    paths:
+    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/*.npy
   - name: SC-code
-    target_ratio: 0.0666667 # was 0.2
+    target_ratio: 0.0666666667
     paths:
-    - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
-  - name: SC-finemath
-    target_ratio: 0.0268667 # was 0.0806
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-20B-v0/allenai/dolma2-tokenizer/**/*.npy
+  - name: SC-megamath
+    # 10% less the .0268 over 10% for dolminos2math
+    target_ratio: 0.0244
     paths:
-    - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
   - name: SC-dolminos2math
-    target_ratio: 0.0398000 # was 0.1194
+    target_ratio: 0.0422666667
     paths:
     # 10.7B
     - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
-    # 1.25B
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/mj_intermediate_math/allenai/dolma2-tokenizer/*.npy
+    # 1.99B
+    # 850,859,688
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/allenai/dolma2-tokenizer/*.npy
+    # 898,733,958
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
+    # 240,590,634
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
   - name: SC-reddit
-    target_ratio: 0.0296666 # was 0.089
+    target_ratio: 0.0296666667
     paths:
-    - gs://ai2-llm/pretraining-data/sources/reddit/dolma_raw/format_rewriting/densesub_highthresh_microanneal_4omini_rewrite_tokenized/*.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/allenai/dolma2-tokenizer/*.npy
   - name: SC-instruction
-    target_ratio: 0.0036667 # was 0.011
+    target_ratio: 0.0036666667
     paths:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
   - name: SC-r1_reasoning
-    target_ratio: 0.0079167 # was 0.02375
+    target_ratio: 0.00625
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
   - name: SC-qwq_reasoning
-    target_ratio: 0.0079167 # was 0.02375
+    target_ratio: 0.00625
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/qwq-traces/dolma2-tokenizer/*.npy
   - name: SC-gemini_reasoning
-    target_ratio: 0.0008333 # was 0.0025
+    target_ratio: 0.0008333333
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
+  - name: SC-faeze_reasoning
+    target_ratio: 0.0033333333
+    paths:
+    #3.166B
+    #1,144,531,442
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+    #366,757,554
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/verifiable/gpt-41/allenai/dolma2-tokenizer/*.npy
+    #1,198,181,281
+    - s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
 
   # We wanna follow a qwen-3 like setup. From their tech report:
   #
@@ -103,7 +122,7 @@ dataset:
 
   - name: LC-s2pdf_32k-64k
     # 14.07B tokens in this subset in total
-    target_ratio: 0.4999999 # 75% of 66.6%
+    target_ratio: 0.4999999666 # 75% of 66.6%
     paths:
     -  s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets/length_2e15/**/*.npy
 
