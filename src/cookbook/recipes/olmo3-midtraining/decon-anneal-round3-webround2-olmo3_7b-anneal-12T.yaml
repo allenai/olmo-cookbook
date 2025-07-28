@@ -36,12 +36,12 @@ dataset:
     paths: # trying to use s3://ai2-llm/pretraining-data/sources/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/
     - s3://ai2-llm/preprocessed/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/**/*.npy
   - name: megamath
-    # 10% less the .0268 over 10% for dolminos2math
-    target_ratio: 0.0732
+    # 10% less the .0267 over 10% for dolminos2math
+    target_ratio: 0.0733
     paths: # assuming this is s3://ai2-llm/pretraining-data/sources/megamath_web_pro_max/llama_rewrites/ per allison
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/llama_rewrites-decon-2/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.1268
+    target_ratio: 0.1267 # has to decrease cuz only 12678161244 tokens in decon-2
     paths:
     # 10.7B
     - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/dolma2-tokenizer/*.npy
