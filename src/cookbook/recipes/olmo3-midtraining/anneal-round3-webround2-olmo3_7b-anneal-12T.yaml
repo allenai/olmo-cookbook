@@ -1,5 +1,5 @@
-name: "anneal-round3-webround2-10B-olmo3_7b_with-reasoning-anneal-12T-merged-checkpoint"
-description: "OLMo3 7b anneal to 10B Tokens from 12T merged ckpt -- round 3 data mix with round2 web data"
+name: "anneal-round3-webround2-10B-olmo3_7b_with-reasoning-anneal-12T-comparision-checkpoint"
+description: "OLMo3 7b anneal to 10B Tokens from 12T ckpt -- round 3 data mix with round2 web data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 0.000088
-load_path: gs://ai2-llm/checkpoints/amanr/OLMo3-7B-swafix/step756906_merged/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906/
 load_state: false
 dataset:
   sources:
