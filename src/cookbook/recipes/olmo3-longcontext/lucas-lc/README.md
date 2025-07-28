@@ -71,7 +71,7 @@ done
 dashboard="olmo3-long-context"
 uv run olmo-cookbook-eval evaluate \
     "/oe-training-default/${model}-hf" \
-    --tasks dev:7b:main \
+    --tasks olmo3:dev:7b:main \
     --priority urgent \
     --cluster aus80g \
     --partition-size 4 \
