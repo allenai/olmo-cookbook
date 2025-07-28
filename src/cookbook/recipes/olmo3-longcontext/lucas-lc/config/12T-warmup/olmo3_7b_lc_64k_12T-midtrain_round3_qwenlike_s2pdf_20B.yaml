@@ -81,7 +81,21 @@ dataset:
   - name: SC-code
     target_ratio: 0.06666668
     paths:
-    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/**/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/C/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/CSharp/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Cpp/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Go/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Java/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/JavaScript/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Markdown/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/PHP/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Python/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Ruby/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Rust/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/SQL/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Shell/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Swift/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/TypeScript/**/*.npy
   - name: SC-megamath
     # 10% less the .0268 over 10% for dolminos2math
     target_ratio: 0.04553335
