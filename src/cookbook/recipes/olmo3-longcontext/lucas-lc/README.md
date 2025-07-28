@@ -17,6 +17,12 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix_12T-02361a85/step2385"
 )
 
+models=(
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_10B-682a95a4/step2385"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_20B-1b63158c/step4769"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_10B-e7d844e5/step2385"
+)
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
