@@ -162,7 +162,7 @@ done'
 
 
 
-count_jobs() {
+: 'count_jobs() {
     jobs -r | wc -l
 }
 
@@ -180,6 +180,37 @@ for i in $(seq -w 0 31); do
         weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
         --allow-dirty \
         --workspace ai2/dolma2
+    echo "Completed experiment for index $i"
+  } &
+done
+
+wait 
+echo "All experiments completed."
+'
+
+
+
+
+
+count_jobs() {
+    jobs -r | wc -l
+}
+
+for i in $(seq -w 0 7); do
+  while [ $(count_jobs) -ge 12 ]; do
+    sleep 5
+  done
+
+  echo "Starting experiment for index $i" 
+  {
+    exp_id="olmo3_7b-12T-5B-reddit-swarm-7862a796-0$i"
+    echo $exp_id
+    python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        --allow-dirty \
+        --workspace ai2/dolma2 \
+        --cluster ai2/saturn-cirrascale
     echo "Completed experiment for index $i"
   } &
 done
