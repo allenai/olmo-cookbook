@@ -9,7 +9,7 @@ workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 8
+nodes: 16
 gpus: 8
 seed: 4123
 
