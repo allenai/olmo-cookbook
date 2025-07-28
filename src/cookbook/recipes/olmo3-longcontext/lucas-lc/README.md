@@ -72,13 +72,15 @@ dashboard="olmo3-long-context"
 uv run olmo-cookbook-eval evaluate \
     "/oe-training-default/${model}-hf" \
     --tasks dev:7b:main \
-    --priority high \
+    --priority urgent \
     --cluster aus80g \
-    --partition-size 8 \
+    --partition-size 4 \
     --num-gpus 1 \
     --model-backend vllm \
     --model-args trust_remote_code=true,max_length=4096 \
-    --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
+    --use-gantry \
     --dashboard ${dashboard} \
+    --oe-eval-branch davidh/olmo3 \
+    --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \
     --workspace ai2/oe-data
 ```
