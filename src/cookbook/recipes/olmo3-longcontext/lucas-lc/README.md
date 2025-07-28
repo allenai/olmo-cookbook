@@ -17,10 +17,11 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_s2pdf-qwen3like_olmo3mix_12T-02361a85/step2385"
 )
 
+# "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_10B-e7d844e5/step2385"
+
 models=(
     "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_10B-682a95a4/step2385"
     "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_20B-1b63158c/step4769"
-    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_10B-e7d844e5/step2385"
 )
 
 for model in "${models[@]}"; do
@@ -43,12 +44,12 @@ for model in "${models[@]}"; do
         --olmo-core-v2-commit-hash  326b7b01cc77750343510919801316d5a5622d87 \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
         --huggingface-transformers-commit-hash 5db7e35d42636e86ee37a43f56a1587daadb7c1b \
-        --dtype float32
+        --dtype float32 --beaker-allow-dirty
 done
 ```
 
 
-## Eval
+## Eval (LC)
 
 ```bash
 git clone git@github.com:allenai/HELMET.git code/ai2-helmet
@@ -59,6 +60,25 @@ uv pip install beaker-gantry
 source .venv/bin/activate
 
 for model in "${models[@]}"; do
-    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=4 WORKSPACE=ai2/long-contexts ./gantry_eval.sh /weka/oe-training-default/${model}-hf ai2/jupiter-cirrascale-2
+    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=4 WORKSPACE=ai2/oe-data ./gantry_eval.sh /weka/oe-training-default/${model}-hf ai2/jupiter-cirrascale-2
 done
+```
+
+
+## Eval (SC)
+
+```bash
+dashboard="olmo3-long-context"
+uv run olmo-cookbook-eval evaluate \
+    "/oe-training-default/${model}-hf" \
+    --tasks dev:7b:main \
+    --priority high \
+    --cluster aus80g \
+    --partition-size 8 \
+    --num-gpus 1 \
+    --model-backend vllm \
+    --model-args trust_remote_code=true,max_length=4096 \
+    --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
+    --dashboard ${dashboard} \
+    --workspace ai2/oe-data
 ```
