@@ -2,13 +2,13 @@
 # Needs updates with actual training dataset and hyperparameters
 # Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
 name: "olmo3_7B-11T_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs2M_warmup"
-description: "OLMo3 7B @11T w/ swafix trained w/ 4M batch size up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
+description: "OLMo3 7B @11T w/ swafix trained w/ 2M batch size up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 8
+nodes: 4
 gpus: 8
 seed: 4123
 
