@@ -30,7 +30,7 @@ dataset:
   - name: sponge
     target_ratio: 0.05
     paths:
-    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/*/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/*/allenai/dolma2-tokenizer/*.npy
   - name: code
     target_ratio: 0.2
     paths: # trying to use s3://ai2-llm/pretraining-data/sources/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/
