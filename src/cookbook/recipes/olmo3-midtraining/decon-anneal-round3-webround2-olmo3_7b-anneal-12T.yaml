@@ -39,47 +39,47 @@ dataset:
     # 10% less the .0267 over 10% for dolminos2math
     target_ratio: 0.0733
     paths: # assuming this is s3://ai2-llm/pretraining-data/sources/megamath_web_pro_max/llama_rewrites/ per allison
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/llama_rewrites-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/llama_rewrites-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
     target_ratio: 0.1267 # has to decrease cuz only 12678161244 tokens in decon-2
     paths:
     # 10.7B
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/allenai/dolma2-tokenizer/*.npy
     # 1.99B
     # 850,859,688
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
     # 898,733,958
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
     # 240,590,634
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: reddit
     target_ratio: 0.089
     paths:
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-2/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/documents-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: instruction
     target_ratio: 0.011
     paths:
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-no-generation-prompt/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-no-generation-prompt/allenai/dolma2-tokenizer/*.npy
   - name: r1_reasoning
     target_ratio: 0.01875
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: qwq_reasoning
     target_ratio: 0.01875
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/qwq-traces-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-traces-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: gemini_reasoning
     target_ratio: 0.0025
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: faeze_reasoning
     target_ratio: .01
     paths:
     #3.166B
     #1,144,531,442
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning/documents-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning/documents-decon-2/allenai/dolma2-tokenizer/*.npy
     #366,757,554
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/documents-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/documents-decon-2/allenai/dolma2-tokenizer/*.npy
     #1,198,181,281
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning/documents-decon-2/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning/documents-decon-2/allenai/dolma2-tokenizer/*.npy
