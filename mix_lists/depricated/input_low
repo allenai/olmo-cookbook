@@ -1,0 +1,15 @@
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-OpenMathReasonin-Reasoning-rewrite-full-thoughts-jsonls-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-tinyMATH-MIND-data-processed-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-tinyMATH-PoT-processed_data-processed-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-flat_dolmino_math-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/finemath-finemath-3plus-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/reddit-rewrites-densesub_highthresh_microanneal_4omini_rewrite-documents-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/reddit-rewrites-densesub_lowthresh_4omini_rewrite-documents-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/tulu-3-sft-for-olmo-3-midtraining-raw-decon/tulu-3-sft-for-olmo-3-midtraining-raw-decon/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/thinking-data-big-reasoning-traces-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/thinking-data-qwq-traces-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/thinking-data-s1k-gemini-traces-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-math-meta-reasoning-documents-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-code-meta-reasoning-documents-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-verifiable-gpt-41-documents-decon/
+s3://robertb-decon-test-cleaned/ian-variants/low-precision/midtraining-reasoning-openmathreasoning-teacher-student-lecture-documents-decon/
