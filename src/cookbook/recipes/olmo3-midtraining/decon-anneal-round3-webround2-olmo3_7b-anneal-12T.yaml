@@ -60,7 +60,7 @@ dataset:
   - name: instruction
     target_ratio: 0.011
     paths:
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-no-generation-prompt/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/allenai/dolma2-tokenizer/*.npy
   - name: r1_reasoning
     target_ratio: 0.01875
     paths:
