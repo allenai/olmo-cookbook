@@ -30,11 +30,11 @@ dataset:
   - name: sponge
     target_ratio: 0.05
     paths:
-    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/**/*.npy
+    - s3://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/*/allenai/dolma2-tokenizer/*.npy
   - name: code
     target_ratio: 0.2
     paths: # trying to use s3://ai2-llm/pretraining-data/sources/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/
-    - s3://ai2-llm/preprocessed/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/*/allenai/dolma2-tokenizer/*.npy
   - name: megamath
     # 10% less the .0267 over 10% for dolminos2math
     target_ratio: 0.0733
