@@ -33,7 +33,8 @@ class DataProcessor:
                  input_prefix: str = "ai2-llm/pretraining-data/sources/",
                  output_prefix: str = "ai2-llm/preprocessed/",
                  local_dir: str = "/mnt/raid0",
-                 tokenizer: str = "allenai/dolma2-tokenizer"):
+                 tokenizer: str = "allenai/dolma2-tokenizer",
+                 dry_run: bool = False):
         self.input_file = input_file
         # Don't strip slashes from remote_prefix as it needs to keep s3:// format
         self.remote_prefix = remote_prefix
@@ -42,6 +43,7 @@ class DataProcessor:
         self.local_dir = Path(local_dir)
         self.tokenizer = tokenizer
         self.tokenizer_suffix = tokenizer.replace('/', '_')
+        self.dry_run = dry_run
         
         # Read input paths
         self.paths = self._read_input_paths()
@@ -63,6 +65,10 @@ class DataProcessor:
         """Run a command and return success status and output."""
         print(f"Running: {description}")
         print(f"Command: {' '.join(cmd)}")
+        
+        if self.dry_run:
+            print("DRY RUN: Command would be executed here")
+            return True, ""
         
         try:
             # Stream output live instead of capturing it
@@ -192,6 +198,9 @@ class DataProcessor:
     def download(self) -> bool:
         """Download data from remote storage."""
         print("=== DOWNLOADING DATA ===")
+        if self.dry_run:
+            print("DRY RUN MODE: Showing what would be downloaded")
+        
         errors = []
         
         for path in self.paths:
@@ -201,7 +210,10 @@ class DataProcessor:
             # Check if this is a file or directory based on the path
             if path.endswith(('.gz', '.jsonl', '.json')):
                 # Single file - download directly
-                local_path.parent.mkdir(parents=True, exist_ok=True)
+                if self.dry_run:
+                    print(f"Would download file: {remote_path} -> {local_path}")
+                else:
+                    local_path.parent.mkdir(parents=True, exist_ok=True)
                 cmd = ["s5cmd", "cp", "-sp", remote_path, str(local_path)]
             else:
                 # Directory - add wildcard for sync
@@ -209,7 +221,10 @@ class DataProcessor:
                     remote_path += '/'
                 remote_path += '*'
                 
-                local_path.mkdir(parents=True, exist_ok=True)
+                if self.dry_run:
+                    print(f"Would sync directory: {remote_path} -> {local_path}/")
+                else:
+                    local_path.mkdir(parents=True, exist_ok=True)
                 cmd = ["s5cmd", "sync", remote_path, str(local_path) + "/"]
             
             success, output = self._run_command(cmd, f"Downloading {remote_path}")
@@ -219,8 +234,14 @@ class DataProcessor:
             else:
                 print(f"Successfully downloaded {remote_path}")
         
-        # Check for and remove empty files
-        total_removed, removed_paths = self._remove_empty_files()
+        if not self.dry_run:
+            # Check for and remove empty files
+            total_removed, removed_paths = self._remove_empty_files()
+            
+            if total_removed > 0:
+                print(f"Removed {total_removed} empty files:")
+                for path in removed_paths:
+                    print(f"  {path}")
         
         if errors:
             print("\n=== DOWNLOAD ERRORS ===")
@@ -229,23 +250,21 @@ class DataProcessor:
             return False
         
         print("All downloads completed successfully!")
-        if total_removed > 0:
-            print(f"Removed {total_removed} empty files:")
-            for path in removed_paths:
-                print(f"  {path}")
         return True
     
     def tokenize(self) -> bool:
         """Tokenize the downloaded data."""
         print("=== TOKENIZING DATA ===")
+        if self.dry_run:
+            print("DRY RUN MODE: Showing what would be tokenized")
         
-        # Check disk space first
-        if not self._check_disk_space():
+        # Check disk space first (skip in dry run)
+        if not self.dry_run and not self._check_disk_space():
             return False
         
-        # Download tokenizer
+        # Download tokenizer (skip in dry run)
         tokenizer_dir = self.local_dir / "tokenizer"
-        if not tokenizer_dir.exists():
+        if not self.dry_run and not tokenizer_dir.exists():
             cmd = ["uv", "run", "huggingface-cli", "download", self.tokenizer, "--local-dir", str(tokenizer_dir)]
             success, output = self._run_command(cmd, "Downloading tokenizer")
             if not success:
@@ -257,53 +276,90 @@ class DataProcessor:
         for path in self.paths:
             local_input_path = self.local_dir / path
             
-            # Detect ID field issues
-            id_field_name, id_field_type = self._detect_id_field_issues(path)
+            # Calculate relative path by removing input prefix
+            if path.startswith(self.input_prefix):
+                relative_path = path[len(self.input_prefix):].lstrip('/')
+            else:
+                relative_path = path
+            
+            # Detect ID field issues (skip in dry run)
+            id_field_name, id_field_type = None, None
+            if not self.dry_run:
+                id_field_name, id_field_type = self._detect_id_field_issues(path)
             
             # Determine if path has subdirectories or is a single file
             if path.endswith(('.gz', '.jsonl', '.json')):
-                # Single file - use exact path for input, strip extension for output
+                # Single file - use exact path for input
                 doc_path = str(local_input_path)
-                # Remove extensions for destination
-                dest_base = path
+                # Remove extensions for destination path calculation
+                dest_base = relative_path
                 for ext in ['.jsonl.gz', '.json.gz', '.gz', '.jsonl', '.json']:
                     if dest_base.endswith(ext):
                         dest_base = dest_base[:-len(ext)]
                         break
-                dest_path = self.local_dir / f"{dest_base}_{self.tokenizer_suffix}"
+                # Create proper output path structure
+                dest_path = self.local_dir / self.output_prefix / dest_base / self.tokenizer.replace('/', '/')
+                
+                if self.dry_run:
+                    print(f"Would tokenize file:")
+                    print(f"  Input:  {doc_path}")
+                    print(f"  Output: {dest_path}")
+                
             else:
                 # Directory - check if it has immediate .gz files or subdirectories
-                if list(local_input_path.glob("*.gz")):
-                    # Has immediate .gz files
-                    doc_path = f"{local_input_path}/*"
-                    dest_path = self.local_dir / f"{path}_{self.tokenizer_suffix}"
-                else:
-                    # Has subdirectories - process each separately
+                has_immediate_gz = False
+                subdirs = []
+                
+                # Always check filesystem for proper detection (even in dry run)
+                if local_input_path.exists():
+                    has_immediate_gz = bool(list(local_input_path.glob("*.gz")))
                     subdirs = [d for d in local_input_path.iterdir() if d.is_dir()]
-                    if subdirs:
-                        # Process each subdirectory
+                
+                if has_immediate_gz:
+                    # Has immediate .gz files - tokenize whole directory
+                    doc_path = f"{local_input_path}/*"
+                    dest_path = self.local_dir / self.output_prefix / relative_path / self.tokenizer.replace('/', '/')
+                    
+                    if self.dry_run:
+                        print(f"Would tokenize directory with immediate .gz files:")
+                        print(f"  Input:  {doc_path}")
+                        print(f"  Output: {dest_path}")
+                    
+                elif subdirs:
+                    # Has subdirectories - process each separately
+                    if self.dry_run:
+                        print(f"Would tokenize directory with subdirectories: {local_input_path}")
                         for subdir in subdirs:
-                            subdir_rel = path + "/" + subdir.name
+                            sub_dest_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
+                            print(f"  Subdir: {subdir.name} -> {sub_dest_path}")
+                    else:
+                        for subdir in subdirs:
                             sub_doc_path = f"{subdir}/*"
-                            sub_dest_path = self.local_dir / f"{subdir_rel}_{self.tokenizer_suffix}"
+                            sub_dest_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
                             
                             success = self._run_tokenization_command(
                                 sub_doc_path, sub_dest_path, tokenizer_dir, 
                                 id_field_name, id_field_type
                             )
                             if not success:
-                                errors.append(f"Failed to tokenize {subdir_rel}")
-                        continue
-                    else:
-                        # Empty directory or no subdirs, treat as regular
-                        doc_path = f"{local_input_path}/*"
-                        dest_path = self.local_dir / f"{path}_{self.tokenizer_suffix}"
+                                errors.append(f"Failed to tokenize {relative_path}/{subdir.name}")
+                    continue
+                else:
+                    # Empty directory or no subdirs, treat as regular
+                    doc_path = f"{local_input_path}/*"
+                    dest_path = self.local_dir / self.output_prefix / relative_path / self.tokenizer.replace('/', '/')
+                    
+                    if self.dry_run:
+                        print(f"Would tokenize empty/regular directory:")
+                        print(f"  Input:  {doc_path}")
+                        print(f"  Output: {dest_path}")
             
-            success = self._run_tokenization_command(
-                doc_path, dest_path, tokenizer_dir, id_field_name, id_field_type
-            )
-            if not success:
-                errors.append(f"Failed to tokenize {path}")
+            if not self.dry_run:
+                success = self._run_tokenization_command(
+                    doc_path, dest_path, tokenizer_dir, id_field_name, id_field_type
+                )
+                if not success:
+                    errors.append(f"Failed to tokenize {relative_path}")
         
         if errors:
             print("\n=== TOKENIZATION ERRORS ===")
@@ -354,32 +410,87 @@ class DataProcessor:
     def upload(self) -> bool:
         """Upload tokenized data to remote storage."""
         print("=== UPLOADING DATA ===")
+        if self.dry_run:
+            print("DRY RUN MODE: Showing what would be uploaded")
+        
         errors = []
         
         for path in self.paths:
-            # Find tokenized directory
-            if path.endswith(('.gz', '.jsonl', '.json')):
-                # Single file case
-                dest_base = path
-                for ext in ['.jsonl.gz', '.json.gz', '.gz', '.jsonl', '.json']:
-                    if dest_base.endswith(ext):
-                        dest_base = dest_base[:-len(ext)]
-                        break
-                local_tokenized_path = self.local_dir / f"{dest_base}_{self.tokenizer_suffix}"
-            else:
-                local_tokenized_path = self.local_dir / f"{path}_{self.tokenizer_suffix}"
-            
-            if not local_tokenized_path.exists():
-                errors.append(f"Tokenized data not found: {local_tokenized_path}")
-                continue
-            
-            # Determine remote destination path
+            # Calculate relative path by removing input prefix
             if path.startswith(self.input_prefix):
                 relative_path = path[len(self.input_prefix):].lstrip('/')
             else:
                 relative_path = path
             
-            remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}/"
+            # Find tokenized directory based on new structure
+            if path.endswith(('.gz', '.jsonl', '.json')):
+                # Single file case
+                dest_base = relative_path
+                for ext in ['.jsonl.gz', '.json.gz', '.gz', '.jsonl', '.json']:
+                    if dest_base.endswith(ext):
+                        dest_base = dest_base[:-len(ext)]
+                        break
+                local_tokenized_path = self.local_dir / self.output_prefix / dest_base / self.tokenizer.replace('/', '/')
+                remote_dest = f"{self.remote_prefix}{self.output_prefix}/{dest_base}/{self.tokenizer}/"
+                
+                if self.dry_run:
+                    print(f"Would upload file tokenization:")
+                    print(f"  Local:  {local_tokenized_path}")
+                    print(f"  Remote: {remote_dest}")
+                
+            else:
+                # Directory case - check if it has subdirectories that were processed separately
+                local_input_path = self.local_dir / path
+                has_subdirs = False
+                subdirs = []
+                
+                # Always check filesystem for proper detection (even in dry run)
+                if local_input_path.exists():
+                    subdirs = [d for d in local_input_path.iterdir() if d.is_dir()]
+                    has_immediate_gz = bool(list(local_input_path.glob("*.gz")))
+                    has_subdirs = subdirs and not has_immediate_gz
+                
+                if has_subdirs:
+                    # Upload each subdirectory separately
+                    if self.dry_run:
+                        print(f"Would upload directory with subdirectories: {path}")
+                        for subdir in subdirs:
+                            sub_local_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
+                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{subdir.name}/{self.tokenizer}/"
+                            print(f"  Subdir: {sub_local_path} -> {sub_remote_dest}")
+                    else:
+                        for subdir in subdirs:
+                            sub_local_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
+                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{subdir.name}/{self.tokenizer}/"
+                            
+                            if not sub_local_path.exists():
+                                errors.append(f"Tokenized data not found: {sub_local_path}")
+                                continue
+                            
+                            cmd = ["s5cmd", "sync", f"{sub_local_path}/", sub_remote_dest]
+                            success, output = self._run_command(cmd, f"Uploading {sub_local_path}")
+                            
+                            if not success:
+                                errors.append(f"Failed to upload {sub_local_path}: {output}")
+                            else:
+                                print(f"Successfully uploaded to {sub_remote_dest}")
+                    continue
+                else:
+                    # Regular directory
+                    local_tokenized_path = self.local_dir / self.output_prefix / relative_path / self.tokenizer.replace('/', '/')
+                    remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{self.tokenizer}/"
+                    
+                    if self.dry_run:
+                        print(f"Would upload regular directory:")
+                        print(f"  Local:  {local_tokenized_path}")
+                        print(f"  Remote: {remote_dest}")
+            
+            if self.dry_run:
+                continue
+            
+            if not local_tokenized_path.exists():
+                errors.append(f"Tokenized data not found: {local_tokenized_path}")
+                continue
             
             cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", remote_dest]
             success, output = self._run_command(cmd, f"Uploading {local_tokenized_path}")
@@ -409,19 +520,34 @@ class DataProcessor:
             else:
                 relative_path = path
             
-            base_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}"
-            
             # Check if there are subdirectories in the original path
             local_path = self.local_dir / path
             has_subdirs = False
             
-            if local_path.exists():
-                has_subdirs = any(d.is_dir() for d in local_path.iterdir() if d.is_dir())
+            if local_path.exists() and not path.endswith(('.gz', '.jsonl', '.json')):
+                subdirs = [d for d in local_path.iterdir() if d.is_dir()]
+                has_immediate_gz = bool(list(local_path.glob("*.gz")))
+                has_subdirs = subdirs and not has_immediate_gz
             
-            # Add appropriate wildcard
-            if has_subdirs:
-                wildcard_path = f"{base_dest}/**/*.gz"
+            if path.endswith(('.gz', '.jsonl', '.json')):
+                # Single file case
+                dest_base = relative_path
+                for ext in ['.jsonl.gz', '.json.gz', '.gz', '.jsonl', '.json']:
+                    if dest_base.endswith(ext):
+                        dest_base = dest_base[:-len(ext)]
+                        break
+                base_dest = f"{self.remote_prefix}{self.output_prefix}/{dest_base}/{self.tokenizer}"
+                wildcard_path = f"{base_dest}/*.gz"
+            elif has_subdirs:
+                # Directory with subdirectories - each subdir gets its own path
+                for subdir in [d for d in local_path.iterdir() if d.is_dir()]:
+                    base_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{subdir.name}/{self.tokenizer}"
+                    wildcard_path = f"{base_dest}/*.gz"
+                    print(wildcard_path)
+                continue
             else:
+                # Regular directory
+                base_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{self.tokenizer}"
                 wildcard_path = f"{base_dest}/*.gz"
             
             print(wildcard_path)
@@ -442,6 +568,8 @@ def main():
                        help="Local directory for processing (default: /mnt/raid0)")
     parser.add_argument("--tokenizer", default="allenai/dolma2-tokenizer",
                        help="Tokenizer to use (default: allenai/dolma2-tokenizer)")
+    parser.add_argument("--dry-run", action="store_true",
+                       help="Show what would be done without actually executing commands")
     
     args = parser.parse_args()
     
@@ -457,7 +585,8 @@ def main():
         input_prefix=args.input_prefix,
         output_prefix=args.output_prefix,
         local_dir=args.local_dir,
-        tokenizer=args.tokenizer
+        tokenizer=args.tokenizer,
+        dry_run=args.dry_run
     )
     
     # Execute command
