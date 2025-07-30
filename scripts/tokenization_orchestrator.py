@@ -199,7 +199,7 @@ class DataProcessor:
             if path.endswith(('.gz', '.jsonl', '.json')):
                 # Single file - download directly
                 local_path.parent.mkdir(parents=True, exist_ok=True)
-                cmd = ["s5cmd", "cp", remote_path, str(local_path)]
+                cmd = ["s5cmd", "cp", "-sp", remote_path, str(local_path)]
             else:
                 # Directory - add wildcard for sync
                 if not remote_path.endswith('/'):
@@ -207,7 +207,7 @@ class DataProcessor:
                 remote_path += '*'
                 
                 local_path.mkdir(parents=True, exist_ok=True)
-                cmd = ["s5cmd", "sync", remote_path, str(local_path) + "/"]
+                cmd = ["s5cmd", "sync", "-sp", remote_path, str(local_path) + "/"]
             
             success, output = self._run_command(cmd, f"Downloading {remote_path}")
             
@@ -376,7 +376,7 @@ class DataProcessor:
             
             remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}/"
             
-            cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", remote_dest]
+            cmd = ["s5cmd", "sync", "-sp", f"{local_tokenized_path}/", remote_dest]
             success, output = self._run_command(cmd, f"Uploading {local_tokenized_path}")
             
             if not success:
