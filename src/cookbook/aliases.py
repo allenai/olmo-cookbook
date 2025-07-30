@@ -98,6 +98,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     float8: bool = False
     activation_checkpointing: bool = False
     model_overrides: Optional[List[str]] = None
+    train_module_overrides: Optional[List[str]] = None
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None

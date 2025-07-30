@@ -44,6 +44,9 @@ eval_interval: 500
 model_overrides:
   - block.attention.rope.theta=8000000
 
+# need this to disable masking
+train_module_overrides:
+  - cp_config.load_balancer=zig_zag
 
 dataset:
   sources:

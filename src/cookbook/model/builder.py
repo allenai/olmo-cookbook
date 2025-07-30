@@ -124,6 +124,7 @@ class TransformerConfigBuilder:
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
+        train_module_overrides (Optional[List[str]]): Optional dotlist overrides for the train module configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
         dp_shard_degree (Optional[int]): The data parallel model/optimizer sharding degree.
         cp_degree (Optional[int]): The number of devices to split context parallelism across. Useful for long context training.
@@ -198,6 +199,7 @@ class TransformerConfigBuilder:
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     model_overrides: Optional[List[str]]
+    train_module_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
     load_path: Optional[str]
     learning_rate: Optional[float]
@@ -237,6 +239,7 @@ class TransformerConfigBuilder:
         cp_degree: Optional[int] = None,
         float8: bool = False,
         model_overrides: Optional[List[str]] = None,
+        train_module_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
         annealing: Optional[AnnealConfig] = None,
         hard_stop: Optional[Duration] = None,
@@ -260,6 +263,7 @@ class TransformerConfigBuilder:
         self.model_identifier = model_identifier
         self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
         self.model_overrides = model_overrides
+        self.train_module_overrides = train_module_overrides
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
@@ -725,6 +729,12 @@ class TransformerConfigBuilder:
             logger.info(self.model_overrides)
 
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
+
+        if self.train_module_overrides:
+            logger.info("Applying train module overrides:")
+            logger.info(self.train_module_overrides)
+
+            train_module_config = train_module_config.merge(dotlist=self.train_module_overrides)
 
         return ModelTrainConfig(
             init_seed=self.seed,

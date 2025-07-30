@@ -182,6 +182,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         annealing=base_config.annealing,
         hard_stop=base_config.hard_stop,
         model_overrides=base_config.model_overrides,
+        train_module_overrides=base_config.train_module_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
         dp_shard_degree=base_config.dp_shard_degree,
         cp_degree=base_config.cp_degree,
