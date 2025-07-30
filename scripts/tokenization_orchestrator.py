@@ -65,10 +65,11 @@ class DataProcessor:
         print(f"Command: {' '.join(cmd)}")
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            return True, result.stdout
+            # Stream output live instead of capturing it
+            result = subprocess.run(cmd, text=True, check=True)
+            return True, ""
         except subprocess.CalledProcessError as e:
-            error_msg = f"Command failed with exit code {e.returncode}\nStdout: {e.stdout}\nStderr: {e.stderr}"
+            error_msg = f"Command failed with exit code {e.returncode}"
             return False, error_msg
     
     def _check_disk_space(self) -> bool:
@@ -134,9 +135,10 @@ class DataProcessor:
             
         return None, None
     
-    def _remove_empty_files(self) -> int:
-        """Remove empty .jsonl.gz and .jsonl files and return count of removed files."""
+    def _remove_empty_files(self) -> Tuple[int, List[str]]:
+        """Remove empty .jsonl.gz and .jsonl files and return count and paths of removed files."""
         removed_count = 0
+        removed_paths = []
         
         for path in self.paths:
             local_path = self.local_dir / path
@@ -151,8 +153,9 @@ class DataProcessor:
                     print(f"Removing empty file: {file_path}")
                     file_path.unlink()
                     removed_count += 1
+                    removed_paths.append(str(file_path))
         
-        return removed_count
+        return removed_count, removed_paths
     
     def _is_empty_jsonl_file(self, file_path: Path) -> bool:
         """Check if a JSONL file is empty (contains no valid JSON objects)."""
@@ -207,7 +210,7 @@ class DataProcessor:
                 remote_path += '*'
                 
                 local_path.mkdir(parents=True, exist_ok=True)
-                cmd = ["s5cmd", "sync", "-sp", remote_path, str(local_path) + "/"]
+                cmd = ["s5cmd", "sync", remote_path, str(local_path) + "/"]
             
             success, output = self._run_command(cmd, f"Downloading {remote_path}")
             
@@ -217,7 +220,7 @@ class DataProcessor:
                 print(f"Successfully downloaded {remote_path}")
         
         # Check for and remove empty files
-        total_removed = self._remove_empty_files()
+        total_removed, removed_paths = self._remove_empty_files()
         
         if errors:
             print("\n=== DOWNLOAD ERRORS ===")
@@ -227,7 +230,9 @@ class DataProcessor:
         
         print("All downloads completed successfully!")
         if total_removed > 0:
-            print(f"Removed {total_removed} empty files")
+            print(f"Removed {total_removed} empty files:")
+            for path in removed_paths:
+                print(f"  {path}")
         return True
     
     def tokenize(self) -> bool:
@@ -376,7 +381,7 @@ class DataProcessor:
             
             remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}/"
             
-            cmd = ["s5cmd", "sync", "-sp", f"{local_tokenized_path}/", remote_dest]
+            cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", remote_dest]
             success, output = self._run_command(cmd, f"Uploading {local_tokenized_path}")
             
             if not success:
