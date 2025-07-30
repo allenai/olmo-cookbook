@@ -195,10 +195,20 @@ class DataProcessor:
             remote_path = f"{self.remote_prefix}{path}"
             local_path = self.local_dir / path
             
-            # Create local directory
-            local_path.parent.mkdir(parents=True, exist_ok=True)
+            # Check if this is a file or directory based on the path
+            if path.endswith(('.gz', '.jsonl', '.json')):
+                # Single file - download directly
+                local_path.parent.mkdir(parents=True, exist_ok=True)
+                cmd = ["s5cmd", "cp", remote_path, str(local_path)]
+            else:
+                # Directory - add wildcard for sync
+                if not remote_path.endswith('/'):
+                    remote_path += '/'
+                remote_path += '*'
+                
+                local_path.mkdir(parents=True, exist_ok=True)
+                cmd = ["s5cmd", "sync", remote_path, str(local_path) + "/"]
             
-            cmd = ["s5cmd", "sync", remote_path, str(local_path)]
             success, output = self._run_command(cmd, f"Downloading {remote_path}")
             
             if not success:
