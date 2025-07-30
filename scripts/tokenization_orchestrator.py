@@ -132,13 +132,15 @@ class DataProcessor:
                 return 'id', 'int'
             return 'id', 'str'
         
-        # Look for fields with 'id' in the name
+        # Look for fields with 'id' in the name (case insensitive)
         id_fields = [k for k in first_line.keys() if 'id' in k.lower()]
         if id_fields:
             field_name = id_fields[0]  # Use first match
             id_type = type(first_line[field_name]).__name__
+            print(f"Found ID field '{field_name}' of type {id_type} in {path}")
             return field_name, 'int' if id_type == 'int' else 'str'
             
+        print(f"Warning: No ID field found in {path}. Available fields: {list(first_line.keys())}")
         return None, None
     
     def _remove_empty_files(self) -> Tuple[int, List[str]]:
@@ -331,15 +333,25 @@ class DataProcessor:
                         print(f"Would tokenize directory with subdirectories: {local_input_path}")
                         for subdir in subdirs:
                             sub_dest_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
+                            # Test ID field detection even in dry run for better preview
+                            subdir_relative_path = str(subdir.relative_to(self.local_dir))
+                            sub_id_field_name, sub_id_field_type = self._detect_id_field_issues(subdir_relative_path)
                             print(f"  Subdir: {subdir.name} -> {sub_dest_path}")
+                            if sub_id_field_name:
+                                print(f"    ID field: {sub_id_field_name} ({sub_id_field_type})")
                     else:
                         for subdir in subdirs:
                             sub_doc_path = f"{subdir}/*"
                             sub_dest_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
                             
+                            # Detect ID field issues for this specific subdirectory
+                            # Pass the relative path from local_dir to the subdirectory
+                            subdir_relative_path = str(subdir.relative_to(self.local_dir))
+                            sub_id_field_name, sub_id_field_type = self._detect_id_field_issues(subdir_relative_path)
+                            
                             success = self._run_tokenization_command(
                                 sub_doc_path, sub_dest_path, tokenizer_dir, 
-                                id_field_name, id_field_type
+                                sub_id_field_name, sub_id_field_type
                             )
                             if not success:
                                 errors.append(f"Failed to tokenize {relative_path}/{subdir.name}")
