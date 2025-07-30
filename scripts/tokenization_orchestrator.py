@@ -35,7 +35,8 @@ class DataProcessor:
                  local_dir: str = "/mnt/raid0",
                  tokenizer: str = "allenai/dolma2-tokenizer"):
         self.input_file = input_file
-        self.remote_prefix = remote_prefix.rstrip('/')
+        # Don't strip slashes from remote_prefix as it needs to keep s3:// format
+        self.remote_prefix = remote_prefix
         self.input_prefix = input_prefix.strip('/')
         self.output_prefix = output_prefix.strip('/')
         self.local_dir = Path(local_dir)
@@ -191,7 +192,7 @@ class DataProcessor:
         errors = []
         
         for path in self.paths:
-            remote_path = f"{self.remote_prefix}/{path}"
+            remote_path = f"{self.remote_prefix}{path}"
             local_path = self.local_dir / path
             
             # Create local directory
@@ -363,7 +364,7 @@ class DataProcessor:
             else:
                 relative_path = path
             
-            remote_dest = f"{self.remote_prefix}/{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}/"
+            remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}/"
             
             cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", remote_dest]
             success, output = self._run_command(cmd, f"Uploading {local_tokenized_path}")
@@ -393,7 +394,7 @@ class DataProcessor:
             else:
                 relative_path = path
             
-            base_dest = f"{self.remote_prefix}/{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}"
+            base_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}_{self.tokenizer_suffix}"
             
             # Check if there are subdirectories in the original path
             local_path = self.local_dir / path
