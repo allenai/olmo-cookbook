@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-All-in-one data processing script for downloading, tokenizing, and uploading data.
+Tokenization orchestrator for downloading, tokenizing, and uploading data.
 
 This script handles the complete pipeline:
 1. Download data from remote storage using s5cmd
@@ -9,7 +9,7 @@ This script handles the complete pipeline:
 4. Report destination paths with appropriate wildcards
 
 Usage:
-    python process_data.py <command> <input_file> [options]
+    python tokenization_orchestrator.py <command> <input_file> [options]
 
 Commands:
     download    - Download data from remote storage
@@ -133,6 +133,58 @@ class DataProcessor:
             
         return None, None
     
+    def _remove_empty_files(self) -> int:
+        """Remove empty .jsonl.gz and .jsonl files and return count of removed files."""
+        removed_count = 0
+        
+        for path in self.paths:
+            local_path = self.local_dir / path
+            if not local_path.exists():
+                continue
+            
+            # Find all .jsonl.gz and .jsonl files
+            jsonl_files = list(local_path.rglob("*.jsonl.gz")) + list(local_path.rglob("*.jsonl"))
+            
+            for file_path in jsonl_files:
+                if self._is_empty_jsonl_file(file_path):
+                    print(f"Removing empty file: {file_path}")
+                    file_path.unlink()
+                    removed_count += 1
+        
+        return removed_count
+    
+    def _is_empty_jsonl_file(self, file_path: Path) -> bool:
+        """Check if a JSONL file is empty (contains no valid JSON objects)."""
+        try:
+            if file_path.suffix == '.gz':
+                import gzip
+                with gzip.open(file_path, 'rt') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            try:
+                                json.loads(line)
+                                return False  # Found at least one valid JSON object
+                            except json.JSONDecodeError:
+                                continue  # Skip invalid JSON lines
+            else:
+                with open(file_path, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            try:
+                                json.loads(line)
+                                return False  # Found at least one valid JSON object
+                            except json.JSONDecodeError:
+                                continue  # Skip invalid JSON lines
+            
+            # If we get here, no valid JSON objects were found
+            return True
+            
+        except Exception as e:
+            print(f"Warning: Could not check file {file_path}: {e}")
+            return False  # Don't remove files we can't read
+    
     def download(self) -> bool:
         """Download data from remote storage."""
         print("=== DOWNLOADING DATA ===")
@@ -153,6 +205,9 @@ class DataProcessor:
             else:
                 print(f"Successfully downloaded {remote_path}")
         
+        # Check for and remove empty files
+        total_removed = self._remove_empty_files()
+        
         if errors:
             print("\n=== DOWNLOAD ERRORS ===")
             for error in errors:
@@ -160,6 +215,8 @@ class DataProcessor:
             return False
         
         print("All downloads completed successfully!")
+        if total_removed > 0:
+            print(f"Removed {total_removed} empty files")
         return True
     
     def tokenize(self) -> bool:
