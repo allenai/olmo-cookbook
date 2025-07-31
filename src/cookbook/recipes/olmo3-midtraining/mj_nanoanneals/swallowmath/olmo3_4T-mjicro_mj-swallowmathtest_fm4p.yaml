@@ -2,7 +2,7 @@ name: mjicroanneal-mj-swallowmathtest-fm4p
 description: microanneal just for just the finemath4plus version of swallowmath (i.e., og requests)
 budget: ai2/oe-base
 workspace: ai2/olmo-3-microanneals
-nodes: 2
+nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 13783479380
