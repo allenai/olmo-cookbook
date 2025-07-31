@@ -525,6 +525,8 @@ class DataProcessor:
         """Output final destination paths with appropriate wildcards."""
         print("=== DESTINATION PATHS ===")
         
+        errors = []
+        
         for path in self.paths:
             # Determine relative path from input prefix
             if path.startswith(self.input_prefix):
@@ -532,37 +534,74 @@ class DataProcessor:
             else:
                 relative_path = path
             
-            # Check if there are subdirectories in the original path
+            # Check if the local data exists (required for destination_paths)
             local_path = self.local_dir / path
-            has_subdirs = False
-            
-            if local_path.exists() and not path.endswith(('.gz', '.jsonl', '.json')):
-                subdirs = [d for d in local_path.iterdir() if d.is_dir()]
-                has_immediate_gz = bool(list(local_path.glob("*.gz")))
-                has_subdirs = subdirs and not has_immediate_gz
+            if not local_path.exists():
+                errors.append(f"Local data not found: {local_path}")
+                continue
             
             if path.endswith(('.gz', '.jsonl', '.json')):
-                # Single file case
+                # Single file case - check if tokenized output exists
                 dest_base = relative_path
                 for ext in ['.jsonl.gz', '.json.gz', '.gz', '.jsonl', '.json']:
                     if dest_base.endswith(ext):
                         dest_base = dest_base[:-len(ext)]
                         break
-                base_dest = f"{self.remote_prefix}{self.output_prefix}/{dest_base}/{self.tokenizer}"
-                wildcard_path = f"{base_dest}/*.gz"
-            elif has_subdirs:
-                # Directory with subdirectories - each subdir gets its own path
-                for subdir in [d for d in local_path.iterdir() if d.is_dir()]:
-                    base_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{subdir.name}/{self.tokenizer}"
-                    wildcard_path = f"{base_dest}/*.gz"
-                    print(wildcard_path)
-                continue
+                
+                # Check if tokenized directory exists
+                tokenized_path = self.local_dir / self.output_prefix / dest_base / self.tokenizer.replace('/', '/')
+                if not tokenized_path.exists():
+                    errors.append(f"Tokenized data not found: {tokenized_path}")
+                    continue
+                
+                base_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{dest_base}/{self.tokenizer}"
+                wildcard_path = f"{base_dest}/*.npy"
+                print(wildcard_path)
+                
             else:
-                # Regular directory
-                base_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{self.tokenizer}"
-                wildcard_path = f"{base_dest}/*.gz"
-            
-            print(wildcard_path)
+                # Directory case - check if it has subdirectories or immediate files
+                subdirs = [d for d in local_path.iterdir() if d.is_dir()]
+                has_immediate_gz = bool(list(local_path.glob("*.gz")))
+                has_subdirs = subdirs and not has_immediate_gz
+                
+                if has_subdirs:
+                    # Directory with subdirectories - check if at least one tokenized subdir exists
+                    found_tokenized = False
+                    for subdir in subdirs:
+                        tokenized_subdir = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
+                        if tokenized_subdir.exists():
+                            found_tokenized = True
+                            break
+                    
+                    if not found_tokenized:
+                        errors.append(f"No tokenized subdirectories found for: {local_path}")
+                        continue
+                    
+                    # Use wildcard for all subdirs
+                    base_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/*/{self.tokenizer}"
+                    wildcard_path = f"{base_dest}/*.npy"
+                    print(wildcard_path)
+                    
+                else:
+                    # Regular directory - check if tokenized directory exists
+                    tokenized_path = self.local_dir / self.output_prefix / relative_path / self.tokenizer.replace('/', '/')
+                    if not tokenized_path.exists():
+                        errors.append(f"Tokenized data not found: {tokenized_path}")
+                        continue
+                    
+                    base_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{self.tokenizer}"
+                    wildcard_path = f"{base_dest}/*.npy"
+                    print(wildcard_path)
+        
+        if errors:
+            print("\n" + "="*60)
+            print("DESTINATION PATHS ERRORS")
+            print("="*60)
+            for i, error in enumerate(errors, 1):
+                print(f"{i}. {error}")
+            print(f"\n{len(errors)} path(s) missing tokenized data out of {len(self.paths)} total paths.")
+            print("ACTION REQUIRED: Run download and tokenize commands first to generate the required data.")
+            sys.exit(1)
 
 
 def main():
