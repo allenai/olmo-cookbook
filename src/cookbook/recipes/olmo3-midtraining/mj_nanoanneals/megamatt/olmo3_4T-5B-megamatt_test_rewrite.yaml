@@ -1,4 +1,4 @@
-name: "microanneal-megamattwebpromax-megamathtest"
+name: "microanneal-megamattwebpromax-megamathtest_rewrites"
 description: "OLMo3_4T 5B-microanneal with ~2.5T tokens of megamatt, rewritten"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
