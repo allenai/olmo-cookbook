@@ -1,5 +1,5 @@
-name: "anneal-round3-webround2-100B-olmo3_7b_with-reasoning-anneal-12T"
-description: "OLMo3 7b anneal to 100B Tokens from 12T ckpt -- round 3 data mix with round2 web data"
+name: "anneal-round3-webround2-100B-olmo3_7b_no-reasoning-no-instruct-anneal-12T"
+description: "OLMo3 7b anneal to 100B Tokens from 12T ckpt -- round 3 data mix with round2 web data, no instruction or reasoning data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 8
