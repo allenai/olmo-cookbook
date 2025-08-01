@@ -49,6 +49,13 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-50web-50synth-wrap-55f2ddc7/step4769'
 )
 
+models=(
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-4T-50v20-50flan-e15a7fa2/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-4T-50v20-50synth-qa-wiki-rewrite-86110b82/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-4T-round1-flan-7541f386/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-4T-round1-flan-synthqa-9c478641/step4769'
+)
+
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
@@ -65,7 +72,8 @@ for model in "${models[@]}"; do
         --use-beaker \
         --olmo-core-v2-commit-hash  013ef7b54aa2d583f9811ec6211a536da407a4b1 \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
-        --huggingface-transformers-commit-hash ca728b8879ce5127ea3e2f8d309c2c5febab5dc5
+        --huggingface-transformers-commit-hash ca728b8879ce5127ea3e2f8d309c2c5febab5dc5 \
+        --beaker-allow-dirty
 done
 
 
