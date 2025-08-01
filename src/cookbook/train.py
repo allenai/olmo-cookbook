@@ -66,7 +66,7 @@ def cli():
     help="Source datasets in the form of `Tuple[str, List[str], float]`",
     cls=PythonLiteralOption,
     required=False,
-    default=None,
+    default=[],
 )
 @record
 def train(
@@ -74,7 +74,7 @@ def train(
     group_id: str,
     beaker_user: str,
     config_path: Path,
-    source: Optional[List[Tuple[str, List[str], str, str]]]= None
+    source: List[Tuple[str, List[str], str, str]]=[]
 ):
     trainer = build_train_config(config_path, run_name, group_id, beaker_user, source=source)
 

@@ -1,5 +1,5 @@
-name: "olmo3_7b-12T-5B-reasoning-swarm"
-description: "5B anneal swarm of reasoning data and hqweb"
+name: "olmo3_7b-12T-5B-reasoning-natural"
+description: "5B anneal 50/50 reasoning and hqweb, natural distribution within reasoning"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 2

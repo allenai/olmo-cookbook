@@ -189,7 +189,7 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
-def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False, source: Optional[List[Tuple[str, List[str], str, str]]]= None):
+def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False, source: List[Tuple[str, List[str], str, str]] = []):
     """
     Launch a training run with the given parameters.
     """
@@ -214,7 +214,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
             base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
 
-    if source is not None:
+    if len(source) > 0:
         source_instances: List[SourceInstance] = []
         for item in source:
             name, paths, ratio, repetition = item
