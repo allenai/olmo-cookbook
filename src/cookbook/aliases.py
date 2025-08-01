@@ -12,6 +12,7 @@ from olmo_core.optim.scheduler import (
     CosWithWarmup,
     CosWithWarmupAndLinearDecay,
     LinearWithWarmup,
+    ConstantWithWarmup,
     Scheduler,
 )
 from pydantic import BaseModel, field_validator
@@ -67,6 +68,7 @@ class WrappedScheduler:
     COSINE_LINEAR = CosWithWarmupAndLinearDecay
     LINEAR = LinearWithWarmup
     WSD = WSD
+    CONST = ConstantWithWarmup
 
     @classmethod
     def from_name_and_config(cls, name: str, config: dict[str, Any]) -> Scheduler:

@@ -16,10 +16,8 @@ priority: urgent
 learning_rate: 5e-4
 activation_checkpointing: true
 scheduler_config:
-  scheduler: WSD
+  scheduler: CONST
   warmup: 0
-  decay: 1
-  decay_min_lr: 5e-4
 cluster: ai2/augusta-google-1
 metrics_config:
   project: tylerm-test-continual-pt
