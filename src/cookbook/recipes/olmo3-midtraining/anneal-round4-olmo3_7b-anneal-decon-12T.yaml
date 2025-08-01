@@ -33,16 +33,16 @@ dataset:
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/*/allenai/dolma2-tokenizer/*.npy
   - name: code
     target_ratio: 0.2
-    paths: # trying to use s3://ai2-llm/pretraining-data/sources/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/
+    paths: 
     - s3://ai2-llm/preprocessed/stack-edu/fim/documents-decon-2/fim_50pct_psm_50pct/*/allenai/dolma2-tokenizer/*.npy
   - name: megamatt
-    # 10% less the .0267 over 10% for dolminos2math
+    # 20% less the ratio for dolminos2math
     # 3_906_854_120
     target_ratio: 0.01706
-    paths: # assuming this is s3://ai2-llm/pretraining-data/sources/megamath_web_pro_max/llama_rewrites/ per allison
+    paths: 
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.18294 # has to decrease cuz only 12678161244 tokens in decon-2
+    target_ratio: 0.18294 
     paths:
     # 5_624_449_531
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
