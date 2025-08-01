@@ -9,7 +9,7 @@ from datetime import datetime
 from functools import partial
 from sys import stderr
 from threading import current_thread, main_thread
-from typing import Callable, ClassVar, Generic, List, TypeVar
+from typing import Callable, ClassVar, Generic, List, TypeVar, Dict, Set, Any, Union
 
 import requests
 from tqdm import tqdm
@@ -19,6 +19,38 @@ from cookbook.eval.cache import get_datalake_cache
 
 T = TypeVar("T")
 V = TypeVar("V")
+
+
+@dataclass
+class FilterTuple:
+    """Represents a filter tuple with doc_ids and task_names."""
+    doc_ids: Set[int]
+    task_names: Set[str]
+
+    @classmethod
+    def load_from_file(cls, file_path: str) -> List[Self]:
+        """Load filter tuples from a file."""
+        import ast
+        tuples = []
+        with open(file_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                # Parse the tuple - expecting format like (doc_id, ["task1", "task2"])
+                doc_id, task_names = ast.literal_eval(line)
+                if isinstance(doc_id, int):
+                    doc_ids = {doc_id}
+                else:
+                    doc_ids = set(doc_id) if isinstance(doc_id, (list, tuple)) else {doc_id}
+                
+                if isinstance(task_names, str):
+                    task_names = {task_names}
+                else:
+                    task_names = set(task_names)
+                
+                tuples.append(cls(doc_ids=doc_ids, task_names=task_names))
+        return tuples
 
 
 @dataclass
@@ -200,7 +232,15 @@ class Metrics:
             return self.extra_metrics["pass_at_16"]
 
     @classmethod
-    def from_dict(cls, d: dict) -> Self:
+    def from_dict(cls, d) -> Self:
+        # Handle case where d is already a Metrics object
+        if isinstance(d, cls):
+            return d
+        
+        # Handle case where d is a dict
+        if not isinstance(d, dict):
+            raise ValueError(f"Expected dict or {cls.__name__}, got {type(d)}")
+            
         # these are the names of the fields that are shared across tasks
         fields = {f.name for f in dataclass_fields(cls)}
 
@@ -372,3 +412,210 @@ class AddToDashboard(RemoveFromDashboard):
         else:
             # if we are single-threaded, then we can just run the function sequentially
             return [fn() for fn in fns]
+
+
+@dataclass
+class MetricsFiltered(MetricsAll):
+    """MetricsAll that filters results based on doc_ids and task_names."""
+    
+    def __init__(self, *args, filter_tuples: List[FilterTuple] = None, filter_mode: str = "include", 
+                 filtered_counts: Dict[str, Dict[str, int]] = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filter_tuples = filter_tuples or []
+        self.filter_mode = filter_mode  # "include" or "exclude"
+        self.filtered_counts = filtered_counts or {}
+
+    @classmethod
+    def _get_predictions_count(cls, experiment_id: str) -> int:
+        """Get the number of prediction files in an experiment."""
+        url = f"{cls._base_url}/greenlake/inspect/{experiment_id}"
+        params = {"resulttype": "PREDICTIONS"}
+        print(f"Getting predictions count from: {url} with params: {params}")
+        response = requests.get(
+            url,
+            params=params,
+            headers={"accept": "application/json"},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        count = data.get("PREDICTIONS_files", 0)
+        print(f"Found {count} prediction files")
+        return count
+
+    @classmethod
+    def _get_predictions_data(cls, experiment_id: str, task_idx: int) -> List[Dict[str, Any]]:
+        """Get predictions data for a specific task index."""
+        url = f"{cls._base_url}/greenlake/get-result/{experiment_id}"
+        params = {"resulttype": "PREDICTIONS", "task_idx": task_idx}
+        print(f"Making predictions request to: {url} with params: {params}")
+        response = requests.get(
+            url,
+            params=params,
+            headers={"accept": "application/json"},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        print(f"Got predictions response with {len(data)} items")
+        return data
+
+    @classmethod
+    def _get_metrics_metadata(cls, experiment_id: str, task_idx: int) -> Union[Dict[str, Any], List[Any]]:
+        """Get metrics metadata for a specific task index."""
+        url = f"{cls._base_url}/greenlake/get-result/{experiment_id}"
+        params = {"resulttype": "METRICS", "task_idx": task_idx}
+        print(f"Getting metrics metadata from: {url} with params: {params}")
+        response = requests.get(
+            url,
+            params=params,
+            headers={"accept": "application/json"},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        print(f"Got metrics metadata response")
+        return data
+
+    @classmethod
+    def _should_include_doc(cls, doc_id: int, task_name: str, filter_tuples: List[FilterTuple], 
+                           filter_mode: str) -> bool:
+        """Determine if a document should be included based on filter criteria."""
+        matches_filter = any(
+            doc_id in ft.doc_ids and task_name in ft.task_names 
+            for ft in filter_tuples
+        )
+        
+        if filter_mode == "include":
+            return matches_filter
+        elif filter_mode == "exclude":
+            return not matches_filter
+        else:
+            raise ValueError(f"Invalid filter_mode: {filter_mode}")
+
+    @classmethod
+    def _recalculate_metrics(cls, predictions: List[Dict[str, Any]], 
+                            task_name: str, primary_metric: str,
+                            filter_tuples: List[FilterTuple], 
+                            filter_mode: str) -> tuple[float, int, int]:
+        """Recalculate metrics based on filtered predictions."""
+        total_items = len(predictions)
+        filtered_predictions = []
+        
+        for pred in predictions:
+            doc_id = pred.get("doc_id")
+            if doc_id is not None and cls._should_include_doc(doc_id, task_name, filter_tuples, filter_mode):
+                filtered_predictions.append(pred)
+        
+        if not filtered_predictions:
+            return 0.0, 0, total_items
+        
+        # Calculate the primary metric average
+        metric_values = []
+        for pred in filtered_predictions:
+            metrics = pred.get("metrics", {})
+            if primary_metric in metrics and metrics[primary_metric] is not None:
+                metric_values.append(metrics[primary_metric])
+            else:
+                raise ValueError(f"Primary metric '{primary_metric}' not found in predictions for task '{task_name}'")
+        
+        if not metric_values:
+            return 0.0, len(filtered_predictions), total_items
+        
+        return sum(metric_values) / len(metric_values), len(filtered_predictions), total_items
+
+    @classmethod
+    def run(cls, experiment_id: str, filter_tuples: List[FilterTuple], filter_mode: str = "include",
+            force: bool = False, skip_on_fail: bool = False) -> List[Self]:
+        """Run filtered metrics calculation."""
+        
+        # First get the regular metrics for metadata
+        regular_metrics = MetricsAll.run(experiment_id, force=force, skip_on_fail=skip_on_fail)
+        if not regular_metrics:
+            return []
+        
+        # Get number of prediction files
+        try:
+            num_tasks = cls._get_predictions_count(experiment_id)
+        except Exception as e:
+            if skip_on_fail:
+                return []
+            else:
+                raise e
+        
+        filtered_metrics = []
+        filtered_counts = {}
+        
+        for task_idx in range(num_tasks):
+            try:
+                # Get predictions and metadata
+                predictions = cls._get_predictions_data(experiment_id, task_idx)
+                metadata_response = cls._get_metrics_metadata(experiment_id, task_idx)
+                
+                # Handle case where metadata is a list instead of dict
+                if isinstance(metadata_response, list):
+                    if not metadata_response:
+                        continue
+                    metadata = metadata_response[0]  # Take first item if it's a list
+                else:
+                    metadata = metadata_response
+                
+                task_name = metadata.get("task_name")
+                primary_metric = metadata.get("task_config", {}).get("primary_metric")
+                
+                if not task_name or not primary_metric:
+                    continue
+                
+                # Find corresponding regular metric for this task
+                regular_metric = None
+                for rm in regular_metrics:
+                    if rm.task_name == task_name and rm.task_idx == task_idx:
+                        regular_metric = rm
+                        break
+                
+                if not regular_metric:
+                    raise ValueError(f"Regular metric not found for task {task_name} (idx {task_idx}) in experiment {experiment_id}")
+                
+                # Recalculate metrics with filtering
+                new_primary_score, filtered_count, total_count = cls._recalculate_metrics(
+                    predictions, task_name, primary_metric, filter_tuples, filter_mode
+                )
+                
+                # Store filtering counts for reporting
+                filtered_counts[task_name] = {
+                    "filtered": filtered_count,
+                    "total": total_count
+                }
+                
+                # Create new filtered metric object
+                filtered_metric = cls(
+                    compute_config=regular_metric.compute_config,
+                    current_date=regular_metric.current_date,
+                    metrics=Metrics(
+                        primary_score=new_primary_score,
+                        # logits_per_byte_corr=regular_metric.metrics.logits_per_byte_corr,
+                        # bits_per_byte_corr=regular_metric.metrics.bits_per_byte_corr,
+                        # extra_metrics=regular_metric.metrics.extra_metrics
+                    ),
+                    model_config=regular_metric.model_config,
+                    model_hash=regular_metric.model_hash,
+                    num_instances=filtered_count,  # Use filtered count
+                    processing_time=regular_metric.processing_time,
+                    task_config=regular_metric.task_config,
+                    task_hash=regular_metric.task_hash,
+                    task_idx=regular_metric.task_idx,
+                    task_name=regular_metric.task_name,
+                    filter_tuples=filter_tuples,
+                    filter_mode=filter_mode,
+                    filtered_counts=filtered_counts
+                )
+                
+                filtered_metrics.append(filtered_metric)
+                
+            except Exception as e:
+                if skip_on_fail:
+                    continue
+                else:
+                    raise e
+        
+        return filtered_metrics

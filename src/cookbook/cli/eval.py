@@ -29,7 +29,7 @@ from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegist
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.results import make_dashboard_table, print_missing_tasks
+from cookbook.eval.results import make_dashboard_table, print_missing_tasks, print_filter_report
 
 logger = logging.getLogger(__name__)
 
@@ -566,14 +566,16 @@ def evaluate_model(
         # Call the dashboard to get all the missing results
         missing_tasks = get_results(
             dashboard,
-            model_name,
+            [model_name],
             tasks,
             format='return_missing',
             sort_by='avg',
-            sort_column_name=None,
-            sort_descending=None,
+            sort_column_name="",
+            sort_descending=False,
             force=False,
             skip_on_fail=True,
+            filter_include=None,
+            filter_exclude=None,
         )
 
         # Override our tasks with the missing set
@@ -674,6 +676,18 @@ def evaluate_model(
     is_flag=True,
     help="Skip experiments that fail to fetch results from the datalake",
 )
+@click.option(
+    "--filter-include",
+    type=str,
+    default=None,
+    help="Path to file containing filter tuples. Only includes items matching the tuples.",
+)
+@click.option(
+    "--filter-exclude",
+    type=str,
+    default=None,
+    help="Path to file containing filter tuples. Excludes items matching the tuples.",
+)
 def get_results(
     dashboard: str,
     models: list[str],
@@ -684,6 +698,8 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
+    filter_include: Optional[str] = None,
+    filter_exclude: Optional[str] = None,
 ) -> None:
 
     # compile tasks names into regex patterns (if possible)
@@ -698,21 +714,44 @@ def get_results(
         named_groups.extend(matching_groups)
         columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
-    # we get the metrics table from the datalake
-    metrics_table = make_dashboard_table(
-        dashboard=dashboard,
-        force=force,
-        skip_on_fail=skip_on_fail,
-    )
+    # Check if filtering is requested
+    if filter_include or filter_exclude:
+        # Validate mutually exclusive options
+        if filter_include and filter_exclude:
+            raise click.ClickException("Cannot specify both --filter-include and --filter-exclude")
+        
+        filter_file = filter_include or filter_exclude
+        filter_mode = "include" if filter_include else "exclude"
+        
+        # Load filter tuples
+        from cookbook.eval.results import load_filter_tuples
+        filter_tuples = load_filter_tuples(filter_file)  # type: ignore
+        
+        # Get filtered metrics table
+        metrics_table, filter_counts = make_dashboard_table(
+            dashboard=dashboard,
+            force=force,
+            skip_on_fail=skip_on_fail,
+            filter_tuples=filter_tuples,
+            filter_mode=filter_mode,
+        )
+        
+        # Print filter report in default format
+        if format == "table":
+            print_filter_report(filter_counts, filter_mode)
+    else:
+        # we get the metrics table from the datalake
+        metrics_table, _ = make_dashboard_table(
+            dashboard=dashboard,
+            force=force,
+            skip_on_fail=skip_on_fail,
+        )
 
     # start by filtering in all the single tasks
     results = metrics_table.keep_cols(*compiled_tasks)
 
     # then iterate over named groups...
     for named_group in named_groups:
-        console = Console(stderr=True)
-        console.print(named_group.tasks)
-
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
         combined_table = named_group.combine(metrics_table)

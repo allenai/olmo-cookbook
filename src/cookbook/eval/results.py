@@ -2,8 +2,9 @@ from datetime import datetime
 import logging
 import re
 import sys
+from typing import List, Dict, Union, Optional
 
-from cookbook.eval.datalake import FindExperiments, MetricsAll
+from cookbook.eval.datalake import FindExperiments, MetricsAll, MetricsFiltered, FilterTuple
 from cookbook.eval.miniframe import MiniFrame
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,37 @@ RE_RC_TASK = re.compile(r"(?P<prefix>:rc)($|:)")
 RE_SUITE_TASK = re.compile(r"(?P<prefix>::.+)$")
 
 
-def make_bpb_name(alias: str) -> str | None:
+def load_filter_tuples(file_path: str) -> List[FilterTuple]:
+    """Load filter tuples from a file."""
+    return FilterTuple.load_from_file(file_path)
+
+
+def print_filter_report(filter_counts: Dict[str, Dict[str, int]], filter_mode: str) -> None:
+    """Print a report of filter results."""
+    if not filter_counts:
+        print("No filtering information available.", file=sys.stderr)
+        return
+    
+    print(f"\n📊 Filter Report (mode: {filter_mode}):", file=sys.stderr)
+    print("-" * 50, file=sys.stderr)
+    
+    for task_name, counts in filter_counts.items():
+        kept_count = counts.get("filtered", 0)  # This is actually the count of items kept
+        total_count = counts.get("total", 0)
+        excluded_count = total_count - kept_count
+        
+        if filter_mode == "include":
+            percentage = (kept_count / total_count * 100) if total_count > 0 else 0
+            print(f"  {task_name}: {kept_count}/{total_count} items included ({percentage:.1f}%)", file=sys.stderr)
+        else:  # exclude mode
+            excluded_percentage = (excluded_count / total_count * 100) if total_count > 0 else 0
+            kept_percentage = (kept_count / total_count * 100) if total_count > 0 else 0
+            print(f"  {task_name}: {excluded_count}/{total_count} items excluded ({excluded_percentage:.1f}%), {kept_count} kept ({kept_percentage:.1f}%)", file=sys.stderr)
+    
+    print(file=sys.stderr)
+
+
+def make_bpb_name(alias: str) -> Union[str, None]:
     if ":bpb" in alias:
         # no double counting; this task already exists as bpb
         return None
@@ -29,7 +60,7 @@ def make_bpb_name(alias: str) -> str | None:
         return f"{alias}:bpb"
     
 
-def make_pass_at_k_name(alias: str, k: int) -> str | None:
+def make_pass_at_k_name(alias: str, k: int) -> Optional[str]:
     return f"{alias}:pass_at_{k}"
 
 
@@ -37,7 +68,9 @@ def make_dashboard_table(
     dashboard: str,
     force: bool = False,
     skip_on_fail: bool = False,
-) -> tuple[MiniFrame, dict[str, list[str]]]:
+    filter_tuples: Optional[List[FilterTuple]] = None,
+    filter_mode: str = "include",
+) -> tuple[MiniFrame, Dict[str, Dict[str, int]]]:
     experiments = FindExperiments.run(dashboard=dashboard)
 
     logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
@@ -45,17 +78,39 @@ def make_dashboard_table(
     # # these are the tables that will be displayed on the dashboard
     # tables = DashboardTables.from_title(dashboard)
 
-    metrics_table = MiniFrame(title=dashboard)
+    title_suffix = " (filtered)" if filter_tuples else ""
+    metrics_table = MiniFrame(title=f"{dashboard}{title_suffix}")
+    filter_counts = {}
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
-        return metrics_table
+        return metrics_table, filter_counts
 
-    metrics = MetricsAll.prun(
-        experiment_id=[experiment.experiment_id for experiment in experiments],
-        force=[force for _ in experiments],
-        skip_on_fail=[skip_on_fail for _ in experiments],
-    )
+    # Use MetricsFiltered if filter_tuples provided, otherwise use MetricsAll
+    if filter_tuples:
+        all_metrics = []
+        for experiment in experiments:
+            try:
+                filtered_metrics = MetricsFiltered.run(
+                    experiment_id=experiment.experiment_id,
+                    filter_tuples=filter_tuples,
+                    filter_mode=filter_mode,
+                    force=force,
+                    skip_on_fail=skip_on_fail
+                )
+                all_metrics.extend(filtered_metrics)
+            except Exception as e:
+                if skip_on_fail:
+                    continue
+                else:
+                    raise e
+        metrics = all_metrics
+    else:
+        metrics = MetricsAll.prun(
+            experiment_id=[experiment.experiment_id for experiment in experiments],
+            force=[force for _ in experiments],
+            skip_on_fail=[skip_on_fail for _ in experiments],
+        )
 
     # keep track of bpb metrics names; we need these to warn users if a metric is missing,
     # but we wanna report the original metric name in the warning.
@@ -82,11 +137,18 @@ def make_dashboard_table(
         # we add primary metric after checking that we have a model name
         assert metric.model_name is not None
 
+        # Collect filter counts if this is a filtered metric
+        if filter_tuples and hasattr(metric, 'filtered_counts') and getattr(metric, 'filtered_counts', None):
+            for task_name, counts in getattr(metric, 'filtered_counts').items():
+                if task_name not in filter_counts:
+                    filter_counts[task_name] = counts
+
         # @davidh: Hotfix for minerva math. The primary metric is set incorrectly in oe-eval but we
         # want to make 100% sure we're looking at the right metric, because a lot of midtraining eval
         # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
         if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
-            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+            if 'exact_match_flex' in metric.metrics.extra_metrics:
+                metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
 
         # @davidh: Hotfix for Alpaca Eval tasks. The alpaca eval metric multiplies its score by 100. No PR
         # in oe-eval to avoid messing with adapt's backend.
@@ -95,7 +157,8 @@ def make_dashboard_table(
 
         # @davidh: Hotfix for styled math. Fix here: https://github.com/allenai/oe-eval-internal/pull/592
         if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
-            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+            if 'exact_match_flex' in metric.metrics.extra_metrics:
+                metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
 
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
@@ -116,13 +179,13 @@ def make_dashboard_table(
             if (pass_at_16_alias := make_pass_at_k_name(metric.alias, k=16)) is not None:
                 metrics_table.add(col=pass_at_16_alias, row=metric.model_name, val=metric.metrics.pass_at_16)
 
-    return metrics_table
+    return metrics_table, filter_counts
 
 
 def print_missing_tasks(
     missing_tasks: dict[str, list[str]],
-    rows_filter_models: list[str | re.Pattern],
-    columns_filter_tasks: list[str | re.Pattern],
+    rows_filter_models: List[Union[str, re.Pattern]],
+    columns_filter_tasks: List[Union[str, re.Pattern]],
 ) -> None:
 
     # go through the missing models and tasks and print them out
