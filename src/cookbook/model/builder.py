@@ -156,9 +156,6 @@ class TransformerConfigBuilder:
         build_dataset_config() -> NumpyDatasetConfig:
             Builds and returns the dataset configuration.
 
-        get_scheduler_config(scheduler_type: SchedulerType) -> Scheduler:
-            Returns the scheduler configuration based on the scheduler type.
-
         get_optimizer_config() -> OptimConfig:
             Returns the optimizer configuration.
 
