@@ -87,6 +87,7 @@ class SchedulerConfig(BaseModel):
     warmup_fraction: Optional[float] = None
     decay: Optional[int] = None
     decay_fraction: Optional[float] = None
+    decay_min_lr: Optional[float] = None
 
     @classmethod
     def _validate_mutually_exclusive(cls, v, field_name, other_field_name, info):
