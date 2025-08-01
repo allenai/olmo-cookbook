@@ -1,11 +1,11 @@
-name: mjicroanneal-mj-swallowmathtest-swallowmatt-rewritex2
+name: mjicroanneal-mj-swallowmathtest-swallowmatt-rewritex2_proper
 description: microanneal to have 2x rewrites 
 budget: ai2/oe-base
 workspace: ai2/olmo-3-microanneals
 nodes: 2
 gpus: 8
 preemptible: true
-max_tokens: 10_000_000
+max_tokens: 10_000_000_000
 global_batch_size: 2_097_152
 sequence_length: 8_192
 seed: 1_337
