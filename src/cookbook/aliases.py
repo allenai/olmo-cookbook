@@ -117,14 +117,6 @@ class SchedulerConfig(BaseModel):
             raise ValueError("decay cannot be 0")
         return cls._validate_mutually_exclusive(v, "decay", "decay_fraction", info)
 
-    @field_validator("decay_fraction")
-    @classmethod
-    def validate_decay_fraction(cls, v, info):
-        """Validate that decay_fraction is mutually exclusive with decay and not zero"""
-        if v is not None and v == 0:
-            raise ValueError("decay_fraction cannot be 0")
-        return cls._validate_mutually_exclusive(v, "decay_fraction", "decay", info)
-
 
 class AnnealConfig(BaseModel):
     enabled: bool = True
