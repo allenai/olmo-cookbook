@@ -14,6 +14,7 @@ model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
 priority: urgent
 learning_rate: 5e-4
+activation_checkpointing: true
 scheduler_config:
   scheduler: WSD
   units: tokens
