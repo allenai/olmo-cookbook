@@ -26,6 +26,7 @@ metrics_config:
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906/model_and_optim/
 load_state: true
 dataset:
+  sources:
   - name: hqweb
     target_ratio: 1.0
     paths:
