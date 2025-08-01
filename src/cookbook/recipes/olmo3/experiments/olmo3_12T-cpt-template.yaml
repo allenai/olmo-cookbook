@@ -24,7 +24,7 @@ metrics_config:
   project: tylerm-test-continual-pt
   entity: ai2-llm
 load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906/
-load_state: true
+load_state: false
 dataset:
   sources:
   - name: hqweb
