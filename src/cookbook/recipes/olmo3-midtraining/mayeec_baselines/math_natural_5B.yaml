@@ -1,0 +1,55 @@
+name: "olmo3_7b-12T-5B-math-natural"
+description: "5B anneal 50/50 math and hqweb, natural distribution within math"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 5_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906 # 12T tokens
+load_state: false
+dataset:
+  sources:
+  - name: hqweb
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/50B/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.5
+  - name: math
+    topics:
+    - name: finemath3
+      paths:
+      - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.10108022084723373
+    - name: dolmino-math-1124
+      paths:
+      - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
+      target_ratio: 0.0315894285903455
+    - name: openmathreasoning-fullthoughts-rewrite
+      paths:
+      - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.015280372064414153
+    - name: tinymath-mind 
+      paths:
+      - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.0034650962171406
+    - name: tinymath-pot 
+      paths:
+      - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.009259336688567155
+    - name: megamath-web-pro-max
+      paths:
+      - s3://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
+      target_ratio: 0.3393255455922989
