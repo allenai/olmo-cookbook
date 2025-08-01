@@ -58,8 +58,9 @@ from cookbook.aliases import (
     AnnealConfig,
     MetricBackend,
     MetricsConfig,
-    SchedulerType,
     SourceInstance,
+    SchedulerConfig,
+    WrappedScheduler,
 )
 from cookbook.cli.core import estimate_batch_size
 from cookbook.data.dataset import MixtureBuilder
@@ -187,7 +188,7 @@ class TransformerConfigBuilder:
     lm_evaluator: bool
     cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
-    scheduler_type: SchedulerType
+    scheduler_config: SchedulerConfig
     model_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
     load_path: Optional[str]
@@ -219,7 +220,7 @@ class TransformerConfigBuilder:
         eval_interval: int,
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
-        scheduler_type: SchedulerType,
+        scheduler_config: SchedulerConfig,
         shard_degree: Optional[int] = None,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
@@ -269,7 +270,7 @@ class TransformerConfigBuilder:
         self.hard_stop = hard_stop
         self.annealing = annealing
         self.load_path_fs = load_path_fs
-        self.scheduler_type = scheduler_type
+        self.scheduler_config = scheduler_config
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
@@ -296,7 +297,7 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self) -> int:
-        if not self.warmup_steps == None:
+        if self.warmup_steps is not None:
             logger.info(f"Using user-defined warmup steps: {self.warmup_steps}")
             return self.warmup_steps
 
@@ -459,22 +460,6 @@ class TransformerConfigBuilder:
 
         return dataset_config
 
-    def get_scheduler_config(self) -> Scheduler:
-        scheduler_map = {
-            SchedulerType.COSINE: lambda: CosWithWarmup(warmup_steps=self.get_warmup_steps()),
-            SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
-                warmup_steps=self.get_warmup_steps(),
-            ),
-            SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
-            ),
-            SchedulerType.WSD: lambda: WSD(
-                warmup_steps=self.get_warmup_steps(),
-            ),
-        }
-
-        return scheduler_map[self.scheduler_type]()
-
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
 
@@ -624,6 +609,10 @@ class TransformerConfigBuilder:
             num_workers=12,
         )
 
+        scheduler_class = self.scheduler_config.scheduler
+        scheduler_config = self.scheduler_config.model_dump(exclude={"scheduler"}, exclude_none=True)
+        scheduler = WrappedScheduler.from_name_and_config(name=scheduler_class, config=scheduler_config)
+
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
@@ -643,7 +632,7 @@ class TransformerConfigBuilder:
             float8_config=self.get_fp8_config(),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
-            scheduler=self.get_scheduler_config(),
+            scheduler=scheduler,
         )
 
         trainer_config = TrainerConfig(

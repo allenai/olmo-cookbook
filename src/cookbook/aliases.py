@@ -6,6 +6,14 @@ from typing import Any, List, Optional, Union
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
 from olmo_core.train.common import Duration
+from olmo_core.optim import SchedulerUnits
+from olmo_core.optim.scheduler import (
+    WSD,
+    CosWithWarmup,
+    CosWithWarmupAndLinearDecay,
+    LinearWithWarmup,
+    Scheduler,
+)
 from pydantic import BaseModel, field_validator
 
 from cookbook.model.config import ModelConfigIdentifier
@@ -54,19 +62,64 @@ class MetricsConfig(BaseModel):
     backends: list[MetricBackend] = [MetricBackend.wandb]
 
 
-class SchedulerType(Enum):
-    COSINE = "cosine"
-    COS_LINEAR = "cos_linear"
-    LINEAR = "linear"
-    WSD = "wsd"
+class WrappedScheduler:
+    COSINE = CosWithWarmup
+    COSINE_LINEAR = CosWithWarmupAndLinearDecay
+    LINEAR = LinearWithWarmup
+    WSD = WSD
 
     @classmethod
-    def values(cls):
-        return [e.value for e in cls]
+    def from_name_and_config(cls, name: str, config: dict[str, Any]) -> Scheduler:
+        """Get the scheduler class by name and config"""
+
+        # TODO(undfined): Remove this temporary fix for issue in Scheduler conditional check
+        # where decay_fraction = None is required
+        if "decay" in config:
+            config["decay_fraction"] = None
+
+        return getattr(cls, name)(**config)
+
+
+class SchedulerConfig(BaseModel):
+    scheduler: str = "COSINE_LINEAR"
+    units: SchedulerUnits = SchedulerUnits.steps
+    warmup: Optional[int] = None
+    warmup_fraction: Optional[float] = None
+    decay: Optional[int] = None
+    decay_fraction: Optional[float] = None
 
     @classmethod
-    def keys(cls):
-        return [e.name for e in cls]
+    def _validate_mutually_exclusive(cls, v, field_name, other_field_name, info):
+        """Helper method to validate that two fields are mutually exclusive."""
+        if v is not None and info.data.get(other_field_name) is not None:
+            raise ValueError(
+                f"{field_name} and {other_field_name} are mutually exclusive and cannot both be specified."
+            )
+        return v
+
+    @field_validator("warmup")
+    @classmethod
+    def validate_warmup(cls, v, info):
+        """Validate that warmup and warmup_fraction are not both specified."""
+        return cls._validate_mutually_exclusive(v, "warmup", "warmup_fraction", info)
+
+    @field_validator("warmup_fraction")
+    @classmethod
+    def validate_warmup_fraction(cls, v, info):
+        """Validate that warmup and warmup_fraction are not both specified."""
+        return cls._validate_mutually_exclusive(v, "warmup_fraction", "warmup", info)
+
+    @field_validator("decay")
+    @classmethod
+    def validate_decay(cls, v, info):
+        """Validate that decay is mutually exclusive with decay_fraction"""
+        return cls._validate_mutually_exclusive(v, "decay", "decay_fraction", info)
+
+    @field_validator("decay_fraction")
+    @classmethod
+    def validate_decay_fraction(cls, v, info):
+        """Validate that decay_fraction is mutually exclusive with decay"""
+        return cls._validate_mutually_exclusive(v, "decay_fraction", "decay", info)
 
 
 class AnnealConfig(BaseModel):
@@ -95,7 +148,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     nccl_debug: bool = False
     activation_checkpointing: bool = False
     model_overrides: Optional[List[str]] = None
-    scheduler_type: SchedulerType = SchedulerType.COS_LINEAR
+    scheduler_config: SchedulerConfig
     hard_stop: Optional[Duration] = None
     rank_microbatch_size: Optional[int] = None
     learning_rate: Optional[float] = None
