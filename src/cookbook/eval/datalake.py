@@ -517,8 +517,10 @@ class MetricsFiltered(MetricsAll):
             if primary_metric in metrics and metrics[primary_metric] is not None:
                 metric_values.append(metrics[primary_metric])
             else:
-                raise ValueError(f"Primary metric '{primary_metric}' not found in predictions for task '{task_name}'")
-        
+                print(f"Warning: Primary metric '{primary_metric}' not found in prediction {pred.get('doc_id')}")
+                # If no metric values found, return 0.0
+                return 0.0, 0, total_items
+
         if not metric_values:
             return 0.0, len(filtered_predictions), total_items
         
@@ -574,7 +576,8 @@ class MetricsFiltered(MetricsAll):
                         break
                 
                 if not regular_metric:
-                    raise ValueError(f"Regular metric not found for task {task_name} (idx {task_idx}) in experiment {experiment_id}")
+                    print(f"Warning: No regular metric found for task {task_name} at index {task_idx}")
+                    continue
                 
                 # Recalculate metrics with filtering
                 new_primary_score, filtered_count, total_count = cls._recalculate_metrics(
