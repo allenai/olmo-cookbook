@@ -340,7 +340,6 @@ def evaluate_checkpoint(
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
             print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
             output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
-            breakpoint()
             print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
             if output.returncode != 0:
                 raise RuntimeError(f"Error running command: {cmd}")
