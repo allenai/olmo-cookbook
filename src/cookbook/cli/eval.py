@@ -529,6 +529,9 @@ def evaluate_model(
     The evaluation results will be saved to the specified remote output prefix.
     """
 
+    if (oe_eval_branch is not None or oe_eval_commit is not None) and not use_gantry:
+        raise ValueError("If oe-eval branch or commit is provided, --use-gantry should be enabled.")
+
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
 
