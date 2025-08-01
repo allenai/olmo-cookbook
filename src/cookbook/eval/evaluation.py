@@ -304,7 +304,7 @@ def evaluate_checkpoint(
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
+            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", "yes": True, **gantry_args_dict}
 
             # finally append gantry args
             local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
@@ -340,6 +340,7 @@ def evaluate_checkpoint(
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
             print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
             output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
+            breakpoint()
             print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
             if output.returncode != 0:
                 raise RuntimeError(f"Error running command: {cmd}")
