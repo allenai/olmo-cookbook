@@ -23,7 +23,7 @@ cluster: ai2/augusta-google-1
 metrics_config:
   project: tylerm-test-continual-pt
   entity: ai2-llm
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906/model_and_optim/
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906/
 load_state: true
 dataset:
   sources:
