@@ -18,8 +18,6 @@ activation_checkpointing: true
 scheduler_config:
   scheduler: WSD
   units: tokens
-  warmup: 0
-  decay: 0
 cluster: ai2/augusta-google-1
 metrics_config:
   project: tylerm-test-continual-pt
