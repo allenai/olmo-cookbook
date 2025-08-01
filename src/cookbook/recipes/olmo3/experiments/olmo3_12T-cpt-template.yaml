@@ -19,7 +19,7 @@ scheduler_config:
   scheduler: WSD
   units: tokens
   warmup: 0
-  decay_fraction: 0
+  decay: 1
 cluster: ai2/augusta-google-1
 metrics_config:
   project: tylerm-test-continual-pt
