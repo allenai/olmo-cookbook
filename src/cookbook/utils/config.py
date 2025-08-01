@@ -2,7 +2,7 @@ import logging
 import math
 import os
 from pathlib import Path
-from typing import List, Tuple, Union, cast
+from typing import List, Tuple, Union, cast, Optional
 from urllib.parse import urlparse
 
 import gcsfs
@@ -189,7 +189,7 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
-def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False, source: List[Tuple[str, List[str], str, str]]= []):
+def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False, source: Optional[List[Tuple[str, List[str], str, str]]]= None):
     """
     Launch a training run with the given parameters.
     """
@@ -214,7 +214,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
             base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
 
-    if len(source) != 0:
+    if source is not None:
         source_instances: List[SourceInstance] = []
         for item in source:
             name, paths, ratio, repetition = item
