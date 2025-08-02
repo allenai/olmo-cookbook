@@ -70,9 +70,9 @@ for model in "${models[@]}"; do
         "/oe-training-default/$model" \
         -t olmo-core-v2 \
         --use-beaker \
-        --olmo-core-v2-commit-hash  013ef7b54aa2d583f9811ec6211a536da407a4b1 \
+        --olmo-core-v2-commit-hash  57a04d0b69047d797c96eede056a211e75b5914a \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
-        --huggingface-transformers-commit-hash ca728b8879ce5127ea3e2f8d309c2c5febab5dc5 \
+        --huggingface-transformers-commit-hash ae3889ced6ed7362e5883671fc6dc4cb4fece5fa \
         --beaker-allow-dirty
 done
 
@@ -81,18 +81,33 @@ done
 # Launch regular evals
 dashboard="olmo3-midtraining-web"
 for model in "${models[@]}"; do
-    uv run olmo-cookbook-eval evaluate \
-        "/oe-training-default/${model}-hf" \
-        --tasks dev:7b:main \
-        --priority high \
-        --cluster aus80g \
-        --partition-size 8 \
-        --num-gpus 1 \
-        --model-backend vllm \
-        --model-args trust_remote_code=true,max_length=4096 \
-        --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
-        --dashboard ${dashboard} \
-        --workspace ai2/oe-data
+    olmo-cookbook-eval evaluate \
+    "/oe-training-default/${model}-hf" \
+    --tasks olmo3:dev:7b:main \
+    --priority high \
+    --cluster aus80g \
+    --partition-size 8 \
+    --num-gpus 1 \
+    --model-backend vllm \
+    --model-args trust_remote_code=true,max_length=4096 \
+    --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \
+    --fim-tokens l2c \
+    --vllm-use-v1-spec \
+    --vllm-memory-utilization 0.7 \
+    --dashboard ${dashboard} \
+    --workspace ai2/oe-data
+    # uv run olmo-cookbook-eval evaluate \
+    #     "/oe-training-default/${model}-hf" \
+    #     --tasks dev:7b:main \
+    #     --priority high \
+    #     --cluster aus80g \
+    #     --partition-size 8 \
+    #     --num-gpus 1 \
+    #     --model-backend vllm \
+    #     --model-args trust_remote_code=true,max_length=4096 \
+    #     --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
+    #     --dashboard ${dashboard} \
+    #     --workspace ai2/oe-data
 done
 
 
