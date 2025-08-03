@@ -24,11 +24,11 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
@@ -323,7 +323,7 @@ def convert_checkpoint(
     "--partition-size",
     type=int,
     default=0,
-    help="How many tasks to evaluate in parallel. Set to 0 (default) to evaluate all tasks in sequence.",
+    help="How many tasks to evaluate per job. Set to 0 (default) to evaluate all tasks in sequence. Set to 1 for maximum parallelism.",
 )
 @click.option(
     "-y",
@@ -381,9 +381,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMoCore)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
@@ -571,8 +571,8 @@ def evaluate_model(
             dashboard,
             model_name,
             tasks,
-            format='return_missing',
-            sort_by='avg',
+            format="return_missing",
+            sort_by="avg",
             sort_column_name=None,
             sort_descending=None,
             force=False,
@@ -583,7 +583,7 @@ def evaluate_model(
         if model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
-            print(f'Found no missing tasks for {model_name}')
+            print(f"Found no missing tasks for {model_name}")
             return
 
     evaluate_checkpoint(
@@ -688,7 +688,6 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -768,7 +767,7 @@ def get_results(
         columns_filter_tasks=columns_filter_tasks,
     )
 
-    if format == 'return_missing':
+    if format == "return_missing":
         return missing_tasks
 
     # okay we got all results! now time to sort them depending on the user's request
