@@ -18,7 +18,7 @@ from olmo_core.data import (
 )
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.float8 import Float8Config
+from olmo_core.float8 import AOFloat8LinearConfig, Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
@@ -101,6 +101,7 @@ class TransformerConfigBuilder:
         seed (int): The random seed for reproducibility.
         tokenizer (TokenizerConfig): The tokenizer configuration.
         dtype (str): The data type for the dataset.
+        generate_doc_lengths (bool): Whether to generate document lengths for the dataset. Enabling this enables intra-document masking.
         weka (bool): Whether to use Weka buckets.
         metrics_config (Optional[MetricsConfig]): The metrics configuration, if any.
         max_dp_world_size (int): The maximum data parallel world size.
@@ -117,6 +118,9 @@ class TransformerConfigBuilder:
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
+        dp_shard_degree (Optional[int]): The data parallel model/optimizer sharding degree.
+        cp_degree (Optional[int]): The number of devices to split context parallelism across. Useful for long context training.
+        float8 (bool): Whether to enable torchao float8 linear layers.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -175,6 +179,7 @@ class TransformerConfigBuilder:
     seed: int
     tokenizer: TokenizerConfig
     dtype: str
+    generate_doc_lengths: bool
     weka: bool
     metrics_config: Optional[MetricsConfig]
     max_dp_world_size: int
@@ -193,6 +198,9 @@ class TransformerConfigBuilder:
     warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    dp_shard_degree: Optional[int]
+    cp_degree: Optional[int]
+    float8: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
 
@@ -208,6 +216,7 @@ class TransformerConfigBuilder:
         tokenizer: str,
         dtype: str,
         model_identifier: ModelConfigIdentifier,
+        generate_doc_lengths: bool,
         weka: bool,
         max_dp_world_size: int,
         save_interval: int,
@@ -216,6 +225,9 @@ class TransformerConfigBuilder:
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
+        dp_shard_degree: Optional[int] = None,
+        cp_degree: Optional[int] = None,
+        float8: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
         annealing: Optional[AnnealConfig] = None,
@@ -243,15 +255,18 @@ class TransformerConfigBuilder:
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.activation_checkpointing = activation_checkpointing
+        self.dp_shard_degree = dp_shard_degree
+        self.cp_degree = cp_degree
+        self.float8 = float8
         self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
+        self.generate_doc_lengths = generate_doc_lengths
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
         self.max_dp_world_size = max_dp_world_size
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
         self.save_interval = save_interval
-        self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
         self.learning_rate = learning_rate
         self.global_batch_size = global_batch_size
@@ -359,8 +374,7 @@ class TransformerConfigBuilder:
                     # it is ignored for wandb metrics, only entity is used
                     # (it is used for comet metrics)
                     logger.warning(
-                        "metrics_config.workspace is ignored for WandB metrics. "
-                        "Use metrics_config.entity instead."
+                        "metrics_config.workspace is ignored for WandB metrics. Use metrics_config.entity instead."
                     )
 
                 callbacks[MetricBackend.wandb.value] = WandBCallback(
@@ -376,8 +390,7 @@ class TransformerConfigBuilder:
                     # show warning if entity is set to non-default value;
                     # it is not used for comet metrics (only workspace is used)
                     logger.warning(
-                        "metrics_config.entity is ignored for Comet metrics. "
-                        "Use metrics_config.workspace instead."
+                        "metrics_config.entity is ignored for Comet metrics. Use metrics_config.workspace instead."
                     )
 
                 callbacks[MetricBackend.comet.value] = CometCallback(
@@ -397,6 +410,7 @@ class TransformerConfigBuilder:
                     sequence_length=self.sequence_length,
                     tokenizer=self.tokenizer,
                     work_dir=self.dataset_cache,
+                    generate_doc_lengths=self.generate_doc_lengths,
                 ),
                 eval_interval=self.eval_interval,
             )
@@ -445,6 +459,7 @@ class TransformerConfigBuilder:
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
+            generate_doc_lengths=self.generate_doc_lengths,
         )
 
         return dataset_config
@@ -476,6 +491,7 @@ class TransformerConfigBuilder:
             weight_decay=0.033,
             betas=(0.9, 0.95),
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+            foreach=True,
         )
 
     def get_ac_config(self):
@@ -483,6 +499,15 @@ class TransformerConfigBuilder:
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
             modules=["blocks.*.feed_forward"],
+        )
+
+    def get_float8_config(self):
+        return Float8Config(
+            ao=AOFloat8LinearConfig(
+                enable_fsdp_float8_all_gather=True,
+                force_recompute_fp8_weight_in_bwd=True,
+                round_scales_to_power_of_2=True,
+            )
         )
 
     def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
@@ -539,30 +564,47 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            base_lr: int = config["train_module"]["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
+        except KeyError:
             # Now try olmo_core v1 config format
             try:
                 base_lr: int = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
-            except KeyError as e:
+            except Exception as e:
                 logger.error(
-                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                    e,
                 )
                 raise e
 
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
+            assert scheduler_class == CosWithWarmup.__name__ or scheduler_class == WSD.__name__
         except AssertionError as e:
             logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+                f"Expected scheduler class {CosWithWarmup.__name__} or {WSD.__name__}, but got {scheduler_class}: Anneals from a base LR cannot be inferred from this scheduler type. Exiting!"
             )
             raise e
 
-        scheduler = CosWithWarmup(**scheduler_config)
+        try:
+            if scheduler_class == WSD.__name__:
+                if not scheduler_config.get("decay_fraction", None):
+                    scheduler_config["decay_fraction"] = None
+                scheduler = WSD(**scheduler_config)
+            elif scheduler_class == CosWithWarmup.__name__:
+                scheduler = CosWithWarmup(**scheduler_config)
+            else:
+                raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+        except Exception as e:
+            logger.error(
+                "Could not instantiate scheduler from config. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                e,
+            )
+            logger.info(scheduler_config)
+            raise e
+
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
         return SchedulerState(
@@ -596,10 +638,16 @@ class TransformerConfigBuilder:
             optim=self.get_optimizer_config(),
             compile_model=True,
             dp_config=train_module.TransformerDataParallelConfig(
-                name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
+                name=DataParallelType.hsdp,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+                shard_degree=self.dp_shard_degree,
             ),
+            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+            if self.cp_degree
+            else None,
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
-            float8_config=Float8Config(enabled=False),
+            float8_config=self.get_float8_config() if self.float8 else Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
             scheduler=self.get_scheduler_config(),
