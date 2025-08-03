@@ -323,7 +323,7 @@ def convert_checkpoint(
     "--partition-size",
     type=int,
     default=0,
-    help="How many tasks to evaluate in parallel. Set to 0 (default) to evaluate all tasks in sequence.",
+    help="How many tasks to evaluate per job. Set to 0 (default) to evaluate all tasks in sequence. Set to 1 for maximum parallelism.",
 )
 @click.option(
     "-y",
@@ -381,9 +381,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMoCore)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
