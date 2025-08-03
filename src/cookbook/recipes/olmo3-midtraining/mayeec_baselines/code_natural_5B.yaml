@@ -30,12 +30,12 @@ dataset:
   - name: code:stackedu-fim
     paths:
     - s3://ai2-llm/preprocessed/stack-edu-fim/all-weighted-pl-disjoint-10B-v0/allenai/dolma2-tokenizer/*/*/*.npy
-    target_ratio: 0.12254408120097456
+    target_ratio: 0.14213131391542685
   - name: code:stackedu
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/weighted-pl-disjoint-10B-v0/allenai/dolma2-tokenizer/*/*/*.npy
-    target_ratio: 0.12316341266894161
+    target_ratio: 0.14284963824760707
   - name: code:swallowcode
     paths:
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/original_data/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.18538709684741372
+    target_ratio: 0.21501904783696604
