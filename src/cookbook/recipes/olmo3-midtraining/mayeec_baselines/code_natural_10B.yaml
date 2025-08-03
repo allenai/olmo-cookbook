@@ -11,7 +11,7 @@ sequence_length: 8192
 seed: 1337
 model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
-priority: high
+priority: urgent
 cluster: ai2/augusta-google-1
 rank_microbatch_size: 16384
 scheduler_type: linear
