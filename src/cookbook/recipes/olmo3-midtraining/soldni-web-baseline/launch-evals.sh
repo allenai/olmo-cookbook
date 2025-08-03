@@ -77,13 +77,12 @@ for model in "${models[@]}"; do
 done
 
 
-
 # Launch regular evals
 dashboard="olmo3-midtraining-web"
 for model in "${models[@]}"; do
     uv run olmo-cookbook-eval evaluate \
         "/oe-training-default/${model}-hf" \
-        --tasks  arc:mc::xlarge \
+        --tasks  olmo3:dev:7b:main  \
         --priority high \
         --cluster aus80g \
         --partition-size 8 \
@@ -99,23 +98,23 @@ for model in "${models[@]}"; do
 done
 
 
-# Launch reasoning evals
-for model in "${models[@]}"; do
-    uv run olmo-cookbook-eval evaluate \
-        "/oe-training-default/${model}-hf" \
-        --tasks olmo3:dev:midtrain:v0 \
-        --priority high \
-        --cluster aus80g \
-        --num-gpus 1 \
-        --partition-size 8 \
-        --model-backend vllm \
-        --no-compute-gold-bpb \
-        --model-args chat_template=basic_answer,trust_remote_code=true,max_length=8192 \
-        --use-gantry \
-        --gantry-args env-secret="OPENAI_API_KEY=openai_api_key" \
-        --task-args chat_overrides="{\"generation_kwargs\": {\"stop_sequences\": [\"Problem:\", \"Answer:\", \"Question:\", \"</s>\", \"<|eot_id|>\"]}}" \
-        --oe-eval-branch davidh/head-qk-norm \
-        --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
-        --dashboard olmo3-midtraining-web \
-        --workspace ai2/oe-data
-done
+# # Launch reasoning evals
+# for model in "${models[@]}"; do
+#     uv run olmo-cookbook-eval evaluate \
+#         "/oe-training-default/${model}-hf" \
+#         --tasks olmo3:dev:midtrain:v0 \
+#         --priority high \
+#         --cluster aus80g \
+#         --num-gpus 1 \
+#         --partition-size 8 \
+#         --model-backend vllm \
+#         --no-compute-gold-bpb \
+#         --model-args chat_template=basic_answer,trust_remote_code=true,max_length=8192 \
+#         --use-gantry \
+#         --gantry-args env-secret="OPENAI_API_KEY=openai_api_key" \
+#         --task-args chat_overrides="{\"generation_kwargs\": {\"stop_sequences\": [\"Problem:\", \"Answer:\", \"Question:\", \"</s>\", \"<|eot_id|>\"]}}" \
+#         --oe-eval-branch davidh/head-qk-norm \
+#         --beaker-image oe-eval-beaker/oe_eval_qk_norm_auto \
+#         --dashboard olmo3-midtraining-web \
+#         --workspace ai2/oe-data
+# done
