@@ -38,11 +38,11 @@ dataset:
   - name: megamatt
     # 20% less the ratio for dolminos2math
     # 3_906_854_120
-    target_ratio: 0.01706
+    target_ratio: 0.01698
     paths: 
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.18294 
+    target_ratio: 0.18302 
     paths:
     # 5_624_449_531
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
