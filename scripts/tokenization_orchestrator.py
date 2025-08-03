@@ -443,7 +443,7 @@ class DataProcessor:
                         dest_base = dest_base[:-len(ext)]
                         break
                 local_tokenized_path = self.local_dir / self.output_prefix / dest_base / self.tokenizer.replace('/', '/')
-                remote_dest = f"{self.remote_prefix}{self.output_prefix}/{dest_base}/{self.tokenizer}/"
+                remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{dest_base}/{self.tokenizer}/"
                 
                 if self.dry_run:
                     print(f"Would upload file tokenization:")
@@ -468,12 +468,12 @@ class DataProcessor:
                         print(f"Would upload directory with subdirectories: {path}")
                         for subdir in subdirs:
                             sub_local_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
-                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{subdir.name}/{self.tokenizer}/"
+                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
                             print(f"  Subdir: {sub_local_path} -> {sub_remote_dest}")
                     else:
                         for subdir in subdirs:
                             sub_local_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
-                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{subdir.name}/{self.tokenizer}/"
+                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
                             
                             if not sub_local_path.exists():
                                 errors.append(f"Tokenized data not found: {sub_local_path}")
@@ -490,7 +490,7 @@ class DataProcessor:
                 else:
                     # Regular directory
                     local_tokenized_path = self.local_dir / self.output_prefix / relative_path / self.tokenizer.replace('/', '/')
-                    remote_dest = f"{self.remote_prefix}{self.output_prefix}/{relative_path}/{self.tokenizer}/"
+                    remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{self.tokenizer}/"
                     
                     if self.dry_run:
                         print(f"Would upload regular directory:")
