@@ -750,7 +750,7 @@ class Olmo3Dev7bCodeGenV2Group(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
-@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v1:n32:pass_at_16")
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v2:n32:pass_at_16")
 class Olmo3Dev7bCodeGenMiniV2N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # We only use a subset of code gen benchmarks for pass@k for speed
