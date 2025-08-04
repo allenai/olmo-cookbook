@@ -63,6 +63,11 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-pstar-17789775/step4769'
 )
 
+models=(
+    "ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-p80-8k-pstar-ca2b61f5/step4769"
+    "ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-p80-8k-c404de0f/step4769"
+)
+
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
