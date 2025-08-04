@@ -35,7 +35,7 @@ dataset:
     target_ratio: 0.2
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
-  - name: bigreasoningtraces 
+  - name: qwq-redo 
     target_ratio: 0.1
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens/allenai/dolma2-tokenizer/*.npy
