@@ -56,6 +56,13 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-4T-round1-flan-synthqa-9c478641/step4769'
 )
 
+models=(
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-8k-d3b43c16/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-8k-pstar-1d88f3b4/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-51abc869/step4769'
+    'ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-pstar-17789775/step4769'
+)
+
 
 # Moving checkpoints to weka
 for model in "${models[@]}"; do
@@ -80,7 +87,8 @@ done
 # Launch regular evals
 dashboard="olmo3-midtraining-web"
 for model in "${models[@]}"; do
-    uv run olmo-cookbook-eval evaluate \
+    uv run --python 3.12 \
+        olmo-cookbook-eval evaluate \
         "/oe-training-default/${model}-hf" \
         --tasks  olmo3:dev:7b:main  \
         --priority high \
