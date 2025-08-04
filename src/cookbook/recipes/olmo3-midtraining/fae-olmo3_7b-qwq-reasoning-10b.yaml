@@ -1,11 +1,11 @@
-name: "math-code-with-llamma-nemotron-reasoning-olmo3-microanneal-5b"
-description: "OLMo3 7b 5B web, math and code with llamma nemotron microanneal"
+name: "math-code-with-qwq-reasoning-olmo3-microanneal-10b"
+description: "OLMo3 7b 5B web, math and code with qwq microanneal"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 5_000_000_000
+max_tokens: 10_000_000_000
 global_batch_size: 2097152
 sequence_length: 8192
 seed: 1337
@@ -28,14 +28,14 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
   - name: code
-    target_ratio: 0.3
+    target_ratio: 0.2
     paths:
     - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
   - name: finemath
     target_ratio: 0.2
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
-  - name: llama-nemotron 
-    target_ratio: 0.1
+  - name: qwq-redo 
+    target_ratio: 0.2
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens/allenai/dolma2-tokenizer/*.npy
