@@ -30,24 +30,24 @@ dataset:
   - name: math:finemath3
     paths:
     - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.10108022084723373
+    target_ratio: 0.14120412980879246
   - name: math:dolmino-math-1124
     paths:
     - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
-    target_ratio: 0.0315894285903455
+    target_ratio: 0.04435795451598006
   - name: math:openmathreasoning-fullthoughts-rewrite
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.015280372064414153
+    target_ratio: 0.003527658515424922
   - name: math:tinymath-mind 
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.0034650962171406
+    target_ratio: 0.003726144915259217
   - name: math:tinymath-pot
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.009259336688567155
+    target_ratio: 0.0009974871423942472
   - name: math:megamath-web-pro-max
     paths:
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.3393255455922989
+    target_ratio: 0.30618662510214906
