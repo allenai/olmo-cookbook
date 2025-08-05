@@ -1,0 +1,52 @@
+name: "olmo3_7b-12T-format-microanneal-5B-qwq-no-escape-reinit"
+description: "OLMo3 7b 12T checkpoint on 5B tokens, Qwen QwQ template, special tokens are not escaped, reinitialized special token embeddings"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 5_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+  initial_lr: 8.8e-05
+load_path: gs://ai2-llm/checkpoints/alisal/OLMo3-7B-swafix/step756906-reinit/model_and_optim
+load_state: false
+dataset:
+  sources:
+  - name: web
+    target_ratio: 0.4
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
+  - name: code
+    target_ratio: 0.2
+    paths:
+    - s3://ai2-llm/preprocessed/stackedu-fim-20pct-natural/allenai/dolma2-tokenizer/*.npy
+  - name: finemath
+    # 10% less the .0195 over 10% for dolminos2math
+    target_ratio: 0.0806
+    paths:
+    - gs://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+  - name: dolminos2math
+    target_ratio: 0.1194
+    paths:
+    # 10.7B
+    - s3://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
+    # 1.25B
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/mj_intermediate_math/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
+  - name: instruction 
+    target_ratio: 0.2
+    paths:
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/tulu-3-midtrain-v0-data-qwen-qwq-template-no-escape/allenai/dolma2-tokenizer/*.npy
