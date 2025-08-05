@@ -34,11 +34,12 @@ dataset:
   - name: pdfs
     target_ratio: [ratio tbd]
     paths:
-    - [path incoming]
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/*/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/*/allenai/dolma2-tokenizer/*.npy
   - name: code_fim
     target_ratio: 0.2
     paths: 
-    # 11,477,583,395
+    # 21,390,279,634
     - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/*.npy
   - name: swallowcode
     target_ratio: [ratio tbd]
@@ -80,7 +81,8 @@ dataset:
   - name: nemotron-synth-qa
     target_ratio: [ratio tbd]
     paths:
-    - [paths incoming]
+    # 486,558,362,887
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon/allenai/dolma2-tokenizer/*.npy
   - name: instruction
     target_ratio: 0.011
     paths:
@@ -94,7 +96,8 @@ dataset:
   - name: flan
     target_ratio: [ratio tbd]
     paths:
-    - [paths incoming]
+    # 17,055,708,123
+    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased-decon/allenai/dolma2-tokenizer/*.npy
   - name: r1_reasoning
     target_ratio: 0.01875
     paths:
@@ -123,15 +126,24 @@ dataset:
   - name: faeze_reasoning
     target_ratio: .01
     paths:
-    # 1,198,073,462
+    # ORIGINALS
+    # 1,198,073,462 --> actually code meta reasoning
     - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning/documents-decon-2/allenai/dolma2-tokenizer/*.npy
-    # 366,757,554
+    # 366,757,554 --> has special tokens
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/documents-decon-2/allenai/dolma2-tokenizer/*.npy
-    # 1,198,074,765
+    # 1,198,074,765 --> different version of code meta reasoning
     - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning/documents-decon-2/allenai/dolma2-tokenizer/*.npy
     ####
-    # newly-formatted sets
-    # 1,057,302,754
+    # FIXES
+    # 1,049,524,455 --> actual math meta reasoning
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
+    # 364,483,656 --> verifiable/gpt-41 without special tokens
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    # 73,752,560 --> verifiable/gpt-o4-mini without special tokens
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon/allenai/dolma2-tokenizer/*.npy
+    ####
+    # NEW FORMAT
+    # 1,057,302,754 --> actual math meta-reasoning with latex format
     - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
-    # 1,199,242,351
+    # 1,199,242,351 --> actual code meta-reasoning with latex format
     - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
