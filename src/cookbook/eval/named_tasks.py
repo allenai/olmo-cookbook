@@ -125,12 +125,6 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
 
         combined_table = MiniFrame(title=results.title)
 
-        # Add empty values to all tasks
-        for row in results.rows:
-            for task in self.expanded_tasks:
-                if isinstance(task, str):
-                    combined_table.add(col=task, row=row.name, val=None)
-
         # each row here is a model
         for row in filtered_rows.rows:
             # we compute the average of the scores for this model; we set the average to None if
