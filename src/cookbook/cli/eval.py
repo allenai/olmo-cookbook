@@ -580,7 +580,7 @@ def evaluate_model(
         )
 
         # Override our tasks with the missing set
-        if model_name in missing_tasks:
+        if missing_tasks and model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
             print(f"Found no missing tasks for {model_name}")
@@ -687,7 +687,7 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-) -> None:
+) -> dict[str, list[str]] | None:
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -695,10 +695,28 @@ def get_results(
     # which we will use later to print any missing tasks.
     named_groups: list[BaseNamedTasksGroup] = []
     columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
+    initial_filter_tasks: list[str | re.Pattern] = []
+    
     for compiled_task in compiled_tasks:
         matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
-        named_groups.extend(matching_groups)
-        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
+        if matching_groups:
+            # This is a named group, add to named_groups
+            named_groups.extend(matching_groups)
+            # Convert expanded task names to regex patterns that match hash suffixes
+            for ng in matching_groups:
+                for task in ng.expanded_tasks:
+                    if isinstance(task, str):
+                        # Create regex pattern that matches task name with optional hash suffix
+                        task_pattern = re.compile(f"^{re.escape(task)}(?:-[a-f0-9]{{6}})?$")
+                        columns_filter_tasks.append(task_pattern)
+                        initial_filter_tasks.append(task_pattern)
+                    else:
+                        columns_filter_tasks.append(task)
+                        initial_filter_tasks.append(task)
+        else:
+            # This is a single task
+            columns_filter_tasks.append(compiled_task)
+            initial_filter_tasks.append(compiled_task)
 
     # we get the metrics table from the datalake
     metrics_table = make_dashboard_table(
@@ -707,8 +725,8 @@ def get_results(
         skip_on_fail=skip_on_fail,
     )
 
-    # start by filtering in all the single tasks
-    results = metrics_table.keep_cols(*compiled_tasks)
+    # Filter to get all relevant tasks (both single tasks and expanded group tasks)
+    results = metrics_table.keep_cols(*initial_filter_tasks)
 
     # then iterate over named groups...
     for named_group in named_groups:
@@ -722,17 +740,8 @@ def get_results(
         if combined_table is not None:
             # we manage to combine! lets put the combined score at the front
             results = combined_table + results
-        else:
-            # this cannot be combined. let's add each metric as a column. make sure not
-            # to include duplicates.
-            named_group_table = metrics_table.keep_cols(*named_group.expanded_tasks)
-            existing_columns = set(results.columns)
-            named_group_table_only_new_columns = named_group_table.keep_cols(
-                *(c for c in named_group_table.columns if c not in existing_columns)
-            )
-
-            # we add the new columns to the end of the table
-            results = results + named_group_table_only_new_columns
+        # Note: if the group cannot be combined, its individual tasks are already 
+        # included in the results from the initial filtering
 
     # we filtered tasks, but the user might want to display only some models
     rows_filter_models: list[str | re.Pattern] = []
@@ -839,7 +848,7 @@ def list_tasks(task: list[str] | None):
         else:
             return task_target == task_source
 
-    table = Table(title=f"Listing named tasks")
+    table = Table(title="Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")

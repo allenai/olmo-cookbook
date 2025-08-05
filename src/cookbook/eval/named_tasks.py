@@ -109,14 +109,27 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
     """
 
     def combine(self, results: MiniFrame) -> MiniFrame | None:
-        filtered_rows = results.keep_cols(*self.expanded_tasks)
+        import re
+        
+        # Convert expanded task names to regex patterns for matching hash suffixes
+        expanded_patterns = []
+        for task in self.expanded_tasks:
+            if isinstance(task, str):
+                # Create regex pattern that matches task name with optional hash suffix
+                task_pattern = re.compile(f"^{re.escape(task)}(?:-[a-f0-9]{{6}})?$")
+                expanded_patterns.append(task_pattern)
+            else:
+                expanded_patterns.append(task)
+        
+        filtered_rows = results.keep_cols(*expanded_patterns)
 
         combined_table = MiniFrame(title=results.title)
 
         # Add empty values to all tasks
         for row in results.rows:
             for task in self.expanded_tasks:
-                combined_table.add(col=task, row=row.name, val=None)
+                if isinstance(task, str):
+                    combined_table.add(col=task, row=row.name, val=None)
 
         # each row here is a model
         for row in filtered_rows.rows:
@@ -142,21 +155,23 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
         filtered_rows = MiniFrame(title=results.title)
 
         # calculate the averages for all child task groups
-        child_task_names: Union[str | re.Pattern] = []
+        child_task_names: list[str] = []
         for task_or_named_group in self.tasks:
             if isinstance(task_or_named_group, BaseAverageNamedTasksGroup):
                 # get task groups (e.g., MMLURCGroup())
                 named_group: BaseAverageNamedTasksGroup = task_or_named_group
                 combined_table = named_group.combine(results)
                 # If the named group is able to average all scores, add it!
-                named_group_col = combined_table.keep_cols(*[named_group.name])
-                child_task_names.append(named_group.name)
+                if combined_table is not None:
+                    named_group_col = combined_table.keep_cols(*[named_group.name])
+                    child_task_names.append(named_group.name)
                 filtered_rows = filtered_rows + named_group_col
-            elif isinstance(task_or_named_group, Union[str | re.Pattern]):
+            elif isinstance(task_or_named_group, (str, re.Pattern)):
                 # get individual tasks (e.g., "arc_challenge:rc::olmes")
-                task: Union[str | re.Pattern] = task_or_named_group
+                task = task_or_named_group
                 task_col = results.keep_cols(*[task])
-                child_task_names.append(task)
+                if isinstance(task, str):
+                    child_task_names.append(task)
                 filtered_rows = filtered_rows + task_col
             else:
                 raise TypeError(f"Task type not yet supported: {type(task_or_named_group)}.")
@@ -164,7 +179,7 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
         # Any tasks that do not exist for all models, add a "None" entry
         for row in results.rows:
             for task in child_task_names:
-                if not task in filtered_rows or filtered_rows[(task, row.name)] is None:
+                if task not in filtered_rows.columns or filtered_rows[(task, row.name)] is None:
                     filtered_rows.add(col=task, row=row.name, val=None)
 
         # compute the average of averages
