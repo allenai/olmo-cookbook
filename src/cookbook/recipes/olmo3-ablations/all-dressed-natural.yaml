@@ -1,0 +1,118 @@
+name: 1b-5xC-all-dressed-natural
+description: Cookbook 1Bv2-5xC on all-dressed natural topic distribution
+budget: ai2/oe-base
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: high
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+metrics_config:
+  project: olmo-cookbook
+  entity: ai2-llm
+dataset:
+  sources:
+  - name: adult_content
+    target_ratio: 0.009345742917551407
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/*/*.npy
+  - name: art_and_design
+    target_ratio: 0.01970228201583858
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/*/*.npy
+  - name: crime_and_law
+    target_ratio: 0.027326242083192783
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/*/*.npy
+  - name: education_and_jobs
+    target_ratio: 0.04599638109488077
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/*/*.npy
+  - name: electronics_and_hardware
+    target_ratio: 0.023915183499617198
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/*/*.npy
+  - name: entertainment
+    target_ratio: 0.07090492309327491
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/*/*.npy
+  - name: fashion_and_beauty
+    target_ratio: 0.027039120536814815
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/*/*.npy
+  - name: finance_and_business
+    target_ratio: 0.09862229856691111
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/*/*.npy
+  - name: food_and_dining
+    target_ratio: 0.03129535676103415
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/*/*.npy
+  - name: games
+    target_ratio: 0.03817247960040365
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/*/*.npy
+  - name: health
+    target_ratio: 0.07629815403025676
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/*/*.npy
+  - name: history_and_geography
+    target_ratio: 0.021189804260034525
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/*/*.npy
+  - name: home_and_hobbies
+    target_ratio: 0.07257689060442338
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/*/*.npy
+  - name: industrial
+    target_ratio: 0.015331661473578959
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/*/*.npy
+  - name: literature
+    target_ratio: 0.040239688042945046
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/*/*.npy
+  - name: politics
+    target_ratio: 0.07963242662055556
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/*/*.npy
+  - name: religion
+    target_ratio: 0.03575081957937664
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/*/*.npy
+  - name: science_math_and_technology
+    target_ratio: 0.05347257057071456
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/*/*.npy
+  - name: social_life
+    target_ratio: 0.040592586764629096
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/*/*.npy
+  - name: software_development
+    target_ratio: 0.02161551173385026
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/*/*.npy
+  - name: software
+    target_ratio: 0.025115138774454513
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/*/*.npy
+  - name: sports_and_fitness
+    target_ratio: 0.06348927836377065
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/*/*.npy
+  - name: transportation
+    target_ratio: 0.0245683704193275
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/*/*.npy
+  - name: travel_and_tourism
+    target_ratio: 0.03780708859256318
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/*/*.npy
