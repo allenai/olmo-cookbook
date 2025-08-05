@@ -16,19 +16,24 @@ from olmo_core.data import (
     NumpyDatasetType,
     TokenizerConfig,
 )
+from olmo_core.nn.attention import SlidingWindowAttentionConfig
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.float8 import Float8Config
+from olmo_core.float8 import AOFloat8LinearConfig, Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
-    CosWithWarmup,
     OptimConfig,
     OptimGroupOverride,
-    Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim.scheduler import (
+    WSD,
+    CosWithWarmup,
+    CosWithWarmupAndLinearDecay,
+    LinearWithWarmup,
+    Scheduler,
+)
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BeakerCallback,
@@ -66,7 +71,6 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
-from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +199,7 @@ class TransformerConfigBuilder:
     activation_checkpointing: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
+    shard_degree: Optional[int] = None
 
     def __init__(
         self,
@@ -215,6 +220,7 @@ class TransformerConfigBuilder:
         lm_evaluator: bool,
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
+        shard_degree: Optional[int] = None,
         activation_checkpointing: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
@@ -229,6 +235,7 @@ class TransformerConfigBuilder:
         seed: int = 42,
         warmup_steps: Optional[int] = None,
         profile: bool = False,
+        float8_enabled: bool = True,
     ):
         self.run_name = run_name
         self.sources = sources
@@ -266,6 +273,9 @@ class TransformerConfigBuilder:
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
+        self.float8_enabled = float8_enabled
+        self.cancel_check_interval = 50
+        self.shard_degree = shard_degree
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
@@ -338,8 +348,8 @@ class TransformerConfigBuilder:
         callbacks = {
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
-                ephemeral_save_interval=100,
-                save_async=True,
+                ephemeral_save_interval=None,
+                save_async=False,
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
@@ -368,7 +378,7 @@ class TransformerConfigBuilder:
                     project=self.metrics_config.project.strip(),
                     entity=self.metrics_config.entity.strip(),
                     group=self.group_id.strip(),
-                    cancel_check_interval=10,
+                    cancel_check_interval=self.cancel_check_interval,
                     enabled=True,
                 )
             if MetricBackend.comet in self.metrics_config.backends:
@@ -385,7 +395,7 @@ class TransformerConfigBuilder:
                     workspace=self.metrics_config.workspace.strip(),
                     project=self.metrics_config.project.strip(),
                     enabled=True,
-                    cancel_check_interval=10,
+                    cancel_check_interval=self.cancel_check_interval,
                 )
 
         if self.lm_evaluator:
@@ -412,7 +422,7 @@ class TransformerConfigBuilder:
 
         return callbacks
 
-    def build_dataset_config(self, loader_processes: int = 16) -> NumpyDatasetConfig:
+    def build_dataset_config(self, loader_processes: int = 8) -> NumpyDatasetConfig:
         is_fractional = any(source.ratio is not None and source.ratio != 1 for source in self.sources)
 
         mixture_config = None
@@ -474,14 +484,14 @@ class TransformerConfigBuilder:
             lr=lr,
             weight_decay=0.033,
             betas=(0.9, 0.95),
+            foreach=True,
             group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
         )
 
     def get_ac_config(self):
-        # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
-            modules=["blocks.*.feed_forward"],
+            modules=[f"blocks.{i}.feed_forward" for i in range(0, 64, 4)],
         )
 
     def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
@@ -509,6 +519,16 @@ class TransformerConfigBuilder:
                 resource_path(folder=f"{self.load_path}/train", fname="rank0.pt"),
                 resource_path(folder=self.load_path, fname="config.json"),
             )
+
+    def get_fp8_config(self) -> Float8Config:
+        return Float8Config(
+            enabled=self.float8_enabled,
+            ao=AOFloat8LinearConfig(
+                enable_fsdp_float8_all_gather=True,
+                force_recompute_fp8_weight_in_bwd=True,
+                round_scales_to_power_of_2=True,
+            ),
+        )
 
     def get_state_from_checkpoint(self) -> SchedulerState:
         state_path, config_path = self.load_state_and_config_from_path()
@@ -538,30 +558,47 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            base_lr: int = config["train_module"]["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
+        except KeyError:
             # Now try olmo_core v1 config format
             try:
                 base_lr: int = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
-            except KeyError as e:
+            except Exception as e:
                 logger.error(
-                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                    e,
                 )
                 raise e
 
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
+            assert scheduler_class == CosWithWarmup.__name__ or scheduler_class == WSD.__name__
         except AssertionError as e:
             logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+                f"Expected scheduler class {CosWithWarmup.__name__} or {WSD.__name__}, but got {scheduler_class}: Anneals from a base LR cannot be inferred from this scheduler type. Exiting!"
             )
             raise e
 
-        scheduler = CosWithWarmup(**scheduler_config)
+        try:
+            if scheduler_class == WSD.__name__:
+                if not scheduler_config.get("decay_fraction", None):
+                    scheduler_config["decay_fraction"] = None
+                scheduler = WSD(**scheduler_config)
+            elif scheduler_class == CosWithWarmup.__name__:
+                scheduler = CosWithWarmup(**scheduler_config)
+            else:
+                raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+        except Exception as e:
+            logger.error(
+                "Could not instantiate scheduler from config. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                e,
+            )
+            logger.info(scheduler_config)
+            raise e
+
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
         return SchedulerState(
@@ -595,10 +632,14 @@ class TransformerConfigBuilder:
             optim=self.get_optimizer_config(),
             compile_model=True,
             dp_config=train_module.TransformerDataParallelConfig(
-                name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
+                name=DataParallelType.hsdp,
+                param_dtype=DType.bfloat16,
+                reduce_dtype=DType.float32,
+                wrapping_strategy=train_module.TransformerDataParallelWrappingStrategy.blocks,
+                shard_degree=self.shard_degree,
             ),
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
-            float8_config=Float8Config(enabled=False),
+            float8_config=self.get_fp8_config(),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
             scheduler=self.get_scheduler_config(),
@@ -612,8 +653,8 @@ class TransformerConfigBuilder:
             work_dir=self.dataset_cache,
             save_overwrite=True,
             metrics_collect_interval=10,
-            cancel_check_interval=5,
-            #max_duration=Duration.tokens(self.max_tokens),
+            cancel_check_interval=self.cancel_check_interval,
+            max_duration=Duration.tokens(self.max_tokens),
         )
 
         for callback_name, callback in self.build_callbacks().items():
@@ -625,6 +666,16 @@ class TransformerConfigBuilder:
             logger.info(self.model_overrides)
 
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
+
+        # TODO(undfined): The hax once swafix is not an issue anymore
+        if self.model_identifier == "olmo2_7B_swafix":
+            self.transformer_config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+                force_full_attention_on_first_layer=False,
+                force_full_attention_on_last_layer=True,
+                pattern=[4096, 4096, 4096, -1],
+            )
+            self.transformer_config.block.attention.use_flash = True
+            self.transformer_config.block.attention.use_head_qk_norm = True
 
         return ModelTrainConfig(
             init_seed=self.seed,

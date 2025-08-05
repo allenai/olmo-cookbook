@@ -1,12 +1,16 @@
 import json
+import os
 import re
 import shlex
 import subprocess
+import sys
+from collections.abc import Mapping
 from copy import deepcopy
 from hashlib import md5
-import sys
 from typing import Optional
 from urllib.parse import urlparse
+
+from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     PythonEnv,
@@ -15,13 +19,9 @@ from cookbook.cli.utils import (
     install_oe_eval,
     make_eval_run_name,
 )
-from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
-    FIM_TOKENS,
-    OE_EVAL_LAUNCH_COMMAND,
-    WEKA_MOUNTS,
-)
+from cookbook.constants import BEAKER_KNOWN_CLUSTERS, FIM_TOKENS, OE_EVAL_LAUNCH_COMMAND, WEKA_MOUNTS
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
+from cookbook.eval.results import make_dashboard_table
 
 
 def evaluate_checkpoint(
@@ -184,17 +184,19 @@ def evaluate_checkpoint(
 
     # these are all the tasks we want to run; note that we can't run regex patterns here,
     # they have to be actual strings
-    all_tasks_set = set()
-    for task_group in tasks:
-        try:
-            # this is a task group! the get function will return a class that has an expanded_tasks attribute
-            all_tasks_set.update(NamedTasksGroupRegistry.get(task_group).expanded_tasks)
-        except ValueError:
-            # actually not a task group, just a task name. append as is.
-            all_tasks_set.add(task_group)
+    all_tasks = sorted(
+        list(
+            set(
+                task
+                for task_group in tasks
+                for task in NamedTasksGroupRegistry.get(task_group).expanded_tasks
+                if isinstance(task, str)
+            )
+        )
+    )
 
-    # we finish by sorting the tasks
-    all_tasks = sorted(all_tasks_set)
+    print("Launching evals on the following tasks:")
+    pprint(all_tasks)
 
     # @davidh: we have a few specific tasks that are not implemented in oe-eval as standalone tasks
     # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
@@ -324,8 +326,11 @@ def evaluate_checkpoint(
                 if "stop_sequences" in partition_task_args["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     partition_task_args["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
-                         if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]]
+                        [
+                            stop_tok
+                            for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]
+                        ]
                     )
                 else:
                     partition_task_args["generation_kwargs"].update(infilling_dict["generation_kwargs"])
