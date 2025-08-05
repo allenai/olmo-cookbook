@@ -27,6 +27,10 @@ def make_bpb_name(alias: str) -> str | None:
         return RE_SUITE_TASK.sub(":bpb\\1", alias)
     else:
         return f"{alias}:bpb"
+    
+
+def make_pass_at_k_name(alias: str, k: int) -> str | None:
+    return f"{alias}:pass_at_{k}"
 
 
 def make_dashboard_table(
@@ -42,11 +46,10 @@ def make_dashboard_table(
     # tables = DashboardTables.from_title(dashboard)
 
     metrics_table = MiniFrame(title=dashboard)
-    missing_tasks: dict[str, list[str]] = {}
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
-        return metrics_table, missing_tasks
+        return metrics_table
 
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
@@ -57,7 +60,7 @@ def make_dashboard_table(
     # keep track of bpb metrics names; we need these to warn users if a metric is missing,
     # but we wanna report the original metric name in the warning.
     bpb_to_og_metric_name_map: dict[str, str] = {}
-    
+
     # Filter to keep only the newest metric for each (model_name, alias) pair
     unique_metrics = {}
     for metric in metrics:
@@ -69,7 +72,7 @@ def make_dashboard_table(
                 unique_metrics[key] = metric
         else:
             unique_metrics[key] = metric
-    metrics = list(unique_metrics.values())
+    metrics: list[MetricsAll] = list(unique_metrics.values())
 
     for metric in metrics:
         if metric.is_aggregate:
@@ -78,6 +81,21 @@ def make_dashboard_table(
 
         # we add primary metric after checking that we have a model name
         assert metric.model_name is not None
+
+        # @davidh: Hotfix for minerva math. The primary metric is set incorrectly in oe-eval but we
+        # want to make 100% sure we're looking at the right metric, because a lot of midtraining eval
+        # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
+        if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+
+        # @davidh: Hotfix for Alpaca Eval tasks. The alpaca eval metric multiplies its score by 100. No PR
+        # in oe-eval to avoid messing with adapt's backend.
+        if 'alpaca' in metric.alias:
+            metric.metrics.primary_score /= 100
+
+        # @davidh: Hotfix for styled math. Fix here: https://github.com/allenai/oe-eval-internal/pull/592
+        if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
 
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
@@ -88,20 +106,17 @@ def make_dashboard_table(
                 metrics_table.add(col=bpb_alias, row=metric.model_name, val=metric.metrics.bpb)
                 bpb_to_og_metric_name_map[bpb_alias] = metric.alias
 
-    for model_row in metrics_table.rows:
-        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
-            # check if any of the values are None; if all values are there, this metric is ok,
-            # we have all results!
-            if metric_column_value is not None:
-                continue
+        # add pass@4 if available and selected
+        if metric.metrics.pass_at_4 is not None:
+            if (pass_at_4_alias := make_pass_at_k_name(metric.alias, k=4)) is not None:
+                metrics_table.add(col=pass_at_4_alias, row=metric.model_name, val=metric.metrics.pass_at_4)
 
-            # replace if necessary
-            metric_column_name = bpb_to_og_metric_name_map.get(metric_column_name, metric_column_name)
+        # add pass@16 if available and selected
+        if metric.metrics.pass_at_16 is not None:
+            if (pass_at_16_alias := make_pass_at_k_name(metric.alias, k=16)) is not None:
+                metrics_table.add(col=pass_at_16_alias, row=metric.model_name, val=metric.metrics.pass_at_16)
 
-            # add missing tasks to the missing_tasks dict
-            missing_tasks.setdefault(model_row.name, []).append(metric_column_name)
-
-    return metrics_table, missing_tasks
+    return metrics_table
 
 
 def print_missing_tasks(
@@ -133,5 +148,5 @@ def print_missing_tasks(
             file=sys.stderr,
         )
         for task in model_missing_tasks:
-            print(f"  -{task}", file=sys.stderr)
+            print(f"  - {task}", file=sys.stderr)
         print(file=sys.stderr)
