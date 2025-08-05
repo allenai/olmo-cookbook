@@ -63,9 +63,16 @@ models=(
     'ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-pstar-17789775/step4769'
 )
 
+# more gzip thresholds
 models=(
     "ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-p80-8k-pstar-ca2b61f5/step4769"
     "ai2-llm/checkpoints/lucas/olmo3-microanneal-10b-gzip-p20-p80-8k-c404de0f/step4769"
+)
+
+# LC checkpoints
+models=(
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_gzip20_10B-6f0035ce/step2385"
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-e34301e8/step2385"
 )
 
 
