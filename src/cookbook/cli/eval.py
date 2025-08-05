@@ -696,7 +696,7 @@ def get_results(
     named_groups: list[BaseNamedTasksGroup] = []
     columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
     initial_filter_tasks: list[str | re.Pattern] = []
-    
+
     for compiled_task in compiled_tasks:
         matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
         if matching_groups:
@@ -716,7 +716,13 @@ def get_results(
         else:
             # This is a single task
             columns_filter_tasks.append(compiled_task)
-            initial_filter_tasks.append(compiled_task)
+            # For single tasks, also create a pattern that matches with hash suffix
+            if isinstance(compiled_task, str):
+                # Create regex pattern that matches task name with optional hash suffix
+                task_pattern = re.compile(f"^{re.escape(compiled_task)}(?:-[a-f0-9]{{6}})?$")
+                initial_filter_tasks.append(task_pattern)
+            else:
+                initial_filter_tasks.append(compiled_task)
 
     # we get the metrics table from the datalake
     metrics_table = make_dashboard_table(
@@ -739,7 +745,7 @@ def get_results(
         if combined_table is not None:
             # we manage to combine! lets put the combined score at the front
             results = combined_table + results
-        # Note: if the group cannot be combined, its individual tasks are already 
+        # Note: if the group cannot be combined, its individual tasks are already
         # included in the results from the initial filtering
 
     # we filtered tasks, but the user might want to display only some models
