@@ -96,14 +96,14 @@ dataset:
     target_ratio: 0.016598397485277843
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/*/*.npy
-  - name: software
-    target_ratio: 0.09951642486085022
-    paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/*/*.npy
   - name: software_development
     target_ratio: 0.0876692955032734
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/*/*.npy
+  - name: software
+    target_ratio: 0.09951642486085022
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/*/*.npy
   - name: sports_and_fitness
     target_ratio: 0.011438545435484393
     paths:
