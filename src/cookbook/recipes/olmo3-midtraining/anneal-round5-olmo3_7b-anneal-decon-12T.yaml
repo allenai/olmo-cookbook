@@ -70,7 +70,7 @@ dataset:
     paths:
     # 9,860,465,314
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
-    # 11,789,114,475
+    # 21,390,279,634
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: rcqa
     target_ratio: 0.03
