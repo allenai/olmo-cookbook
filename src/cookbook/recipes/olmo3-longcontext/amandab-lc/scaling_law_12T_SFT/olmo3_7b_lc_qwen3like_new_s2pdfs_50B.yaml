@@ -42,6 +42,7 @@ float8: true  # NOTE: it might be preferable to disable float8 for anneal / long
 eval_interval: 500
 # downstream_evaluators:
 #   - olmo2_dev_1b
+learning_rate: 9e-5
 model_overrides:
   - block.attention.rope.scaling.new_theta=8000000
 dataset:

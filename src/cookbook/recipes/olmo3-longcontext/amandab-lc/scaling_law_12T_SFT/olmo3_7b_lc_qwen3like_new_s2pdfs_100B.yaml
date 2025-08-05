@@ -42,6 +42,7 @@ cp_degree: 8
 warmup_steps: 200
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
 eval_interval: 500
+learning_rate: 9e-5
 # downstream_evaluators:
 #   - olmo2_dev_1b
 model_overrides:
