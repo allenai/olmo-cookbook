@@ -30,7 +30,7 @@ dataset:
   - name: code_fim-stackedu-hq-filter-v0
     target_ratio: 0.2
     paths:
-    - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/*/*/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/*/*/*.npy
   - name: finemath
     # 10% less the .0195 over 10% for dolminos2math
     target_ratio: 0.0806
