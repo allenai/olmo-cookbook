@@ -730,8 +730,7 @@ def get_results(
 
     # then iterate over named groups...
     for named_group in named_groups:
-        console = Console(stderr=True)
-        console.print(named_group.tasks)
+        # Debug output removed - was causing the task list to print
 
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
@@ -758,16 +757,15 @@ def get_results(
             if metric_column_value is not None:
                 continue
 
-            all_tasks_set = set()
             try:
                 # this is a task group! the get function will return a class that has an expanded_tasks attribute
-                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+                # Skip named group columns - we don't want to report individual tasks as missing
+                # just because the average couldn't be calculated
+                NamedTasksGroupRegistry.get(metric_column_name)
+                continue
             except ValueError:
                 # actually not a task group, just a task name. append as is.
-                all_tasks_set.add(metric_column_name)
-
-            # add missing tasks to the missing_tasks dict
-            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
+                missing_tasks.setdefault(model_row.name, []).append(metric_column_name)
 
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
