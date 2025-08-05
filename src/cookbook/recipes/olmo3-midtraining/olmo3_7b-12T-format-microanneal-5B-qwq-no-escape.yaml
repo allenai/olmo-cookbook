@@ -19,7 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-load_path: gs://ai2-llm/checkpoints/alisal/OLMo3-7B-swafix/step756906
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906
 load_state: false
 dataset:
   sources:
