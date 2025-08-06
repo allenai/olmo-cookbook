@@ -1,6 +1,6 @@
 name: "olmo3_12T-10B-micro_all-sources-fim-stackedu-hq-filter-weighted-pl_reinit"
 description: "OLMo3 7b 10B with all sources + fim-stack-edu-hq-filter-weighted-pl-v0, from 12T checkpoint, special token embeddings reinitialized"
-budget: "ai2/base"
+budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
