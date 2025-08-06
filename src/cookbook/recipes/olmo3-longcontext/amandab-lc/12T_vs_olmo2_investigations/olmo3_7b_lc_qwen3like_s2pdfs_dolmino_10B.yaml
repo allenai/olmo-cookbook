@@ -34,7 +34,6 @@ sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
 scheduler_type: linear
-warmup_steps: 0
 dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 warmup_steps: 200

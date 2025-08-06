@@ -1,6 +1,6 @@
-name: "olmo3_7B-2T_SFT_20B_global_lc_64k_gzip2080_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs4M_warmup"
+name: "olmo3_7B-2T_redone_20B_global_lc_64k_gzip2080_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs4M_warmup"
 #group_id: 6201d05b # for resuming from checkpoint 
-description: "OLMo3 7B @2T SFT w/ swafix trained w/ 4M batch size for 20B tokens up to 64k context length with a Qwen3-like mix of (NEW) s2pdfs and midtraining recipe from week 1"
+description: "OLMo3 7B @2T w/ warmup for real w/ swafix trained w/ 4M batch size for 20B tokens up to 64k context length with a Qwen3-like mix of (NEW) s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
@@ -33,6 +33,8 @@ dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
 eval_interval: 500
+warmup_steps: 200 
+
 # downstream_evaluators:
 #   - olmo2_dev_1b
 model_overrides:
