@@ -74,11 +74,11 @@ dataset:
     paths:
     # 486,558,362,887
     - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon/allenai/dolma2-tokenizer/*.npy
-  - name: instruction
-    target_ratio: 0.0
-    paths:
-    # 1,627,593,038
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/allenai/dolma2-tokenizer/*.npy
+  # - name: instruction
+  #   target_ratio: 0.0
+  #   paths:
+  #   # 1,627,593,038
+  #   - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw-decon-2/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/allenai/dolma2-tokenizer/*.npy
   - name: instruction-new-format
     target_ratio: 0.011
     paths:
