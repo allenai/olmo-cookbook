@@ -27,7 +27,7 @@ from olmo_core.optim import (
     OptimGroupOverride,
     Scheduler,
     SkipStepAdamWConfig,
-    WSD,
+    # WSD,
 )
 from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
@@ -69,6 +69,25 @@ from cookbook.model.config import (
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class WSD(Scheduler):
+    """
+    Warmup-stable-decay scheduler
+    """
+
+    warmup: Optional[int] = None
+    warmup_steps: Optional[int] = None  # deprecated, use 'warmup' instead.
+    warmup_fraction: Optional[float] = None
+    decay: Optional[int] = None
+    decay_steps: Optional[int] = None  # deprecated, use 'decay' instead.
+    decay_fraction: Optional[float] = 0.1
+    warmup_min_lr: float = 0.0
+    decay_min_lr: float = 0.0
+
+    def __post_init__(self):
+        raise NotImplementedError("WSD is just a mock since this branch is from old version of OLMo-core")
 
 
 @dataclass
