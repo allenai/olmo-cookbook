@@ -1,5 +1,5 @@
-name: "olmo3_7b-12T-5B-non-code-math-swarm"
-description: "5B anneal swarm of non-code math decontaminated data"
+name: "olmo3_7b-12T-5B-gen-mcqa-swarm"
+description: "5B anneal swarm of gen/mcqa decontaminated data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 2
