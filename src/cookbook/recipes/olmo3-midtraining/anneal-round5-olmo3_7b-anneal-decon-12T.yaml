@@ -23,14 +23,6 @@ load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906
 load_state: false
 dataset:
   sources:
-  # - name: hqweb
-  #   target_ratio: 0.225
-  #   paths:
-  #   - [decon/subsampled version incoming]
-  # - name: pdf
-  #   target_ratio: 0.05
-  #   paths:
-  #   - [decon/subsampled version incoming]
   - name: sponge
     target_ratio: 0.05
     paths:
