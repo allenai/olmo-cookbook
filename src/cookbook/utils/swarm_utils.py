@@ -88,7 +88,7 @@ def generate_weights(
                 if source.topics[0].target_ratio is not None:
                     some_fixed_topic_weights = True
                     # this source has topics with a fixed weight, so we use that weight as the prior
-                    conditional_weight = np.array([[topic.target_ratio for topic in source.topics]])
+                    conditional_weight = np.array([topic.target_ratio for topic in source.topics])
                     logger.info(f"Using fixed topic weights for source '{source.name}': {conditional_weight[0]}")
                     fixed_topic_weights[source.name] = conditional_weight
                 else:
@@ -128,7 +128,7 @@ def generate_weights(
                 source_samples.extend(samples_per_strength)
                 print(f"Generated {len(samples_per_strength)} samples for strength {strength:.2f}")
 
-
+    total_samples = len(source_samples)
     if has_topics:
         topic_samples = defaultdict(list)
         for source, topic_prior in topic_priors.items():
@@ -157,9 +157,10 @@ def generate_weights(
     else:
         candidates.extend(source_samples)
 
+    logger.info(f"Generated {len(candidates)} candidate samples before filtering.")
     filtered_candidates = np.array([
         sample
-        for sample in candidates
+        for sample in tqdm(candidates)
         if all(
             lower <= sample[idx] <= upper
             for idx, (lower, upper) in enumerate(weight_bounds)
@@ -171,14 +172,25 @@ def generate_weights(
         raise ValueError(f"Not enough candidates after filtering: {len(filtered_candidates)} < {num_samples_out}. "
                             "Consider increasing sample_multiplier.") 
 
-    while len(filtered_candidates) > num_samples_out:
+    """while len(filtered_candidates) > num_samples_out:
         distances = squareform(pdist(filtered_candidates))
         np.fill_diagonal(distances, np.inf)
         closest_pair = np.unravel_index(np.argmin(distances), distances.shape)
         midpoint = (filtered_candidates[closest_pair[0]] + filtered_candidates[closest_pair[1]]) / 2
         filtered_candidates = np.delete(filtered_candidates, closest_pair, axis=0)
         filtered_candidates = np.vstack([filtered_candidates, midpoint])
+    """
 
+    from sklearn.cluster import AgglomerativeClustering
+
+    clustering = AgglomerativeClustering(n_clusters=num_samples_out, linkage='average')
+    labels = clustering.fit_predict(filtered_candidates)
+
+    # Use cluster centroids as representatives
+    filtered_candidates = np.array([
+        filtered_candidates[labels == i].mean(axis=0)
+        for i in range(num_samples_out)
+    ])
 
     selected_samples = [(candidate, np.ones(len(candidates)))for candidate in filtered_candidates]
     if allow_repetition:
