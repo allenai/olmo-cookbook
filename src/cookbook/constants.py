@@ -407,15 +407,15 @@ BASIC_SKILLS = [
 ]
 
 AGI_EVAL_ENGLISH_TASKS = [
-    "lsat-ar",
-    "lsat-lr",
-    "lsat-rc",
-    "logiqa-en",
-    "sat-math",
-    "sat-en",
-    "aqua-rat",
-    "sat-en-without-passage",
-    "gaokao-english",
+    "agi_eval_lsat-ar",
+    "agi_eval_lsat-lr",
+    "agi_eval_lsat-rc",
+    "agi_eval_logiqa-en",
+    "agi_eval_sat-math",
+    "agi_eval_sat-en",
+    "agi_eval_aqua-rat",
+    "agi_eval_sat-en-without-passage",
+    "agi_eval_gaokao-english",
 ]
 
 BBH_TASKS = [
