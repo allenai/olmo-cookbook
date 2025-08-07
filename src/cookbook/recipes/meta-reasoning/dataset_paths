@@ -1,0 +1,62 @@
+$$ format: s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed/
+$$ fotmat decon: s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/
+latex_delim: s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim/
+latex-delim decon: s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/
+
+All the open long cot reasoning data are here:
+s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens/allenai/dolma2-tokenizer/
+  -> 2.48B
+s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens/allenai/dolma2-tokenizer/
+  -> 257M (very small)
+s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens/allenai/dolma2-tokenizer/
+ -> 4.77B
+s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts/allenai/dolma2-tokenizer/
+ -> 20B
+s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped/allenai/dolma2-tokenizer/
+ -> 5.60B
+
+# NEW FORMAT
+actual math meta-reasoning with latex format
+    1,057,302,754 --> 1.057B
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
+
+actual code meta-reasoning with latex format
+    1,199,242,351 --> 1.199B
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
+
+openmathreasoning fullthought:
+s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/
+
+verifiable:
+s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon/allenai/dolma2-tokenizer/
+
+
+  - name: r1_reasoning
+    target_ratio: 0.01875
+    paths:
+    # 2,483,453,165
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  - name: qwq_reasoning
+    target_ratio: 0.01875
+    paths:
+    # 4,774,150,082
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  - name: gemini_reasoning
+    target_ratio: 0.0025
+    paths:
+    # 254,415,258
+    - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  - name: llamanemotron_reasoning
+    target_ratio: .0125
+    paths:
+    # 20.9B
+    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  - name: openthoughts2
+    target_ratio: .0125
+    paths:
+    # 5,601,836,260
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-2/allenai/dolma2-tokenizer/*.npy
