@@ -24,6 +24,18 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_round1_qwenlike_s2pdf_20B-1b63158c/step4769"
 )
 
+
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_gzip2080_20B-2ad4d832/step4769"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-172f9af6/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-e16314e9/step2385"
+)
+
+models_do_not_use=(
+    "ai2-llm/checkpoints/lucas/olmo3_7b_lc_64k_12T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-73200adf/step2385"
+)
+
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
@@ -41,9 +53,9 @@ for model in "${models[@]}"; do
         "/oe-training-default/${model}" \
         -t olmo-core-v2 \
         --use-beaker \
-        --olmo-core-v2-commit-hash 326b7b01cc77750343510919801316d5a5622d87 \
+        --olmo-core-v2-commit-hash 71aa590af8d3979125cd7d96eb661d05e26d04a1 \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
-        --huggingface-transformers-commit-hash 5db7e35d42636e86ee37a43f56a1587daadb7c1b \
+        --huggingface-transformers-commit-hash 4f2fbde7eaa7253b1ca977e294da6c9fcddfa345 \
         --dtype float32 --beaker-allow-dirty
 done
 ```
@@ -60,7 +72,7 @@ uv pip install beaker-gantry
 source .venv/bin/activate
 
 for model in "${models[@]}"; do
-    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=4 WORKSPACE=ai2/oe-data MODEL_NAME_OR_PATH=/weka/oe-training-default/${model}-hf CLUSTER=ai2/jupiter-cirrascale-2 ./gantry_eval.sh
+    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=4 WORKSPACE=ai2/oe-data MODEL_NAME_OR_PATH=/weka/oe-training-default/${model}-hf CLUSTER=ai2/jupiter-cirrascale-2  ./gantry_eval.sh -r new
 done
 ```
 
