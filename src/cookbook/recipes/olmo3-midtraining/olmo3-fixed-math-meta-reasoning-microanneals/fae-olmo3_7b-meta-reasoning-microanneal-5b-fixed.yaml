@@ -1,5 +1,5 @@
 name: "meta-reasoning-olmo3-microanneal-5B"
-description: "OLMo3 7b 5B math meta-reasoning microanneal fixed"
+description: "OLMo3 7b 5B meta-reasoning microanneal fixed"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
