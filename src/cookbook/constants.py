@@ -1,7 +1,7 @@
 import json
 
 TRANSFORMERS_GIT_URL = "https://github.com/huggingface/transformers.git"
-TRANSFORMERS_COMMIT_HASH = "241c04d36867259cdf11dbb4e9d9a60f9cb65ebc"  # v4.47.1
+TRANSFORMERS_COMMIT_HASH = "ae3889ced6ed7362e5883671fc6dc4cb4fece5fa"  # v4.47.1
 
 OLMOE_CONVERSION_SCRIPT = "src/transformers/models/olmoe/convert_olmoe_weights_to_hf.py"
 OLMO2_CONVERSION_SCRIPT = "src/transformers/models/olmo2/convert_olmo2_weights_to_hf.py"
@@ -16,7 +16,7 @@ OLMO2_COMMIT_HASH = "69362b95c66655191d513e9c1420d54aa8477d92"
 OLMO2_UNSHARD_SCRIPT = "scripts/unshard.py"
 
 OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
-OLMO_CORE_V2_COMMIT_HASH = "1662d0d4f3e628ebb68591e311cce68737c094c4"
+OLMO_CORE_V2_COMMIT_HASH = "57a04d0b69047d797c96eede056a211e75b5914a"
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
 
 DEFAULT_OLMOE_TOKENIZER = "allenai/eleuther-ai-gpt-neox-20b-pii-special"
