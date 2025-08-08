@@ -43,10 +43,16 @@ class MixtureBuilder:
             schemes = {urlparse(path).scheme for path in paths + globs}
             if len(schemes) > 1:
                 raise ValueError(f"All paths for source {source.name} must have the same scheme. Found: {schemes}")
+            elif len(schemes) == 0:
+                raise ValueError(f"No paths found for source {source.name}")
 
             scheme = schemes.pop()
 
             expanded = paths + expand_globs(self.cached_fs.get(scheme, self.cached_fs["s3"]), globs)
+
+            if len(expanded) == 0:
+                raise ValueError(f"No paths found for source {source.name}")
+            
             source_configs.append(
                 SourceMixtureConfig(
                     source_name=source.name,
