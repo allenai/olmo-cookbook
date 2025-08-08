@@ -1,5 +1,5 @@
-name: "microanneal-noisy-meta-reasoning-olmo3-microanneal-100b-10b-10b-lr8.8e-05"
-description: "OLMo3 7b 10B meta reasoning microanneal - continue from 100B nonreasoning + 10B noisy reasoning - lr 8.8e-05"
+name: "microanneal-noisy-fullthoughtverifiable-reasoning-olmo3-microanneal-100b-10b-10b-lr8.8e-05"
+description: "OLMo3 7b 10B fullthoughtverifiable reasoning microanneal - continue from 100B nonreasoning + 10B noisy reasoning - lr 8.8e-05"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 8.8e-05
-load_path: ai2-llm/checkpoints/stellal/microanneal-noisy-reasoning-olmo3-microanneal-100b-10b-lr8.8e-05-a0f88f73/step4769
+load_path: gs://ai2-llm/checkpoints/stellal/microanneal-noisy-reasoning-olmo3-microanneal-100b-10b-lr8.8e-05-a0f88f73/step4769
 load_state: false
 dataset:
   sources:
@@ -88,7 +88,7 @@ dataset:
   
   - name: verifiable-41
     target_ratio: 0.12
-    repetition_factor: 3.29
+    repetition_factor: 3.295
     # 364,483,656
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
