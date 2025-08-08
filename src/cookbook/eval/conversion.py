@@ -524,7 +524,7 @@ def run_checkpoint_conversion(
             gantry_flags.append(f"--cluster {cluster}")
 
         install_flash_attention = (
-            "&& uv sync --no-build-isolation-package flash-attn"
+            "uv sync --no-build-isolation-package flash-attn &&"
             if olmo_type == "olmo-core-v2"
             else ""
         )
