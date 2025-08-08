@@ -52,7 +52,6 @@ class MixtureBuilder:
 
             if len(expanded) == 0:
                 raise ValueError(f"No paths found for source {source.name}")
-            
             source_configs.append(
                 SourceMixtureConfig(
                     source_name=source.name,
