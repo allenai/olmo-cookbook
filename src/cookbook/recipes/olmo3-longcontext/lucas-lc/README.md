@@ -56,7 +56,9 @@ for model in "${models[@]}"; do
         --olmo-core-v2-commit-hash 71aa590af8d3979125cd7d96eb661d05e26d04a1 \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
         --huggingface-transformers-commit-hash 4f2fbde7eaa7253b1ca977e294da6c9fcddfa345 \
-        --dtype float32 --beaker-allow-dirty
+        --dtype float32 \
+        --beaker-allow-dirty \
+        --beaker-image oe-eval-beaker/oe_eval_olmo3_auto
 done
 ```
 

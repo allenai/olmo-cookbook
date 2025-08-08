@@ -523,8 +523,15 @@ def run_checkpoint_conversion(
         for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
             gantry_flags.append(f"--cluster {cluster}")
 
+        install_flash_attention = (
+            "&& uv sync --no-build-isolation-package flash-attn"
+            if olmo_type == "olmo-core-v2"
+            else ""
+        )
+
         remote_command = [
             "pip install uv && uv pip install . --system &&",
+            install_flash_attention,
             "olmo-cookbook-eval convert",
             f"{input_dir}",
             f"--olmo-type {olmo_type}",
