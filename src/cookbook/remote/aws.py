@@ -12,7 +12,7 @@ from ..cli.utils import get_aws_access_key_id, get_aws_secret_access_key
 from .base import AuthenticationError, BaseAuthentication
 
 if TYPE_CHECKING:
-    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.client import S3Client  # pyright: ignore
 
 
 @dataclass(frozen=True)

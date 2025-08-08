@@ -26,6 +26,37 @@ from cookbook.constants import (
 
 
 @dataclass(frozen=True)
+class Package:
+    name: str | None = None
+    min_version: str | None = None
+    max_version: str | None = None
+    git_url: str | None = None
+    git_commit: str | None = None
+    git_branch: str | None = None
+
+    def __post_init__(self):
+        assert self.name is not None or self.git_url is not None, "Either name or git_url must be provided"
+
+        if self.git_commit is not None or self.git_branch is not None:
+            assert self.git_url is not None, "git_url must be provided if git_commit or git_branch is provided"
+
+    def __str__(self) -> str:
+        if self.name is not None:
+            return " ".join(
+                [
+                    self.name,
+                    (f">=={self.min_version}" if self.min_version is not None else ""),
+                    (f"<={self.max_version}" if self.max_version is not None else ""),
+                ]
+            )
+
+        if self.git_url is not None:
+            return f"{self.git_url}@{self.git_commit or self.git_branch}"
+
+        raise ValueError("Not enough information to construct package string")
+
+
+@dataclass(frozen=True)
 class PythonEnv:
     name: Optional[str]
     python: str
@@ -84,6 +115,17 @@ class PythonEnv:
     @classmethod
     def null(cls) -> "PythonEnv":
         return cls(name=None, python="python", pip="pip")
+
+
+    def install(self, *packages: Package) -> None:
+        for package in packages:
+            cmd = [self.pip, "install", str(package)]
+            subprocess.run(shlex.split(" ".join(cmd)), check=True, env=self.path())
+
+    def check(self, *packages: Package) -> None:
+        for package in packages:
+            cmd = [self.pip, "show", str(package)]
+            subprocess.run(shlex.split(" ".join(cmd)), check=True, env=self.path())
 
 
 def get_huggingface_token() -> Optional[str]:
