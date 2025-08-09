@@ -23,7 +23,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step170000/model_and_optim
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step170000
 load_state: false
 model: "olmo3_7B_swafix_abf"
 tokenizer: "dolma2"
