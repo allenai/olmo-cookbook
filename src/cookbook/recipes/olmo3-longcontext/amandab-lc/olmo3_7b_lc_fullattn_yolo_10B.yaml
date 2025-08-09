@@ -26,7 +26,7 @@ metrics_config:
 generate_doc_lengths: true  # enable intra-document masking
 load_path: gs://ai2-llm/checkpoints/amandab/olmo3-7B-swafix-12T-noswa
 load_state: false
-model: "olmo3_7B_swafix"
+model: "olmo3_7B_swafix_yolofull"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens
 # global_batch_size: 2_097_152  # switched to 2M batch size to match midtraining
