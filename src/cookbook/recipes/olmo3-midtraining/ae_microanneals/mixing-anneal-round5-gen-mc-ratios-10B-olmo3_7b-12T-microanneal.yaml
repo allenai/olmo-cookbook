@@ -1,5 +1,5 @@
-name: "round5-ratios-10B-olmo3-microanneal"
-description: "OLMo3 7b 10B web v18 + passageQA v1 microanneal"
+name: "mixing-gen-mc-round5-ratios-10B-olmo3-microanneal"
+description: "OLMo3 7b 10B mixing gen/MC validation with round 5 ratios"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
