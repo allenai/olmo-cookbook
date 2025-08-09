@@ -5,7 +5,7 @@ workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 4
+nodes: 8
 gpus: 8
 seed: 4123
 
@@ -25,7 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo29/step166000
+load_path: gs://ai2-llm/checkpoints/OLMo29/step169210
 load_state: false
 model: "olmo3_7B_swafix"
 tokenizer: "dolma2"
