@@ -1,7 +1,10 @@
+#!/bin/bash
+
 # login to gcloud
-# gcloud auth application-default login  #(run this if you are not logged in)
+# gcloud auth application-default login
 # gcloud auth application-default set-quota-project ai2-allennlp
 # export GOOGLE_CLOUD_PROJECT=ai2-allennlp
+
 
 # List of GS paths to process
 GS_PATHS=(
@@ -31,21 +34,20 @@ for gs_path in "${GS_PATHS[@]}"; do
     echo "  Weka Remote Path: $weka_path_remote"
     echo "  Weka Local Path: $weka_path_local"
     
-    echo " copying $gs_path to $weka_path_remote"
-    # Run the first command
-    echo "  Running remote copy command..."
-    if python -m cookbook.remote "$gs_path" "$weka_path_remote"; then
-        echo "  ✓ Remote copy completed successfully"
+    
+    # Run the second command
+    echo "  Running conversion command..."
+    if olmo-cookbook-eval convert "$weka_path_local" \
+        -t olmo-core-v2 \
+        --use-beaker \
+        --olmo-core-v2-commit-hash 57a04d0b69047d797c96eede056a211e75b5914a \
+        --huggingface-transformers-commit-hash ae3889ced6ed7362e5883671fc6dc4cb4fece5fa; then
+        echo "  ✓ Conversion completed successfully"
     else
-        echo "  ✗ Remote copy failed"
-        continue
+        echo "  ✗ Conversion failed"
     fi
     
-
-    
     echo "  Finished processing: $gs_path"
-
 done
 
 echo "All paths processed!"
-
