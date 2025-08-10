@@ -184,6 +184,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         model_overrides=base_config.model_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
         dp_shard_degree=base_config.dp_shard_degree,
+        tp_degree=base_config.tp_degree,
         cp_degree=base_config.cp_degree,
         float8=base_config.float8,
         load_path_fs=load_path_fs,

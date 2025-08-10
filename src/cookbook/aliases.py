@@ -94,6 +94,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     annealing: Optional[AnnealConfig] = None
     nccl_debug: bool = False
     dp_shard_degree: Optional[int] = None
+    tp_degree: Optional[int] = None
     cp_degree: Optional[int] = None
     float8: bool = False
     activation_checkpointing: bool = False
