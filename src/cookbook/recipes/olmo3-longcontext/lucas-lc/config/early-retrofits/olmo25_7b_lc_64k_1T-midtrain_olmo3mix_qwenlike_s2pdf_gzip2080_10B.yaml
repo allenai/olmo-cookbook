@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_1T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B"
+name: &name "olmo25_7b_lc_64k_1T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
