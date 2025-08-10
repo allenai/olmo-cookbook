@@ -25,7 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo25-from476838/step500680
+load_path: gs://ai2-llm/checkpoints/OLMo25/step476838
 load_state: false
 model: "olmo25_7b"
 tokenizer: "dolma2"
