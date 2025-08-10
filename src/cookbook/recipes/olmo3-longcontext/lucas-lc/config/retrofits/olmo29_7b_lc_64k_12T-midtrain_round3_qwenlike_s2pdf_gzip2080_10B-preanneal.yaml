@@ -17,7 +17,7 @@ gc_interval: 200
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 # (from end of pretraining)
 warmup_steps: 200
-learning_rate: 0.00020712352850360292
+learning_rate: 0.0041418
 
 metrics_config:
   backend: wandb
