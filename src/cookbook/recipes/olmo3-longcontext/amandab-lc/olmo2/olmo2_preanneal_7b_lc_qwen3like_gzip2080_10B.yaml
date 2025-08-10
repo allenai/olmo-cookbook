@@ -27,7 +27,7 @@ metrics_config:
 generate_doc_lengths: true  # enable intra-document masking
 load_path: gs://ai2-llm/checkpoints/shanea/OLMo-medium/peteish7/step928646
 load_state: false
-model: "olmo2_7b"
+model: "olmo2_7B"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
