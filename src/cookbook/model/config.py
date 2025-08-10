@@ -198,6 +198,20 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def olmo25_7b_fullattn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 retrofit w/ full attn 
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[-1, -1, -1, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
+
+    @classmethod
     def olmo3_7B_swafix(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
