@@ -27,9 +27,9 @@ from olmo_core.optim import (
     OptimGroupOverride,
     Scheduler,
     SkipStepAdamWConfig,
-    #WSD,
+    # WSD,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup, WSD
+from olmo_core.optim.scheduler import WSD, CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BeakerCallback,
@@ -127,6 +127,7 @@ class TransformerConfigBuilder:
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
         dp_shard_degree (Optional[int]): The data parallel model/optimizer sharding degree.
+        tp_degree (Optional[int]): The number of devices to split tensor parallelism across.
         cp_degree (Optional[int]): The number of devices to split context parallelism across. Useful for long context training.
         float8 (bool): Whether to enable torchao float8 linear layers.
         profile (bool): Whether to enable profiling.
@@ -208,6 +209,7 @@ class TransformerConfigBuilder:
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
     dp_shard_degree: Optional[int]
+    tp_degree: Optional[int]
     cp_degree: Optional[int]
     float8: bool
     annealing: Optional[AnnealConfig] = None
@@ -235,6 +237,7 @@ class TransformerConfigBuilder:
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
         dp_shard_degree: Optional[int] = None,
+        tp_degree: Optional[int] = None,
         cp_degree: Optional[int] = None,
         float8: bool = False,
         model_overrides: Optional[List[str]] = None,
@@ -266,6 +269,7 @@ class TransformerConfigBuilder:
         self.profile = profile
         self.activation_checkpointing = activation_checkpointing
         self.dp_shard_degree = dp_shard_degree
+        self.tp_degree = tp_degree
         self.cp_degree = cp_degree
         self.float8 = float8
         self.data_dir = "s3://ai2-llm"
@@ -295,14 +299,20 @@ class TransformerConfigBuilder:
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
+            self.checkpoint_dir = (
+                f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
+            )
 
         if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = "/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
+            self.checkpoint_dir = (
+                f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
+            )
 
-        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name.strip('v2')}/dataset-cache"
+        self.dataset_cache = (
+            f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name.strip('v2')}/dataset-cache"
+        )
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
@@ -365,7 +375,7 @@ class TransformerConfigBuilder:
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
-                save_async=False, # fix for gloo error 
+                save_async=False,  # fix for gloo error
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
@@ -483,9 +493,7 @@ class TransformerConfigBuilder:
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
                 warmup_steps=self.get_warmup_steps(),
             ),
-            SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0
-            ),
+            SchedulerType.LINEAR: lambda: LinearWithWarmup(warmup_steps=self.get_warmup_steps(), alpha_f=0.0),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
@@ -506,7 +514,9 @@ class TransformerConfigBuilder:
             weight_decay = getattr(self.annealing, "weight_decay", None) or optimizer_state.weight_decay
             betas = getattr(self.annealing, "betas", None) or optimizer_state.betas
             foreach = getattr(self.annealing, "foreach", None) or optimizer_state.foreach
-            optim_group_override_dict = getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            optim_group_override_dict = (
+                getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            )
 
         group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
@@ -682,7 +692,6 @@ class TransformerConfigBuilder:
 
         return scheduler_state, optimizer_state
 
-
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
         rank_microbatch_size = self.get_rank_microbatch_size()
@@ -699,20 +708,29 @@ class TransformerConfigBuilder:
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
+        dp_config = train_module.TransformerDataParallelConfig(
+            name=DataParallelType.hsdp,
+            param_dtype=DType.bfloat16,
+            shard_degree=self.dp_shard_degree,
+        )
+        tp_config = train_module.TransformerTensorParallelConfig(degree=self.tp_degree) if self.tp_degree else None
+        cp_config = None
+        if self.cp_degree:
+            if self.generate_doc_lengths:
+                # if intra-document masking is enabled, use llama3 context parallelism
+                cp_config = train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+            else:
+                # else use zigzag context parallelism, which is more efficient but doesn't support intra-document masking
+                cp_config = train_module.TransformerContextParallelConfig.zigzag(degree=self.cp_degree)
+
         train_module_config = train_module.TransformerTrainModuleConfig(
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,
             optim=self.get_optimizer_config(),
             compile_model=True,
-            dp_config=train_module.TransformerDataParallelConfig(
-                name=DataParallelType.hsdp,
-                param_dtype=DType.bfloat16,
-                reduce_dtype=DType.float32,
-                shard_degree=self.dp_shard_degree,
-            ),
-            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
-            if self.cp_degree
-            else None,
+            dp_config=dp_config,
+            tp_config=tp_config,
+            cp_config=cp_config,
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=self.get_float8_config() if self.float8 else Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
