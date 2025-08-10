@@ -1,0 +1,98 @@
+name: "microanneal-noisy-meta-fullthoughtverifiable-reasoning-olmo3-microanneal-100b-10b-10b-10b-lr8.8e-05"
+description: "OLMo3 7b 10B fullthoughtverifiable reasoning microanneal - continue from 100B nonreasoning + 10B noisy reasoning + 10B meta- lr 8.8e-05"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo2_7B_swafix"
+tokenizer: "dolma2"
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 8192
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+  initial_lr: 8.8e-05
+load_path: gs://ai2-llm/checkpoints/stellal/microanneal-noisy-meta-reasoning-olmo3-microanneal-100b-10b-10b-lr8.8e-05-ce2f3921/step4769
+load_state: false
+dataset:
+  sources:
+  - name: web 
+    target_ratio: 0.5
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
+  
+  
+  # - name: r1_reasoning
+  #   target_ratio: 0.14423
+  #   paths:
+  #   # 2,483,453,165
+  #   - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  # - name: qwq_reasoning
+  #   target_ratio: 0.14423
+  #   paths:
+  #   # 4,774,150,082
+  #   - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  # - name: gemini_reasoning
+  #   target_ratio: 0.01923
+  #   paths:
+  #   # 254,415,258
+  #   - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  # - name: llamanemotron_reasoning
+  #   target_ratio: 0.09615
+  #   paths:
+  #   # 20.9B
+  #   - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  # - name: openthoughts2
+  #   target_ratio: 0.09615
+  #   paths:
+  #   # 5,601,836,260
+  #   - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-2/allenai/dolma2-tokenizer/*.npy
+  
+  
+  # - name: math-meta-reasoning 
+  #   target_ratio: 0.25
+  #   repetition_factor: 2.365
+  #   paths:
+  #   - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
+  # - name: code-meta-reasoning 
+  #   target_ratio: 0.25
+  #   repetition_factor: 2.085
+  #   paths:
+  #   - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
+  
+  - name: fullthought
+    target_ratio: 0.33
+    repetition_factor: 3.88
+    # 850,848,999
+    paths:
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
+
+  - name: verifiable-o4
+    target_ratio: 0.05
+    repetition_factor: 6.78
+    # 73,752,560
+    paths:
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon/allenai/dolma2-tokenizer/*.npy
+  
+  - name: verifiable-41
+    target_ratio: 0.12
+    repetition_factor: 3.295
+    # 364,483,656
+    paths:
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
+
+
+
+  # /model_and_optim/
