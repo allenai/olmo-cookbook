@@ -89,6 +89,24 @@ for model in "${models[@]}"; do
 done
 ```
 
+Pull results
+
+```bash
+urls=(
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2D3F101BN9WETC6WK7GZGSE?'
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2CZMBAJ236C5AH5MEXWA0C7?'
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2CZM7B7H7H6J3ZS6SBN9YZ8?'
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2CZM5BHH918S8468ACA6H4W?'
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2CZM38EW4XET2B1FDW8S9T5?'
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2CZM19H0SKYBZNR02Y1V5ZX?'
+    'https://beaker.allen.ai/orgs/ai2/workspaces/oe-data/work/01K2CZKZ88ZY33YGMKY3F0B0VJ?'
+)
+
+for url in "${urls[@]}"; do
+    ./fetch_results.py -u ${url} >> ~/Downloads/results.csv
+done
+```
+
 
 ## Eval (SC)
 
