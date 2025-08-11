@@ -72,8 +72,8 @@ def run_instance_analysis(
     metrics = []  # e.g., primary_score
     for task in tasks:
         # Expand the named group if it exists
-        all_task_groups = NamedTasksGroupRegistry.names()
-        task_alias = all_task_groups.get(task, task)
+        # task_alias = NamedTasksGroupRegistry.get(task)
+        task_alias = task
 
         # Add setup for primary_score
         metrics += ["primary_score"]
@@ -88,7 +88,7 @@ def run_instance_analysis(
             task_aliases += [task_alias]
 
     results = []
-    with tqdm(total=len(tasks)) as pbar:
+    with tqdm(total=len(task_names)) as pbar:
         for task, task_alias, metric in zip(task_names, task_aliases, metrics):
             pbar.set_description(f"Computing paired permutation test on {len(models)} models for {task}")
 
