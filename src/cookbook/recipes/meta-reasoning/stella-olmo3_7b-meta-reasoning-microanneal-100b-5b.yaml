@@ -1,11 +1,11 @@
-name: "microanneal-meta-reasoning-olmo3-microanneal-100b-10b-lr8.8e-05"
-description: "OLMo3 7b 10B meta reasoning microanneal - continue from 100B - lr 8.8e-05"
+name: "microanneal-meta-reasoning-olmo3-microanneal-100b-5b-lr8.8e-05"
+description: "OLMo3 7b 5B meta reasoning microanneal - continue from 100B - lr 8.8e-05"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
 gpus: 8
 preemptible: true
-max_tokens: 10_000_000_000
+max_tokens: 5_000_000_000
 global_batch_size: 2097152
 sequence_length: 8192
 seed: 1337
