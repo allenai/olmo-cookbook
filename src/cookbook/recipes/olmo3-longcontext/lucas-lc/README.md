@@ -36,6 +36,17 @@ models_do_not_use=(
 )
 
 
+models=(
+    "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_1T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-0a84103f/step2385"
+    "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_1T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-highLR-60881d2e/step2385"
+    "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_2T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-3f8d6d04/step2385"
+    "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_2T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-highLR-f16fb41d/step2385"
+    "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_500B-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-highLR-8013d98e/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_1T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-7d3eef66/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_500B-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-2531084a/step2385"
+)
+
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
