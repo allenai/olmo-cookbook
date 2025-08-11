@@ -2,9 +2,9 @@ import json
 import re
 import shlex
 import subprocess
+import sys
 from copy import deepcopy
 from hashlib import md5
-import sys
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -107,7 +107,10 @@ def evaluate_checkpoint(
         if cluster != "goog" and cluster not in BEAKER_KNOWN_CLUSTERS["goog"]:
             print(
                 "Checkpoint is stored in Google Cloud Storage, "
-                "but cluster is not set to 'goog'. Overriding cluster."
+                "but cluster is not set to 'goog'. Overriding cluster to 'goog'.\n"
+                "To run this eval on a cluster with WEKA access instead, first copy the checkpoint to weka:\n"
+                f"  gsutil -m cp -r {checkpoint_path} <weka_path>\n"
+                "Then re-run the eval with the weka checkpoint path."
             )
             cluster = "goog"
     elif scheme:
@@ -200,14 +203,11 @@ def evaluate_checkpoint(
     # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
     #          it's just the task alias that does not exist.
     EXCLUDE_FROM_LAUNCH = [
-        r'^mmlu_.*:bpb::olmes$',
-        r'^lambada:bpb$',
-        r'^.*:pass_at_.*$',
+        r"^mmlu_.*:bpb::olmes$",
+        r"^lambada:bpb$",
+        r"^.*:pass_at_.*$",
     ]
-    all_tasks = [
-        task for task in all_tasks
-        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
-    ]
+    all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
 
     # DOING SOME PRETTY PRINTING HERE #
     print(
@@ -324,8 +324,11 @@ def evaluate_checkpoint(
                 if "stop_sequences" in partition_task_args["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     partition_task_args["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
-                         if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]]
+                        [
+                            stop_tok
+                            for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]
+                        ]
                     )
                 else:
                     partition_task_args["generation_kwargs"].update(infilling_dict["generation_kwargs"])
