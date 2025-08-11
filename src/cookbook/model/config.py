@@ -198,6 +198,17 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def olmo2_7b_flash(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2 but overriding the config to use flash attn
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+      
+        config.block.attention.use_flash = True
+        return config
+
+
+    @classmethod
     def olmo25_7b_fullattn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         OLMo2.5 retrofit w/ full attn 
