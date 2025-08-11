@@ -26,7 +26,7 @@ DEFAULT_OLMO2_TOKENIZER = "allenai/dolma2-tokenizer"
 DEFAULT_OLMO_CORE_TOKENIZER = "allenai/OLMo-2-1124-7B"
 
 BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
-BEAKER_DEFAULT_BUDGET = "ai2/oe-data"
+BEAKER_DEFAULT_BUDGET = "ai2/oe-base"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
 BEAKER_PY_MAX_VERSION = "1.34.1"
@@ -143,10 +143,71 @@ MMLU_CATEGORIES = [
 ]
 
 MMLU_SUBCATEGORIES = {
-    "stem": ['abstract_algebra', 'astronomy', 'college_biology', 'college_chemistry', 'college_computer_science', 'college_mathematics', 'college_physics', 'computer_security', 'conceptual_physics', 'electrical_engineering', 'elementary_mathematics', 'high_school_biology', 'high_school_chemistry', 'high_school_computer_science', 'high_school_mathematics', 'high_school_physics', 'high_school_statistics', 'machine_learning'],
-    "humanities": ['formal_logic', 'high_school_european_history', 'high_school_us_history', 'high_school_world_history', 'international_law', 'jurisprudence', 'logical_fallacies', 'moral_disputes', 'moral_scenarios', 'philosophy', 'prehistory', 'professional_law', 'world_religions'],
-    "social_sciences": ['econometrics', 'high_school_geography', 'high_school_government_and_politics', 'high_school_macroeconomics', 'high_school_microeconomics', 'high_school_psychology', 'human_sexuality', 'professional_psychology', 'public_relations', 'security_studies', 'sociology', 'us_foreign_policy'],
-    "other": ['anatomy', 'business_ethics', 'clinical_knowledge', 'college_medicine', 'global_facts', 'human_aging', 'management', 'marketing', 'medical_genetics', 'miscellaneous', 'nutrition', 'professional_accounting', 'professional_medicine', 'virology']
+    "stem": [
+        "abstract_algebra",
+        "astronomy",
+        "college_biology",
+        "college_chemistry",
+        "college_computer_science",
+        "college_mathematics",
+        "college_physics",
+        "computer_security",
+        "conceptual_physics",
+        "electrical_engineering",
+        "elementary_mathematics",
+        "high_school_biology",
+        "high_school_chemistry",
+        "high_school_computer_science",
+        "high_school_mathematics",
+        "high_school_physics",
+        "high_school_statistics",
+        "machine_learning",
+    ],
+    "humanities": [
+        "formal_logic",
+        "high_school_european_history",
+        "high_school_us_history",
+        "high_school_world_history",
+        "international_law",
+        "jurisprudence",
+        "logical_fallacies",
+        "moral_disputes",
+        "moral_scenarios",
+        "philosophy",
+        "prehistory",
+        "professional_law",
+        "world_religions",
+    ],
+    "social_sciences": [
+        "econometrics",
+        "high_school_geography",
+        "high_school_government_and_politics",
+        "high_school_macroeconomics",
+        "high_school_microeconomics",
+        "high_school_psychology",
+        "human_sexuality",
+        "professional_psychology",
+        "public_relations",
+        "security_studies",
+        "sociology",
+        "us_foreign_policy",
+    ],
+    "other": [
+        "anatomy",
+        "business_ethics",
+        "clinical_knowledge",
+        "college_medicine",
+        "global_facts",
+        "human_aging",
+        "management",
+        "marketing",
+        "medical_genetics",
+        "miscellaneous",
+        "nutrition",
+        "professional_accounting",
+        "professional_medicine",
+        "virology",
+    ],
 }
 
 MMLU_PRO_CATEGORIES = [
@@ -391,11 +452,7 @@ ALL_MINERVA_TASKS = [
     "minerva_math_precalculus",
 ]
 
-ALL_GSM_SYMB_TASKS = [
-    "gsm_symbolic::olmo3", 
-    "gsm_symbolic:p1::olmo3",
-    "gsm_symbolic:p2::olmo3"
-]
+ALL_GSM_SYMB_TASKS = ["gsm_symbolic::olmo3", "gsm_symbolic:p1::olmo3", "gsm_symbolic:p2::olmo3"]
 
 BASIC_SKILLS = [
     "basic_skills_arithmetic",
@@ -564,20 +621,20 @@ MULTILINGUAL_MBPP_TASKS_V2 = [
 ]
 
 MULTIPL_E_HE_TASKS = [
-    'multipl_e_humaneval:cpp::olmo3', 
-    'multipl_e_humaneval:java::olmo3', 
-    'multipl_e_humaneval:js::olmo3', 
-    'multipl_e_humaneval:php::olmo3', 
-    'multipl_e_humaneval:rs::olmo3', 
-    'multipl_e_humaneval:sh::olmo3', 
+    "multipl_e_humaneval:cpp::olmo3",
+    "multipl_e_humaneval:java::olmo3",
+    "multipl_e_humaneval:js::olmo3",
+    "multipl_e_humaneval:php::olmo3",
+    "multipl_e_humaneval:rs::olmo3",
+    "multipl_e_humaneval:sh::olmo3",
 ]
 
 MULTIPL_E_MBPP_TASKS = [
-    'multipl_e_mbpp:cpp::olmo3', 
-    'multipl_e_mbpp:java::olmo3', 
-    'multipl_e_mbpp:js::olmo3', 
-    'multipl_e_mbpp:php::olmo3', 
-    'multipl_e_mbpp:rs::olmo3',
+    "multipl_e_mbpp:cpp::olmo3",
+    "multipl_e_mbpp:java::olmo3",
+    "multipl_e_mbpp:js::olmo3",
+    "multipl_e_mbpp:php::olmo3",
+    "multipl_e_mbpp:rs::olmo3",
 ]
 
 MT_EVAL_TASKS = [
@@ -717,7 +774,6 @@ OMEGA_SUB_CATEGORIES = {
         "numbertheory_ordered_lte",
         "numbertheory_qr_sum",
     ],
-
     # Transformative has train, test splits
     "transformative": [
         "trans_matrix_rank",
@@ -727,7 +783,7 @@ OMEGA_SUB_CATEGORIES = {
         "trans_integrations",
         "trans_gridworld",
         "trans_circles",
-    ]
+    ],
 }
 
 

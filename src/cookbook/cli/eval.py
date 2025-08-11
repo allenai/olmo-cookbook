@@ -24,11 +24,11 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -196,7 +196,7 @@ def convert_checkpoint_from_hf(
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -306,7 +306,7 @@ def convert_checkpoint(
     help="Set cluster (aus for Austin, sea for Seattle, goog for Google, or provide specific cluster name)",
 )
 @click.option("-d", "--dashboard", type=str, default="generic", help="Set dashboard name")
-@click.option("-b", "--budget", type=str, default="ai2/oe-data", help="Set budget")
+@click.option("-b", "--budget", type=str, default="ai2/oe-base", help="Set budget")
 @click.option("-w", "--workspace", type=str, default="ai2/oe-data", help="Set workspace")
 @click.option(
     "-t",
@@ -571,8 +571,8 @@ def evaluate_model(
             dashboard,
             model_name,
             tasks,
-            format='return_missing',
-            sort_by='avg',
+            format="return_missing",
+            sort_by="avg",
             sort_column_name=None,
             sort_descending=None,
             force=False,
@@ -583,7 +583,7 @@ def evaluate_model(
         if model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
-            print(f'Found no missing tasks for {model_name}')
+            print(f"Found no missing tasks for {model_name}")
             return
 
     evaluate_checkpoint(
@@ -688,7 +688,6 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -768,7 +767,7 @@ def get_results(
         columns_filter_tasks=columns_filter_tasks,
     )
 
-    if format == 'return_missing':
+    if format == "return_missing":
         return missing_tasks
 
     # okay we got all results! now time to sort them depending on the user's request
