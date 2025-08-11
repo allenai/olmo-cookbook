@@ -69,7 +69,7 @@ for model in "${models[@]}"; do
         --huggingface-transformers-commit-hash 4f2fbde7eaa7253b1ca977e294da6c9fcddfa345 \
         --dtype float32 \
         --beaker-allow-dirty \
-        --beaker-image oe-eval-beaker/oe_eval_olmo3_auto
+        --skip-validation
 done
 ```
 
