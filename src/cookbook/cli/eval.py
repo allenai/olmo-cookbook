@@ -789,6 +789,8 @@ def get_results(
         results.show()
     elif format == "csv":
         print(results.to_csv())
+    elif format == 'return_all':
+        return results._data
     else:
         raise ValueError(f"Invalid format: {format}")
 
