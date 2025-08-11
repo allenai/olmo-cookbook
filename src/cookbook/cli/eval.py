@@ -26,6 +26,7 @@ from cookbook.constants import (
     TRANSFORMERS_GIT_URL,
 )
 from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
 from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
@@ -48,7 +49,7 @@ logger = logging.getLogger(__name__)
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -196,7 +197,7 @@ def convert_checkpoint_from_hf(
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -306,7 +307,7 @@ def convert_checkpoint(
     help="Set cluster (aus for Austin, sea for Seattle, goog for Google, or provide specific cluster name)",
 )
 @click.option("-d", "--dashboard", type=str, default="generic", help="Set dashboard name")
-@click.option("-b", "--budget", type=str, default="ai2/oe-data", help="Set budget")
+@click.option("-b", "--budget", type=str, default="ai2/oe-base", help="Set budget")
 @click.option("-w", "--workspace", type=str, default="ai2/oe-data", help="Set workspace")
 @click.option(
     "-t",
