@@ -687,7 +687,7 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-) -> dict[str, list[str]] | None:
+) -> None:
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -695,34 +695,10 @@ def get_results(
     # which we will use later to print any missing tasks.
     named_groups: list[BaseNamedTasksGroup] = []
     columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
-    initial_filter_tasks: list[str | re.Pattern] = []
-
     for compiled_task in compiled_tasks:
         matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
-        if matching_groups:
-            # This is a named group, add to named_groups
-            named_groups.extend(matching_groups)
-            # Convert expanded task names to regex patterns that match hash suffixes
-            for ng in matching_groups:
-                for task in ng.expanded_tasks:
-                    if isinstance(task, str):
-                        # Create regex pattern that matches task name with optional hash suffix
-                        task_pattern = re.compile(f"^{re.escape(task)}(?:-[a-f0-9]{{6}})?$")
-                        columns_filter_tasks.append(task_pattern)
-                        initial_filter_tasks.append(task_pattern)
-                    else:
-                        columns_filter_tasks.append(task)
-                        initial_filter_tasks.append(task)
-        else:
-            # This is a single task
-            columns_filter_tasks.append(compiled_task)
-            # For single tasks, also create a pattern that matches with hash suffix
-            if isinstance(compiled_task, str):
-                # Create regex pattern that matches task name with optional hash suffix
-                task_pattern = re.compile(f"^{re.escape(compiled_task)}(?:-[a-f0-9]{{6}})?$")
-                initial_filter_tasks.append(task_pattern)
-            else:
-                initial_filter_tasks.append(compiled_task)
+        named_groups.extend(matching_groups)
+        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
     metrics_table = make_dashboard_table(
@@ -731,12 +707,13 @@ def get_results(
         skip_on_fail=skip_on_fail,
     )
 
-    # Filter to get all relevant tasks (both single tasks and expanded group tasks)
-    results = metrics_table.keep_cols(*initial_filter_tasks)
+    # start by filtering in all the single tasks
+    results = metrics_table.keep_cols(*compiled_tasks)
 
     # then iterate over named groups...
     for named_group in named_groups:
-        # Debug output removed - was causing the task list to print
+        console = Console(stderr=True)
+        console.print(named_group.tasks)
 
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
@@ -745,8 +722,17 @@ def get_results(
         if combined_table is not None:
             # we manage to combine! lets put the combined score at the front
             results = combined_table + results
-        # Note: if the group cannot be combined, its individual tasks are already
-        # included in the results from the initial filtering
+        else:
+            # this cannot be combined. let's add each metric as a column. make sure not
+            # to include duplicates.
+            named_group_table = metrics_table.keep_cols(*named_group.expanded_tasks)
+            existing_columns = set(results.columns)
+            named_group_table_only_new_columns = named_group_table.keep_cols(
+                *(c for c in named_group_table.columns if c not in existing_columns)
+            )
+
+            # we add the new columns to the end of the table
+            results = results + named_group_table_only_new_columns
 
     # we filtered tasks, but the user might want to display only some models
     rows_filter_models: list[str | re.Pattern] = []
@@ -763,15 +749,16 @@ def get_results(
             if metric_column_value is not None:
                 continue
 
+            all_tasks_set = set()
             try:
                 # this is a task group! the get function will return a class that has an expanded_tasks attribute
-                # Skip named group columns - we don't want to report individual tasks as missing
-                # just because the average couldn't be calculated
-                NamedTasksGroupRegistry.get(metric_column_name)
-                continue
+                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
             except ValueError:
                 # actually not a task group, just a task name. append as is.
-                missing_tasks.setdefault(model_row.name, []).append(metric_column_name)
+                all_tasks_set.add(metric_column_name)
+
+            # add missing tasks to the missing_tasks dict
+            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
 
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
