@@ -31,64 +31,64 @@ dataset:
   
   
   - name: r1_reasoning
-    target_ratio: 0.0962
+    target_ratio: 0.048077
     paths:
     # 2,483,453,165
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
   
   - name: qwq_reasoning
-    target_ratio: 0.0962
+    target_ratio: 0.048077
     paths:
     # 4,774,150,082
     - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
   
   - name: gemini_reasoning
-    target_ratio: 0.0128
+    target_ratio: 0.006411
     paths:
     # 254,415,258
     - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
   
   - name: llamanemotron_reasoning
-    target_ratio: 0.0641
+    target_ratio: 0.032051
     paths:
     # 20.9B
     - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-2/allenai/dolma2-tokenizer/*.npy
   
   - name: openthoughts2
-    target_ratio: 0.0641
+    target_ratio: 0.032051
     paths:
     # 5,601,836,260
     - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-2/allenai/dolma2-tokenizer/*.npy
   
   
   - name: math-meta-reasoning 
-    target_ratio: 0.1667
+    target_ratio: 0.083333
     repetition_factor: 1.183
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
   - name: code-meta-reasoning 
-    target_ratio: 0.1667
+    target_ratio: 0.083333
     repetition_factor: 1.043
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
 
 
   - name: fullthought
-    target_ratio: 0.22
+    target_ratio: 0.11
     repetition_factor: 1.94
     # 850,848,999
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
 
   - name: verifiable-o4
-    target_ratio: 0.0333
+    target_ratio: 0.016667
     repetition_factor: 3.39
     # 73,752,560
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon/allenai/dolma2-tokenizer/*.npy
   
   - name: verifiable-41
-    target_ratio: 0.08
+    target_ratio: 0.04
     repetition_factor: 1.65
     # 364,483,656
     paths:
