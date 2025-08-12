@@ -27,7 +27,7 @@ def make_bpb_name(alias: str) -> str | None:
         return RE_SUITE_TASK.sub(":bpb\\1", alias)
     else:
         return f"{alias}:bpb"
-    
+
 
 def make_pass_at_k_name(alias: str, k: int) -> str | None:
     return f"{alias}:pass_at_{k}"
@@ -85,17 +85,17 @@ def make_dashboard_table(
         # @davidh: Hotfix for minerva math. The primary metric is set incorrectly in oe-eval but we
         # want to make 100% sure we're looking at the right metric, because a lot of midtraining eval
         # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
-        if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
-            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+        if "minerva_math" in metric.alias and "hamish_zs_reasoning" in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics["exact_match_flex"]
 
         # @davidh: Hotfix for Alpaca Eval tasks. The alpaca eval metric multiplies its score by 100. No PR
         # in oe-eval to avoid messing with adapt's backend.
-        if 'alpaca' in metric.alias:
+        if "alpaca" in metric.alias:
             metric.metrics.primary_score /= 100
 
         # @davidh: Hotfix for styled math. Fix here: https://github.com/allenai/oe-eval-internal/pull/592
-        if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
-            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+        if "styled_math500" in metric.alias and "tulu" in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics["exact_match_flex"]
 
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
@@ -124,7 +124,6 @@ def print_missing_tasks(
     rows_filter_models: list[str | re.Pattern],
     columns_filter_tasks: list[str | re.Pattern],
 ) -> None:
-
     # go through the missing models and tasks and print them out
     for model, missing_task in missing_tasks.items():
         # filter to only models user requested

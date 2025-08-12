@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
@@ -154,9 +153,7 @@ class ModelConfigIdentifier:
             # Validate against registry
             if value not in cls._registry:
                 valid_values = ", ".join(cls._registry.keys())
-                raise ValueError(
-                    f"'{value}' is not a valid model identifier. " f"Available models: {valid_values}"
-                )
+                raise ValueError(f"'{value}' is not a valid model identifier. Available models: {valid_values}")
 
             return cls(value)
 

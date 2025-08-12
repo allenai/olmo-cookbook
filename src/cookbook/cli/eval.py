@@ -789,7 +789,7 @@ def get_results(
         results.show()
     elif format == "csv":
         print(results.to_csv())
-    elif format == 'return_all':
+    elif format == "return_all":
         return results._data
     else:
         raise ValueError(f"Invalid format: {format}")
@@ -839,7 +839,7 @@ def list_tasks(task: list[str] | None):
         else:
             return task_target == task_source
 
-    table = Table(title=f"Listing named tasks")
+    table = Table(title="Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")

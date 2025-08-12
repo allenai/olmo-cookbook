@@ -105,7 +105,7 @@ def get_token_counts_and_ratios(
     total_tokens = sum(token_counts.values())
 
     if total_tokens == 0:
-        raise Exception(f"Error processing config, no tokens found!")
+        raise Exception("Error processing config, no tokens found!")
 
     relative_sizes = {path: count / total_tokens for path, count in token_counts.items()}
 

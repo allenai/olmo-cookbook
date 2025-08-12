@@ -184,11 +184,7 @@ def install_oe_eval(
     install_beaker_py(env)
 
     # Get current installation location, if exists
-    result = subprocess.run(
-        [env.pip, "show", "oe-eval"],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run([env.pip, "show", "oe-eval"], capture_output=True, text=True)
 
     oe_eval_dir = None
     for line in result.stdout.splitlines():
@@ -198,22 +194,14 @@ def install_oe_eval(
 
     if bool(oe_eval_dir and os.path.exists(oe_eval_dir)):
         # Get local commit hash
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=oe_eval_dir,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=oe_eval_dir, capture_output=True, text=True)
         installed_commit = result.stdout.strip()
 
         if commit_hash is None:
             # Check if commit matches remote hash (branch or HEAD)
             branch = commit_branch or "HEAD"
             result = subprocess.run(
-                ["git", "ls-remote", "origin", branch],
-                cwd=oe_eval_dir,
-                capture_output=True,
-                text=True
+                ["git", "ls-remote", "origin", branch], cwd=oe_eval_dir, capture_output=True, text=True
             )
             if result.returncode != 0 or not result.stdout:
                 return None
@@ -438,7 +426,9 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
         if commit_branch:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
-            subprocess.run(shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True)
+            subprocess.run(
+                shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True
+            )
             subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
 
         if commit_hash:

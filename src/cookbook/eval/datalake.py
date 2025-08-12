@@ -148,7 +148,6 @@ class FindExperiments(BaseDatalakeItem):
 
     @classmethod
     def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000) -> list[Self]:
-
         # make sure at least one of dashboard or model_name is provided
         assert dashboard or model_name, "Either dashboard or model_name must be provided"
         response = requests.get(
@@ -188,12 +187,12 @@ class Metrics:
     @property
     def bpb(self) -> float | None:
         return self.bits_per_byte_corr or self.logits_per_byte_corr
-    
+
     @property
     def pass_at_4(self) -> float | None:
         if "pass_at_4" in self.extra_metrics:
             return self.extra_metrics["pass_at_4"]
-    
+
     @property
     def pass_at_16(self) -> float | None:
         if "pass_at_16" in self.extra_metrics:
@@ -251,9 +250,8 @@ class MetricsAll(BaseDatalakeItem):
     @property
     def model_name(self) -> str | None:
         model_name = self.model_config.get("model", None)
-        if 'revision' in self.model_config and \
-            self.model_config['revision'] is not None:
-            model_name = model_name + ':' + self.model_config['revision']
+        if "revision" in self.model_config and self.model_config["revision"] is not None:
+            model_name = model_name + ":" + self.model_config["revision"]
         return model_name
 
     @property
@@ -316,7 +314,6 @@ class RemoveFromDashboard(BaseDatalakeItem):
 
         fns = []
         for run in runs:
-
             # if the experiment is in the cache, we remove it since we changed its tags
             cache.delete(experiment_id=run.experiment_id)
 

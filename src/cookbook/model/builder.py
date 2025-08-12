@@ -286,7 +286,7 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self) -> int:
-        if not self.warmup_steps == None:
+        if self.warmup_steps is not None:
             logger.info(f"Using user-defined warmup steps: {self.warmup_steps}")
             return self.warmup_steps
 
@@ -359,8 +359,7 @@ class TransformerConfigBuilder:
                     # it is ignored for wandb metrics, only entity is used
                     # (it is used for comet metrics)
                     logger.warning(
-                        "metrics_config.workspace is ignored for WandB metrics. "
-                        "Use metrics_config.entity instead."
+                        "metrics_config.workspace is ignored for WandB metrics. Use metrics_config.entity instead."
                     )
 
                 callbacks[MetricBackend.wandb.value] = WandBCallback(
@@ -376,8 +375,7 @@ class TransformerConfigBuilder:
                     # show warning if entity is set to non-default value;
                     # it is not used for comet metrics (only workspace is used)
                     logger.warning(
-                        "metrics_config.entity is ignored for Comet metrics. "
-                        "Use metrics_config.workspace instead."
+                        "metrics_config.entity is ignored for Comet metrics. Use metrics_config.workspace instead."
                     )
 
                 callbacks[MetricBackend.comet.value] = CometCallback(
@@ -541,7 +539,7 @@ class TransformerConfigBuilder:
             # Try olmo_core v2 config format first
             base_lr: int = config["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
+        except KeyError:
             # Now try olmo_core v1 config format
             try:
                 base_lr: int = config["optim"]["lr"]

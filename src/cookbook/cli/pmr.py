@@ -885,7 +885,6 @@ class Session:
         user: str = "ec2-user",
         client: Union["EC2Client", None] = None,
     ):
-
         self.private_key_path = private_key_path
         self.user = user
         self.instance = InstanceInfo.describe_instance(instance_id=instance_id, region=region, client=client)
@@ -1008,7 +1007,6 @@ class Session:
         terminate: bool = True,
         timeout: int | None = None,
     ) -> SessionContent:
-
         if self.instance.state != InstanceStatus.RUNNING:
             raise ValueError(f"Instance {self.instance.instance_id} is not running")
 
