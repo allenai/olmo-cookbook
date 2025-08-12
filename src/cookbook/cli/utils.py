@@ -183,6 +183,51 @@ def install_oe_eval(
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
 
+    # Get current installation location, if exists
+    result = subprocess.run(
+        [env.pip, "show", "oe-eval"],
+        capture_output=True,
+        text=True
+    )
+
+    oe_eval_dir = None
+    for line in result.stdout.splitlines():
+        if line.startswith("Editable project location:"):
+            oe_eval_dir = line.split(":", 1)[1].strip()
+            break
+
+    if bool(oe_eval_dir and os.path.exists(oe_eval_dir)):
+        # Get local commit hash
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=oe_eval_dir,
+            capture_output=True,
+            text=True
+        )
+        installed_commit = result.stdout.strip()
+
+        if commit_hash is None:
+            # Check if commit matches remote hash (branch or HEAD)
+            branch = commit_branch or "HEAD"
+            result = subprocess.run(
+                ["git", "ls-remote", "origin", branch],
+                cwd=oe_eval_dir,
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0 or not result.stdout:
+                return None
+            remote_commit = result.stdout.split()[0]
+
+            if installed_commit == remote_commit:
+                print(f"Current commit matches remote {branch} in {oe_eval_dir}")
+                return oe_eval_dir
+        else:
+            # Check if commit matches user-specified commit
+            if installed_commit == commit_hash:
+                print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
+                return oe_eval_dir
+
     oe_eval_dir = clone_repository(OE_EVAL_GIT_URL, commit_hash, commit_branch)
 
     print(f"Installing OE-Eval from {oe_eval_dir}" + (" in editable mode" if is_editable else "") + "...")
@@ -504,11 +549,14 @@ def download_tokenizer(huggingface_tokenizer: str, env: Optional[PythonEnv] = No
     return tokenizer_dir
 
 
-def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = None) -> str:
+def install_transformers(
+    commit_hash: Optional[str], env: Optional[PythonEnv] = None, git_url: Optional[str] = None
+) -> str:
     env = env or PythonEnv.null()
+    git_url = git_url or TRANSFORMERS_GIT_URL
 
     # Clone the repository
-    transformers_dir = clone_repository(TRANSFORMERS_GIT_URL, commit_hash)
+    transformers_dir = clone_repository(git_url, commit_hash)
 
     # Install the package
     print(f"Installing the correct version of Transformers ({commit_hash}) from {transformers_dir}...")
@@ -519,6 +567,9 @@ def install_transformers(commit_hash: Optional[str], env: Optional[PythonEnv] = 
 
     print("Installing accelerate to fully support Huggingface model conversion...")
     subprocess.run(shlex.split(f"{env.pip} install 'accelerate>=0.26.0'"), check=True, env=env.path())
+
+    print("Installing torchao to fully support Huggingface model conversion...")
+    subprocess.run(shlex.split(f"{env.pip} install 'torchao'"), check=True, env=env.path())
 
     return transformers_dir
 

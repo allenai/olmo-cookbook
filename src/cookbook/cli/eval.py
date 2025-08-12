@@ -1,35 +1,178 @@
 import json
 import logging
 import re
-import sys
 from typing import Optional
 
 import click
 from rich.console import Console
 from rich.table import Table
-from rich.pretty import pprint
 
 from cookbook.cli.utils import (
     get_aws_access_key_id,
     get_aws_secret_access_key,
     get_huggingface_token,
+    make_eval_run_name,
 )
 from cookbook.constants import (
     FIM_TOKENS,
     OLMO2_COMMIT_HASH,
     OLMO_CORE_COMMIT_HASH,
+    OLMO_CORE_CONVERT_DTYPES,
     OLMO_CORE_V2_COMMIT_HASH,
     OLMO_TYPES,
     OLMOE_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
+    TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
+
+
+@click.argument("input_dir", type=str)
+@click.option("--output-dir", type=str, default=None, help="Output directory")
+@click.option("--output-suffix", type=str, default="olmo_core", help="Output suffix")
+@click.option(
+    "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
+)
+@click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
+@click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
+@click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
+@click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
+@click.option("--beaker-workspace", type=str, default="ai2/oe-data", help="Beaker workspace")
+@click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
+@click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
+@click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
+@click.option(
+    "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
+)
+@click.option("--beaker-gpus", type=int, default=1, help="Number of GPUs for Beaker")
+@click.option("--beaker-dry-run", is_flag=True, help="Dry run for Beaker")
+@click.option("--use-system-python", is_flag=True, help="Whether to use system Python or a virtual environment")
+@click.option(
+    "--force-venv",
+    is_flag=True,
+    help="Force creation of new virtual environment",
+    default=False,
+)
+@click.option(
+    "--env-name",
+    type=str,
+    default="oe-conversion-from-hf-venv",
+    help="Name of the environment to use for conversion",
+)
+@click.option(
+    "--olmo-core-v2-experiment-json-path",
+    default=None,
+    help="Path to the OLMo core v2 experiment config json.",
+)
+@click.option(
+    "--olmo-core-v2-model-arch",
+    default=None,
+    help=(
+        "OLMo Core v2 model architecture corresponding to the HF model. "
+        "New architectures should be added to ``_get_transformer_config`` in ``convert_checkpoint_from_hf.py`` of OLMo core. "
+        "This is required for OLMo Core v2 when an experiment config is not provided."
+    ),
+)
+@click.option(
+    "--olmo-core-v2-tokenizer",
+    default=None,
+    help=(
+        "OLMo Core v2 tokenizer corresponding to the HF model. "
+        "New architectures should be added to ``_get_transformer_config`` in ``convert_checkpoint_from_hf.py`` of OLMo core. "
+        "This is required for OLMo Core v2 when an experiment config is not provided."
+    ),
+)
+@click.option(
+    "--huggingface-transformers-model-id",
+    default=None,
+    help="Model id of the HF Hub repo corresponding to the model. Use to get model specific mappings in :mod:`olmo_core.nn.hf.convert`",
+)
+@click.option(
+    "--huggingface-transformers-revision",
+    default="main",
+    help="Huggingface model revision/branch.",
+)
+@click.option(
+    "--skip-validation",
+    is_flag=True,
+    help="Skip validation of the model after conversion.",
+)
+@click.option(
+    "--debug-validation",
+    is_flag=True,
+    help="Provide extra debug logs during validation of the model after conversion.",
+)
+@click.option(
+    "--torch-device",
+    default=None,
+    help="The torch device on which to run conversion and validation.",
+)
+def convert_checkpoint_from_hf(
+    beaker_allow_dirty: bool,
+    beaker_budget: str,
+    beaker_cluster: str,
+    beaker_dry_run: bool,
+    beaker_gpus: int,
+    beaker_priority: str,
+    beaker_workspace: str,
+    force_venv: bool,
+    huggingface_token: Optional[str],
+    input_dir: str,
+    output_dir: Optional[str],
+    output_suffix: str,
+    olmo_core_v2_commit_hash: str,
+    olmo_core_v2_experiment_json_path: Optional[str],
+    olmo_core_v2_model_arch: Optional[str],
+    olmo_core_v2_tokenizer: Optional[str],
+    huggingface_transformers_git_url: str,
+    huggingface_transformers_commit_hash: str,
+    huggingface_transformers_model_id: Optional[str],
+    huggingface_transformers_revision: str,
+    use_system_python: bool,
+    use_beaker: bool,
+    env_name: str,
+    beaker_preemptible: bool,
+    skip_validation: bool,
+    debug_validation: bool,
+    torch_device: Optional[str],
+):
+    run_checkpoint_conversion_from_hf(
+        beaker_allow_dirty=beaker_allow_dirty,
+        beaker_budget=beaker_budget,
+        beaker_cluster=beaker_cluster,
+        beaker_dry_run=beaker_dry_run,
+        beaker_gpus=beaker_gpus,
+        beaker_preemptible=beaker_preemptible,
+        beaker_priority=beaker_priority,
+        beaker_workspace=beaker_workspace,
+        huggingface_token=huggingface_token,
+        huggingface_transformers_git_url=huggingface_transformers_git_url,
+        huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
+        huggingface_transformers_model_id=huggingface_transformers_model_id,
+        huggingface_transformers_revision=huggingface_transformers_revision,
+        input_dir=input_dir.rstrip("/"),
+        output_dir=output_dir,
+        output_suffix=output_suffix,
+        olmo_core_v2_commit_hash=olmo_core_v2_commit_hash,
+        olmo_core_v2_experiment_json_path=olmo_core_v2_experiment_json_path,
+        olmo_core_v2_model_arch=olmo_core_v2_model_arch,
+        olmo_core_v2_tokenizer=olmo_core_v2_tokenizer,
+        python_venv_force=force_venv,
+        python_venv_name=env_name,
+        use_beaker=use_beaker,
+        use_system_python=use_system_python,
+        skip_validation=skip_validation,
+        debug_validation=debug_validation,
+        torch_device=torch_device,
+    )
 
 
 @click.argument("input_dir", type=str)
@@ -45,6 +188,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--olmo-core-v2-commit-hash", type=str, default=OLMO_CORE_V2_COMMIT_HASH, help="OLMo core commit hash"
 )
+@click.option("--huggingface-transformers-git-url", type=str, default=TRANSFORMERS_GIT_URL)
 @click.option("--huggingface-transformers-commit-hash", type=str, default=TRANSFORMERS_COMMIT_HASH)
 @click.option("--huggingface-token", type=str, default=get_huggingface_token(), help="Huggingface token")
 @click.option("-b", "--use-beaker", is_flag=True, help="Use Beaker")
@@ -52,7 +196,7 @@ logger = logging.getLogger(__name__)
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -82,6 +226,12 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="If converting OLMo Core v2 checkpoint, skip validation of the model after conversion.",
 )
+@click.option(
+    "--dtype",
+    type=click.Choice(OLMO_CORE_CONVERT_DTYPES),
+    default=None,
+    help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -101,6 +251,7 @@ def convert_checkpoint(
     olmoe_commit_hash: str,
     olmo_core_commit_hash: str,
     olmo_core_v2_commit_hash: str,
+    huggingface_transformers_git_url: str,
     huggingface_transformers_commit_hash: str,
     unsharded_output_dir: Optional[str],
     unsharded_output_suffix: str,
@@ -110,6 +261,7 @@ def convert_checkpoint(
     beaker_preemptible: bool,
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
+    dtype: Optional[str] = None,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -124,6 +276,7 @@ def convert_checkpoint(
         huggingface_output_suffix=huggingface_output_suffix,
         huggingface_token=huggingface_token,
         huggingface_tokenizer=huggingface_tokenizer,
+        huggingface_transformers_git_url=huggingface_transformers_git_url,
         huggingface_transformers_commit_hash=huggingface_transformers_commit_hash,
         input_dir=input_dir.rstrip("/"),
         max_sequence_length=max_sequence_length,
@@ -139,6 +292,7 @@ def convert_checkpoint(
         use_beaker=use_beaker,
         use_system_python=use_system_python,
         skip_validation=skip_validation,
+        dtype=dtype,
     )
 
 
@@ -152,7 +306,7 @@ def convert_checkpoint(
     help="Set cluster (aus for Austin, sea for Seattle, goog for Google, or provide specific cluster name)",
 )
 @click.option("-d", "--dashboard", type=str, default="generic", help="Set dashboard name")
-@click.option("-b", "--budget", type=str, default="ai2/oe-data", help="Set budget")
+@click.option("-b", "--budget", type=str, default="ai2/oe-base", help="Set budget")
 @click.option("-w", "--workspace", type=str, default="ai2/oe-data", help="Set workspace")
 @click.option(
     "-t",
@@ -276,6 +430,13 @@ def convert_checkpoint(
     help="Whether to compute gold BPB when evaluating generative tasks.",
 )
 @click.option(
+    "--task-args",
+    type=str,
+    default=[],
+    multiple=True,
+    help="Extra arguments to pass to the task config. Can specify multiple args.",
+)
+@click.option(
     "--model-args",
     type=str,
     default="",
@@ -304,6 +465,12 @@ def convert_checkpoint(
     default=False,
     type=bool,
     help="Whether to use the backend in the run name",
+)
+@click.option(
+    "--backfill/--no-backfill",
+    default=False,
+    type=bool,
+    help="When True, only launch evals that are marked as 'missing' in the workspace.",
 )
 @click.option(
     "--name-suffix",
@@ -349,9 +516,11 @@ def evaluate_model(
     vllm_for_mc: bool,
     compute_gold_bpb: bool,
     model_args: str,
+    task_args: list[str],
     fim_tokens: str,
     vllm_use_v1_spec: bool,
     use_backend_in_run_name: bool,
+    backfill: bool,
     name_suffix: str,
     num_shots: int | None,
 ):
@@ -360,8 +529,18 @@ def evaluate_model(
     The evaluation results will be saved to the specified remote output prefix.
     """
 
+    if (oe_eval_branch is not None or oe_eval_commit is not None) and not use_gantry:
+        raise ValueError("If oe-eval branch or commit is provided, --use-gantry should be enabled.")
+
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
+
+    parsed_task_args: dict[str, str] = {}
+    for arg in task_args:
+        if not (arg := arg.strip()):
+            continue
+        key, value = arg.split("=")
+        parsed_task_args[key] = json.loads(value)
 
     parsed_model_args: dict[str, str] = {}
     for arg in model_args.split(","):
@@ -376,6 +555,36 @@ def evaluate_model(
             continue
         key, value = arg.split("=", 1)
         parsed_gantry_args[key] = value
+
+    if backfill:
+        # Get the model's run name using cookbook logic
+        # E.g., "allenai/OLMo-2-1124-13B-SFT" => "OLMo-2-1124-13B-SFT"
+        model_name = make_eval_run_name(
+            checkpoint_path=checkpoint_path,
+            add_bos_token=add_bos_token,
+            num_shots=num_shots,
+            name_suffix=name_suffix.strip(),
+        )
+
+        # Call the dashboard to get all the missing results
+        missing_tasks = get_results(
+            dashboard,
+            model_name,
+            tasks,
+            format="return_missing",
+            sort_by="avg",
+            sort_column_name=None,
+            sort_descending=None,
+            force=False,
+            skip_on_fail=True,
+        )
+
+        # Override our tasks with the missing set
+        if model_name in missing_tasks:
+            tasks = missing_tasks[model_name]
+        else:
+            print(f"Found no missing tasks for {model_name}")
+            return
 
     evaluate_checkpoint(
         oe_eval_branch=oe_eval_branch,
@@ -408,6 +617,7 @@ def evaluate_model(
         vllm_memory_utilization=vllm_memory_utilization,
         vllm_for_mc=vllm_for_mc,
         compute_gold_bpb=compute_gold_bpb,
+        task_args=parsed_task_args,
         model_args=parsed_model_args,
         fim_tokens=fim_tokens,
         use_vllm_v1_spec=vllm_use_v1_spec,
@@ -478,7 +688,6 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -492,7 +701,7 @@ def get_results(
         columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
-    metrics_table, missing_tasks = make_dashboard_table(
+    metrics_table = make_dashboard_table(
         dashboard=dashboard,
         force=force,
         skip_on_fail=skip_on_fail,
@@ -503,7 +712,8 @@ def get_results(
 
     # then iterate over named groups...
     for named_group in named_groups:
-        pprint(named_group.tasks)
+        console = Console(stderr=True)
+        console.print(named_group.tasks)
 
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
@@ -531,12 +741,35 @@ def get_results(
         rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
         results = results.keep_rows(*rows_filter_models)
 
+    missing_tasks: dict[str, list[str]] = {}
+    for model_row in results.rows:
+        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
+            # check if any of the values are None; if all values are there, this metric is ok,
+            # we have all results!
+            if metric_column_value is not None:
+                continue
+
+            all_tasks_set = set()
+            try:
+                # this is a task group! the get function will return a class that has an expanded_tasks attribute
+                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+            except ValueError:
+                # actually not a task group, just a task name. append as is.
+                all_tasks_set.add(metric_column_name)
+
+            # add missing tasks to the missing_tasks dict
+            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
+
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
         missing_tasks=missing_tasks,
         rows_filter_models=rows_filter_models,
         columns_filter_tasks=columns_filter_tasks,
     )
+
+    if format == "return_missing":
+        return missing_tasks
+
     # okay we got all results! now time to sort them depending on the user's request
     try:
         results = results.sort(
@@ -556,6 +789,8 @@ def get_results(
         results.show()
     elif format == "csv":
         print(results.to_csv())
+    elif format == 'return_all':
+        return results._data
     else:
         raise ValueError(f"Invalid format: {format}")
 
@@ -693,6 +928,7 @@ def cli():
     pass
 
 
+cli.command("convert-from-hf")(convert_checkpoint_from_hf)
 cli.command("convert")(convert_checkpoint)
 cli.command("evaluate")(evaluate_model)
 cli.command("results")(get_results)
