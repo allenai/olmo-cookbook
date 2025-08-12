@@ -51,10 +51,12 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@tyler/lc-localadj-gloofix-ropescaling",
+    # this is branch tyler/lc-localadj-gloofix-ropescaling as of 2025-08-10
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@708e7a6dd05aa700150e5cbfd90def45751ca1e9",
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
+    "pyarrow>=19,<20",
 ]
 
 [project.scripts]
