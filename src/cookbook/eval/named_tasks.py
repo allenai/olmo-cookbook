@@ -35,7 +35,7 @@ class NamedTasksGroupRegistry:
 
             # a little bit of a Python crime, but when registering a group,
             # we replace the class name with the task name for the `.name` property.
-            task.name = _task_name  # pyright: ignore
+            setattr(task, "_registry_name", _task_name)
             return task
 
         return decorator
@@ -78,7 +78,7 @@ class BaseNamedTasksGroup:
 
     @property
     def name(self) -> str:
-        return self.__class__.__name__
+        return getattr(self.__class__, "_registry_name", self.__class__.__name__)
 
     @cached_property
     def expanded_tasks(self) -> list[Union[str, re.Pattern]]:
@@ -117,7 +117,9 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
         # Add empty values to all tasks
         for row in results.rows:
             for task in self.expanded_tasks:
-                combined_table.add(col=task, row=row.name, val=None)
+                # task should be a string at this point since expanded_tasks only contains str/Pattern
+                task_name = task if isinstance(task, str) else str(task.pattern)
+                combined_table.add(col=task_name, row=row.name, val=None)
 
         # each row here is a model
         for row in filtered_rows.rows:
@@ -143,30 +145,35 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
         filtered_rows = MiniFrame(title=results.title)
 
         # calculate the averages for all child task groups
-        child_task_names: Union[str | re.Pattern] = []
+        child_task_names: list[str] = []
         for task_or_named_group in self.tasks:
             if isinstance(task_or_named_group, BaseAverageNamedTasksGroup):
                 # get task groups (e.g., MMLURCGroup())
                 named_group: BaseAverageNamedTasksGroup = task_or_named_group
                 combined_table = named_group.combine(results)
                 # If the named group is able to average all scores, add it!
-                named_group_col = combined_table.keep_cols(*[named_group.name])
-                child_task_names.append(named_group.name)
-                filtered_rows = filtered_rows + named_group_col
-            elif isinstance(task_or_named_group, Union[str | re.Pattern]):
+                if combined_table is not None:
+                    named_group_col = combined_table.keep_cols(*[named_group.name])
+                    child_task_names.append(named_group.name)
+                    filtered_rows = filtered_rows + named_group_col
+            elif isinstance(task_or_named_group, (str, re.Pattern)):
                 # get individual tasks (e.g., "arc_challenge:rc::olmes")
-                task: Union[str | re.Pattern] = task_or_named_group
-                task_col = results.keep_cols(*[task])
-                child_task_names.append(task)
+                task_name = (
+                    task_or_named_group
+                    if isinstance(task_or_named_group, str)
+                    else str(task_or_named_group.pattern)
+                )
+                task_col = results.keep_cols(*[task_or_named_group])
+                child_task_names.append(task_name)
                 filtered_rows = filtered_rows + task_col
             else:
                 raise TypeError(f"Task type not yet supported: {type(task_or_named_group)}.")
 
         # Any tasks that do not exist for all models, add a "None" entry
         for row in results.rows:
-            for task in child_task_names:
-                if task not in filtered_rows or filtered_rows[(task, row.name)] is None:
-                    filtered_rows.add(col=task, row=row.name, val=None)
+            for task_name in child_task_names:
+                if task_name not in filtered_rows or filtered_rows[(task_name, row.name)] is None:
+                    filtered_rows.add(col=task_name, row=row.name, val=None)
 
         # compute the average of averages
         # each row here is a model
@@ -361,7 +368,7 @@ class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
-    tasks = ["gsm8k::olmo1", "gsm8k::olmes", [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]]
+    tasks = ["gsm8k::olmo1", "gsm8k::olmes"] + [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]  # type: ignore[assignment]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb")

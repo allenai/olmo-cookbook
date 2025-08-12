@@ -181,7 +181,6 @@ class TransformerConfigBuilder:
     eval_interval: int
     save_interval: int
     lm_evaluator: bool
-    cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
     model_overrides: Optional[List[str]]
@@ -401,7 +400,7 @@ class TransformerConfigBuilder:
 
         if self.downstream_evaluators:
             evaluators = DownstreamEvaluatorCallbackConfig(
-                tasks=get_tasks_for_groups(self.downstream_evaluators),
+                tasks=get_tasks_for_groups([evaluator.name for evaluator in self.downstream_evaluators]),
                 tokenizer=self.tokenizer,
                 eval_interval=self.eval_interval,
             )
@@ -537,12 +536,12 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            base_lr_from_config: int = config["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
         except KeyError:
             # Now try olmo_core v1 config format
             try:
-                base_lr: int = config["optim"]["lr"]
+                base_lr_from_config = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
             except KeyError as e:
                 logger.error(
@@ -561,14 +560,14 @@ class TransformerConfigBuilder:
             raise e
 
         scheduler = CosWithWarmup(**scheduler_config)
-        starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
+        starting_lr = float(scheduler.get_lr(base_lr_from_config, last_pretrain_step, max_pretrain_steps))
 
         return SchedulerState(
             global_step=last_pretrain_step,
             max_steps=max_pretrain_steps,
             last_pretrain_step=last_pretrain_step,
             max_pretrain_steps=max_pretrain_steps,
-            base_lr=base_lr,
+            base_lr=base_lr_from_config,
             starting_lr=starting_lr,
         )
 

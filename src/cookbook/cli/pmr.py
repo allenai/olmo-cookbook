@@ -841,8 +841,8 @@ class InstanceInfo:
                             "Ebs": {
                                 "DeleteOnTermination": True,
                                 "VolumeSize": storage_size,
-                                **({"VolumeType": storage_type} if storage_type else {}),
-                                **({"Iops": storage_iops} if storage_iops else {}),
+                                **({} if not storage_type else {"VolumeType": storage_type}),  # type: ignore[dict-item]
+                                **({} if not storage_iops else {"Iops": storage_iops}),
                             },
                         }
                     ]
@@ -1176,6 +1176,8 @@ def common_cli_options(f: T) -> T:
             if ctx.params.get("script", None) is not None:
                 raise click.UsageError("Cannot provide both --command and --script")
             return value
+
+        return None
 
     click_decorators = [
         click.option("-n", "--name", type=str, required=True, help="Cluster name"),

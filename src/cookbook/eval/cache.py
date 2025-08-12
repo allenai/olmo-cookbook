@@ -19,7 +19,7 @@ class DatalakeCacheResult(Generic[T]):
 
 
 # Singleton instance storage
-_DATALAKE_CACHE_INSTANCE = None
+_DATALAKE_CACHE_INSTANCE: "DatalakeCache | None" = None
 
 
 @dataclass
@@ -98,4 +98,5 @@ def get_datalake_cache(invalidate: bool = False, do_not_cache: bool = False) -> 
             kwargs["do_not_cache"] = do_not_cache
         _DATALAKE_CACHE_INSTANCE = DatalakeCache(**kwargs)
 
+    assert _DATALAKE_CACHE_INSTANCE is not None
     return _DATALAKE_CACHE_INSTANCE

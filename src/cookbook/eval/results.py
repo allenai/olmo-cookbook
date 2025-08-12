@@ -49,7 +49,7 @@ def make_dashboard_table(
 
     if len(experiments) == 0:
         # return empty tables if no experiments are found
-        return metrics_table
+        return metrics_table, {}
 
     metrics = MetricsAll.prun(
         experiment_id=[experiment.experiment_id for experiment in experiments],
@@ -62,7 +62,7 @@ def make_dashboard_table(
     bpb_to_og_metric_name_map: dict[str, str] = {}
 
     # Filter to keep only the newest metric for each (model_name, alias) pair
-    unique_metrics = {}
+    unique_metrics: dict[tuple[str | None, str], MetricsAll] = {}
     for metric in metrics:
         key = (metric.model_name, metric.alias)
         if key in unique_metrics:
@@ -72,9 +72,9 @@ def make_dashboard_table(
                 unique_metrics[key] = metric
         else:
             unique_metrics[key] = metric
-    metrics: list[MetricsAll] = list(unique_metrics.values())
+    filtered_metrics: list[MetricsAll] = list(unique_metrics.values())
 
-    for metric in metrics:
+    for metric in filtered_metrics:
         if metric.is_aggregate:
             # we skip aggregate tasks; we will aggregate them ourselves...
             continue
@@ -116,7 +116,10 @@ def make_dashboard_table(
             if (pass_at_16_alias := make_pass_at_k_name(metric.alias, k=16)) is not None:
                 metrics_table.add(col=pass_at_16_alias, row=metric.model_name, val=metric.metrics.pass_at_16)
 
-    return metrics_table
+    # Create missing tasks dictionary (currently empty as no tracking is implemented)
+    missing_tasks: dict[str, list[str]] = {}
+
+    return metrics_table, missing_tasks
 
 
 def print_missing_tasks(

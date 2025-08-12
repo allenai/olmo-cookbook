@@ -102,7 +102,7 @@ class BaseDatalakeItem(Generic[T]):
         fns = [partial(cls.run, **{k: v[i] for k, v in kwargs.items()}) for i in range(num_args)]
 
         # actually run the function in parallel
-        results = cls._prun(fns=fns, num_workers=num_workers, quiet=quiet)
+        results = cls._prun(fns=fns, num_workers=num_workers, quiet=quiet)  # type: ignore[arg-type]
         return [result for result_group in results for result in result_group]
 
 
@@ -147,7 +147,9 @@ class FindExperiments(BaseDatalakeItem):
     _endpoint: ClassVar[str] = "bluelake/find-experiments/"
 
     @classmethod
-    def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000) -> list[Self]:
+    def run(
+        cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000, **kwargs
+    ) -> list[Self]:
         # make sure at least one of dashboard or model_name is provided
         assert dashboard or model_name, "Either dashboard or model_name must be provided"
         response = requests.get(
@@ -192,11 +194,13 @@ class Metrics:
     def pass_at_4(self) -> float | None:
         if "pass_at_4" in self.extra_metrics:
             return self.extra_metrics["pass_at_4"]
+        return None
 
     @property
     def pass_at_16(self) -> float | None:
         if "pass_at_16" in self.extra_metrics:
             return self.extra_metrics["pass_at_16"]
+        return None
 
     @classmethod
     def from_dict(cls, d: dict) -> Self:
@@ -259,7 +263,11 @@ class MetricsAll(BaseDatalakeItem):
         return self.task_config.get("metadata", {}).get("num_tasks", 0) > 0
 
     @classmethod
-    def run(cls, experiment_id: str, force: bool = False, skip_on_fail: bool = False) -> List[Self]:
+    def run(
+        cls, experiment_id: str | None = None, force: bool = False, skip_on_fail: bool = False, **kwargs
+    ) -> List[Self]:
+        if experiment_id is None:
+            raise ValueError("experiment_id is required")
         cache = get_datalake_cache()
         if not (result := cache.get(experiment_id=experiment_id)).success or force:
             response = requests.get(
@@ -276,9 +284,9 @@ class MetricsAll(BaseDatalakeItem):
 
             result = cache.set(response.json(), experiment_id=experiment_id)
 
-        result = [cls(**metric) for metric in (result.value or [])]
+        metrics = [cls(**metric) for metric in (result.value or [])]
 
-        return result
+        return metrics
 
 
 @dataclass
@@ -308,7 +316,11 @@ class RemoveFromDashboard(BaseDatalakeItem):
         return cls(**(response.json() or {}))
 
     @classmethod
-    def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
+    def run(
+        cls, model_name: str | None = None, dashboard: str | None = None, fuzzy: bool = False, **kwargs
+    ) -> List[Self]:
+        if model_name is None or dashboard is None:
+            raise ValueError("model_name and dashboard are required")
         runs = FindExperiments.run(model_name=model_name, dashboard=dashboard)
         cache = get_datalake_cache()
 
@@ -329,7 +341,7 @@ class RemoveFromDashboard(BaseDatalakeItem):
         if (n := cls._thread_number()) > 0:
             # if we are already running in parallel, then we can use _prun() to create more parallelism
             # (we avoid making a second progress bar by setting quiet=True)
-            return cls._prun(fns=fns, num_workers=len(runs), position=n)
+            return cls._prun(fns=fns, num_workers=len(runs), position=n)  # type: ignore[arg-type]
         else:
             # if we are single-threaded, then we can just run the function sequentially
             return [fn() for fn in fns]
@@ -340,7 +352,11 @@ class AddToDashboard(RemoveFromDashboard):
     """Add an experiment to a dashboard."""
 
     @classmethod
-    def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
+    def run(
+        cls, model_name: str | None = None, dashboard: str | None = None, fuzzy: bool = False, **kwargs
+    ) -> List[Self]:
+        if model_name is None or dashboard is None:
+            raise ValueError("model_name and dashboard are required")
         runs = FindExperiments.run(model_name=model_name)
         cache = get_datalake_cache()
         fns = []
@@ -365,7 +381,7 @@ class AddToDashboard(RemoveFromDashboard):
         if (n := cls._thread_number()) > 0:
             # if we are already running in parallel, then we can use _prun() to create more parallelism
             # (we avoid making a second progress bar by setting quiet=True)
-            return cls._prun(fns=fns, num_workers=len(runs), position=n)
+            return cls._prun(fns=fns, num_workers=len(runs), position=n)  # type: ignore[arg-type]
         else:
             # if we are single-threaded, then we can just run the function sequentially
             return [fn() for fn in fns]
