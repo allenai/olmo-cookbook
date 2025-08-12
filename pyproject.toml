@@ -34,8 +34,7 @@ dependencies = [
 dev = [
     "ruff",
     "mypy>=1.0,<1.4",
-    "ruff",
-    "mypy>=1.0,<1.4",
+    "pytest",
     "boto3-stubs[essential,ec2,s3,ssm]",
     "google-api-python-client-stubs",
 ]
