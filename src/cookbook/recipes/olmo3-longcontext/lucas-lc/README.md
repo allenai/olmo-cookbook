@@ -36,6 +36,7 @@ models_do_not_use=(
 )
 
 
+# trying earlier signals for helmet
 models=(
     "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_1T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-0a84103f/step2385"
     "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_1T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-highLR-60881d2e/step2385"
@@ -46,6 +47,11 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_500B-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-2531084a/step2385"
 )
 
+# does 2x batch size hurt?
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-eb4860c6/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25-2xbzs_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-474bfe7b/step2385"
+)
 
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
