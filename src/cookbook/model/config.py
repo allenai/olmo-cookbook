@@ -4,6 +4,7 @@ from enum import Enum
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
+from olmo_core.nn.attention import SlidingWindowAttentionConfig
 from olmo_core.nn.transformer import (
     TransformerBlockType,
     TransformerConfig,
