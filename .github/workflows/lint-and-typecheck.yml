@@ -1,4 +1,4 @@
-name: Lint and Type Check
+name: CI
 
 on:
   push:
