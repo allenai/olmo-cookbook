@@ -370,7 +370,7 @@ class TestMiniFrame:
         # Test with invalid filter type by directly calling _make_fn with invalid data
         # We need to bypass type checking to test runtime behavior
         fn = frame._make_fn((123,), False)  # type: ignore
-        
+
         # The ValueError should be raised when the function is called with invalid filter
         with pytest.raises(ValueError, match="Invalid column filter"):
             fn("test_string")

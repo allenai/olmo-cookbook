@@ -43,7 +43,7 @@ class MiniFrame:
         # If empty frame, return a copy of empty frame
         if not self._data:
             return MiniFrame(title=self.title)
-            
+
         # model names to sort
         all_keys = {row for col in self._data for row in self._data[col]}
 
