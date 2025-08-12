@@ -22,6 +22,7 @@ annealing:
   initial_lr: 0.00020712352850360292
 load_path: gs://ai2-llm/checkpoints/OLMo25/step476838
 load_state: false
+nccl_debug: true
 dataset:
   sources:
   - name: sponge
