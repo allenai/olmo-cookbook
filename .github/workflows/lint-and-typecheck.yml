@@ -25,12 +25,12 @@ jobs:
       uses: astral-sh/setup-uv@v4
 
     - name: Install dependencies
-      run: uv sync --extra dev
+      run: make install
 
     - name: Lint
       run: |
-        uv run ruff check .
-        uv run ruff format --check .
+        make lint
+        make format-check
 
   typecheck:
     runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
       uses: astral-sh/setup-uv@v4
 
     - name: Install dependencies
-      run: uv sync --extra dev
+      run: make install
 
     - name: Type check
-      run: uv run mypy src/ scripts/ tests/
+      run: make typecheck
