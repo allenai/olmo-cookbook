@@ -374,7 +374,7 @@ class TestMiniFrame:
         # We can't directly pass invalid types to _make_fn due to type checking,
         # so we'll test the error handling inside the function by mocking
         fn = frame._make_fn(("valid_string",), False)
-        
+
         # The ValueError should be raised when the function encounters invalid filter types
         # during actual usage, but since _make_fn itself only accepts valid types,
         # we'll just verify that a proper function is returned
