@@ -1,5 +1,5 @@
-name: "microanneal-noisy-fullthoughtverifiableinstruct-reasoning-olmo3-microanneal-100b-5b-5b-lr8.8e-05"
-description: "OLMo3 7b 5B fullthoughtverifiableinstruct reasoning microanneal - continue from 100B nonreasoning + 5B noisy reasoning - lr 8.8e-05"
+name: "microanneal-meta-noisy-fullthoughtverifiable-reasoning-olmo3-microanneal-100b-5b-5b-5b-lr8.8e-05"
+description: "OLMo3 7b 5B fullthoughtverifiable reasoning microanneal - continue from 100B nonreasoning + 5B meta + 5B noisy reasoning - lr 8.8e-05"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 8.8e-05
-load_path: gs://ai2-llm/checkpoints/stellal/microanneal-noisy-reasoning-olmo3-microanneal-100b-5b-lr8.8e-05-f3cbf03f/step2385
+load_path: gs://ai2-llm/checkpoints/stellal/microanneal-meta-noisy-reasoning-olmo3-microanneal-100b-5b-5b-lr8.8e-05-644659cf/step2385
 load_state: false
 dataset:
   sources:
@@ -60,7 +60,7 @@ dataset:
   #   # 5,601,836,260
   #   - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-2/allenai/dolma2-tokenizer/*.npy
   
-   
+  
   # - name: math-meta-reasoning 
   #   target_ratio: 0.25
   #   repetition_factor: 2.365
@@ -73,37 +73,25 @@ dataset:
   #   - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
   
   - name: fullthought
-    target_ratio: 0.264
-    repetition_factor: 1.55514
+    target_ratio: 0.33
+    repetition_factor: 1.94
     # 850,848,999
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
 
   - name: verifiable-o4
-    target_ratio: 0.04
-    repetition_factor: 2.712
+    target_ratio: 0.05
+    repetition_factor: 3.39
     # 73,752,560
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon/allenai/dolma2-tokenizer/*.npy
   
   - name: verifiable-41
-    target_ratio: 0.096
-    repetition_factor: 1.317
+    target_ratio: 0.12
+    repetition_factor: 1.65
     # 364,483,656
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
-
-  - name: instruction
-    target_ratio: 0.1
-    # 1,627,593,038
-    paths:
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
-
-  # - name: instruction-new-format
-  #   target_ratio: 0.011
-  #   # 1,639,399,859
-  #   paths:
-  #   - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw/tulu-3-midtrain-v0-data-simple-concat-with-therefore-template-decon/allenai/dolma2-tokenizer/*.npy
 
 
 
