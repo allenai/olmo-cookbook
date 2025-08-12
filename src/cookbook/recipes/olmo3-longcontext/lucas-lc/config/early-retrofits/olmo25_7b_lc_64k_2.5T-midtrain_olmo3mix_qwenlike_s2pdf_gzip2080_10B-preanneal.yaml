@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-fixed"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -13,11 +13,12 @@ gc_interval: 200
 
 annealing:
   enabled: true
+  initial_lr: 0.00019122
 
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 # (from end of pretraining)
 warmup_steps: 200
-learning_rate: 0.00019122
+
 
 metrics_config:
   backend: wandb
