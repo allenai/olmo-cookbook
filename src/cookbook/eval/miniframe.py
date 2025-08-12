@@ -153,8 +153,9 @@ class MiniFrame:
         return json.dumps(self._data, sort_keys=True)
 
     def to_csv(self) -> str:
-        # Header row with just column names, sorted alphabetically
-        columns = sorted(self.columns)
+        # Header row with just column names, sorted using the original table order
+        # columns = sorted(self.columns)
+        columns = list(self.columns)
         header = ",".join(["name"] + columns)
         # Data rows with formatted values
         rows = []

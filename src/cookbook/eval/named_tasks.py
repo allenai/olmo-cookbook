@@ -339,6 +339,16 @@ class MinervaGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva:n4")
+class MinervaN4Group(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::olmes:n4" for subtask in constants.ALL_MINERVA_TASKS]
+
+
+@NamedTasksGroupRegistry.register("minerva:n4:v2")
+class MinervaN4V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::olmes:n4:v2" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("minerva::hamish_zs_reasoning")
 class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
@@ -356,6 +366,26 @@ class MathGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("gsm-symb")
 class GsmSymbGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8")
+class GsmSymbN8Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8:v2")
+class GsmSymbN8V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:v2' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8:pass_at_4")
+class GsmSymbN8PassAt4Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:pass_at_4' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8:v2:pass_at_4")
+class GsmSymbN8V2PassAt4Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:v2:pass_at_4' for task in constants.ALL_GSM_SYMB_TASKS]
 
 
 @NamedTasksGroupRegistry.register("code")
@@ -401,6 +431,46 @@ class MultiPlEHEGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("multipl-e-mbpp")
 class MultiPlEMBPPGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32")
+class MultiPlEHEN32Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32")
+class MultiPlEMBPPN32Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:pass_at_16")
+class MultiPlEHEN32PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:pass_at_16' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:pass_at_16")
+class MultiPlEMBPPN32PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:pass_at_16' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:v2")
+class MultiPlEHEN32V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:v2")
+class MultiPlEMBPPN32V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:v2:pass_at_16")
+class MultiPlEHEN32V2PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2:pass_at_16' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:v2:pass_at_16")
+class MultiPlEMBPPN32V2PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2:pass_at_16' for task in constants.MULTIPL_E_MBPP_TASKS]
 
 
 @NamedTasksGroupRegistry.register("fim")
@@ -602,10 +672,29 @@ class Olmo3Dev7bMathGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v1")
+class Olmo3Dev7bMathV1Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Math
+        "gsm8k::olmo3:n8",
+        GsmSymbN8Group(),
+        MinervaN4Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
+class Olmo3Dev7bMathV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Math
+        "gsm8k::olmo3:n8:v2",
+        GsmSymbN8V2Group(),
+        MinervaN4V2Group(),
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen")
 class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Code
         "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3",
         "deepseek_leetcode::olmo3",
@@ -614,6 +703,56 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
         # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v1")
+class Olmo3Dev7bCodeGenV1Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "bigcodebench:3shot::olmo3",
+        "codex_humaneval:3shot::olmo3:n32",
+        "deepseek_leetcode::olmo3:n32",
+        "ds1000:3shot::olmo3",
+        "mbpp:3shot::olmo3:n32",
+        MultiPlEHEN32Group(),
+        MultiPlEMBPPN32Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v1:n32:pass_at_16")
+class Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # We only use a subset of code gen benchmarks for pass@k for speed
+        "deepseek_leetcode::olmo3:n32:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:pass_at_16",
+        "mbpp:3shot::olmo3:n32:pass_at_16",
+        MultiPlEHEN32PassAt16Group(),
+        MultiPlEMBPPN32PassAt16Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v2")
+class Olmo3Dev7bCodeGenV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "bigcodebench:3shot::olmo3:v2",
+        "codex_humaneval:3shot::olmo3:n32:v2",
+        "deepseek_leetcode::olmo3:n32:v2",
+        "ds1000:3shot::olmo3:v2",
+        "mbpp:3shot::olmo3:n32:v2",
+        MultiPlEHEN32V2Group(),
+        MultiPlEMBPPN32V2Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v2:n32:pass_at_16")
+class Olmo3Dev7bCodeGenMiniV2N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # We only use a subset of code gen benchmarks for pass@k for speed
+        "deepseek_leetcode::olmo3:n32:v2:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:v2:pass_at_16",
+        "mbpp:3shot::olmo3:n32:v2:pass_at_16",
+        MultiPlEHEN32V2PassAt16Group(),
+        MultiPlEMBPPN32V2PassAt16Group(),
     ]
 
 
@@ -774,6 +913,62 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v1")
+class Olmo3Dev7bV1MainGroup(BaseTaskView):
+    tasks = [
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV1Group(),
+        Olmo3Dev7bCodeGenV1Group(),
+        Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(),
+        Olmo3Dev7bCodeFimGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmo3:n8",
+        GsmSymbN8Group(),
+        GsmSymbN8PassAt4Group(),
+        MinervaN4Group(),
+        "minerva_math_500::olmo3:n32",
+        "minerva_math_500::olmo3:n32:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32",
+        "mbpp:3shot::olmo3:n32",
+        MultiPlEHEN32Group(),
+        MultiPlEMBPPN32Group(),
+        CruxEvalGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v2")
+class Olmo3Dev7bV2MainGroup(BaseTaskView):
+    tasks = [
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV2Group(),
+        Olmo3Dev7bCodeGenV2Group(),
+        Olmo3Dev7bCodeGenMiniV2N32PassAt16Group(),
+        Olmo3Dev7bCodeFimGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmo3:n8:v2",
+        GsmSymbN8V2Group(),
+        GsmSymbN8V2PassAt4Group(),
+        MinervaN4V2Group(),
+        "minerva_math_500::olmo3:n32:v2",
+        "minerva_math_500::olmo3:n32:v2:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:v2",
+        "mbpp:3shot::olmo3:n32:v2",
+        MultiPlEHEN32V2Group(),
+        MultiPlEMBPPN32V2Group(),
+        CruxEvalGroup(),
+    ]
+
+
 # This is a legacy group, please use the "v1" version!
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
@@ -801,14 +996,8 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
 class Olmo3DevMidtrainMainGroup(BaseTaskView):
     tasks = [
         # Everything in this task set is 0-shot
-        # "alpaca_eval_v3::hamish_zs_reasoning",
         "ifeval::hamish_zs_reasoning",
-        # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
-        # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
-        # "ifeval_ood::tulu-thinker", # this is held-out (for now?)
         StyledMath500ThinkerGroup(),
-        # StyledAlpacaEvalThinkerGroup(),
-        # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
         "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         MinervaHamishZSReasoningGroup(),
         "minerva_math_500::hamish_zs_reasoning",
@@ -823,6 +1012,14 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         "popqa::olmo3:thinker",
         AgiEvalEnglishOLMo3ThinkerGroup(),
         MMLUOLMo3ThinkerGroup(),
+
+        ### These are API-based evals. To prevent large OpenAI costs, we disable.
+        # "alpaca_eval_v3::hamish_zs_reasoning",
+        # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
+        # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
+        # "ifeval_ood::tulu-thinker", # this is held-out (for now?)
+        # StyledAlpacaEvalThinkerGroup(),
+        # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
         # "simpleqa::tulu-thinker",
 
         ### Not implemented

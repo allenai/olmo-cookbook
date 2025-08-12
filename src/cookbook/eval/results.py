@@ -32,6 +32,10 @@ def make_bpb_name(alias: str) -> str | None:
         return RE_SUITE_TASK.sub(":bpb\\1", alias)
     else:
         return f"{alias}:bpb"
+    
+
+def make_pass_at_k_name(alias: str, k: int) -> str | None:
+    return f"{alias}:pass_at_{k}"
 
 
 def make_dashboard_table(
@@ -94,6 +98,10 @@ def make_dashboard_table(
         if 'alpaca' in metric.alias:
             metric.metrics.primary_score /= 100
 
+        # @davidh: Hotfix for styled math. Fix here: https://github.com/allenai/oe-eval-internal/pull/592
+        if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
 
@@ -102,6 +110,16 @@ def make_dashboard_table(
             if (bpb_alias := make_bpb_name(metric.alias)) is not None:
                 metrics_table.add(col=bpb_alias, row=metric.model_name, val=metric.metrics.bpb)
                 bpb_to_og_metric_name_map[bpb_alias] = metric.alias
+
+        # add pass@4 if available and selected
+        if metric.metrics.pass_at_4 is not None:
+            if (pass_at_4_alias := make_pass_at_k_name(metric.alias, k=4)) is not None:
+                metrics_table.add(col=pass_at_4_alias, row=metric.model_name, val=metric.metrics.pass_at_4)
+
+        # add pass@16 if available and selected
+        if metric.metrics.pass_at_16 is not None:
+            if (pass_at_16_alias := make_pass_at_k_name(metric.alias, k=16)) is not None:
+                metrics_table.add(col=pass_at_16_alias, row=metric.model_name, val=metric.metrics.pass_at_16)
 
     return metrics_table
 
