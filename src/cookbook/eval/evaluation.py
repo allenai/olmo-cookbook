@@ -115,14 +115,19 @@ def evaluate_checkpoint(
             cluster = "goog"
     elif scheme:
         raise ValueError(f"Unsupported scheme '{scheme}' in checkpoint path")
-    elif checkpoint_path.startswith("/") and any(re.match(rf"/{w}/", checkpoint_path) for w in WEKA_MOUNTS):
+
+    elif checkpoint_path.startswith("/weka/") or any(checkpoint_path.startswith(f"/{w}/") for w in WEKA_MOUNTS):
         print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
         for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
             clusters_to_exclude.add(cl)
-        checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
+
+        if checkpoint_path.startswith("/weka/"):
+            checkpoint_path = f"weka://{checkpoint_path[6:].rstrip('/')}"
+        else:
+            checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
 
     else:
-        print("Path is a huggingface model; I will add huggingface token to workspace")
+        print("Path is a huggingface hub model; I will add huggingface token to beaker workspace")
         if huggingface_secret:
             hf_token_secret = add_secret_to_beaker_workspace(
                 secret_name="HUGGING_FACE_HUB_TOKEN",
@@ -304,7 +309,10 @@ def evaluate_checkpoint(
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
+            gantry_args_dict = {
+                "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                **gantry_args_dict,
+            }
 
             # finally append gantry args
             local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")

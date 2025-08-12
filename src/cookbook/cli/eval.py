@@ -24,11 +24,11 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
+from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 from cookbook.eval.results import make_dashboard_table, print_missing_tasks
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -196,7 +196,7 @@ def convert_checkpoint_from_hf(
 @click.option("--beaker-priority", type=str, default="high", help="Beaker priority")
 @click.option("--beaker-cluster", type=str, default="aus", help="Beaker cluster")
 @click.option("--beaker-allow-dirty", is_flag=True, help="Allow dirty Beaker workspace")
-@click.option("--beaker-budget", type=str, default="ai2/oe-data", help="Beaker budget")
+@click.option("--beaker-budget", type=str, default="ai2/oe-base", help="Beaker budget")
 @click.option(
     "--beaker-preemptible/--no-beaker-preemptible", is_flag=True, help="Use preemptible instances for Beaker"
 )
@@ -306,7 +306,7 @@ def convert_checkpoint(
     help="Set cluster (aus for Austin, sea for Seattle, goog for Google, or provide specific cluster name)",
 )
 @click.option("-d", "--dashboard", type=str, default="generic", help="Set dashboard name")
-@click.option("-b", "--budget", type=str, default="ai2/oe-data", help="Set budget")
+@click.option("-b", "--budget", type=str, default="ai2/oe-base", help="Set budget")
 @click.option("-w", "--workspace", type=str, default="ai2/oe-data", help="Set workspace")
 @click.option(
     "-t",
@@ -323,7 +323,7 @@ def convert_checkpoint(
     "--partition-size",
     type=int,
     default=0,
-    help="How many tasks to evaluate in parallel. Set to 0 (default) to evaluate all tasks in sequence.",
+    help="How many tasks to evaluate per job. Set to 0 (default) to evaluate all tasks in sequence. Set to 1 for maximum parallelism.",
 )
 @click.option(
     "-y",
@@ -381,9 +381,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMoCore)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
@@ -529,6 +529,9 @@ def evaluate_model(
     The evaluation results will be saved to the specified remote output prefix.
     """
 
+    if (oe_eval_branch is not None or oe_eval_commit is not None) and not use_gantry:
+        raise ValueError("If oe-eval branch or commit is provided, --use-gantry should be enabled.")
+
     # Remove any escaped hyphens in extra_args
     extra_args = re.sub(r"\\-", "-", extra_args.strip())
 
@@ -568,8 +571,8 @@ def evaluate_model(
             dashboard,
             model_name,
             tasks,
-            format='return_missing',
-            sort_by='avg',
+            format="return_missing",
+            sort_by="avg",
             sort_column_name=None,
             sort_descending=None,
             force=False,
@@ -577,10 +580,10 @@ def evaluate_model(
         )
 
         # Override our tasks with the missing set
-        if model_name in missing_tasks:
+        if missing_tasks and model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
-            print(f'Found no missing tasks for {model_name}')
+            print(f"Found no missing tasks for {model_name}")
             return
 
     evaluate_checkpoint(
@@ -684,8 +687,7 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-) -> None:
-
+) -> dict[str, list[str]] | None:
     # compile tasks names into regex patterns (if possible)
     compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -693,10 +695,34 @@ def get_results(
     # which we will use later to print any missing tasks.
     named_groups: list[BaseNamedTasksGroup] = []
     columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
+    initial_filter_tasks: list[str | re.Pattern] = []
+
     for compiled_task in compiled_tasks:
         matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
-        named_groups.extend(matching_groups)
-        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
+        if matching_groups:
+            # This is a named group, add to named_groups
+            named_groups.extend(matching_groups)
+            # Convert expanded task names to regex patterns that match hash suffixes
+            for ng in matching_groups:
+                for task in ng.expanded_tasks:
+                    if isinstance(task, str):
+                        # Create regex pattern that matches task name with optional hash suffix
+                        task_pattern = re.compile(f"^{re.escape(task)}(?:-[a-f0-9]{{6}})?$")
+                        columns_filter_tasks.append(task_pattern)
+                        initial_filter_tasks.append(task_pattern)
+                    else:
+                        columns_filter_tasks.append(task)
+                        initial_filter_tasks.append(task)
+        else:
+            # This is a single task
+            columns_filter_tasks.append(compiled_task)
+            # For single tasks, also create a pattern that matches with hash suffix
+            if isinstance(compiled_task, str):
+                # Create regex pattern that matches task name with optional hash suffix
+                task_pattern = re.compile(f"^{re.escape(compiled_task)}(?:-[a-f0-9]{{6}})?$")
+                initial_filter_tasks.append(task_pattern)
+            else:
+                initial_filter_tasks.append(compiled_task)
 
     # we get the metrics table from the datalake
     metrics_table = make_dashboard_table(
@@ -705,13 +731,12 @@ def get_results(
         skip_on_fail=skip_on_fail,
     )
 
-    # start by filtering in all the single tasks
-    results = metrics_table.keep_cols(*compiled_tasks)
+    # Filter to get all relevant tasks (both single tasks and expanded group tasks)
+    results = metrics_table.keep_cols(*initial_filter_tasks)
 
     # then iterate over named groups...
     for named_group in named_groups:
-        console = Console(stderr=True)
-        console.print(named_group.tasks)
+        # Debug output removed - was causing the task list to print
 
         # ...and try to combine them into a single score. Note we are giving it the full metrics table,
         # not the one after filtering to single tasks.
@@ -720,17 +745,8 @@ def get_results(
         if combined_table is not None:
             # we manage to combine! lets put the combined score at the front
             results = combined_table + results
-        else:
-            # this cannot be combined. let's add each metric as a column. make sure not
-            # to include duplicates.
-            named_group_table = metrics_table.keep_cols(*named_group.expanded_tasks)
-            existing_columns = set(results.columns)
-            named_group_table_only_new_columns = named_group_table.keep_cols(
-                *(c for c in named_group_table.columns if c not in existing_columns)
-            )
-
-            # we add the new columns to the end of the table
-            results = results + named_group_table_only_new_columns
+        # Note: if the group cannot be combined, its individual tasks are already
+        # included in the results from the initial filtering
 
     # we filtered tasks, but the user might want to display only some models
     rows_filter_models: list[str | re.Pattern] = []
@@ -747,16 +763,15 @@ def get_results(
             if metric_column_value is not None:
                 continue
 
-            all_tasks_set = set()
             try:
                 # this is a task group! the get function will return a class that has an expanded_tasks attribute
-                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+                # Skip named group columns - we don't want to report individual tasks as missing
+                # just because the average couldn't be calculated
+                NamedTasksGroupRegistry.get(metric_column_name)
+                continue
             except ValueError:
                 # actually not a task group, just a task name. append as is.
-                all_tasks_set.add(metric_column_name)
-
-            # add missing tasks to the missing_tasks dict
-            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
+                missing_tasks.setdefault(model_row.name, []).append(metric_column_name)
 
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
@@ -765,7 +780,7 @@ def get_results(
         columns_filter_tasks=columns_filter_tasks,
     )
 
-    if format == 'return_missing':
+    if format == "return_missing":
         return missing_tasks
 
     # okay we got all results! now time to sort them depending on the user's request
@@ -787,6 +802,8 @@ def get_results(
         results.show()
     elif format == "csv":
         print(results.to_csv())
+    elif format == 'return_all':
+        return results._data
     else:
         raise ValueError(f"Invalid format: {format}")
 
@@ -835,7 +852,7 @@ def list_tasks(task: list[str] | None):
         else:
             return task_target == task_source
 
-    table = Table(title=f"Listing named tasks")
+    table = Table(title="Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")

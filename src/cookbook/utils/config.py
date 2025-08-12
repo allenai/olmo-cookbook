@@ -241,10 +241,10 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             shared_filesystem=group.config.weka,
             allow_dirty=True,
             weka_buckets=weka_buckets,
-            budget=group.config.budget or "ai2/oe-data",
+            budget=group.config.budget or "ai2/oe-base",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu126",
+            beaker_image="petew/olmo-core-tch270cu128",
             priority=group.config.priority,
             env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
