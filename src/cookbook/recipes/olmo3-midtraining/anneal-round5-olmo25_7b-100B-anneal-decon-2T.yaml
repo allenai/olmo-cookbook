@@ -2,7 +2,7 @@ name: "anneal-round5-100B-olmo25_7b-anneal-2T"
 description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 2T ckpt"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 16
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 100_000_000_000
