@@ -1,4 +1,4 @@
-.PHONY: lint format typecheck check install
+.PHONY: lint format typecheck check install test
 
 # Install development dependencies
 install:
@@ -24,6 +24,10 @@ format:
 typecheck:
 	uv run mypy src/ tests/
 
+# Run tests
+test:
+	uv run pytest tests/
+
 # Run all checks (lint + format + typecheck)
 check: lint format-check typecheck
 
@@ -39,5 +43,6 @@ help:
 	@echo "  format-check - Check code formatting"
 	@echo "  format       - Auto-format code"
 	@echo "  typecheck    - Run type checking"
+	@echo "  test         - Run tests"
 	@echo "  check        - Run all checks (lint + format + typecheck)"
 	@echo "  fix           - Fix formatting and auto-fixable linting issues"

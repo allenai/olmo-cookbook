@@ -48,7 +48,7 @@ TASK_GROUPS: Dict[str, List[str]] = {"all": list(list_tasks()), "olmo2_dev_1b": 
 
 ALL_TASKS_MAP = {task.upper(): task for task in list_tasks()}
 
-DownstreamEvaluator = Enum(
+DownstreamEvaluator = Enum(  # type: ignore[misc]
     "DownstreamEvaluator",
     {
         item[0].upper(): item[1] if isinstance(item[1], list) else [item[1]]

@@ -49,10 +49,13 @@ class MiniFrame:
 
             # make sure the column exists
             assert by_col in self._data, f"Column {by_col} not found"
+            assert by_col is not None
 
             # we get values from the column; if the value is None, we use -inf as the key
             def key_fn(row):
+                assert by_col is not None  # Type narrowing for mypy
                 return self._data[by_col].get(row) or float("-inf")
+
         elif by_avg:
             # sort by average of all values; make sure we don't provide both by_col and by_name
             assert by_col is None and by_name is False, "Cannot provide both by_avg and by_col or by_name"
@@ -60,12 +63,14 @@ class MiniFrame:
             # we get the average of all values; if the value is None, we use 0 as the value
             def key_fn(row):
                 return sum(self._data[col].get(row) or 0 for col in self._data) / len(self._data)
+
         elif by_name:
             # we sort alphabetically by column name
             assert by_col is None and by_avg is False, "Cannot provide both by_name and by_col or by_avg"
 
             def key_fn(col):
                 return col
+
         else:
             # I don't recognize the sorting criteria
             raise ValueError("No sorting criteria provided")
