@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import Optional
+from typing import Any, Optional
 
 import click
 from rich.console import Console
@@ -687,9 +687,11 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-) -> None:
+) -> dict[str, list[str]] | Any | None:
     # compile tasks names into regex patterns (if possible)
-    compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
+    compiled_tasks: list[str | re.Pattern] = [
+        re.compile(task) if re.escape(task) != task else task for task in tasks
+    ]
 
     # we partition between single tasks and named groups; we also keep a set of all tasks names,
     # which we will use later to print any missing tasks.
@@ -701,7 +703,7 @@ def get_results(
         columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
 
     # we get the metrics table from the datalake
-    metrics_table = make_dashboard_table(
+    metrics_table, missing_tasks_from_datalake = make_dashboard_table(
         dashboard=dashboard,
         force=force,
         skip_on_fail=skip_on_fail,
@@ -758,7 +760,9 @@ def get_results(
                 all_tasks_set.add(metric_column_name)
 
             # add missing tasks to the missing_tasks dict
-            missing_tasks.setdefault(model_row.name, []).extend(all_tasks_set)
+            missing_tasks.setdefault(model_row.name, []).extend(
+                [task.pattern if isinstance(task, re.Pattern) else task for task in all_tasks_set]
+            )
 
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(
@@ -789,10 +793,12 @@ def get_results(
         results.show()
     elif format == "csv":
         print(results.to_csv())
-    elif format == 'return_all':
+    elif format == "return_all":
         return results._data
     else:
         raise ValueError(f"Invalid format: {format}")
+
+    return None
 
 
 @click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
@@ -824,7 +830,7 @@ def remove_from_dashboard(dashboard: str, models: list[str]) -> None:
 
 @click.option("-t", "--task", type=str, multiple=True, help="Tasks to filter by")
 def list_tasks(task: list[str] | None):
-    valid_tasks = [re.compile(t) if re.escape(t) != t else t for t in task] if task else []
+    valid_tasks: list[str | re.Pattern] = [re.compile(t) if re.escape(t) != t else t for t in task] if task else []
 
     # first, we write a helper function to compare tasks; this is necessary because both valid tasks and
     # tasks in a group can be either strings or regex patterns.
@@ -839,7 +845,7 @@ def list_tasks(task: list[str] | None):
         else:
             return task_target == task_source
 
-    table = Table(title=f"Listing named tasks")
+    table = Table(title="Listing named tasks")
     table.add_column("Group")
     table.add_column("Tasks")
     table.add_column("Count")

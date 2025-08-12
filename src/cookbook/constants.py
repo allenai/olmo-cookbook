@@ -1,5 +1,3 @@
-import json
-
 TRANSFORMERS_GIT_URL = "https://github.com/huggingface/transformers.git"
 TRANSFORMERS_COMMIT_HASH = "241c04d36867259cdf11dbb4e9d9a60f9cb65ebc"  # v4.47.1
 

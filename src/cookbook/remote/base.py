@@ -30,8 +30,8 @@ class BaseAuthentication(Generic[C]):
         for key, value in obj.items():
             if not isinstance(key, str):
                 raise ValueError(f"Invalid key type: {key!r} (expected str)")
-            if not isinstance(value, JSON_VALID_TYPES):
-                raise ValueError(f"Invalid value type: {value!r} (expected {JSON_VALID_TYPES})")
+            if not isinstance(value, (str, int, float, bool, list, dict)):
+                raise ValueError(f"Invalid value type: {value!r} (expected JSON_VALID_TYPES)")
             if isinstance(value, dict):
                 cls._check_dict_types(value)
 

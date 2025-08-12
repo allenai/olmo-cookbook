@@ -841,8 +841,8 @@ class InstanceInfo:
                             "Ebs": {
                                 "DeleteOnTermination": True,
                                 "VolumeSize": storage_size,
-                                **({"VolumeType": storage_type} if storage_type else {}),
-                                **({"Iops": storage_iops} if storage_iops else {}),
+                                **({} if not storage_type else {"VolumeType": storage_type}),  # type: ignore[dict-item]
+                                **({} if not storage_iops else {"Iops": storage_iops}),
                             },
                         }
                     ]
@@ -885,7 +885,6 @@ class Session:
         user: str = "ec2-user",
         client: Union["EC2Client", None] = None,
     ):
-
         self.private_key_path = private_key_path
         self.user = user
         self.instance = InstanceInfo.describe_instance(instance_id=instance_id, region=region, client=client)
@@ -1008,7 +1007,6 @@ class Session:
         terminate: bool = True,
         timeout: int | None = None,
     ) -> SessionContent:
-
         if self.instance.state != InstanceStatus.RUNNING:
             raise ValueError(f"Instance {self.instance.instance_id} is not running")
 
@@ -1178,6 +1176,8 @@ def common_cli_options(f: T) -> T:
             if ctx.params.get("script", None) is not None:
                 raise click.UsageError("Cannot provide both --command and --script")
             return value
+
+        return None
 
     click_decorators = [
         click.option("-n", "--name", type=str, required=True, help="Cluster name"),

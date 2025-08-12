@@ -84,7 +84,10 @@ def evaluate_checkpoint(
     # processing gantry/task args
     gantry_args_dict = json.loads(gantry_args.strip() or "{}") if isinstance(gantry_args, str) else gantry_args
 
-    task_args_dict = json.loads(task_args.strip() or "{}") if isinstance(task_args, str) else (task_args or {})
+    if isinstance(task_args, str):
+        task_args_dict = json.loads(task_args.strip() or "{}")
+    else:
+        task_args_dict = task_args or {}
 
     # Need to figure out how checkpoint is stored!
     if (scheme := urlparse(checkpoint_path).scheme) == "s3":
@@ -193,21 +196,18 @@ def evaluate_checkpoint(
             # actually not a task group, just a task name. append as is.
             all_tasks_set.add(task_group)
 
-    # we finish by sorting the tasks
-    all_tasks = sorted(all_tasks_set)
+    # we finish by sorting the tasks (convert patterns to strings for sorting)
+    all_tasks = sorted(task if isinstance(task, str) else str(task.pattern) for task in all_tasks_set)
 
     # @davidh: we have a few specific tasks that are not implemented in oe-eval as standalone tasks
     # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
     #          it's just the task alias that does not exist.
     EXCLUDE_FROM_LAUNCH = [
-        r'^mmlu_.*:bpb::olmes$',
-        r'^lambada:bpb$',
-        r'^.*:pass_at_.*$',
+        r"^mmlu_.*:bpb::olmes$",
+        r"^lambada:bpb$",
+        r"^.*:pass_at_.*$",
     ]
-    all_tasks = [
-        task for task in all_tasks
-        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
-    ]
+    all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
 
     # DOING SOME PRETTY PRINTING HERE #
     print(
@@ -220,7 +220,7 @@ def evaluate_checkpoint(
     # # # # # # # # # # # # # # # # # #
 
     # we need to partition tasks based on whether they are mc, gen, or rc
-    partitioned_tasks = {}
+    partitioned_tasks: dict[str, list[str]] = {}
     for task in all_tasks:
         if ":rc::" in task:
             partitioned_tasks.setdefault("rc", []).append(task)
@@ -323,9 +323,18 @@ def evaluate_checkpoint(
                 partition_task_args.setdefault("generation_kwargs", {})
                 if "stop_sequences" in partition_task_args["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
-                    partition_task_args["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
-                         if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]]
+                    existing_stop_sequences = partition_task_args["generation_kwargs"]["stop_sequences"]
+                    assert isinstance(existing_stop_sequences, list)
+                    infilling_gen_kwargs = infilling_dict["generation_kwargs"]
+                    assert isinstance(infilling_gen_kwargs, dict)
+                    infilling_stop_sequences = infilling_gen_kwargs["stop_sequences"]
+                    assert isinstance(infilling_stop_sequences, list)
+                    existing_stop_sequences.extend(
+                        [
+                            stop_tok
+                            for stop_tok in infilling_stop_sequences
+                            if stop_tok not in existing_stop_sequences
+                        ]
                     )
                 else:
                     partition_task_args["generation_kwargs"].update(infilling_dict["generation_kwargs"])

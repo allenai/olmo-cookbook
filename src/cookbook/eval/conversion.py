@@ -53,7 +53,6 @@ def convert_olmo_core_v2(
 ):
     env = env or PythonEnv.null()
 
-    current_directory = os.getcwd()
     directories_to_clean_up = []
 
     if max_sequence_length is None:
@@ -150,7 +149,7 @@ def convert_olmo_core_v2(
             config = json.load(f)
 
         if config.get("torch_dtype", "") == "float32":
-            print(f"Changing type of model to bfloat16...")
+            print("Changing type of model to bfloat16...")
             config["torch_dtype"] = "bfloat16"
 
             with open(config_file, "w") as f:

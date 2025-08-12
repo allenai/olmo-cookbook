@@ -22,19 +22,21 @@ class GoogleCloudToken(BaseAuthentication):
 
     @classmethod
     def from_dict(cls, obj: dict[str, JSON_VALID_TYPES]) -> "GoogleCloudToken":
-        parsed_obj = {
-            "token": obj["token"],
-            "expiry": datetime.datetime.fromisoformat(e) if isinstance(e := obj.get("expiry", None), str) else e,
-            "project_id": obj["project_id"],
-        }
-        return super().from_dict(parsed_obj)
+        expiry_str = obj.get("expiry", None)
+        expiry = datetime.datetime.fromisoformat(expiry_str) if isinstance(expiry_str, str) else None
+        return cls(
+            token=str(obj["token"]),
+            project_id=str(obj["project_id"]),
+            expiry=expiry,
+        )
 
     def to_dict(self) -> dict[str, JSON_VALID_TYPES]:
-        obj = {
+        obj: dict[str, JSON_VALID_TYPES] = {
             "token": self.token,
-            "expiry": self.expiry.isoformat() if self.expiry else None,
             "project_id": self.project_id,
         }
+        if self.expiry is not None:
+            obj["expiry"] = self.expiry.isoformat()
         return obj
 
     @classmethod

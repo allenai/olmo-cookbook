@@ -15,8 +15,7 @@ def copy_prefix(
     dst_path: str,
     src_credentials: BaseAuthentication | None = None,
     dst_credentials: BaseAuthentication | None = None,
-    *args: Any,
-    **kwargs: Any,
+    num_workers: int | None = None,
 ):
     src_loc = LocatedPath.from_str(src_path)
     dst_loc = LocatedPath.from_str(dst_path)
@@ -26,15 +25,17 @@ def copy_prefix(
             from .gcp import GoogleCloudToken, download_gcs_prefix
 
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
-            download_gcs_prefix(src_loc.remote, dst_loc.local, credentials=src_credentials, *args, **kwargs)
+            download_gcs_prefix(
+                src_loc.remote, dst_loc.local, credentials=src_credentials, num_workers=num_workers
+            )
         elif dst_loc.prot == "gs":
             from .gcp import GoogleCloudToken, download_gcs_prefix, upload_gcs_prefix
 
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
             with TemporaryDirectory() as tmp_dir:
-                download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
-                upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+                download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, num_workers=num_workers)
+                upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, num_workers=num_workers)
 
         elif dst_loc.prot == "s3":
             from .aws import AwsCredentials, upload_s3_prefix
@@ -43,23 +44,23 @@ def copy_prefix(
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
             with TemporaryDirectory() as tmp_dir:
-                download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
-                upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+                download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, num_workers=num_workers)
+                upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, num_workers=num_workers)
 
     elif src_loc.prot == "s3":
         if dst_loc.prot in ("weka", "file"):
             from .aws import AwsCredentials, download_s3_prefix
 
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
-            download_s3_prefix(src_loc.remote, dst_loc.local, credentials=src_credentials, *args, **kwargs)
+            download_s3_prefix(src_loc.remote, dst_loc.local, credentials=src_credentials, num_workers=num_workers)
         elif dst_loc.prot == "s3":
             from .aws import AwsCredentials, download_s3_prefix, upload_s3_prefix
 
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
             with TemporaryDirectory() as tmp_dir:
-                download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
-                upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+                download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, num_workers=num_workers)
+                upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, num_workers=num_workers)
         elif dst_loc.prot == "gs":
             from .aws import AwsCredentials, download_s3_prefix
             from .gcp import GoogleCloudToken, upload_gcs_prefix
@@ -67,8 +68,8 @@ def copy_prefix(
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
             with TemporaryDirectory() as tmp_dir:
-                download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
-                upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+                download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, num_workers=num_workers)
+                upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, num_workers=num_workers)
 
     elif src_loc.prot in ("weka", "file"):
         if dst_loc.prot in ("weka", "file"):
@@ -78,12 +79,12 @@ def copy_prefix(
             from .gcp import GoogleCloudToken, upload_gcs_prefix
 
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
-            upload_gcs_prefix(src_loc.local, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+            upload_gcs_prefix(src_loc.local, dst_loc.remote, credentials=dst_credentials, num_workers=num_workers)
         elif dst_loc.prot == "s3":
             from .aws import AwsCredentials, upload_s3_prefix
 
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
-            upload_s3_prefix(src_loc.local, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
+            upload_s3_prefix(src_loc.local, dst_loc.remote, credentials=dst_credentials, num_workers=num_workers)
 
     else:
         raise ValueError(f"{src_loc.prot.upper()} -> {dst_loc.prot.upper()}: not recognized")

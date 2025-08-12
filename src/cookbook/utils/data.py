@@ -56,7 +56,7 @@ def get_token_counts_and_ratios(
         except FileNotFoundError:
             logger.info("No cache file found, calculating from source files...")
 
-    token_counts = defaultdict(int)
+    token_counts: defaultdict[str, int] = defaultdict(int)
 
     filesystems = {}
 
@@ -71,7 +71,7 @@ def get_token_counts_and_ratios(
             )
 
         # Get the scheme (or None for local paths)
-        scheme = next(iter(schemes)) if schemes and next(iter(schemes)) else "local"
+        scheme = next(iter(schemes)) if schemes else "local"
 
         if scheme not in filesystems:
             filesystems[scheme] = get_filesystem_for_scheme(scheme)
@@ -105,7 +105,7 @@ def get_token_counts_and_ratios(
     total_tokens = sum(token_counts.values())
 
     if total_tokens == 0:
-        raise Exception(f"Error processing config, no tokens found!")
+        raise Exception("Error processing config, no tokens found!")
 
     relative_sizes = {path: count / total_tokens for path, count in token_counts.items()}
 
