@@ -718,10 +718,14 @@ class TransformerConfigBuilder:
         if self.cp_degree:
             if self.generate_doc_lengths:
                 # if intra-document masking is enabled, use llama3 context parallelism
-                cp_config = train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+                cp_config = train_module.TransformerContextParallelConfig.llama3(
+                    degree=self.cp_degree, head_stride=8
+                )
             else:
                 # else use zigzag context parallelism, which is more efficient but doesn't support intra-document masking
-                cp_config = train_module.TransformerContextParallelConfig.zigzag(degree=self.cp_degree)
+                raise NotImplementedError(
+                    "Zigzag context parallelism is not supported yet bc its got some sharp edges."
+                )
 
         train_module_config = train_module.TransformerTrainModuleConfig(
             rank_microbatch_size=rank_microbatch_size,

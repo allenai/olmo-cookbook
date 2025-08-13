@@ -42,6 +42,7 @@ dev = [
 beaker = [
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
+    "google-cloud-compute",
 ]
 wandb = [
     "wandb",
@@ -55,6 +56,7 @@ all = [
     "datasets>=3,<4",  # workaround for pinned oe-eval version in olmocore
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
+    "google-cloud-compute",
     "wandb",
 ]
 
