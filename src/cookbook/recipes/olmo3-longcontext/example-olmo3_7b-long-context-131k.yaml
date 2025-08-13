@@ -1,0 +1,48 @@
+# Example recipe for OLMo3 7b swafix high-throughput configuration for 131k context length
+# Needs updates with actual training dataset and hyperparameters
+# Benchmarked at 8.3k TPS/device on 2x8 H100s
+name: "olmo3-7b-long-context-extension-131k-example"
+description: "OLMo3 7b swafix high-throughput configuration for 131k context length"
+budget: "ai2/oe-base"
+workspace: "ai2/oe-data"
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: urgent
+nodes: 2
+gpus: 8
+seed: 4123
+generate_doc_lengths: true  # enable intra-document masking
+# TODO: update to the actual start checkpoint for Long Context extension
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B/step297000/model_and_optim/
+load_state: false
+model: "olmo3_7B_swafix"
+tokenizer: "dolma2"
+max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
+global_batch_size: 4194304
+sequence_length: &seq_len 131072
+max_target_sequence_length: *seq_len
+rank_microbatch_size: *seq_len  # must be the same as sequence_length
+eval_interval: 500
+scheduler_type: linear
+warmup_steps: 0
+dp_shard_degree: 2  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+cp_degree: 8
+float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
+activation_checkpointing: true
+downstream_evaluators:
+  - olmo2_dev_1b
+dataset:
+  # TODO: configure target dataset sources
+  sources:
+  - name: dclm
+    target_ratio: 0.5
+    paths:
+    - gs://ai2-llm/preprocessed/dclm/v0_rep32_ft7percentile_fw2/documents/allenai/dolma2-tokenizer/**/*.npy
+  - name: code
+    target_ratio: 0.4
+    paths:
+    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+  - name: reasoning
+    target_ratio: 0.1
+    paths:
+    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy

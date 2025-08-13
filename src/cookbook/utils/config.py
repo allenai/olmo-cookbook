@@ -156,6 +156,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         cluster=base_config.cluster,
         downstream_evaluators=base_config.downstream_evaluators,
         dtype=base_config.dataset.dtype,
+        generate_doc_lengths=base_config.generate_doc_lengths,
         eval_interval=base_config.eval_interval,
         group_id=group_id.strip(),
         lm_evaluator=base_config.lm_evaluator,
@@ -170,6 +171,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         sources=source_instances,
         tokenizer=base_config.tokenizer,
         metrics_config=base_config.metrics_config,
+        gc_interval=base_config.gc_interval,
         weka=base_config.weka,
         rank_microbatch_size=base_config.rank_microbatch_size,
         global_batch_size=base_config.global_batch_size,
@@ -181,6 +183,10 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         hard_stop=base_config.hard_stop,
         model_overrides=base_config.model_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
+        dp_shard_degree=base_config.dp_shard_degree,
+        tp_degree=base_config.tp_degree,
+        cp_degree=base_config.cp_degree,
+        float8=base_config.float8,
         load_path_fs=load_path_fs,
     ).build()
 

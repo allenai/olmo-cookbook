@@ -1,14 +1,12 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
 
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
-from olmo_core.nn.transformer import (
-    TransformerBlockType,
-    TransformerConfig,
-)
+from olmo_core.nn.attention import SlidingWindowAttentionConfig
+from olmo_core.nn.rope import ABFRoPEScalingConfig, YaRNRoPEScalingConfig
+from olmo_core.nn.transformer import TransformerBlockConfig, TransformerBlockType, TransformerConfig
 from olmo_core.optim import OptimConfig
 from olmo_core.train import TrainerConfig
 
@@ -154,9 +152,7 @@ class ModelConfigIdentifier:
             # Validate against registry
             if value not in cls._registry:
                 valid_values = ", ".join(cls._registry.keys())
-                raise ValueError(
-                    f"'{value}' is not a valid model identifier. " f"Available models: {valid_values}"
-                )
+                raise ValueError(f"'{value}' is not a valid model identifier. Available models: {valid_values}")
 
             return cls(value)
 
@@ -186,6 +182,201 @@ class WrappedTransformerConfig:
             qk_norm=DefaultTransformerProperties.qk_norm,
             block_name=DefaultTransformerProperties.block_type,
         )
+
+    @classmethod
+    def olmo25_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 retrofit
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
+
+    @classmethod
+    def olmo2_7b_flash(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2 but overriding the config to use flash attn
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+      
+        config.block.attention.use_flash = True
+        return config
+
+
+    @classmethod
+    def olmo25_7b_fullattn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 retrofit w/ full attn 
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[-1, -1, -1, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
+
+    @classmethod
+    def olmo3_7B_swafix(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
+        return config
+
+    @classmethod
+    def olmo3_7B_swafix_yolofull(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        Temporary OLMo3 7B "swafix" config with full attn until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[-1, -1, -1, -1],
+        )
+        config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
+        return config
+
+    @classmethod
+    def olmo3_7B_swafix_abf(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+            rope_scaling=ABFRoPEScalingConfig(new_theta=8000000),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
+        return config
+
+    @classmethod
+    def olmo3_7B_swafix_abf_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+            rope_scaling=ABFRoPEScalingConfig(new_theta=8000000),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
+
+        def no_rope_scaling(block: TransformerBlockConfig) -> TransformerBlockConfig:
+            rope_config = block.attention.rope
+            if rope_config is not None:
+                rope_config.scaling = None
+                block.attention.rope = rope_config
+            return block
+
+        config.block_overrides = {
+            i: no_rope_scaling(config.block.copy())
+            for i in range(config.n_layers)
+            if config.block.attention.sliding_window.should_use_swa(i, config.n_layers)
+        }
+        return config
+
+    @classmethod
+    def olmo3_7B_swafix_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+            rope_scaling=YaRNRoPEScalingConfig(factor=8, beta_fast=32, beta_slow=1, old_context_len=8192),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
+        return config
+
+    @classmethod
+    def olmo3_7B_swafix_yarn_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
+        https://github.com/allenai/OLMo-core/pull/310/files#diff-03f6a1f5db18fc4be7a243d8168698ae674cd50b2866253bcdadba5d48590b3dR48
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+            rope_scaling=YaRNRoPEScalingConfig(factor=8, beta_fast=32, beta_slow=1, old_context_len=8192),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
+
+        def no_rope_scaling(block: TransformerBlockConfig) -> TransformerBlockConfig:
+            rope_config = block.attention.rope
+            if rope_config is not None:
+                rope_config.scaling = None
+                block.attention.rope = rope_config
+            return block
+
+        config.block_overrides = {
+            i: no_rope_scaling(config.block.copy())
+            for i in range(config.n_layers)
+            if config.block.attention.sliding_window.should_use_swa(i, config.n_layers)
+        }
+        return config
 
     @classmethod
     def from_model_identifier(

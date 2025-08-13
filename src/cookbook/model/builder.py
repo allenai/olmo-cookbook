@@ -18,7 +18,7 @@ from olmo_core.data import (
 )
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.distributed.parallel import DataParallelType
-from olmo_core.float8 import Float8Config
+from olmo_core.float8 import AOFloat8LinearConfig, Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
@@ -27,8 +27,9 @@ from olmo_core.optim import (
     OptimGroupOverride,
     Scheduler,
     SkipStepAdamWConfig,
+    # WSD,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim.scheduler import WSD, CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BeakerCallback,
@@ -66,7 +67,6 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
-from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,14 @@ class SchedulerState:
     max_pretrain_steps: int
     base_lr: float
     starting_lr: float
+
+
+@dataclass
+class OptimizerState:
+    weight_decay: float
+    betas: Tuple[float, float]
+    foreach: bool
+    optim_group_override: dict | None = None
 
 
 @dataclass
@@ -101,6 +109,7 @@ class TransformerConfigBuilder:
         seed (int): The random seed for reproducibility.
         tokenizer (TokenizerConfig): The tokenizer configuration.
         dtype (str): The data type for the dataset.
+        generate_doc_lengths (bool): Whether to generate document lengths for the dataset. Enabling this enables intra-document masking.
         weka (bool): Whether to use Weka buckets.
         metrics_config (Optional[MetricsConfig]): The metrics configuration, if any.
         max_dp_world_size (int): The maximum data parallel world size.
@@ -117,6 +126,10 @@ class TransformerConfigBuilder:
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
+        dp_shard_degree (Optional[int]): The data parallel model/optimizer sharding degree.
+        tp_degree (Optional[int]): The number of devices to split tensor parallelism across.
+        cp_degree (Optional[int]): The number of devices to split context parallelism across. Useful for long context training.
+        float8 (bool): Whether to enable torchao float8 linear layers.
         profile (bool): Whether to enable profiling.
 
     Methods:
@@ -175,8 +188,10 @@ class TransformerConfigBuilder:
     seed: int
     tokenizer: TokenizerConfig
     dtype: str
+    generate_doc_lengths: bool
     weka: bool
     metrics_config: Optional[MetricsConfig]
+    gc_interval: Optional[int]
     max_dp_world_size: int
     eval_interval: int
     save_interval: int
@@ -193,6 +208,10 @@ class TransformerConfigBuilder:
     warmup_steps: Optional[int]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
+    dp_shard_degree: Optional[int]
+    tp_degree: Optional[int]
+    cp_degree: Optional[int]
+    float8: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
 
@@ -208,6 +227,7 @@ class TransformerConfigBuilder:
         tokenizer: str,
         dtype: str,
         model_identifier: ModelConfigIdentifier,
+        generate_doc_lengths: bool,
         weka: bool,
         max_dp_world_size: int,
         save_interval: int,
@@ -216,6 +236,10 @@ class TransformerConfigBuilder:
         downstream_evaluators: List[DownstreamEvaluator],  # type: ignore
         scheduler_type: SchedulerType,
         activation_checkpointing: bool = False,
+        dp_shard_degree: Optional[int] = None,
+        tp_degree: Optional[int] = None,
+        cp_degree: Optional[int] = None,
+        float8: bool = False,
         model_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
         annealing: Optional[AnnealConfig] = None,
@@ -225,6 +249,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size: Optional[int] = None,
         learning_rate: Optional[float] = None,
         metrics_config: Optional[MetricsConfig] = None,
+        gc_interval: Optional[int] = None,
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
@@ -243,15 +268,20 @@ class TransformerConfigBuilder:
         self.beaker_user = beaker_user.strip()
         self.profile = profile
         self.activation_checkpointing = activation_checkpointing
+        self.dp_shard_degree = dp_shard_degree
+        self.tp_degree = tp_degree
+        self.cp_degree = cp_degree
+        self.float8 = float8
         self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
+        self.generate_doc_lengths = generate_doc_lengths
         self.root_dir = f"/tmp/{self.run_name}"
         self.metrics_config = metrics_config
+        self.gc_interval = gc_interval
         self.max_dp_world_size = max_dp_world_size
         self.max_target_sequence_length = max_target_sequence_length
         self.max_grad_norm = 1.0
         self.save_interval = save_interval
-        self.dataset_detype = NumpyDatasetDType[dtype]
         self.lm_evaluator = lm_evaluator
         self.learning_rate = learning_rate
         self.global_batch_size = global_batch_size
@@ -269,14 +299,20 @@ class TransformerConfigBuilder:
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            self.checkpoint_dir = (
+                f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
+            )
 
         if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
             self.root_dir = "/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
-            self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            self.checkpoint_dir = (
+                f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name.strip('v2')}"
+            )
 
-        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
+        self.dataset_cache = (
+            f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name.strip('v2')}/dataset-cache"
+        )
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
@@ -339,11 +375,13 @@ class TransformerConfigBuilder:
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
-                save_async=True,
+                save_async=False,  # fix for gloo error
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
-            "garbage_collector": GarbageCollectorCallback(),
+            "garbage_collector": GarbageCollectorCallback(
+                **{"gc_interval": self.gc_interval} if self.gc_interval else {}
+            ),
         }
 
         if self.beaker_user is not None:
@@ -359,8 +397,7 @@ class TransformerConfigBuilder:
                     # it is ignored for wandb metrics, only entity is used
                     # (it is used for comet metrics)
                     logger.warning(
-                        "metrics_config.workspace is ignored for WandB metrics. "
-                        "Use metrics_config.entity instead."
+                        "metrics_config.workspace is ignored for WandB metrics. Use metrics_config.entity instead."
                     )
 
                 callbacks[MetricBackend.wandb.value] = WandBCallback(
@@ -376,8 +413,7 @@ class TransformerConfigBuilder:
                     # show warning if entity is set to non-default value;
                     # it is not used for comet metrics (only workspace is used)
                     logger.warning(
-                        "metrics_config.entity is ignored for Comet metrics. "
-                        "Use metrics_config.workspace instead."
+                        "metrics_config.entity is ignored for Comet metrics. Use metrics_config.workspace instead."
                     )
 
                 callbacks[MetricBackend.comet.value] = CometCallback(
@@ -397,6 +433,7 @@ class TransformerConfigBuilder:
                     sequence_length=self.sequence_length,
                     tokenizer=self.tokenizer,
                     work_dir=self.dataset_cache,
+                    generate_doc_lengths=self.generate_doc_lengths,
                 ),
                 eval_interval=self.eval_interval,
             )
@@ -445,6 +482,7 @@ class TransformerConfigBuilder:
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
+            generate_doc_lengths=self.generate_doc_lengths,
         )
 
         return dataset_config
@@ -455,9 +493,7 @@ class TransformerConfigBuilder:
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
                 warmup_steps=self.get_warmup_steps(),
             ),
-            SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
-            ),
+            SchedulerType.LINEAR: lambda: LinearWithWarmup(warmup_steps=self.get_warmup_steps(), alpha_f=0.0),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
@@ -467,15 +503,29 @@ class TransformerConfigBuilder:
 
     def get_optimizer_config(self) -> OptimConfig:
         lr = self.get_learning_rate()
+        weight_decay = 0.1
+        betas = (0.9, 0.95)
+        foreach = True
+        optim_group_override_dict = dict(params=["embeddings.weight"], opts=dict(weight_decay=0.0))
 
         if self.annealing is not None:
-            lr = getattr(self.annealing, "initial_lr", None) or self.get_state_from_checkpoint().starting_lr
+            scheduler_state, optimizer_state = self.get_state_from_checkpoint()
+            lr = getattr(self.annealing, "initial_lr", None) or scheduler_state.starting_lr
+            weight_decay = getattr(self.annealing, "weight_decay", None) or optimizer_state.weight_decay
+            betas = getattr(self.annealing, "betas", None) or optimizer_state.betas
+            foreach = getattr(self.annealing, "foreach", None) or optimizer_state.foreach
+            optim_group_override_dict = (
+                getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            )
+
+        group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
         return SkipStepAdamWConfig(
             lr=lr,
-            weight_decay=0.033,
-            betas=(0.9, 0.95),
-            group_overrides=[OptimGroupOverride(params=["embeddings.weight"], opts=dict(weight_decay=0.0))],
+            weight_decay=weight_decay,
+            betas=betas,
+            group_overrides=group_overrides,
+            foreach=foreach,
         )
 
     def get_ac_config(self):
@@ -483,6 +533,15 @@ class TransformerConfigBuilder:
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
             modules=["blocks.*.feed_forward"],
+        )
+
+    def get_float8_config(self):
+        return Float8Config(
+            ao=AOFloat8LinearConfig(
+                enable_fsdp_float8_all_gather=True,
+                force_recompute_fp8_weight_in_bwd=True,
+                round_scales_to_power_of_2=True,
+            )
         )
 
     def load_state_and_config_from_path(self) -> Tuple[Path, Path]:
@@ -511,7 +570,7 @@ class TransformerConfigBuilder:
                 resource_path(folder=self.load_path, fname="config.json"),
             )
 
-    def get_state_from_checkpoint(self) -> SchedulerState:
+    def get_state_from_checkpoint(self) -> Tuple[SchedulerState, OptimizerState]:
         state_path, config_path = self.load_state_and_config_from_path()
         train_state = torch.load(state_path, weights_only=False)
 
@@ -539,33 +598,50 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            base_lr: int = config["train_module"]["optim"]["lr"]
             scheduler_config = config["train_module"]["scheduler"]
-        except KeyError as e:
+        except KeyError:
             # Now try olmo_core v1 config format
             try:
                 base_lr: int = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
-            except KeyError as e:
+            except Exception as e:
                 logger.error(
-                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state."
+                    "Could not find base_lr or scheduler config in train state. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                    e,
                 )
                 raise e
 
         scheduler_class = scheduler_config.pop("_CLASS_").split(".")[-1]
 
         try:
-            assert scheduler_class == CosWithWarmup.__name__
+            assert scheduler_class == CosWithWarmup.__name__ or scheduler_class == WSD.__name__
         except AssertionError as e:
             logger.error(
-                f"Expected scheduler class {CosWithWarmup.__name__}, but got {scheduler_class}: Anneals from a base LR can only be inferred from CosWithWarmup scheduler."
+                f"Expected scheduler class {CosWithWarmup.__name__} or {WSD.__name__}, but got {scheduler_class}: Anneals from a base LR cannot be inferred from this scheduler type. Exiting!"
             )
             raise e
 
-        scheduler = CosWithWarmup(**scheduler_config)
+        try:
+            if scheduler_class == WSD.__name__:
+                if not scheduler_config.get("decay_fraction", None):
+                    scheduler_config["decay_fraction"] = None
+                scheduler = WSD(**scheduler_config)
+            elif scheduler_class == CosWithWarmup.__name__:
+                scheduler = CosWithWarmup(**scheduler_config)
+            else:
+                raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
+        except Exception as e:
+            logger.error(
+                "Could not instantiate scheduler from config. Please ensure the checkpoint is valid. Unable to load scheduler state.",
+                e,
+            )
+            logger.info(scheduler_config)
+            raise e
+
         starting_lr = float(scheduler.get_lr(base_lr, last_pretrain_step, max_pretrain_steps))
 
-        return SchedulerState(
+        scheduler_state = SchedulerState(
             global_step=last_pretrain_step,
             max_steps=max_pretrain_steps,
             last_pretrain_step=last_pretrain_step,
@@ -573,6 +649,48 @@ class TransformerConfigBuilder:
             base_lr=base_lr,
             starting_lr=starting_lr,
         )
+
+        optimizer_config = config["train_module"]["optim"]
+        optimizer_class = optimizer_config.get("_CLASS_", None).split(".")[-1]
+
+        try:
+            assert optimizer_class == SkipStepAdamWConfig.__name__
+
+            weight_decay = optimizer_config.get("weight_decay", None)
+            assert isinstance(weight_decay, float)
+
+            betas = optimizer_config.get("betas", None)
+            assert isinstance(betas, list) and len(betas) == 2
+
+            foreach = optimizer_config.get("foreach", None)
+            assert isinstance(foreach, bool)
+
+            group_overrides = optimizer_config.get("group_overrides", [])
+
+            optim_group_override = None
+            for group_override in group_overrides:
+                group_override_class = group_override.get("_CLASS_", None).split(".")[-1]
+                if group_override_class == OptimGroupOverride.__name__:
+                    (optim_group_override := {**group_override}).pop("_CLASS_")
+                    break
+            assert optim_group_override is None or isinstance(optim_group_override, dict)
+
+        except Exception as e:
+            logger.error(
+                "Could not load optimizer state from checkpoint. Please ensure the checkpoint is valid. Exiting!",
+                e,
+            )
+            logger.info(optimizer_config)
+            raise e
+
+        optimizer_state = OptimizerState(
+            weight_decay=weight_decay,
+            betas=tuple(betas),
+            foreach=foreach,
+            optim_group_override=optim_group_override,
+        )
+
+        return scheduler_state, optimizer_state
 
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
@@ -590,16 +708,31 @@ class TransformerConfigBuilder:
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
+        dp_config = train_module.TransformerDataParallelConfig(
+            name=DataParallelType.hsdp,
+            param_dtype=DType.bfloat16,
+            shard_degree=self.dp_shard_degree,
+        )
+        tp_config = train_module.TransformerTensorParallelConfig(degree=self.tp_degree) if self.tp_degree else None
+        cp_config = None
+        if self.cp_degree:
+            if self.generate_doc_lengths:
+                # if intra-document masking is enabled, use llama3 context parallelism
+                cp_config = train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+            else:
+                # else use zigzag context parallelism, which is more efficient but doesn't support intra-document masking
+                cp_config = train_module.TransformerContextParallelConfig.zigzag(degree=self.cp_degree)
+
         train_module_config = train_module.TransformerTrainModuleConfig(
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,
             optim=self.get_optimizer_config(),
             compile_model=True,
-            dp_config=train_module.TransformerDataParallelConfig(
-                name=DataParallelType.hsdp, param_dtype=DType.bfloat16, reduce_dtype=DType.float32
-            ),
+            dp_config=dp_config,
+            tp_config=tp_config,
+            cp_config=cp_config,
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
-            float8_config=Float8Config(enabled=False),
+            float8_config=self.get_float8_config() if self.float8 else Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
             max_grad_norm=1.0,
             scheduler=self.get_scheduler_config(),
@@ -611,7 +744,7 @@ class TransformerConfigBuilder:
             load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
             work_dir=self.dataset_cache,
-            save_overwrite=True,
+            save_overwrite=False,
             metrics_collect_interval=10,
             cancel_check_interval=5,
             max_duration=Duration.tokens(self.max_tokens),
