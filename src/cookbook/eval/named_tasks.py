@@ -184,12 +184,12 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
             filtered_rows.add(col=self.name, row=row.name, val=average)
 
         return filtered_rows
-    
+
 
 class BaseTaskView(BaseAverageOfAveragesNamedTasksGroup):
     """
-    Base class for tasks "views". In a task view, only the child tasks are averages 
-    
+    Base class for tasks "views". In a task view, only the child tasks are averages
+
     For example, "olmo3:dev:7b:main" is not a average, but contains "olmo3:dev:7b:mcqa" and "mmlu:mc" are task averages.
     """
     def combine(self, results: MiniFrame) -> MiniFrame | None:
@@ -363,7 +363,7 @@ class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageNamedTasksGroup):
     tasks = [
-        "gsm8k::olmo1", 
+        "gsm8k::olmo1",
         "gsm8k::olmes",
         [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
     ]
@@ -571,6 +571,21 @@ def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
 for helmet_length in (int(2**i) for i in range(13, 18)):
     NamedTasksGroupRegistry.register(f"helmet:{helmet_length // 2 ** 10}k")(make_helmet_group(helmet_length))
 
+
+def make_ruler_group(ruler_length: int) -> Type[BaseAverageNamedTasksGroup]:
+    class RULERGroup(BaseAverageNamedTasksGroup):
+        tasks = [
+            task
+            for group_name, tasks in constants.RULER_SUITES.items()
+            for task in tasks
+            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
+        ]
+
+    return RULERGroup
+
+
+for ruler_length in (int(2**i) for i in range(12, 18)):
+    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2 ** 10}k")(make_ruler_group(ruler_length))
 
 @NamedTasksGroupRegistry.register("minerva:bpb")
 class MinervaBpbGroup(BaseAverageNamedTasksGroup):
