@@ -32,7 +32,7 @@ def make_bpb_name(alias: str) -> str | None:
         return RE_SUITE_TASK.sub(":bpb\\1", alias)
     else:
         return f"{alias}:bpb"
-    
+
 
 def make_pass_at_k_name(alias: str, k: int) -> str | None:
     return f"{alias}:pass_at_{k}"
@@ -78,6 +78,7 @@ def make_dashboard_table(
         else:
             unique_metrics[key] = metric
     metrics: list[MetricsAll] = list(unique_metrics.values())
+
 
     for metric in metrics:
         if metric.is_aggregate:
