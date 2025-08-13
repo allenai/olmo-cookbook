@@ -188,6 +188,16 @@ class Metrics:
     @property
     def bpb(self) -> float | None:
         return self.bits_per_byte_corr or self.logits_per_byte_corr
+    
+    @property
+    def pass_at_4(self) -> float | None:
+        if "pass_at_4" in self.extra_metrics:
+            return self.extra_metrics["pass_at_4"]
+    
+    @property
+    def pass_at_16(self) -> float | None:
+        if "pass_at_16" in self.extra_metrics:
+            return self.extra_metrics["pass_at_16"]
 
     @classmethod
     def from_dict(cls, d: dict) -> Self:
@@ -196,6 +206,8 @@ class Metrics:
 
         # move all metrics that are not shared across tasks to extra_metrics
         extra_metrics = {**d.pop("extra_metrics", {}), **{k: d.pop(k) for k in list(d) if k not in fields}}
+        if "primary_score" not in d:
+            d["primary_score"] = None
         return cls(**d, extra_metrics=extra_metrics)
 
 

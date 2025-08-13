@@ -236,7 +236,9 @@ uv pip install dolma
 """.strip()
 
 
-def make_decon_python_setup(github_token: str | None = None, host_index: int | None = None, host_count: int | None = None) -> str:
+def make_decon_python_setup(
+    github_token: str | None = None, host_index: int | None = None, host_count: int | None = None
+) -> str:
     """Generate the DECON Python setup script with optional GitHub token and PMR environment variables."""
     clone_cmd = "git clone https://github.com/allenai/decon.git"
     if github_token:
@@ -304,9 +306,6 @@ sudo "${{PKG_MANAGER}}" install git tmux htop -y
 # install gcc, g++, cmake, openssl-devel
 sudo "${{PKG_MANAGER}}" install gcc g++ cmake openssl-devel -y
 
-# install github cli
-curl -sS https://webi.sh/gh | sh
-
 # install s5cmd
 wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
 tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
@@ -326,8 +325,34 @@ pip install -r python/requirements.txt
 make evals-s3
 """.strip()
 
+
 # Keep the default for backward compatibility
 DECON_PYTHON_SETUP = make_decon_python_setup()
+
+
+class ClientUtils:
+    @staticmethod
+    def get_ec2_client(
+        region: str = "us-east-1",
+        profile_name: str | None = None,
+    ) -> Union["EC2Client", None]:
+        """
+        Get a boto3 client for the specified service and region.
+        """
+        session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", profile_name))
+        return session.client("ec2", region_name=region)  # type: ignore
+
+    @staticmethod
+    def get_ssm_client(
+        region: str = "us-east-1",
+        profile_name: str | None = None,
+    ) -> Union["SSMClient", None]:
+        """
+        Get a boto3 SSM client for the specified region.
+        """
+        session = boto3.Session(profile_name=os.getenv("AWS_PROFILE", profile_name))
+        return session.client("ssm", region_name=region)  # type: ignore
+
 
 class InstanceStatus(Enum):
     PENDING = "pending"
@@ -512,7 +537,7 @@ class InstanceInfo:
     def describe_instances(
         cls,
         instance_ids: list[str] | None = None,
-        client: Union["EC2Client", None] = None,
+        client: Union["EC2Client", "SSMClient", None] = None,
         region: str | None = None,
         project: str | None = None,
         owner: str | None = None,
@@ -535,8 +560,8 @@ class InstanceInfo:
         # default statuses
         statuses = statuses or InstanceStatus.active()
 
-        # Use provided client or create a new one with the specified region
-        client = client or boto3.client("ec2", region_name=region or cls.region)
+        client = client or ClientUtils.get_ec2_client(region=region or cls.region)
+        assert client, "EC2 client is required"
 
         filters = []
 
@@ -589,7 +614,7 @@ class InstanceInfo:
     def describe_instance(
         cls,
         instance_id: str,
-        client: Union["EC2Client", None] = None,
+        client: Union["EC2Client", "SSMClient", None] = None,
         region: str | None = None,
     ) -> "InstanceInfo":
         """
@@ -603,7 +628,7 @@ class InstanceInfo:
         Returns:
             InstanceInfo object containing the instance details
         """
-        client = client or boto3.client("ec2", region_name=region or cls.region)
+        client = client or ClientUtils.get_ec2_client(region=region or cls.region)
         assert client, "EC2 client is required"
 
         response = client.describe_instances(InstanceIds=[instance_id])
@@ -620,7 +645,7 @@ class InstanceInfo:
         Returns:
             True if pause was successful, False otherwise
         """
-        client = client or boto3.client("ec2", region_name=self.region)
+        client = client or ClientUtils.get_ec2_client(region=self.region)
         assert client, "EC2 client is required"
 
         # check if the instance is already paused
@@ -657,7 +682,7 @@ class InstanceInfo:
         Returns:
             True if resume was successful, False otherwise
         """
-        client = client or boto3.client("ec2", region_name=self.region)
+        client = client or ClientUtils.get_ec2_client(region=self.region)
         assert client, "EC2 client is required"
 
         # check if the instance is already running
@@ -694,7 +719,7 @@ class InstanceInfo:
         Returns:
             True if termination was successful, False otherwise
         """
-        client = client or boto3.client("ec2", region_name=self.region)
+        client = client or ClientUtils.get_ec2_client(region=self.region)
         assert client, "EC2 client is required"
 
         try:
@@ -733,7 +758,7 @@ class InstanceInfo:
         else:
             image_id = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 
-        client = client or boto3.client("ssm")
+        client = client or ClientUtils.get_ssm_client(region=cls.region)
         assert client, "SSM client is required"
 
         parameter = client.get_parameter(Name=image_id, WithDecryption=False)
@@ -774,8 +799,16 @@ class InstanceInfo:
             InstanceInfo object representing the newly created EC2 instance
         """
         # Initialize the EC2 client with the specified region
-        client = client or boto3.client("ec2", region_name=region)
+        client = client or ClientUtils.get_ec2_client(region=region)
         assert client, "EC2 client is required"
+
+        vpcs = client.describe_vpcs()["Vpcs"]
+        vpc_id = vpcs[0].get("VpcId")
+
+        if vpc_id is None:
+            raise ValueError("No VPC ID found in VPC: {}".format(vpcs[0]))
+
+        print(f"Using VPC ID: {vpc_id}")
 
         # If AMI ID is not provided, use a default Amazon Linux 2023 AMI (x86_64 or arm64 based on instance type)
         ami_id = ami_id or cls.get_latest_ami_id(instance_type)
@@ -998,7 +1031,8 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
         The key pair ID if the import was successful.
     """
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
+    client = ClientUtils.get_ec2_client(region=region)
+    assert client, "EC2 client is required"
 
     # Use default SSH private key path if not specified
     if not private_key_path:
@@ -1050,15 +1084,15 @@ def import_ssh_key_to_ec2(key_name: str, region: str, private_key_path: str) -> 
     try:
         # Check if key pair already exists
         try:
-            ec2_client.describe_key_pairs(KeyNames=[key_name])
+            client.describe_key_pairs(KeyNames=[key_name])
             logger.info(f"Key pair '{key_name}' already exists in region {region}. Skipping import.")
             return key_name
-        except ec2_client.exceptions.ClientError:
+        except client.exceptions.ClientError:
             # Key doesn't exist, continue with import
             pass
 
         # Import the key
-        response = ec2_client.import_key_pair(KeyName=key_name, PublicKeyMaterial=public_key_material)
+        response = client.import_key_pair(KeyName=key_name, PublicKeyMaterial=public_key_material)
 
         if response["KeyFingerprint"] is None:
             raise ValueError(f"Failed to import key pair '{key_name}' to region {region}")
@@ -1306,7 +1340,7 @@ def create_instances(
         logger.info("No existing instances found. Starting with index 0")
 
     # Initialize the EC2 client with the specified region
-    ec2_client = boto3.client("ec2", region_name=region)
+    ec2_client = ClientUtils.get_ec2_client(region=region)
     logger.debug(f"Initialized EC2 client for region {region}")
 
     instances = []
@@ -1353,7 +1387,7 @@ def list_instances(
     """
     logger.info(f"Listing instances with project={name} in region {region}")
 
-    client = boto3.client("ec2", region_name=region)
+    client = ClientUtils.get_ec2_client(region=region)
 
     # Retrieve matching instances
     instances = InstanceInfo.describe_instances(
@@ -1402,7 +1436,7 @@ def terminate_instances(
     """
     logger.info(f"Terminating instances with project={name} in region {region}")
 
-    client = boto3.client("ec2", region_name=region)
+    client = ClientUtils.get_ec2_client(region=region)
 
     # Retrieve instances matching the project and owner tags
     instances = InstanceInfo.describe_instances(
@@ -1450,7 +1484,7 @@ def pause_instances(
     """
     logger.info(f"Pausing instances with project={name} in region {region}")
 
-    client = boto3.client("ec2", region_name=region)
+    client = ClientUtils.get_ec2_client(region=region)
 
     # Retrieve instances matching the project and owner tags
     instances = InstanceInfo.describe_instances(
@@ -1494,7 +1528,7 @@ def resume_instances(
         instance_id: Optional list of specific instance IDs to resume
         detach: Whether to return immediately without waiting for resume to complete
     """
-    client = boto3.client("ec2", region_name=region)
+    client = ClientUtils.get_ec2_client(region=region)
 
     logger.info(f"Resuming instances with project={name} in region {region}")
 
@@ -1854,7 +1888,9 @@ def setup_decon(
 
     # Set up each instance with its specific host index
     for idx, instance in enumerate(instances):
-        logger.info(f"Setting up Decon on instance {instance.instance_id} ({instance.name}) with PMR_HOST_INDEX={idx}")
+        logger.info(
+            f"Setting up Decon on instance {instance.instance_id} ({instance.name}) with PMR_HOST_INDEX={idx}"
+        )
 
         # Generate the setup script with the specific host index for this instance
         decon_setup_script = make_decon_python_setup(github_token, host_index=idx, host_count=len(instances))
