@@ -254,15 +254,14 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
-    def olmo25_abf(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+    def olmo25_7b_abf(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         config = cls.olmo25_7b(tokenizer)
         config.block.attention.rope.scaling = ABFRoPEScalingConfig(new_theta=8_000_000)
         return config
 
     @classmethod
-    def olmo25_abf_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
-        config = cls.olmo25_7b(tokenizer)
-        config.block.attention.rope.scaling = ABFRoPEScalingConfig(new_theta=8_000_000)
+    def olmo25_7b_abf_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b_abf(tokenizer)
 
         def no_rope_scaling(block: TransformerBlockConfig) -> TransformerBlockConfig:
             rope_config = block.attention.rope
@@ -279,7 +278,7 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
-    def olmo25_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+    def olmo25_7b_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         config = cls.olmo25_7b(tokenizer)
         config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
             factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
@@ -287,11 +286,8 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
-    def olmo25_yarn_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
-        config = cls.olmo25_yarn(tokenizer)
-        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
-            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
-        )
+    def olmo25_7b_yarn_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b_yarn(tokenizer)
 
         def no_rope_scaling(block: TransformerBlockConfig) -> TransformerBlockConfig:
             rope_config = block.attention.rope
