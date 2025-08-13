@@ -28,6 +28,7 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
+    "pyarrow>=19.0,<20"
 ]
 
 [project.optional-dependencies]
