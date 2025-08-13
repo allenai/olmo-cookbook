@@ -1,11 +1,11 @@
-name: &name "olmo25_280B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "olmo25_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_20B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
-nodes: 4
+nodes: 8
 gpus: 8
 seed: 4123
 
@@ -17,7 +17,7 @@ gc_interval: 200
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 # (from end of pretraining)
 warmup_steps: 200
-learning_rate: 0.00029802
+learning_rate: 0.00029952
 
 metrics_config:
   backend: wandb
@@ -25,11 +25,11 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo25/step67000
+load_path: gs://ai2-llm/checkpoints/OLMo25/step34000
 load_state: false
 model: "olmo25_7b"
 tokenizer: "dolma2"
-max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
+max_tokens: 20_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
 sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
