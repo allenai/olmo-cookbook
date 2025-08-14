@@ -62,7 +62,6 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC_round5-LC_s2pdf_code-10B-ec413d34/step2385"
 )
 
-
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
@@ -122,6 +121,16 @@ for url in "${urls[@]}"; do
     ./fetch_results.py -u ${url} >> ~/Downloads/results.csv
 done
 ```
+
+
+For ruler:
+
+```bash
+for model in "${models[@]}"; do
+    ./scripts/launch_ruler.sh /oe-training-default/${model}-hf
+done
+```
+
 
 
 ## Eval (SC)
