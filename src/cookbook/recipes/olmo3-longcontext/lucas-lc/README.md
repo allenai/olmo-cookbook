@@ -62,6 +62,11 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC_round5-LC_s2pdf_code-10B-ec413d34/step2385"
 )
 
+# round 5
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5-LC67_s2pdf_gzip2080-10B-a71e7b1d/step2385"
+)
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
