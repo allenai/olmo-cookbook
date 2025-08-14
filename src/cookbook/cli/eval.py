@@ -28,7 +28,7 @@ from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.eval.results import (
     find_missing_tasks,
     make_dashboard_table,
