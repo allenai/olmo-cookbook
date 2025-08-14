@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_2T-SC50_round5-LC50_s2pdf_gzip2080-10B-preanneal"
+name: &name "olmo25_7b_lc_64k_2T-SC50_round5-LC50_s2pdf_gzip2080-10B"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -11,14 +11,13 @@ seed: 4123
 
 gc_interval: 200
 
-annealing:
-  enabled: true
-  initial_lr: 0.00020712352850360292
+# annealing:
+#   enabled: true
 
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 # (from end of pretraining)
 warmup_steps: 200
-
+learning_rate: 0.00020712352850360292
 
 metrics_config:
   backend: wandb
@@ -26,7 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo25/step476838
+load_path: gs://ai2-llm/checkpoints/OLMo25-from476838/step500680
 load_state: false
 model: "olmo25_7b"
 tokenizer: "dolma2"
@@ -40,7 +39,7 @@ scheduler_type: linear
 dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 cp_degree: 8
 float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
-eval_interval: 1000
+eval_interval: 500
 # downstream_evaluators:
 #   - olmo2_dev_1b
 model_overrides:
