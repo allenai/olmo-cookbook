@@ -580,22 +580,6 @@ for ruler_length in (int(2**i) for i in range(12, 18)):
     NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2**10}k")(make_ruler_group(ruler_length))
 
 
-def make_ruler_group(ruler_length: int) -> Type[BaseAverageNamedTasksGroup]:
-    class RULERGroup(BaseAverageNamedTasksGroup):
-        tasks = [
-            task
-            for group_name, tasks in constants.RULER_SUITES.items()
-            for task in tasks
-            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
-        ]
-
-    return RULERGroup
-
-
-for ruler_length in (int(2**i) for i in range(12, 18)):
-    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2**10}k")(make_ruler_group(ruler_length))
-
-
 @NamedTasksGroupRegistry.register("minerva:bpb")
 class MinervaBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}:bpb::olmes" for subtask in constants.ALL_MINERVA_TASKS]
