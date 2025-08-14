@@ -466,7 +466,7 @@ class TransformerConfigBuilder:
                 warmup_steps=self.get_warmup_steps(),
             ),
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
-                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
+                warmup_steps=self.get_warmup_steps(), alpha_f=0.0 # if self.annealing is not None else 0.1
             ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
