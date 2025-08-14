@@ -79,7 +79,7 @@ for model in "${models[@]}"; do
         "/oe-training-default/${model}" \
         -t olmo-core-v2 \
         --use-beaker \
-        --olmo-core-v2-commit-hash 71aa590af8d3979125cd7d96eb661d05e26d04a1 \
+        --olmo-core-v2-commit-hash 59465108d4214595083ab331233f86cd75125dce \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
         --huggingface-transformers-commit-hash 4f2fbde7eaa7253b1ca977e294da6c9fcddfa345 \
         --dtype float32 \
