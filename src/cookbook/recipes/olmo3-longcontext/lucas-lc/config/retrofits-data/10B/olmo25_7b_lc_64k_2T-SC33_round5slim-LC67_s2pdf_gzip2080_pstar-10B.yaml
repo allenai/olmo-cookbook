@@ -90,7 +90,7 @@ dataset:
   - name: SC-instruction-new-format-new
     target_ratio: 0.00608120797821429
     paths:
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/dolma2-tokenizer/*.npy
   - name: SC-flan
     target_ratio: 0.01883120809821429
     paths:
