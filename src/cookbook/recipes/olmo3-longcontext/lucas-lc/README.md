@@ -52,11 +52,16 @@ models_borked=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-eb4860c6/step2385"
     "ai2-llm/checkpoints/lucas/olmo25-2xbzs_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-474bfe7b/step2385"
 )
-
 models=(
     "ai2-llm/checkpoints/lucas/olmo25-2xbzs_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-mixfix-eb6c19d0/step2385"
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-mixfix-7949bf4b/step2385"
 )
+
+# the code one
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC_round5-LC_s2pdf_code-10B-ec413d34/step2385"
+)
+
 
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
