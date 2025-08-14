@@ -4,11 +4,13 @@ import os
 from pathlib import Path
 import random
 from collections import defaultdict
-from typing import Tuple, Optional, List, Iterator
+from typing import Tuple, Optional, List, Iterator, Dict
 from copy import deepcopy
 import yaml 
 from scipy.spatial.distance import pdist, squareform
 import math
+import re
+import matplotlib.pyplot as plt 
 
 import numpy as np
 import s3fs
@@ -43,8 +45,8 @@ class ConfigDefaults:
 
 
 def generate_weights(
-    sources: list[SourceConfig],
-    leaf_distr: dict[str, float],
+    sources: List[SourceConfig],
+    leaf_distr: Dict[str, float],
     num_samples_out: int,
     allow_repetition: bool,
     minimum_weight: float,
@@ -54,8 +56,10 @@ def generate_weights(
     max_topic_strength: float,
     max_tokens: int,
     available_tokens: int,
+    mix_temperature: float,
     sample_multiplier: Optional[int],
-    fixed_source_weights: Optional[dict[str, float]] = None,
+    fixed_source_weights: Optional[Dict[str, float]] = None,
+    manual_prior: Optional[Dict[str, float]] = None
 ):
     token_scale = available_tokens / max_tokens
     weight_bounds = None 
@@ -75,7 +79,6 @@ def generate_weights(
             (minimum_weight, 1) for idx in range(len(prior_dist))
         ]
 
-
     fixed_topic_weights = {}
     some_fixed_topic_weights = False
     topic_priors = {}
@@ -83,7 +86,7 @@ def generate_weights(
     has_topics = any([source.topics for source in sources])
 
     if has_topics:
-        for source in sources:
+        for source in sources: #sorted(sources, key=lambda x: x.name):
             if source.topics:
                 if source.topics[0].target_ratio is not None:
                     some_fixed_topic_weights = True
@@ -97,6 +100,7 @@ def generate_weights(
                             f"Source '{source.name}' has topics without fixed weights, but some other source has fixed topic weights. "
                             "This is not supported yet, because it is unclear how to best do grid sampling to create mixes on sources and topics simultaneously."
                         )
+                # uniform topic prior 
                 topic_priors[source.name] = np.ones(len(source.topics))
             else:
                 topic_priors[source.name] = np.array([1.0])  # no topics, so we use a uniform prior
@@ -104,7 +108,7 @@ def generate_weights(
 
 
     if fixed_source_weights is not None:
-        fixed_source_weights = [fixed_source_weights[source_config.name] for source_config in sorted(sources, key=lambda x: x.name)]
+        fixed_source_weights = [fixed_source_weights[source_config.name] for source_config in sources] #sorted(sources, key=lambda x: x.name)]
 
     sample_multiplier = sample_multiplier if sample_multiplier else ConfigDefaults.sample_multiplier
     total_samples = num_samples_out * sample_multiplier
@@ -112,8 +116,15 @@ def generate_weights(
     n_strength_buckets = 15 if min_source_strength != max_source_strength else 1
     n_samples_per_strength = math.ceil(total_samples / n_strength_buckets)
 
+    if manual_prior is not None:
+        source_prior = np.array([manual_prior.get(source_config.name, 0.0) for source_config in sources]) #sorted(sources, key=lambda x: x.name)
 
-    source_prior = np.ones(len(sources))
+        if mix_temperature < 1.0:
+            source_prior = source_prior**mix_temperature
+            source_prior = source_prior / np.sum(source_prior)
+            logger.info(f"Source prior after temperature scaling: {source_prior}")
+    else:
+        source_prior = np.ones(len(sources))
     if fixed_source_weights is not None:
         source_samples = np.array([fixed_source_weights] * total_samples)
     else:
@@ -137,7 +148,9 @@ def generate_weights(
                 conditional_weight = fixed_topic_weights[source]
                 topic_samples[source].extend(np.array([conditional_weight] * total_samples))
             else:
-                if min_topic_strength == max_topic_strength:
+                if topic_prior == np.array([1]):
+                    topic_samples[source].extend([topic_prior] * total_samples)
+                elif min_topic_strength == max_topic_strength:
                     topic_samples[source].extend(np.random.dirichlet(topic_prior * min_topic_strength, total_samples))
                 else:
                     min_topic_strength_log = np.log10(min_topic_strength)
@@ -145,7 +158,6 @@ def generate_weights(
                     for strength in np.logspace(min_topic_strength_log, max_topic_strength_log, n_strength_buckets):
                         samples_per_strength = np.random.dirichlet(topic_prior * strength, n_samples_per_strength)
                         topic_samples[source].extend(samples_per_strength)
-
     # convert from source_samples and topic_samples back to a set of leaf-level samples 
     candidates = []
 
@@ -156,7 +168,6 @@ def generate_weights(
             candidates.append(flattened_sample)
     else:
         candidates.extend(source_samples)
-
     logger.info(f"Generated {len(candidates)} candidate samples before filtering.")
     filtered_candidates = np.array([
         sample
@@ -216,7 +227,7 @@ def generate_weights(
     return selected_samples
 
 def mk_mixtures(
-    config: SwarmConfig, use_cache: bool = True
+    config: SwarmConfig, group_uuid: str, use_cache: bool = True
 ) -> list[dict[str, Tuple[float, float]]]:
     random.seed(config.seed)
     np.random.seed(config.seed)
@@ -250,6 +261,8 @@ def mk_mixtures(
         available_tokens=available_tokens,
         fixed_source_weights=config.fixed_source_weights,
         sample_multiplier=config.sample_multiplier,
+        manual_prior=config.manual_prior,
+        mix_temperature=config.mix_temperature
     )
 
     weight_maps = []
@@ -278,7 +291,25 @@ def mk_mixtures(
             source_weights.append(total)
         source_weights = np.array(source_weights)
         logger.info(f"Source {source}, min: {source_weights.min()}, max: {source_weights.max()}")
+        
+        out_dir = Path("cache") / "swarms" / str(group_uuid)
+        out_dir.mkdir(parents=True, exist_ok=True)
 
+        # Sanitize source to be filesystem-friendly
+        safe_source = re.sub(r'[^A-Za-z0-9_.-]+', '_', str(source))
+        out_path = out_dir / f"{safe_source}_source_weights_hist.png"
+
+        # Plot histogram
+        plt.figure(figsize=(8, 5))
+        plt.hist(source_weights[~np.isnan(source_weights)], bins=10)
+        plt.title(f"{source}")
+        plt.xlabel("Weight")
+        plt.ylabel("Frequency")
+        plt.tight_layout()
+
+        # Save & close
+        plt.savefig(out_path, dpi=200)
+        plt.close()
 
     return weight_maps
 
@@ -290,7 +321,7 @@ def prettify_mixes(mixes: list[dict[str, Tuple[float, float]]]):
 def mk_mixes(
     config: SwarmConfig, group_uuid: str, output: Optional[Path] = None, use_cache: bool = True
 ) -> list[dict[str, Tuple[float, float]]]:
-    mixes = mk_mixtures(config, use_cache=use_cache)
+    mixes = mk_mixtures(config, group_uuid, use_cache=use_cache)
     mix_string = prettify_mixes(mixes)
 
     if not output:

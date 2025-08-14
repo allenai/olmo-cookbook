@@ -1,7 +1,7 @@
 from enum import Enum
 from os import PathLike
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Union, Dict
 
 from olmo_core.data.types import NumpyDatasetDType
 from olmo_core.launch.beaker import BeakerLaunchConfig
@@ -142,7 +142,7 @@ class SwarmConfig(ExperimentConfig):
     variants: int = 1  # number of variants to generate
     allow_repetition: bool = False  # whether to allow repetition of sources in mixtures
     minimum_weight: float = 0.05  # minimum weight for sources in mixtures
-    fixed_source_weights: Optional[dict[str, float]] = None  # fixed weights for sources in mixtures
+    fixed_source_weights: Optional[Dict[str, float]] = None  # fixed weights for sources in mixtures
     sample_multiplier: int = 10  # multiplier for the number of samples per source
     min_source_strength: Optional[float] = None  # minimum strength for sources
     max_source_strength: Optional[float] = None  # maximum strength for sources
@@ -150,6 +150,9 @@ class SwarmConfig(ExperimentConfig):
     max_topic_strength: Optional[float] = None  # maximum strength for topics
     min_strength: float = 0.1  # minimum strength for sources and topics
     max_strength: float = 5.0  # maximum strength for sources and topics
+    manual_prior: Optional[Dict[str, float]] = None
+    mix_temperature: float = 1.0
+
 
 
 class ExperimentInstance(BaseModel):
