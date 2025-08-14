@@ -109,7 +109,6 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
     """
     Base class for named tasks groups that are supposed to be averaged.
     """
-
     def combine(self, results: MiniFrame) -> MiniFrame:
         # filter results by task names; if we have no results at all, we create a new table.
         filtered = results.keep_cols(*self.expanded_tasks) or MiniFrame(title=results.title)
@@ -170,7 +169,6 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
         # compute the average of averages
         # each row here is a model
         for row in list(filtered_rows.rows):
-
             # we compute the average of the scores for this model; we set the average to None if
             # there are missing scores or if there are no scores at all.
             average: float | None = None
@@ -359,11 +357,11 @@ class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("math")
-class MathGroup(BaseAverageNamedTasksGroup):
+class MathGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         "gsm8k::olmo1",
         "gsm8k::olmes",
-        *[f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
+        MinervaGroup()
     ]
 
 
