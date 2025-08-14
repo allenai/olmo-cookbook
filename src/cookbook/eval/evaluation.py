@@ -348,9 +348,21 @@ def evaluate_checkpoint(
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
             print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
             output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
-            print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
+            stdout = output.stdout.decode()
+            stderr = output.stderr.decode()
+
+            if stdout:
+                print(f"STDOUT:\n{stdout}\n")
+            if stderr:
+                print(f"STDERR:\n{stderr}\n")
+
             if output.returncode != 0:
-                raise RuntimeError(f"Error running command: {cmd}")
+                error_msg = f"Error running command (exit code {output.returncode}):\n"
+                error_msg += f"Command: {cmd}\n"
+                error_msg += f"Working directory: {oe_eval_dir}\n"
+                if stderr:
+                    error_msg += f"Error output:\n{stderr}"
+                raise RuntimeError(error_msg)
             submitted_jobs_cnt += 1
 
     print(f"Launched {submitted_jobs_cnt:,} eval jobs on {beaker_clusters} for {run_name}.")
