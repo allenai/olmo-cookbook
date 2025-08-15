@@ -420,7 +420,7 @@ class DataProcessor:
         return success
     
     def upload(self) -> bool:
-        """Upload tokenized data to remote storage."""
+        """Upload tokenized data to remote storage (both S3 and GCS)."""
         print("=== UPLOADING DATA ===")
         if self.dry_run:
             print("DRY RUN MODE: Showing what would be uploaded")
@@ -443,12 +443,14 @@ class DataProcessor:
                         dest_base = dest_base[:-len(ext)]
                         break
                 local_tokenized_path = self.local_dir / self.output_prefix / dest_base / self.tokenizer.replace('/', '/')
-                remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{dest_base}/{self.tokenizer}/"
+                s3_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{dest_base}/{self.tokenizer}/"
+                gcs_remote_dest = f"gs://{self.output_prefix.rstrip('/')}/{dest_base}/{self.tokenizer}/"
                 
                 if self.dry_run:
                     print(f"Would upload file tokenization:")
                     print(f"  Local:  {local_tokenized_path}")
-                    print(f"  Remote: {remote_dest}")
+                    print(f"  S3:     {s3_remote_dest}")
+                    print(f"  GCS:    {gcs_remote_dest}")
                 
             else:
                 # Directory case - check if it has subdirectories that were processed separately
@@ -468,34 +470,50 @@ class DataProcessor:
                         print(f"Would upload directory with subdirectories: {path}")
                         for subdir in subdirs:
                             sub_local_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
-                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
-                            print(f"  Subdir: {sub_local_path} -> {sub_remote_dest}")
+                            sub_s3_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
+                            sub_gcs_remote_dest = f"gs://{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
+                            print(f"  Subdir: {sub_local_path}")
+                            print(f"    S3:  {sub_s3_remote_dest}")
+                            print(f"    GCS: {sub_gcs_remote_dest}")
                     else:
                         for subdir in subdirs:
                             sub_local_path = self.local_dir / self.output_prefix / relative_path / subdir.name / self.tokenizer.replace('/', '/')
-                            sub_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
+                            sub_s3_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
+                            sub_gcs_remote_dest = f"gs://{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
                             
                             if not sub_local_path.exists():
                                 errors.append(f"Tokenized data not found: {sub_local_path}")
                                 continue
                             
-                            cmd = ["s5cmd", "sync", f"{sub_local_path}/", sub_remote_dest]
-                            success, output = self._run_command(cmd, f"Uploading {sub_local_path}")
+                            # Upload to S3
+                            s3_cmd = ["s5cmd", "sync", f"{sub_local_path}/", sub_s3_remote_dest]
+                            success, output = self._run_command(s3_cmd, f"Uploading {sub_local_path} to S3")
                             
                             if not success:
-                                errors.append(f"Failed to upload {sub_local_path}: {output}")
+                                errors.append(f"Failed to upload {sub_local_path} to S3: {output}")
                             else:
-                                print(f"Successfully uploaded to {sub_remote_dest}")
+                                print(f"Successfully uploaded to S3: {sub_s3_remote_dest}")
+                            
+                            # Upload to GCS
+                            gcs_cmd = ["gsutil", "-m", "rsync", "-r", f"{sub_local_path}/", sub_gcs_remote_dest]
+                            success, output = self._run_command(gcs_cmd, f"Uploading {sub_local_path} to GCS")
+                            
+                            if not success:
+                                errors.append(f"Failed to upload {sub_local_path} to GCS: {output}")
+                            else:
+                                print(f"Successfully uploaded to GCS: {sub_gcs_remote_dest}")
                     continue
                 else:
                     # Regular directory
                     local_tokenized_path = self.local_dir / self.output_prefix / relative_path / self.tokenizer.replace('/', '/')
-                    remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{self.tokenizer}/"
+                    s3_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{self.tokenizer}/"
+                    gcs_remote_dest = f"gs://{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{self.tokenizer}/"
                     
                     if self.dry_run:
                         print(f"Would upload regular directory:")
                         print(f"  Local:  {local_tokenized_path}")
-                        print(f"  Remote: {remote_dest}")
+                        print(f"  S3:     {s3_remote_dest}")
+                        print(f"  GCS:    {gcs_remote_dest}")
             
             if self.dry_run:
                 continue
@@ -504,13 +522,23 @@ class DataProcessor:
                 errors.append(f"Tokenized data not found: {local_tokenized_path}")
                 continue
             
-            cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", remote_dest]
-            success, output = self._run_command(cmd, f"Uploading {local_tokenized_path}")
+            # Upload to S3
+            s3_cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", s3_remote_dest]
+            success, output = self._run_command(s3_cmd, f"Uploading {local_tokenized_path} to S3")
             
             if not success:
-                errors.append(f"Failed to upload {local_tokenized_path}: {output}")
+                errors.append(f"Failed to upload {local_tokenized_path} to S3: {output}")
             else:
-                print(f"Successfully uploaded to {remote_dest}")
+                print(f"Successfully uploaded to S3: {s3_remote_dest}")
+            
+            # Upload to GCS
+            gcs_cmd = ["gsutil", "-m", "rsync", "-r", f"{local_tokenized_path}/", gcs_remote_dest]
+            success, output = self._run_command(gcs_cmd, f"Uploading {local_tokenized_path} to GCS")
+            
+            if not success:
+                errors.append(f"Failed to upload {local_tokenized_path} to GCS: {output}")
+            else:
+                print(f"Successfully uploaded to GCS: {gcs_remote_dest}")
         
         if errors:
             print("\n=== UPLOAD ERRORS ===")
