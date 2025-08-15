@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-1B"
+name: &name "olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-1B-2M50W"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -16,7 +16,7 @@ gc_interval: 200
 
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 # (from end of pretraining)
-warmup_steps: 200
+warmup_steps: 50
 learning_rate: 0.00020712352850360292
 
 metrics_config:
@@ -30,7 +30,7 @@ load_state: false
 model: "olmo25_7b"
 tokenizer: "dolma2"
 max_tokens: 1_000_000_000  # 1B tokens TODO: update if needed
-global_batch_size: 4_194_304
+global_batch_size: 2_097_152
 sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
