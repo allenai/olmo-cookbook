@@ -93,7 +93,7 @@ def swarm(config: Path, dry_run: bool, no_cache: bool, group_id: Optional[str] =
         return
     
     mixes = mk_mixes(swarm_config, group_uuid, use_cache=(no_cache == False))
-    if click.confirm("Launch experiment with this set of mixtures?", default=False):
+    if click.confirm(f"Launch experiment {group_uuid} with this set of mixtures?", default=False):
         with yaspin(text="Building experiment group...", color="yellow") as spinner:
             launch_group = LaunchGroup(
                 instances=mk_launch_configs(
