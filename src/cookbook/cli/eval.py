@@ -24,16 +24,16 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.eval.results import (
-    make_dashboard_table,
-    print_missing_tasks,
     find_missing_tasks,
-    make_results_from_dashboard
+    make_dashboard_table,
+    make_results_from_dashboard,
+    print_missing_tasks,
 )
 
 logger = logging.getLogger(__name__)
@@ -328,7 +328,7 @@ def convert_checkpoint(
     "--partition-size",
     type=int,
     default=0,
-    help="How many tasks to evaluate in parallel. Set to 0 (default) to evaluate all tasks in sequence.",
+    help="How many tasks to evaluate per job. Set to 0 (default) to evaluate all tasks in sequence. Set to 1 for maximum parallelism.",
 )
 @click.option(
     "-y",
@@ -386,9 +386,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMoCore)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
@@ -578,7 +578,7 @@ def evaluate_model(
         missing_tasks = find_missing_tasks(results=results)
 
         # Override our tasks with the missing set
-        if model_name in missing_tasks:
+        if missing_tasks and model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
             print(f"Found no missing tasks for {model_name}")
