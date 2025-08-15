@@ -5,7 +5,7 @@ import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
 from olmo_core.nn.attention import SlidingWindowAttentionConfig
-from olmo_core.nn.rope import ABFRoPEScalingConfig, YaRNRoPEScalingConfig
+from olmo_core.nn.rope import ABFRoPEScalingConfig, YaRNRoPEScalingConfig, PIRoPEScalingConfig
 from olmo_core.nn.transformer import TransformerBlockConfig, TransformerBlockType, TransformerConfig
 from olmo_core.optim import OptimConfig
 from olmo_core.train import TrainerConfig
@@ -262,6 +262,30 @@ class WrappedTransformerConfig:
     @classmethod
     def olmo25_7b_abf_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         config = cls.olmo25_7b_abf(tokenizer)
+
+        def no_rope_scaling(block: TransformerBlockConfig) -> TransformerBlockConfig:
+            rope_config = block.attention.rope
+            if rope_config is not None:
+                rope_config.scaling = None
+                block.attention.rope = rope_config
+            return block
+
+        config.block_overrides = {
+            i: no_rope_scaling(config.block.copy())
+            for i in range(config.n_layers)
+            if config.block.attention.sliding_window.should_use_swa(i, config.n_layers)
+        }
+        return config
+
+    @classmethod
+    def olmo25_7b_pi(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b(tokenizer)
+        config.block.attention.rope.scaling = PIRoPEScalingConfig(factor=4)
+        return config
+
+    @classmethod
+    def olmo25_7b_pi_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b_pi(tokenizer)
 
         def no_rope_scaling(block: TransformerBlockConfig) -> TransformerBlockConfig:
             rope_config = block.attention.rope
