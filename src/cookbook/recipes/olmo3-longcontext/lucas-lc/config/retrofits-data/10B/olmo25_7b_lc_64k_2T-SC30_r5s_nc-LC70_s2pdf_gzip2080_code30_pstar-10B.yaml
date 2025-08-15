@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_2T-SC30_r5s_nc-LC70_s2pdf_gzip2080_code30_pstar-1B"
+name: &name "olmo25_7b_lc_64k_2T-SC30_r5s_nc-LC70_s2pdf_gzip2080_code30_pstar-10B-liteRep"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/long-contexts
