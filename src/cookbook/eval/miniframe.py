@@ -1,5 +1,5 @@
-import re
 import json
+import re
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from functools import partial
@@ -92,7 +92,8 @@ class MiniFrame:
 
             # we get values from the column; if the value is None, we use -inf as the key
             def sort_by_col_fn(row: str) -> float:
-                return (self._data[by_col].get(row) or float("-inf"))
+                return self._data[by_col].get(row) or float("-inf")
+
             key_fn = sort_by_col_fn
 
         elif by_avg:
@@ -102,6 +103,7 @@ class MiniFrame:
             # we get the average of all values; if the value is None, we use 0 as the value
             def sort_by_avg_fn(row: str) -> float:
                 return sum(self._data[col].get(row) or 0 for col in self._data) / len(self._data)
+
             key_fn = sort_by_avg_fn
 
         elif by_name:
@@ -110,6 +112,7 @@ class MiniFrame:
 
             def sort_by_name_fn(col: str) -> str:
                 return col
+
             key_fn = sort_by_name_fn
 
         else:
@@ -214,6 +217,13 @@ class MiniFrame:
             ]
             rows.append(",".join([row.name] + formatted_values))
         return "\n".join([header] + rows)
+
+    def to_pandas(self) -> "DataFrame":  # noqa: F821
+        try:
+            import pandas as pd
+        except ImportError:
+            raise ImportError("pandas is not installed")
+        return pd.DataFrame(self._data)
 
     def __getitem__(self, item: Iterable[str]) -> float | None:
         try:
