@@ -67,6 +67,22 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5-LC67_s2pdf_gzip2080-10B-a71e7b1d/step2385"
 )
 
+
+# 1B proxies
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC_round5-LC_s2pdf_code-1B-4M20W-ae66b812/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-midtrain_round3_qwenlike_s2pdf_gzip2080_1B-4M20W-9054cc59/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5-LC67_s2pdf_gzip2080-1B-4M20W-d4d68891/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC30_r5s_nc-LC67_s2pdf_gzip2080_code30_pstar-1B-4M20W-ca1977e3/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-1B-4M20W-c253267a/step239"
+)
+
+# leftover to eval
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC30_r5s_nc-LC70_s2pdf_gzip2080_code30_pstar-10B-liteRep-9280996b/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-10B-fe8c2599/step2385"
+)
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
