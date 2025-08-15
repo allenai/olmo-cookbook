@@ -88,7 +88,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e13/TypeScript/*.npy
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e14/TypeScript/*.npy
-
   - name: LLC-stack-edu-concat-c
     target_ratio: 0.0062874108675
     paths:
@@ -111,14 +110,17 @@ dataset:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/Java/*.npy
   - name: LLC-stack-edu-concat-javascript
     target_ratio: 0.013737918915000001
+    repetition_factor: 2
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/JavaScript/*.npy
   - name: LLC-stack-edu-concat-markdown
     target_ratio: 0.0262772217225
+    repetition_factor: 2
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/Markdown/*.npy
   - name: LLC-stack-edu-concat-php
     target_ratio: 0.00954728397
+    repetition_factor: 2
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/PHP/*.npy
   - name: LLC-stack-edu-concat-python
@@ -143,12 +145,15 @@ dataset:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/Shell/*.npy
   - name: LLC-stack-edu-concat-swift
     target_ratio: 0.0022122971325
+    repetition_factor: 2
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/Swift/*.npy
   - name: LLC-stack-edu-concat-typescript
     target_ratio: 0.0036105049575
+    repetition_factor: 2
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/lc/filtered_v0_grouped_v1_tree-fitter-v1_nosep_lenbin-v0_cmprs-filter-v0/allenai/dolma2-tokenizer/length_2e15/TypeScript/*.npy
+
 
 
   - name: LSC-pdf-quality-crime_law
