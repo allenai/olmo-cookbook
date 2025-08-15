@@ -39,6 +39,7 @@ dev = [
 beaker = [
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
+    "google-cloud-compute",
 ]
 wandb = [
     "wandb",
@@ -48,9 +49,11 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@7afdc3ed67f00b090aae11b5101ef147160274cc", #c779ca546cc3194e73e7491aaefcdffbed042c65",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@tyler/lc-localadj-gloofix-ropescaling",
+    "datasets>=3,<4",  # workaround for pinned oe-eval version in olmocore
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
+    "google-cloud-compute",
     "wandb",
 ]
 
