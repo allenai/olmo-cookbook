@@ -24,12 +24,17 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
-from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
-from cookbook.eval.results import make_dashboard_table, print_missing_tasks
+from cookbook.eval.results import (
+    make_dashboard_table,
+    print_missing_tasks,
+    find_missing_tasks,
+    make_results_from_dashboard
+)
 
 logger = logging.getLogger(__name__)
 
@@ -566,18 +571,11 @@ def evaluate_model(
             name_suffix=name_suffix.strip(),
         )
 
-        # Call the dashboard to get all the missing results
-        missing_tasks = get_results(
-            dashboard,
-            model_name,
-            tasks,
-            format="return_missing",
-            sort_by="avg",
-            sort_column_name=None,
-            sort_descending=None,
-            force=False,
-            skip_on_fail=True,
-        )
+        # to find what to backfill with, we get all results for this dashboard, then filter them
+        # to match this model name, and finally find all missing tasks in results.
+        dashboard_table = make_dashboard_table(dashboard=dashboard)
+        results = make_results_from_dashboard(dashboard_table=dashboard_table, tasks=tasks, models=[model_name])
+        missing_tasks = find_missing_tasks(results=results)
 
         # Override our tasks with the missing set
         if missing_tasks and model_name in missing_tasks:
@@ -687,101 +685,26 @@ def get_results(
     sort_descending: bool,
     force: bool,
     skip_on_fail: bool,
-) -> dict[str, list[str]] | None:
-    # compile tasks names into regex patterns (if possible)
-    compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
-
-    # we partition between single tasks and named groups; we also keep a set of all tasks names,
-    # which we will use later to print any missing tasks.
-    named_groups: list[BaseNamedTasksGroup] = []
-    columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
-    initial_filter_tasks: list[str | re.Pattern] = []
-
-    for compiled_task in compiled_tasks:
-        matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
-        if matching_groups:
-            # This is a named group, add to named_groups
-            named_groups.extend(matching_groups)
-            # Convert expanded task names to regex patterns that match hash suffixes
-            for ng in matching_groups:
-                for task in ng.expanded_tasks:
-                    if isinstance(task, str):
-                        # Create regex pattern that matches task name with optional hash suffix
-                        task_pattern = re.compile(f"^{re.escape(task)}(?:-[a-f0-9]{{6}})?$")
-                        columns_filter_tasks.append(task_pattern)
-                        initial_filter_tasks.append(task_pattern)
-                    else:
-                        columns_filter_tasks.append(task)
-                        initial_filter_tasks.append(task)
-        else:
-            # This is a single task
-            columns_filter_tasks.append(compiled_task)
-            # For single tasks, also create a pattern that matches with hash suffix
-            if isinstance(compiled_task, str):
-                # Create regex pattern that matches task name with optional hash suffix
-                task_pattern = re.compile(f"^{re.escape(compiled_task)}(?:-[a-f0-9]{{6}})?$")
-                initial_filter_tasks.append(task_pattern)
-            else:
-                initial_filter_tasks.append(compiled_task)
-
+) -> None:
     # we get the metrics table from the datalake
-    metrics_table = make_dashboard_table(
+    dashboard_table = make_dashboard_table(
         dashboard=dashboard,
         force=force,
         skip_on_fail=skip_on_fail,
     )
 
-    # Filter to get all relevant tasks (both single tasks and expanded group tasks)
-    results = metrics_table.keep_cols(*initial_filter_tasks)
-
-    # then iterate over named groups...
-    for named_group in named_groups:
-        # Debug output removed - was causing the task list to print
-
-        # ...and try to combine them into a single score. Note we are giving it the full metrics table,
-        # not the one after filtering to single tasks.
-        combined_table = named_group.combine(metrics_table)
-
-        if combined_table is not None:
-            # we manage to combine! lets put the combined score at the front
-            results = combined_table + results
-        # Note: if the group cannot be combined, its individual tasks are already
-        # included in the results from the initial filtering
-
-    # we filtered tasks, but the user might want to display only some models
-    rows_filter_models: list[str | re.Pattern] = []
-    if len(models) > 0:
-        # okay we filter models too! do the same regex trick as above
-        rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
-        results = results.keep_rows(*rows_filter_models)
-
-    missing_tasks: dict[str, list[str]] = {}
-    for model_row in results.rows:
-        for metric_column_name, metric_column_value in zip(model_row.columns, model_row.values):
-            # check if any of the values are None; if all values are there, this metric is ok,
-            # we have all results!
-            if metric_column_value is not None:
-                continue
-
-            try:
-                # this is a task group! the get function will return a class that has an expanded_tasks attribute
-                # Skip named group columns - we don't want to report individual tasks as missing
-                # just because the average couldn't be calculated
-                NamedTasksGroupRegistry.get(metric_column_name)
-                continue
-            except ValueError:
-                # actually not a task group, just a task name. append as is.
-                missing_tasks.setdefault(model_row.name, []).append(metric_column_name)
-
-    # we gotta let the user know if there are any missing tasks
-    print_missing_tasks(
-        missing_tasks=missing_tasks,
-        rows_filter_models=rows_filter_models,
-        columns_filter_tasks=columns_filter_tasks,
+    # we subselect the right tasks and models, plus expand named tasks
+    results = make_results_from_dashboard(
+        dashboard_table=dashboard_table,
+        tasks=tasks,
+        models=models,
     )
 
-    if format == "return_missing":
-        return missing_tasks
+    # we find missing tasks in the results
+    missing_tasks = find_missing_tasks(results=results)
+
+    # we gotta let the user know if there are any missing tasks
+    print_missing_tasks(missing_tasks=missing_tasks, models=models, tasks=tasks)
 
     # okay we got all results! now time to sort them depending on the user's request
     try:
@@ -797,13 +720,11 @@ def get_results(
 
     # output according to format requested by the user
     if format == "json":
-        print(json.dumps(results._data))
+        print(results.to_json())
     elif format == "table":
         results.show()
     elif format == "csv":
         print(results.to_csv())
-    elif format == 'return_all':
-        return results._data
     else:
         raise ValueError(f"Invalid format: {format}")
 
@@ -817,8 +738,19 @@ def get_results(
     required=True,
     help="Models to add to the dashboard",
 )
-def add_to_dashboard(dashboard: str, models: list[str]) -> None:
-    resp = AddToDashboard.prun(dashboard=[dashboard for _ in models], model_name=list(models))
+@click.option(
+    "-s",
+    "--source-dashboard",
+    type=str,
+    help="Optional argument: if provided, only copy results from this dashboard",
+    default=None,
+)
+def add_to_dashboard(dashboard: str, models: list[str], source_dashboard: str | None) -> None:
+    resp = AddToDashboard.prun(
+        dashboard=[dashboard for _ in models],
+        model_name=list(models),
+        source_dashboard=[source_dashboard for _ in models],
+    )
     print(f"Added {len(resp)} models to the dashboard")
 
 
