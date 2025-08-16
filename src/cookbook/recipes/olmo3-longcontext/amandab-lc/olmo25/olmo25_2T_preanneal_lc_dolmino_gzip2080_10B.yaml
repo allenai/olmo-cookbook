@@ -32,8 +32,6 @@ float8: true
 eval_interval: 500
 model_overrides:
 - block.attention.rope.theta=8000000
-train_module_overrides:
-- scheduler.alpha_f=0.0
 
 
 dataset:
