@@ -71,12 +71,19 @@ class DataProcessor:
             return True, ""
         
         try:
-            # Stream output live instead of capturing it
-            result = subprocess.run(cmd, text=True, check=True)
+            result = subprocess.run(cmd, text=True, check=True, env=os.environ.copy())
             return True, ""
         except subprocess.CalledProcessError as e:
-            error_msg = f"Command failed with exit code {e.returncode}"
-            return False, error_msg
+            return False, f"Command failed with exit code {e.returncode}"
+    
+    def _check_gcs_auth(self) -> bool:
+        """Check if GCS authentication is properly configured."""
+        try:
+            result = subprocess.run(["gcloud", "auth", "list", "--filter=status:ACTIVE", "--format=value(account)"], 
+                                  capture_output=True, text=True, check=True)
+            return bool(result.stdout.strip())
+        except:
+            return False
     
     def _check_disk_space(self) -> bool:
         """Check if there's at least 10TB of free disk space."""
@@ -139,8 +146,13 @@ class DataProcessor:
             id_type = type(first_line[field_name]).__name__
             print(f"Found ID field '{field_name}' of type {id_type} in {path}")
             return field_name, 'int' if id_type == 'int' else 'str'
+        
+        # Fallback: check if 'text' field exists
+        if 'text' in first_line:
+            print(f"No ID field found in {path}, using 'text' field as fallback ID. Available fields: {list(first_line.keys())}")
+            return 'text', 'str'
             
-        print(f"Warning: No ID field found in {path}. Available fields: {list(first_line.keys())}")
+        print(f"Warning: No ID or text field found in {path}. Available fields: {list(first_line.keys())}")
         return None, None
     
     def _remove_empty_files(self) -> Tuple[int, List[str]]:
@@ -494,9 +506,15 @@ class DataProcessor:
                             else:
                                 print(f"Successfully uploaded to S3: {sub_s3_remote_dest}")
                             
-                            # Upload to GCS
-                            gcs_cmd = ["gsutil", "-m", "rsync", "-r", f"{sub_local_path}/", sub_gcs_remote_dest]
-                            success, output = self._run_command(gcs_cmd, f"Uploading {sub_local_path} to GCS")
+                            # Upload to GCS - try gcloud storage first, fallback to gsutil
+                            # gcloud storage rsync often handles auth better than gsutil
+                            gcs_cmd = ["gcloud", "storage", "rsync", "-r", f"{sub_local_path}/", sub_gcs_remote_dest]
+                            success, output = self._run_command(gcs_cmd, f"Uploading {sub_local_path} to GCS (using gcloud storage)")
+                            
+                            if not success:
+                                print("Retrying with gsutil...")
+                                gcs_cmd = ["gsutil", "-m", "rsync", "-r", f"{sub_local_path}/", sub_gcs_remote_dest]
+                                success, output = self._run_command(gcs_cmd, f"Uploading {sub_local_path} to GCS (using gsutil)")
                             
                             if not success:
                                 errors.append(f"Failed to upload {sub_local_path} to GCS: {output}")
@@ -531,9 +549,15 @@ class DataProcessor:
             else:
                 print(f"Successfully uploaded to S3: {s3_remote_dest}")
             
-            # Upload to GCS
-            gcs_cmd = ["gsutil", "-m", "rsync", "-r", f"{local_tokenized_path}/", gcs_remote_dest]
-            success, output = self._run_command(gcs_cmd, f"Uploading {local_tokenized_path} to GCS")
+            # Upload to GCS - try gcloud storage first, fallback to gsutil
+            # gcloud storage rsync often handles auth better than gsutil
+            gcs_cmd = ["gcloud", "storage", "rsync", "-r", f"{local_tokenized_path}/", gcs_remote_dest]
+            success, output = self._run_command(gcs_cmd, f"Uploading {local_tokenized_path} to GCS (using gcloud storage)")
+            
+            if not success:
+                print("Retrying with gsutil...")
+                gcs_cmd = ["gsutil", "-m", "rsync", "-r", f"{local_tokenized_path}/", gcs_remote_dest]
+                success, output = self._run_command(gcs_cmd, f"Uploading {local_tokenized_path} to GCS (using gsutil)")
             
             if not success:
                 errors.append(f"Failed to upload {local_tokenized_path} to GCS: {output}")
