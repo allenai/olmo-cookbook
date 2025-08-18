@@ -16,7 +16,7 @@ metrics_config:
   project: olmo3-7b-long-context
   entity: ai2-llm
 generate_doc_lengths: true
-load_path: gs://ai2-llm/checkpoints/OLMo3-midtraining/anneal-round5-100B-olmo25_7b-anneal-2T-f07e3111/step47684
+load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-2T-f07e3111/step47684
 load_state: false
 model: olmo25_7b
 tokenizer: dolma2
