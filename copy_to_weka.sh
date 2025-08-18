@@ -330,7 +330,7 @@ for exp_id in "${experiments[@]}"; do
 done'
 
 
-experiments=(
+: 'experiments=(
   olmo3_7b-12T-10B-reasoning-linear-repetition-2-pareto-3e7ea6bc
   olmo3_7b-12T-10B-reasoning-natural-f55f2e13
 )
@@ -342,4 +342,102 @@ for exp_id in "${experiments[@]}"; do
         weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step4769 \
         --allow-dirty \
         --workspace ai2/dolma2
+done'
+
+: 'for i in $(seq -w 0 15); do
+  while [ $(count_jobs) -ge 12 ]; do
+    sleep 5
+  done
+
+  echo "Starting experiment for index $i" 
+  {
+    exp_id="olmo3_7b-12T-5B-round-2-code-conditional-gen-mcqa-swarm-515eaf2d-$i"
+    echo $exp_id
+    python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        --allow-dirty \
+        --workspace ai2/dolma2
+    echo "Completed experiment for index $i"
+  } &
 done
+
+wait 
+echo "All experiments completed."
+'
+
+
+: 'for i in $(seq -w 0 47); do
+  while [ $(count_jobs) -ge 12 ]; do
+    sleep 5
+  done
+
+  echo "Starting experiment for index $i" 
+  {
+    exp_id="olmo3_7b-12T-5B-round-2-code-math-conditional-gen-mcqa-swarm-a3e06472-$i"
+    echo $exp_id
+    python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        --allow-dirty \
+        --workspace ai2/dolma2
+    echo "Completed experiment for index $i"
+  } &
+done
+
+wait 
+echo "All experiments completed."
+'
+
+
+: 'experiments=(
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-30B-a0160e7d
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-35B-37f49e0b
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-40B-3b0ea5e3
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-45B-88bc0109
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-50B-de5ea711
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-55B-bb2e09e0
+  olmo3_7b-12T-5B-round-3-sweep-gen-mc-code-math-60B-931e11dc
+)
+
+
+for exp_id in "${experiments[@]}"; do
+  while [ $(count_jobs) -ge 12 ]; do
+    sleep 5
+  done
+
+  echo "Starting experiment $exp_id" 
+  {
+        python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        weka://oe-data-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        --allow-dirty \
+        --workspace ai2/dolma2
+    echo "Completed experiment for $exp_id"
+  } &
+done
+
+wait 
+echo "All experiments completed." 
+'
+
+for i in $(seq -w 0 49); do
+  while [ $(count_jobs) -ge 12 ]; do
+    sleep 5
+  done
+
+  echo "Starting experiment for index $i" 
+  {
+    exp_id="olmo3_7b-12T-5B-reasoning-v2-conditional-swarm-e83bd48b-$i"
+    echo $exp_id
+    python -m cookbook.remote \
+        gs://ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        weka://oe-training-default/ai2-llm/checkpoints/mayeec/$exp_id/step2385 \
+        --allow-dirty \
+        --workspace ai2/dolma2
+    echo "Completed experiment for index $i"
+  } &
+done
+
+wait 
+echo "All experiments completed."
