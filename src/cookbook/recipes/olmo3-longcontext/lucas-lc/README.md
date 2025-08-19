@@ -36,6 +36,7 @@ models_do_not_use=(
 )
 
 
+# trying earlier signals for helmet
 models=(
     "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_1T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-0a84103f/step2385"
     "ai2-llm/checkpoints/lucas/olmo29_7b_lc_64k_1T-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal-highLR-60881d2e/step2385"
@@ -46,6 +47,41 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_500B-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-2531084a/step2385"
 )
 
+# does 2x batch size hurt?
+models_borked=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-eb4860c6/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25-2xbzs_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-474bfe7b/step2385"
+)
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25-2xbzs_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-mixfix-eb6c19d0/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2.5T-midtrain_olmo3mix_qwenlike_s2pdf_gzip2080_10B-preanneal-mixfix-7949bf4b/step2385"
+)
+
+# the code one
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC_round5-LC_s2pdf_code-10B-ec413d34/step2385"
+)
+
+# round 5
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5-LC67_s2pdf_gzip2080-10B-a71e7b1d/step2385"
+)
+
+
+# 1B proxies
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC_round5-LC_s2pdf_code-1B-4M20W-ae66b812/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-midtrain_round3_qwenlike_s2pdf_gzip2080_1B-4M20W-9054cc59/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5-LC67_s2pdf_gzip2080-1B-4M20W-d4d68891/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC30_r5s_nc-LC67_s2pdf_gzip2080_code30_pstar-1B-4M20W-ca1977e3/step239"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-1B-4M20W-c253267a/step239"
+)
+
+# leftover to eval
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC30_r5s_nc-LC70_s2pdf_gzip2080_code30_pstar-10B-liteRep-9280996b/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-10B-fe8c2599/step2385"
+)
 
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
@@ -64,7 +100,7 @@ for model in "${models[@]}"; do
         "/oe-training-default/${model}" \
         -t olmo-core-v2 \
         --use-beaker \
-        --olmo-core-v2-commit-hash 71aa590af8d3979125cd7d96eb661d05e26d04a1 \
+        --olmo-core-v2-commit-hash 59465108d4214595083ab331233f86cd75125dce \
         --huggingface-transformers-git-url https://github.com/2015aroras/transformers.git \
         --huggingface-transformers-commit-hash 4f2fbde7eaa7253b1ca977e294da6c9fcddfa345 \
         --dtype float32 \
@@ -85,7 +121,7 @@ uv pip install beaker-gantry
 source .venv/bin/activate
 
 for model in "${models[@]}"; do
-    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=4 WORKSPACE=ai2/oe-data MODEL_NAME_OR_PATH=/weka/oe-training-default/${model}-hf CLUSTER=ai2/jupiter-cirrascale-2  ./gantry_eval.sh -r new
+    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=8 WORKSPACE=ai2/oe-long-contexts MODEL_NAME_OR_PATH=/weka/oe-training-default/${model}-hf CLUSTER=ai2/jupiter-cirrascale-2  ./gantry_eval.sh -r new
 done
 ```
 
@@ -106,6 +142,16 @@ for url in "${urls[@]}"; do
     ./fetch_results.py -u ${url} >> ~/Downloads/results.csv
 done
 ```
+
+
+For ruler:
+
+```bash
+for model in "${models[@]}"; do
+    ./scripts/launch_ruler.sh /oe-training-default/${model}-hf
+done
+```
+
 
 
 ## Eval (SC)
