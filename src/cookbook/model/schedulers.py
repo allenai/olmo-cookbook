@@ -1,57 +1,68 @@
+import logging
+import warnings
 from dataclasses import dataclass
+from math import pi, cos
 from typing import Optional, Union
 
 import torch
 from olmo_core.exceptions import OLMoConfigurationError
 from olmo_core.optim import Scheduler
 
+log = logging.getLogger(__name__)
+
 
 @dataclass
-# NOTE: Temporary port from https://github.com/allenai/OLMo-core/blob/dirkg/DenseExperiments/src/olmo_core/optim/scheduler.py#L67 for debugging
-class WSD(Scheduler):
+class HalfCosWithWarmup(Scheduler):
     """
-    Warmup-stable-decay scheduler
+    Second half of a cosine learning rate schedule, with a warmup before that.
+    Note: This assumes that the peak LR set is for the full cosine schedule.
     """
 
-    warmup_steps: Optional[int] = 2000
+    warmup: Optional[int] = None
+    warmup_steps: Optional[int] = None  # deprecated, use 'warmup' instead.
     warmup_fraction: Optional[float] = None
-    decay_steps: Optional[int] = None
-    decay_fraction: Optional[float] = 0.1
+    alpha_f: float = 0.1
+    t_max: Optional[int] = None
     warmup_min_lr: float = 0.0
-    decay_min_lr: float = 0.0
 
     def __post_init__(self):
-        if (self.warmup_fraction is None) == (self.warmup_steps is None):
-            raise OLMoConfigurationError("Either warmup_fraction or warmup_steps must be specified.")
+        if self.warmup is None and self.warmup_steps is not None:
+            self.warmup = self.warmup_steps
+            self.warmup_steps = None
+            warnings.warn(
+                f"'{self.__class__.__name__}.warmup_steps' is deprecated, please use '.warmup' instead.",
+                DeprecationWarning,
+            )
+
+        if (self.warmup_fraction is None) == (self.warmup is None):
+            raise OLMoConfigurationError("Either 'warmup_fraction' or 'warmup' must be specified.")
+
         if self.warmup_fraction is not None and (self.warmup_fraction < 0 or self.warmup_fraction > 1):
             raise OLMoConfigurationError("warmup_fraction must be between 0 and 1.")
 
-        if (self.decay_fraction is None) == (self.decay_steps is None):
-            raise OLMoConfigurationError("Either decay_fraction or decay_steps must be specified.")
-        if self.decay_fraction is not None and (self.decay_fraction < 0 or self.decay_fraction > 1):
-            raise OLMoConfigurationError("decay_fraction must be between 0 and 1.")
-
     def get_lr(
-        self, initial_lr: Union[float, torch.Tensor], step: int, max_steps: int
+        self, initial_lr: Union[float, torch.Tensor], current: int, t_max: int
     ) -> Union[float, torch.Tensor]:
-        if self.warmup_steps is None:
-            warmup_steps = round(max_steps * self.warmup_fraction) if self.warmup_fraction is not None else 0
+        t_max = t_max if self.t_max is None else self.t_max
+        eta_min = initial_lr * self.alpha_f
+
+        if self.warmup is None:
+            assert self.warmup_fraction is not None
+            warmup = round(t_max * self.warmup_fraction)
         else:
-            warmup_steps = self.warmup_steps
+            warmup = self.warmup
 
-        if step <= warmup_steps:
-            return _linear_warmup(initial_lr, step, warmup_steps, self.warmup_min_lr)
-
-        if self.decay_steps is None:
-            decay_steps = round(max_steps * self.decay_fraction) if self.decay_fraction is not None else 0
+        if current < warmup:
+            max_lr = eta_min + (initial_lr - eta_min) / 2
+            return _linear_warmup(max_lr, current, warmup, self.warmup_min_lr)
+        elif current >= t_max:
+            return eta_min
         else:
-            decay_steps = self.decay_steps
-
-        if step >= max_steps - decay_steps:
-            return _linear_decay(initial_lr, max_steps - step, decay_steps, self.decay_min_lr)
-
-        del step, max_steps
-        return initial_lr
+            current = current - warmup
+            t_max = t_max - warmup
+            current += t_max
+            t_max *= 2
+            return eta_min + (initial_lr - eta_min) * (1 + cos(pi * current / t_max)) / 2
 
 
 def _linear_warmup(

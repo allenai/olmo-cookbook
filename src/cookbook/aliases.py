@@ -57,6 +57,7 @@ class MetricsConfig(BaseModel):
 class SchedulerType(Enum):
     COSINE = "cosine"
     COS_LINEAR = "cos_linear"
+    HALF_COSINE = "half_cosine"
     LINEAR = "linear"
     WSD = "wsd"
 

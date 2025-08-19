@@ -67,6 +67,7 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
+from cookbook.model.schedulers import HalfCosWithWarmup
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,7 @@ class OptimizerState:
     betas: tuple[float, float]
     foreach: bool
     optim_group_override: dict | None = None
+
 
 @dataclass
 class TransformerConfigBuilder:
@@ -368,7 +370,7 @@ class TransformerConfigBuilder:
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
-                save_async=False,   # TODO: enable async saving when augusta stops being silly
+                save_async=False,  # TODO: enable async saving when augusta stops being silly
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
@@ -509,7 +511,9 @@ class TransformerConfigBuilder:
             weight_decay = getattr(self.annealing, "weight_decay", None) or optimizer_state.weight_decay
             betas = getattr(self.annealing, "betas", None) or optimizer_state.betas
             foreach = getattr(self.annealing, "foreach", None) or optimizer_state.foreach
-            optim_group_override_dict = getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            optim_group_override_dict = (
+                getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            )
 
         group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
@@ -614,6 +618,8 @@ class TransformerConfigBuilder:
             scheduler = CosWithWarmup(**scheduler_config)
         elif scheduler_class == LinearWithWarmup.__name__:
             scheduler = LinearWithWarmup(**scheduler_config)
+        elif scheduler_class == HalfCosWithWarmup.__name__:
+            scheduler = HalfCosWithWarmup(**scheduler_config)
         else:
             raise ValueError(f"Unsupported scheduler class: {scheduler_class}")
 
@@ -670,7 +676,6 @@ class TransformerConfigBuilder:
 
         return scheduler_state, optimizer_state
 
-
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
         rank_microbatch_size = self.get_rank_microbatch_size()
@@ -698,9 +703,11 @@ class TransformerConfigBuilder:
                 reduce_dtype=DType.float32,
                 shard_degree=self.dp_shard_degree,
             ),
-            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
-            if self.cp_degree
-            else None,
+            cp_config=(
+                train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+                if self.cp_degree
+                else None
+            ),
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
             float8_config=self.get_float8_config() if self.float8 else Float8Config(enabled=False),
             z_loss_multiplier=1e-5,
