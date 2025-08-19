@@ -8,10 +8,12 @@ from dataclasses import field as dataclass_field
 from dataclasses import fields as dataclass_fields
 from datetime import datetime
 from functools import partial
+import logging
 from sys import stderr
 from threading import current_thread, main_thread
 from typing import Callable, ClassVar, Generic, List, TypeVar
 
+import os
 import requests
 from tqdm import tqdm
 from typing_extensions import Self
@@ -21,6 +23,9 @@ from cookbook.eval.cache import get_datalake_cache
 
 T = TypeVar("T")
 V = TypeVar("V")
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -34,15 +39,21 @@ class BaseDatalakeItem(Generic[T]):
             if (parser := field.metadata.get("parser", None)) is not None:
                 setattr(self, field.name, parser(getattr(self, field.name)))
 
+    @classmethod
+    def num_workers(cls, num_workers: int | None = None) -> int | None:
+        if num_workers is None:
+            num_workers = int(w) if (w := os.environ.get("OE_EVAL_WORKERS", None)) is not None else None
+        return num_workers
+
     @staticmethod
     def _thread_number() -> int:
         if current_thread() == main_thread():
-            return 0
+            return -1
         else:
             return int(current_thread().name.split("-")[-1])
 
     @classmethod
-    def run(cls, **kwargs: T) -> List[Self]:
+    def run(cls, *args: T, **kwargs: T) -> List[Self]:
         """Run a query to retrieve one or more datalake items of this type."""
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -59,9 +70,10 @@ class BaseDatalakeItem(Generic[T]):
             return []
 
         results: list[V] = []
+
         with ExitStack() as stack:
             # Set up thread pool and progress bar
-            pool = stack.enter_context(ThreadPoolExecutor(max_workers=num_workers))
+            pool = stack.enter_context(ThreadPoolExecutor(max_workers=cls.num_workers(num_workers)))
             pbar = stack.enter_context(
                 tqdm(total=len(fns), desc=cls.__name__, disable=quiet, file=stderr, position=position)
             )
@@ -104,7 +116,7 @@ class BaseDatalakeItem(Generic[T]):
         fns = [partial(cls.run, **{k: v[i] for k, v in kwargs.items()}) for i in range(num_args)]
 
         # actually run the function in parallel
-        results = cls._prun(fns=fns, num_workers=num_workers, quiet=quiet)
+        results = cls._prun(fns=fns, num_workers=cls.num_workers(num_workers), quiet=quiet)
         return [result for result_group in results for result in result_group]
 
 
@@ -190,6 +202,16 @@ class Metrics:
     @property
     def bpb(self) -> float | None:
         return self.bits_per_byte_corr or self.logits_per_byte_corr
+    
+    @property
+    def pass_at_4(self) -> float | None:
+        if "pass_at_4" in self.extra_metrics:
+            return self.extra_metrics["pass_at_4"]
+    
+    @property
+    def pass_at_16(self) -> float | None:
+        if "pass_at_16" in self.extra_metrics:
+            return self.extra_metrics["pass_at_16"]
 
     @classmethod
     def from_dict(cls, d: dict) -> Self:
@@ -198,6 +220,8 @@ class Metrics:
 
         # move all metrics that are not shared across tasks to extra_metrics
         extra_metrics = {**d.pop("extra_metrics", {}), **{k: d.pop(k) for k in list(d) if k not in fields}}
+        if "primary_score" not in d:
+            d["primary_score"] = None
         return cls(**d, extra_metrics=extra_metrics)
 
 
@@ -359,10 +383,18 @@ class PredictionsAll(BaseDatalakeItem):
 
 
 @dataclass
-class RemoveFromDashboard(BaseDatalakeItem):
-    """Remove an experiment from a dashboard."""
+class BaseDashboardTransformRequest(BaseDatalakeItem):
+    """Base class for dashboard requests."""
 
     _endpoint: ClassVar[str] = "bluelake/add-experiment-tags/"
+
+    @classmethod
+    def num_workers(cls, num_workers: int | None = None) -> int | None:
+        logger.warning(
+            "\033[1;33mlimiting num_workers to 1 (asked: %s) for dashboard requests\033[0m",
+            num_workers or "unlimited"
+        )
+        return 1
 
     @classmethod
     def _endpoint_request(cls, experiment_id: str, tags: list[Tag], overwrite: bool = True) -> Self:
@@ -384,8 +416,20 @@ class RemoveFromDashboard(BaseDatalakeItem):
         response.raise_for_status()
         return cls(**(response.json() or {}))
 
+
+
+@dataclass
+class RemoveFromDashboard(BaseDashboardTransformRequest):
+    """Remove an experiment from a dashboard."""
+
     @classmethod
-    def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
+    def run(
+        cls,
+        model_name: str,
+        dashboard: str,
+        fuzzy: bool = False,
+        num_workers: int | None = None
+    ) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name, dashboard=dashboard)
         cache = get_datalake_cache()
 
@@ -402,23 +446,30 @@ class RemoveFromDashboard(BaseDatalakeItem):
             fn = partial(cls._endpoint_request, experiment_id=run.experiment_id, tags=new_tags, overwrite=True)
             fns.append(fn)
 
-        print(f"Removing {len(runs):,} experiments from dashboard {dashboard}")
+        print(f"Removing {len(fns):,} experiments from dashboard {dashboard}")
 
-        if (n := cls._thread_number()) > 0:
+        if (n := cls._thread_number()) >= 0:
             # if we are already running in parallel, then we can use _prun() to create more parallelism
             # (we avoid making a second progress bar by setting quiet=True)
-            return cls._prun(fns=fns, num_workers=len(runs), position=n)
+            return cls._prun(fns=fns, num_workers=num_workers, position=n)
         else:
             # if we are single-threaded, then we can just run the function sequentially
             return [fn() for fn in fns]
 
 
 @dataclass
-class AddToDashboard(RemoveFromDashboard):
+class AddToDashboard(BaseDashboardTransformRequest):
     """Add an experiment to a dashboard."""
 
     @classmethod
-    def run(cls, model_name: str, dashboard: str, fuzzy: bool = False) -> List[Self]:
+    def run(
+        cls,
+        model_name: str,
+        dashboard: str,
+        source_dashboard: str | None = None,
+        fuzzy: bool = False,
+        num_workers: int | None = None,
+    ) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name)
         cache = get_datalake_cache()
         fns = []
@@ -433,17 +484,26 @@ class AddToDashboard(RemoveFromDashboard):
             if any(tag.key == "dashboard" and tag.value == dashboard for tag in run.tags):
                 continue
 
+            if source_dashboard:
+                # check if the current run has the right source dashboard tag
+                if not any(tag.key == "dashboard" and tag.value == source_dashboard for tag in run.tags):
+                    continue
+
+            if "winogrande" not in run.task_name:
+                continue
+            print(run)
+
             # if it is not present, then we add it
             new_tags = [Tag(key="dashboard", value=dashboard)]
             fn = partial(cls._endpoint_request, experiment_id=run.experiment_id, tags=new_tags, overwrite=False)
             fns.append(fn)
 
-        print(f"Adding {len(runs):,} experiments to dashboard {dashboard}")
+        print(f"Adding {len(fns):,} experiments to dashboard {dashboard}")
 
-        if (n := cls._thread_number()) > 0:
+        if (n := cls._thread_number()) >= 0:
             # if we are already running in parallel, then we can use _prun() to create more parallelism
             # (we avoid making a second progress bar by setting quiet=True)
-            return cls._prun(fns=fns, num_workers=len(runs), position=n)
+            return cls._prun(fns=fns, num_workers=num_workers, position=n)
         else:
             # if we are single-threaded, then we can just run the function sequentially
             return [fn() for fn in fns]

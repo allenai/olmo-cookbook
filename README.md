@@ -43,12 +43,6 @@ olmo-cookbook prepare-user-workspace \
 ```
 *Note: Weka / R2 endpoint urls only need to be set if you are using them for storage.*
 
-If you plan to run jobs on `ai2/augusta-google-1` then your workspace will also require the `Beaker` secrets:
-```
-GS_INTEROP_KEY
-GS_INTEROP_SECRET
-```
-
 ### Build your training configuration
 
 See `src/cookbook/recipes/train-1b-1xC-dclm.yaml` for an example to clone.

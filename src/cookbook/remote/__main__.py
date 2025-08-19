@@ -32,7 +32,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
@@ -42,7 +42,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, GoogleCloudToken)
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_gcs_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
@@ -57,7 +57,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
             assert dst_credentials is None or isinstance(dst_credentials, AwsCredentials)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_s3_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
         elif dst_loc.prot == "gs":
@@ -66,7 +66,7 @@ def copy_prefix(
 
             assert src_credentials is None or isinstance(src_credentials, AwsCredentials)
             assert dst_credentials is None or isinstance(dst_credentials, GoogleCloudToken)
-            with TemporaryDirectory(delete=True) as tmp_dir:
+            with TemporaryDirectory() as tmp_dir:
                 download_s3_prefix(src_loc.remote, tmp_dir, credentials=src_credentials, *args, **kwargs)
                 upload_gcs_prefix(tmp_dir, dst_loc.remote, credentials=dst_credentials, *args, **kwargs)
 
@@ -126,7 +126,7 @@ def main():
     parser.add_argument("--num-workers", type=int, default=10, help="Number of workers")
     parser.add_argument("--google-cloud-token", type=str, default=None, help="Google Cloud token")
     parser.add_argument("--allow-dirty", action="store_true", help="Allow dirty operations")
-    parser.add_argument("--budget", type=str, default="ai2/oe-data", help="Budget")
+    parser.add_argument("--budget", type=str, default="ai2/oe-base", help="Budget")
     parser.add_argument("--cluster", type=str, default="aus", help="Clusters to run on")
     parser.add_argument("--dry-run", action="store_true", help="Dry run")
     parser.add_argument("--gpus", type=int, default=0, help="Number of GPUs")
@@ -140,7 +140,6 @@ def main():
     args = parser.parse_args()
 
     if os.environ.get("BEAKER_EXPERIMENT_ID") or args.local_only:
-
         # only pull credentials if running on beaker
         source_credentials, destination_credentials = (
             pull_credentials(args.src_path, args.dst_path) if not args.local_only else (None, None)
