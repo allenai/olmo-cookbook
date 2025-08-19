@@ -1,4 +1,4 @@
-name: "microanneal-swallowcode2_scor_lintQ3"
+name: "microanneal-swallowcode2_scor_lintQ4"
 description: "OLMo3_4T 10B-anneal with 5T tokens of swallowcode2 with SCOR rewrites (improved code only) | Just the fourth quartile of linted data"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
