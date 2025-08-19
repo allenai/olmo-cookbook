@@ -52,7 +52,7 @@ checkpoints = [
 ]
 all = [
     # this is branch tyler/lc-localadj-gloofix-ropescaling as of 2025-08-10
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@b7bb8313ed1a983b9d9d4452b69b472de240b708",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@6d471e03aba208f547602fa66476d056cb52cf13",
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
