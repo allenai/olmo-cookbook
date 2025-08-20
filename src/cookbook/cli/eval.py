@@ -328,7 +328,7 @@ def convert_checkpoint(
     "--partition-size",
     type=int,
     default=0,
-    help="How many tasks to evaluate in parallel. Set to 0 (default) to evaluate all tasks in sequence.",
+    help="How many tasks to evaluate per job. Set to 0 (default) to evaluate all tasks in sequence. Set to 1 for maximum parallelism.",
 )
 @click.option(
     "-y",
@@ -386,9 +386,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMoCore)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
@@ -578,7 +578,7 @@ def evaluate_model(
         missing_tasks = find_missing_tasks(results=results)
 
         # Override our tasks with the missing set
-        if model_name in missing_tasks:
+        if missing_tasks and model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
             print(f"Found no missing tasks for {model_name}")
@@ -727,6 +727,8 @@ def get_results(
         print(results.to_csv())
     else:
         raise ValueError(f"Invalid format: {format}")
+
+    return results
 
 
 @click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
