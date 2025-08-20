@@ -48,7 +48,8 @@ analysis = [
     "matplotlib",
     "scipy",
     "pandas",
-    "tqdm"
+    "tqdm",
+    "smallpond"
 ]
 checkpoints = [
     "google-cloud-storage",

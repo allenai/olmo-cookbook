@@ -185,3 +185,7 @@ uv.lock
 
 # ignore vscode workspace settings
 *.code-workspace
+
+# smallpond-specific excludes
+*.parquet
+.MANIFEST.txt

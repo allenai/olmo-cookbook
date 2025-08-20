@@ -56,8 +56,7 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
         skip_on_fail=[skip_on_fail for _ in experiments],
     )
 
-    df = PredictionsAll.to_parquet(task_predictions)
-    df.to_parquet(prediction_path)
+    PredictionsAll.to_parquet(task_predictions, output_path=prediction_path)
 
     logger.info(f"Saved predictions to {prediction_path}")
 
