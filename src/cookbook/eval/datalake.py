@@ -444,7 +444,7 @@ class InstancesAll(BaseDatalakeItem):
                 result = cache.set(parsed, experiment_id=experiment_id, task_idx=metric.task_idx, type="inputs")
 
             task_instances = Instances(
-                predictions=[Instance(**instance) for instance in (result.value or [])], metrics=metric
+                instances=[Instance(**instance) for instance in (result.value or [])], metrics=metric
             )
 
             all_instances.append(task_instances)

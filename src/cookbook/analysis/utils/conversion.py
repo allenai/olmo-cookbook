@@ -2,6 +2,7 @@ from collections import defaultdict
 import os
 import tempfile
 import shutil
+import logging
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -10,9 +11,16 @@ import json
 from multiprocessing import Pool, cpu_count
 import time
 from typing import List
-from cookbook.eval.datalake import MetricsAll, PredictionsAll, Prediction
+from cookbook.eval.datalake import MetricsAll, PredictionsAll, Prediction, InstancesAll
 
 from tqdm import tqdm
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 
 def get_predictions_schema():
@@ -257,34 +265,30 @@ def _process_prediction_row(prediction, metrics):
     return full_row
 
 
-def _process_question_row(metrics, question):
+def _process_question_row(instance, metrics):
     full_row = {
         "task_alias": metrics.alias,
         "task_name": metrics.task_name,
         **metrics.to_dict(),
     }
 
+    full_row["native_id"] = str(instance.native_id)
+    full_row["label"] = str(instance.label)
     full_row["instance_id"] = get_instance_id(full_row)
 
-    if not isinstance(full_row["native_id"], str):
-        full_row["native_id"] = str(full_row["native_id"])
-
-    if not isinstance(full_row["label"], str):
-        full_row["label"] = str(full_row["label"])
-
     # @davidh -- I would like to store this primitive as a dict
-    full_row["doc"] = str(question["doc"])
+    full_row["doc"] = str(instance.doc)
 
     return full_row
 
 
-def _get_type_mapping():
+def _get_type_mapping(schema_func):
     """
     Get a mapping of field names to their required PyArrow types based on the enforced schema.
     """
     import pyarrow as pa
     
-    schema = get_predictions_schema()
+    schema = schema_func()
     type_mapping = {}
     
     for field_name, python_type in schema.items():
@@ -305,13 +309,19 @@ def _get_type_mapping():
     return type_mapping
 
 
-def _create_consistent_table(chunk_df, worker_id=None):
+def _create_consistent_prediction_table(chunk_df, worker_id=None):
+    return _create_consistent_table_generic(chunk_df, _get_type_mapping(get_predictions_schema), worker_id)
+
+
+def _create_consistent_questions_table(chunk_df, worker_id=None):
+    return _create_consistent_table_generic(chunk_df, _get_type_mapping(get_questions_schema), worker_id)
+
+
+def _create_consistent_table_generic(chunk_df, type_mapping, worker_id=None):
     """
-    Create a PyArrow table with consistent types for the enforced schema.
+    Create a PyArrow table with consistent types for the given type mapping.
     """
     import pyarrow as pa
-    
-    type_mapping = _get_type_mapping()
     
     # Convert DataFrame to PyArrow table
     table = pa.Table.from_pandas(chunk_df)
@@ -407,14 +417,22 @@ def _cleanup_dataframe_for_pyarrow(df, worker_id=None):
                     
                     cleaned_df[col_name] = col_data.apply(safe_list_float_convert)
             except Exception as e:
-                print(f"[Worker {worker_id}] ⚠️  Failed to clean column {col_name}: {e}")
+                logger.info(f"[Worker {worker_id}] ⚠️  Failed to clean column {col_name}: {e}")
                 # Keep original column if cleaning fails
                 continue
     
     return cleaned_df
 
 
-def _process_experiment_worker(args):
+def _process_prediction_worker(args):
+    return _generic_experiment_worker(args, "predictions")
+
+
+def _process_instances_worker(args):
+    return _generic_experiment_worker(args, "instances")
+
+
+def _generic_experiment_worker(args, data_type):
     """
     Worker function for processing a single experiment in parallel with enforced schema.
     """
@@ -424,22 +442,39 @@ def _process_experiment_worker(args):
     import pyarrow as pa
     import pyarrow.parquet as pq
     
-    schema = get_predictions_schema()
+    # Select schema and processing functions based on data type
+    if data_type == "predictions":
+        schema = get_predictions_schema()
+        data_fetcher = PredictionsAll.run
+        process_row_func = _process_prediction_row
+        table_creator = _create_consistent_prediction_table
+    elif data_type == "instances":
+        schema = get_questions_schema()
+        data_fetcher = InstancesAll.run
+        process_row_func = _process_question_row
+        table_creator = _create_consistent_questions_table
+    else:
+        raise ValueError(f"Unknown data_type: {data_type}")
+    
     batch_files = []
     current_chunk = []
     total_processed = 0
     
     try:
-        all_predictions = PredictionsAll.run(experiment_id=experiment.experiment_id, force=force, skip_on_fail=skip_on_fail)
+        all_data = data_fetcher(experiment_id=experiment.experiment_id, force=force, skip_on_fail=skip_on_fail)
 
-        for predictions in all_predictions:
-            metrics = predictions.metrics
-            predictions = predictions.predictions
+        for data_collection in all_data:
+            metrics = data_collection.metrics
+            
+            if data_type == "predictions":
+                data_items = data_collection.predictions
+            elif data_type == "instances":
+                data_items = data_collection.instances
 
-            for prediction in predictions:
+            for data_item in data_items:
                 try:
-                    # Process prediction files
-                    full_row = _process_prediction_row(prediction, metrics)
+                    # Process data item
+                    full_row = process_row_func(data_item, metrics)
                     
                     # Enforce the schema
                     row = _enforce_schema(full_row, schema)
@@ -454,7 +489,7 @@ def _process_experiment_worker(args):
                         chunk_df = pd.DataFrame(current_chunk)
                         
                         # Create table with consistent types for problematic fields
-                        table = _create_consistent_table(chunk_df, worker_id=worker_id)
+                        table = table_creator(chunk_df, worker_id=worker_id)
                         
                         pq.write_table(table, batch_file)
                         
@@ -464,9 +499,9 @@ def _process_experiment_worker(args):
                 except Exception as e:
                     if skip_on_fail:
                         if "404 client error" in str(e).lower():
-                            # Some prediction files simply don't exist in the datalake
+                            # Some files simply don't exist in the datalake
                             continue
-                        print(f"[Worker {worker_id}] ⚠️  Task {metrics.task_idx} in experiment {experiment.experiment_id} failed (skipping): {e}")
+                        logger.info(f"[Worker {worker_id}] ⚠️  Task {metrics.task_idx} in experiment {experiment.experiment_id} failed (skipping): {e}")
                         continue
                     else:
                         raise e
@@ -479,7 +514,7 @@ def _process_experiment_worker(args):
             chunk_df = pd.DataFrame(current_chunk)
             
             # Create table with consistent types for problematic fields
-            table = _create_consistent_table(chunk_df, worker_id=worker_id)
+            table = table_creator(chunk_df, worker_id=worker_id)
             
             pq.write_table(table, batch_file)
             
@@ -489,7 +524,7 @@ def _process_experiment_worker(args):
         
     except Exception as e:
         if skip_on_fail:
-            print(f"[Worker {worker_id}] ❌ Experiment {experiment.experiment_id} failed (Processed {total_processed} rows before failure): {e}")
+            logger.info(f"[Worker {worker_id}] ❌ Experiment {experiment.experiment_id} failed (Processed {total_processed} rows before failure): {e}")
 
             # Return any batch files that were successfully created before the error
             return batch_files, total_processed, experiment.experiment_id
@@ -497,10 +532,8 @@ def _process_experiment_worker(args):
             raise e
 
 
-def predictions_to_smallpond(experiments, output_path, chunk_size=50000, return_pandas=False, force=False, skip_on_fail=False):
-    """
-    Pull prediction files from datalake -> smallpond
-    """
+
+def construct_smallpond(experiments, output_path, data_type, chunk_size=50000, return_pandas=False, force=False, skip_on_fail=False):
     import smallpond
     import pandas as pd
     import pyarrow as pa
@@ -510,13 +543,18 @@ def predictions_to_smallpond(experiments, output_path, chunk_size=50000, return_
     
     # Determine number of workers
     env_workers = os.environ.get('OE_EVAL_WORKERS')
-    num_workers = int(env_workers) if env_workers else min(cpu_count(), len(experiments), 32)
+    num_workers = int(env_workers) if env_workers else min(cpu_count(), len(experiments), 64)
     
-    # Get the enforced schema
-    schema = get_predictions_schema()
+    # Select worker function based on data type
+    if data_type == "predictions":
+        worker_func = _process_prediction_worker
+    elif data_type == "instances":
+        worker_func = _process_instances_worker
+    else:
+        raise ValueError(f"Unknown data_type: {data_type}")
     
     # Create temporary directory for batch processing
-    temp_dir = Path(tempfile.mkdtemp(prefix="predictions_streaming_mp_"))
+    temp_dir = Path(tempfile.mkdtemp(prefix=f"{data_type}_streaming_mp_"))
     
     try:
         start_time = time.time()
@@ -533,41 +571,41 @@ def predictions_to_smallpond(experiments, output_path, chunk_size=50000, return_
         
         with Pool(processes=num_workers) as pool:
             # Use imap for better progress tracking
-            results = pool.imap(_process_experiment_worker, worker_args)
+            results = pool.imap(worker_func, worker_args)
             
-            for i, (batch_files, processed_count, experiment_id) in enumerate(tqdm(results, total=len(experiments), desc="Processing experiments")):
+            for i, (batch_files, processed_count, experiment_id) in enumerate(tqdm(results, total=len(experiments), desc=f"Processing {data_type}")):
                 all_batch_files.extend(batch_files)
                 total_processed += processed_count
                 
                 if (i + 1) % 10 == 0:
                     elapsed = time.time() - start_time
                     rate = (i + 1) / elapsed if elapsed > 0 else 0
-                    print(f"  Completed {i + 1}/{len(experiments)} experiments ({rate:.1f} exp/sec), {total_processed:,} rows processed")
+                    logger.info(f"  Completed {i + 1}/{len(experiments)} experiments ({rate:.1f} exp/sec), {total_processed:,} rows processed")
         
         elapsed_time = time.time() - start_time
 
-        print(f"Parallel processing completed in {elapsed_time:.1f} seconds")
-        print(f"Created {len(all_batch_files)} batch files with {total_processed:,} total rows")
+        logger.info(f"Parallel processing completed in {elapsed_time:.1f} seconds")
+        logger.info(f"Created {len(all_batch_files)} batch files with {total_processed:,} total rows")
         
         # Concatenate all batch files efficiently
-        print("Combining batch files...")
+        logger.info("Combining batch files...")
         final_output = Path(output_path)
         
         # Ensure output directory exists
         final_output.parent.mkdir(parents=True, exist_ok=True)
         
         # Use PyArrow streaming with schema unification for maximum efficiency
-        print("Combining batch files using streaming concatenation...")
+        logger.info("Combining batch files using streaming concatenation...")
         
         # Read all tables and unify schema (handle column order differences)
-        print(f"Reading {len(all_batch_files)} batch files...")
+        logger.info(f"Reading {len(all_batch_files)} batch files...")
         all_tables = []
         for batch_file in all_batch_files:
             table = pq.read_table(batch_file)
             all_tables.append(table)
         
         # Concatenate tables
-        print("Concatenating tables...")
+        logger.info("Concatenating tables...")
         unified_table = pa.concat_tables(all_tables)
         
         # Write the unified table
@@ -576,13 +614,13 @@ def predictions_to_smallpond(experiments, output_path, chunk_size=50000, return_
         
         final_time = time.time() - start_time
 
-        print(f"Total processing time: {final_time / 60:.1f} minutes")
-        print(f"Processing rate: {total_rows / final_time:.0f} rows/sec")
-        print(f"Streamed {total_rows:,} rows from {len(all_batch_files)} batch files")
-        print(f"Final dataset saved to: {final_output}")
+        logger.info(f"Total processing time: {final_time / 60:.1f} minutes")
+        logger.info(f"Processing rate: {total_rows / final_time:.0f} rows/sec")
+        logger.info(f"Streamed {total_rows:,} rows from {len(all_batch_files)} batch files")
+        logger.info(f"Final dataset saved to: {final_output}")
         
     finally:
         # Clean up temporary directory
         if temp_dir.exists():
             shutil.rmtree(temp_dir)
-            print("Cleaned up temporary files")
+            logger.info("Cleaned up temporary files")

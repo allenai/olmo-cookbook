@@ -7,7 +7,7 @@ import pandas as pd
 
 from cookbook.analysis.constants import get_cache_path
 from cookbook.analysis.runners import run_instance_analysis
-from cookbook.analysis.utils.conversion import predictions_to_smallpond
+from cookbook.analysis.utils.conversion import construct_smallpond
 from cookbook.eval.datalake import FindExperiments, PredictionsAll
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,12 @@ def cli():
     help="Dashboard name to analyze",
 )
 @click.option(
+    "--data-type",
+    type=click.Choice(["predictions", "instances"]),
+    default="predictions",
+    help="Type of data to download (predictions or instances)",
+)
+@click.option(
     "--force",
     is_flag=True,
     default=False,
@@ -42,24 +48,25 @@ def cli():
     default=False,
     help="Skip tasks that fail instead of raising an error",
 )
-def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
+def download(dashboard: str, data_type: str = "predictions", force: bool = False, skip_on_fail: bool = False):
     """Download and process evaluation results from the datalake to a dataframe."""
     cache_dir = get_cache_path(dashboard)
-    prediction_path = cache_dir / f"{dashboard}_predictions.parquet"
+    output_path = cache_dir / f"{dashboard}_{data_type}.parquet"
 
     experiments = FindExperiments.run(dashboard=dashboard)
 
     logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
 
-    predictions_to_smallpond(
+    construct_smallpond(
         experiments=experiments,
-        output_path=prediction_path,
+        output_path=output_path,
+        data_type=data_type,
         force=force,
         skip_on_fail=skip_on_fail,
         return_pandas=False
     )
 
-    logger.info(f"Saved predictions to {prediction_path}")
+    logger.info(f"Saved {data_type} to {output_path}")
 
 
 @cli.command()
