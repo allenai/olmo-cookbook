@@ -348,7 +348,7 @@ class PredictionsAll(BaseDatalakeItem):
 
         all_predictions = []
         for metric in metrics:
-            if not (result := cache.get(experiment_id=experiment_id, type="predictions")).success or force:
+            if not (result := cache.get(experiment_id=experiment_id, task_idx=metric.task_idx, type="predictions")).success or force:
                 try:
                     response = requests.get(
                         f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
@@ -365,7 +365,7 @@ class PredictionsAll(BaseDatalakeItem):
                 # Response is a List[dict]
                 parsed = [json.loads(line) for line in response.iter_lines(decode_unicode=True) if line]
 
-                result = cache.set(parsed, experiment_id=experiment_id, type="predictions")
+                result = cache.set(parsed, experiment_id=experiment_id, task_idx=metric.task_idx, type="predictions")
 
             task_predictions = Predictions(
                 predictions=[Prediction(**prediction) for prediction in (result.value or [])], metrics=metric
@@ -375,6 +375,81 @@ class PredictionsAll(BaseDatalakeItem):
 
         return all_predictions
 
+
+@dataclass
+class Instance:
+    """
+    An input evaluation instance.
+    """
+
+    task_name: str
+    doc: dict
+    native_id: int
+    doc_id: int
+    label: str
+    requests: List[dict]
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass
+class Instances:
+    """
+    A collection of instances for a given task and model.
+    """
+
+    instances: List[Instance]
+    metrics: MetricsAll
+
+    def __iter__(self):
+        return iter(self.instances)
+
+
+@dataclass
+class InstancesAll(BaseDatalakeItem):
+    """Find all instances for a given experiment."""
+
+    all_instances: List[Instances]
+
+    # this is not a field in dataclass
+    _endpoint: ClassVar[str] = "greenlake/download-result/"
+
+    @classmethod
+    def run(cls, experiment_id: str, force: bool = False, skip_on_fail: bool = False) -> List[Self]:
+        cache = get_datalake_cache()
+
+        # Get indices of all tasks
+        metrics = MetricsAll.run(experiment_id=experiment_id, force=force, skip_on_fail=skip_on_fail)
+
+        all_instances = []
+        for metric in metrics:
+            if not (result := cache.get(experiment_id=experiment_id, task_idx=metric.task_idx, type="inputs")).success or force:
+                try:
+                    response = requests.get(
+                        f"{cls._base_url}/{cls._endpoint.rstrip('/')}/{experiment_id}",
+                        params={"resulttype": "INPUTS", "task_idx": metric.task_idx},
+                        headers={"accept": "application/json"},
+                    )
+                    response.raise_for_status()
+                except Exception as e:
+                    if skip_on_fail:
+                        return []
+                    else:
+                        raise e
+
+                # Response is a List[dict]
+                parsed = [json.loads(line) for line in response.iter_lines(decode_unicode=True) if line]
+
+                result = cache.set(parsed, experiment_id=experiment_id, task_idx=metric.task_idx, type="inputs")
+
+            task_instances = Instances(
+                predictions=[Instance(**instance) for instance in (result.value or [])], metrics=metric
+            )
+
+            all_instances.append(task_instances)
+
+        return all_instances
 
 @dataclass
 class BaseDashboardTransformRequest(BaseDatalakeItem):

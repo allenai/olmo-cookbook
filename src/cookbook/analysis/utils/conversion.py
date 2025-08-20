@@ -10,37 +10,90 @@ import json
 from multiprocessing import Pool, cpu_count
 import time
 from typing import List
-from cookbook.eval.cache import get_datalake_cache
-from cookbook.eval.datalake import MetricsAll, Prediction
+from cookbook.eval.datalake import MetricsAll, PredictionsAll, Prediction
 
 from tqdm import tqdm
 
 
-def get_schema():
+def get_predictions_schema():
     """Instance-level prediction table schema"""
     return {
-        'alias': str,
+        'task_alias': str,
         'model_name': str,
-        'model_path': str,
-        'revision': str,
-        'task_name': str,
-        'doc_id': int,
-        'native_id': str,
-        'label': str,
-        'num_tokens': int,
-        'correct_choice': int,
-        'bits_per_byte_corr': float,
+        'model_revision': str,
+        'instance_id': str,
         'primary_score': float,
+        'bits_per_byte_corr': float,
         'pass_at_1': float,
+        'pass_at_2': float,
+        'pass_at_4': float,
         'pass_at_10': float,
+        'pass_at_16': float,
+        'pass_at_32': float,
+        'maj_at_1': float,
+        'maj_at_2': float,
+        'maj_at_4': float,
+        'maj_at_16': float,
+        'maj_at_32': float,
         'exact_match': float,
+        'exact_match_flex': float,
         'f1': float,
         'recall': float,
+        'label': str,
+        'correct_choice': int,
+        'model_answer': str,
+        'model_path': str,
+        'doc_id': int,
+        'native_id': str,
+
         # 'logits_per_char': List[float],
         # 'bits_per_byte': List[float],
         # 'logits_per_char_corr': float,
         # 'logits_per_byte_corr': float,
+
+        # num_instances
+        # processing_time
+        # continuation
+        # tested_completion
+        # exec_result
+
+        # 'num_tokens': int,
+        # sum_logits
+        # num_tokens_all
+        # predicted_index_raw
+        # predicted_index_per_token
+        # predicted_index_per_char
+        # predicted_index_per_byte
+        # predicted_index_uncond
+        # acc_raw
+        # acc_per_token
+        # acc_per_char
+        # acc_per_byte
+        # acc_uncond
+        # no_answer
+        # rank
+        # greedy_acc
     }
+
+
+def get_questions_schema():
+    """Questions table schema"""
+    return {
+        'task_alias': str,
+        'instance_id': str,
+        'doc': str,
+        'label': str,
+        'task_name': str,
+        'doc_id': int,
+        'native_id': str
+    }
+
+
+def get_instance_id(pred):
+    if pred["native_id"] is not None:
+        return str(pred["native_id"])
+    elif pred["doc_id"] is not None:
+        return str(pred["doc_id"])
 
 
 def _truncate_for_display(value, max_length=500):
@@ -120,16 +173,24 @@ def _enforce_schema(row, schema):
     return enforced_row
 
 
-def _process_prediction_row(metrics, prediction, model_output_dict):
+def _process_prediction_row(prediction, metrics):
     """
     Process a single prediction row with common data cleaning logic.
     Returns the processed row ready for schema enforcement.
     """
+    # Convert list of dicts to dict of lists for model outputs
+    model_output_dict = defaultdict(list)
+    for output in prediction.model_output:
+        for key, value in output.items():
+            model_output_dict[key].append(value)
+
     # Build the full row first
     full_row = {
-        "alias": metrics.alias,
-        "model_name": metrics.model_name,
-        "model_path": metrics.model_path,
+        "task_alias": metrics.alias,
+        "task_name": metrics.task_name,
+        "model_name": metrics.model_config.get("model", None),
+        "model_revision": metrics.model_config.get("revision", None),
+        "model_path": metrics.model_config.get("model_path", None),
         **metrics.to_dict(),
         **prediction.to_dict(),
         **model_output_dict,
@@ -142,16 +203,17 @@ def _process_prediction_row(metrics, prediction, model_output_dict):
 
     # Apply data cleaning for schema compatibility
     if "correct_choice" not in full_row or isinstance(full_row["correct_choice"], str):
-        full_row["correct_choice"] = 0
+        full_row["correct_choice"] = np.nan
 
     if "exact_match" in full_row and isinstance(full_row["exact_match"], bool):
         full_row["exact_match"] = float(full_row["exact_match"])
 
-    if not isinstance(full_row["native_id"], str):
-        full_row["native_id"] = str(full_row["native_id"])
+    if "exact_match_flex" in full_row and isinstance(full_row["exact_match_flex"], bool):
+        full_row["exact_match_flex"] = float(full_row["exact_match_flex"])
 
-    if not isinstance(full_row["label"], str):
-        full_row["label"] = str(full_row["label"])
+    # Set default model_revision to "main"
+    if not full_row.get("model_revision"):
+        full_row["model_revision"] = "main"
 
     # Fix legacy names
     if "bits_per_byte_corr" in full_row and full_row["bits_per_byte_corr"] is not None:
@@ -159,6 +221,15 @@ def _process_prediction_row(metrics, prediction, model_output_dict):
 
     if "logits_per_byte_corr" in full_row and full_row["logits_per_byte_corr"] is not None:
         full_row["bits_per_byte_corr"] = full_row["logits_per_byte_corr"]
+    
+    # Get instance ID
+    if not isinstance(full_row["native_id"], str):
+        full_row["native_id"] = str(full_row["native_id"])
+
+    if not isinstance(full_row["label"], str):
+        full_row["label"] = str(full_row["label"])
+
+    full_row["instance_id"] = get_instance_id(full_row)
 
     # Get the instance-level primary_metric
     primary_metric = full_row["task_config"]["primary_metric"]
@@ -167,6 +238,8 @@ def _process_prediction_row(metrics, prediction, model_output_dict):
         # Unfortunately, not all oe-eval tasks specify a metric, so default to these
         if "acc_per_char" in full_row:
             primary_score = full_row["acc_per_char"]
+        elif "exact_match_flex" in full_row:
+            primary_score = full_row["exact_match_flex"]
         elif "exact_match" in full_row:
             primary_score = full_row["exact_match"]
         elif "pass_at_1" in full_row:
@@ -176,9 +249,31 @@ def _process_prediction_row(metrics, prediction, model_output_dict):
         assert not isinstance(primary_score, list), _truncate_for_display(full_row)
         full_row["primary_score"] = primary_score
     elif isinstance(full_row[primary_metric], list):
-        full_row["primary_score"] = full_row[primary_metric][correct_choice]
+        choice_index = correct_choice if not np.isnan(correct_choice) else 0
+        full_row["primary_score"] = full_row[primary_metric][choice_index]
     else:
         full_row["primary_score"] = full_row[primary_metric]
+
+    return full_row
+
+
+def _process_question_row(metrics, question):
+    full_row = {
+        "task_alias": metrics.alias,
+        "task_name": metrics.task_name,
+        **metrics.to_dict(),
+    }
+
+    full_row["instance_id"] = get_instance_id(full_row)
+
+    if not isinstance(full_row["native_id"], str):
+        full_row["native_id"] = str(full_row["native_id"])
+
+    if not isinstance(full_row["label"], str):
+        full_row["label"] = str(full_row["label"])
+
+    # @davidh -- I would like to store this primitive as a dict
+    full_row["doc"] = str(question["doc"])
 
     return full_row
 
@@ -189,7 +284,7 @@ def _get_type_mapping():
     """
     import pyarrow as pa
     
-    schema = get_schema()
+    schema = get_predictions_schema()
     type_mapping = {}
     
     for field_name, python_type in schema.items():
@@ -246,7 +341,7 @@ def _cleanup_dataframe_for_pyarrow(df, worker_id=None):
     """
     import json
     
-    schema = get_schema()
+    schema = get_predictions_schema()
     cleaned_df = df.copy()
     
     for col_name, expected_type in schema.items():
@@ -329,43 +424,22 @@ def _process_experiment_worker(args):
     import pyarrow as pa
     import pyarrow.parquet as pq
     
-    schema = get_schema()
+    schema = get_predictions_schema()
     batch_files = []
     current_chunk = []
     total_processed = 0
     
     try:
-        # Get task ids using metrics files for experiment
-        cache = get_datalake_cache()
-        metrics_list = MetricsAll.run(experiment_id=experiment.experiment_id, force=force, skip_on_fail=skip_on_fail)
-        
-        for metric in metrics_list:
-            try:
-                # Get predictions
-                if not (result := cache.get(experiment_id=experiment.experiment_id, type="predictions")).success or force:
-                    response = requests.get(
-                        f"https://oe-eval-datalake.allen.ai/greenlake/download-result/{experiment.experiment_id}",
-                        params={"resulttype": "PREDICTIONS", "task_idx": metric.task_idx},
-                        headers={"accept": "application/json"},
-                    )
-                    response.raise_for_status()
-                    
-                    # Response is a List[dict]
-                    parsed = [json.loads(line) for line in response.iter_lines(decode_unicode=True) if line]
-                    result = cache.set(parsed, experiment_id=experiment.experiment_id, type="predictions")
-                
-                # Process predictions
-                for prediction_data in (result.value or []):
-                    prediction = Prediction(**prediction_data)
-                    
-                    # Convert list of dicts to dict of lists for model outputs
-                    model_output_dict = defaultdict(list)
-                    for output in prediction.model_output:
-                        for key, value in output.items():
-                            model_output_dict[key].append(value)
+        all_predictions = PredictionsAll.run(experiment_id=experiment.experiment_id, force=force, skip_on_fail=skip_on_fail)
 
+        for predictions in all_predictions:
+            metrics = predictions.metrics
+            predictions = predictions.predictions
+
+            for prediction in predictions:
+                try:
                     # Process prediction files
-                    full_row = _process_prediction_row(metric, prediction, model_output_dict)
+                    full_row = _process_prediction_row(prediction, metrics)
                     
                     # Enforce the schema
                     row = _enforce_schema(full_row, schema)
@@ -386,16 +460,16 @@ def _process_experiment_worker(args):
                         
                         batch_files.append(batch_file)
                         current_chunk = []
-            
-            except Exception as e:
-                if skip_on_fail:
-                    if "404 client error" in str(e).lower():
-                        # Some prediction files simply don't exist in the datalake
+                
+                except Exception as e:
+                    if skip_on_fail:
+                        if "404 client error" in str(e).lower():
+                            # Some prediction files simply don't exist in the datalake
+                            continue
+                        print(f"[Worker {worker_id}] ⚠️  Task {metrics.task_idx} in experiment {experiment.experiment_id} failed (skipping): {e}")
                         continue
-                    print(f"[Worker {worker_id}] ⚠️  Task {metric.task_idx} in experiment {experiment.experiment_id} failed (skipping): {e}")
-                    continue
-                else:
-                    raise e
+                    else:
+                        raise e
         
         # Write final chunk if any remaining data
         if current_chunk:
@@ -439,7 +513,7 @@ def predictions_to_smallpond(experiments, output_path, chunk_size=50000, return_
     num_workers = int(env_workers) if env_workers else min(cpu_count(), len(experiments), 32)
     
     # Get the enforced schema
-    schema = get_schema()
+    schema = get_predictions_schema()
     
     # Create temporary directory for batch processing
     temp_dir = Path(tempfile.mkdtemp(prefix="predictions_streaming_mp_"))
