@@ -1,0 +1,317 @@
+name: "anneal-superswarm-ratios-round5-groups-100B-olmo25_7b-2T"
+description: "OLMo2.5 7b anneal to 100B Tokens on superswarm ratios, round5 groups (.4 math/code, .525 gen/MC, .075 reasoning), from 2T ckpt"
+budget: "ai2/oe-base"
+workspace: "ai2/olmo-3-microanneals"
+nodes: 16
+gpus: 8
+preemptible: true
+max_tokens: 100_000_000_000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: "olmo25_7b"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+  initial_lr: 0.00020712352850360292
+load_path: gs://ai2-llm/checkpoints/OLMo25/step476838
+load_state: false
+nccl_debug: true
+dataset:
+  sources:
+  - name: code_fim
+    paths:
+    - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/**/**/*.npy
+    target_ratio: 0.14743316807850154
+  - name: swallowcode
+    paths:
+    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.12750113818712477
+  - name: megamatt
+    paths:
+    - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.02375858489465109
+  - name: swallowmath
+    paths:
+    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.038156496085888586
+  - name: dolminomath
+    paths:
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.05477225682196277
+  - name: openmathreasoning-fullthoughts-rewrite
+    paths:
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0012764154429958997
+  - name: tinymath-mind
+    paths:
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.005538262519728882
+  - name: tinymath-pot
+    paths:
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.001563677969146424
+  - name: pdf-quality-art_design
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/art_design/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/art_design/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 2.764463804483232e-05
+  - name: pdf-quality-crime_law
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/crime_law/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/crime_law/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0006121312709927155
+  - name: pdf-quality-education_jobs
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/education_jobs/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/education_jobs/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0020378047473047817
+  - name: pdf-quality-entertainment
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/entertainment/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/entertainment/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 8.688314814090158e-05
+  - name: pdf-quality-finance_business
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/finance_business/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/finance_business/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0005528927608966462
+  - name: pdf-quality-hardware
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/hardware/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/hardware/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.00018956323230742163
+  - name: pdf-quality-health
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/health/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/health/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.004687740765602281
+  - name: pdf-quality-history
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/history/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/history/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.00021325863634584933
+  - name: pdf-quality-home_hobbies
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/home_hobbies/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/home_hobbies/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 2.764463804483232e-05
+  - name: pdf-quality-industrial
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/industrial/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/industrial/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.002124687895445684
+  - name: pdf-quality-literature
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/literature/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/literature/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.00035543106057641554
+  - name: pdf-quality-politics
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/politics/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/politics/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0007266590571784496
+  - name: pdf-quality-religion
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/religion/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/religion/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.00020536016833304005
+  - name: pdf-quality-science_tech
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/science_tech/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/science_tech/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.02350584080612028
+  - name: pdf-quality-software
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/software/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/software/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0004660096127557448
+  - name: pdf-quality-software_dev
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/software_dev/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/software_dev/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0034358335855720163
+  - name: pdf-quality-sports_fitness
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/sports_fitness/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/sports_fitness/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.00015007089224337538
+  - name: pdf-quality-transportation
+    paths:
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e12/transportation/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/transportation/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 8.688314814090158e-05
+  - name: web-all_dressed-snazzy2-v18-v20--adult_content
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/adult_content/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/adult_content/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0002512874139815231
+  - name: web-all_dressed-snazzy2-v18-v20--art_and_design
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/art_and_design/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/art_and_design/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0027753749377643923
+  - name: web-all_dressed-snazzy2-v18-v20--crime_and_law
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/crime_and_law/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/crime_and_law/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.006474963173580487
+  - name: web-all_dressed-snazzy2-v18-v20--education_and_jobs
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/education_and_jobs/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/education_and_jobs/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.009487593071077332
+  - name: web-all_dressed-snazzy2-v18-v20--electronics_and_hardware
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/electronics_and_hardware/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/electronics_and_hardware/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.007659290617261858
+  - name: web-all_dressed-snazzy2-v18-v20--entertainment
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/entertainment/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/entertainment/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.021235317879823246
+  - name: web-all_dressed-snazzy2-v18-v20--fashion_and_beauty
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/fashion_and_beauty/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/fashion_and_beauty/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 2.8175961292916196e-05
+  - name: web-all_dressed-snazzy2-v18-v20--finance_and_business
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/finance_and_business/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/finance_and_business/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.008984716533309022
+  - name: web-all_dressed-snazzy2-v18-v20--food_and_dining
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/food_and_dining/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/food_and_dining/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0031087254532415932
+  - name: web-all_dressed-snazzy2-v18-v20--games
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/games/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/games/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.01522691698012078
+  - name: web-all_dressed-snazzy2-v18-v20--health
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/health/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/health/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.022018885270217052
+  - name: web-all_dressed-snazzy2-v18-v20--history_and_geography
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/history_and_geography/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/history_and_geography/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.006013129488393113
+  - name: web-all_dressed-snazzy2-v18-v20--home_and_hobbies
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/home_and_hobbies/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/home_and_hobbies/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.002023017313773763
+  - name: web-all_dressed-snazzy2-v18-v20--industrial
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/industrial/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/industrial/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0034727176951628766
+  - name: web-all_dressed-snazzy2-v18-v20--literature
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/literature/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/literature/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.015076462555487514
+  - name: web-all_dressed-snazzy2-v18-v20--politics
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/politics/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/politics/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0047816910905262335
+  - name: web-all_dressed-snazzy2-v18-v20--religion
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/religion/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/religion/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.004369888654919618
+  - name: web-all_dressed-snazzy2-v18-v20--science_math_and_technology
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/science_math_and_technology/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/science_math_and_technology/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0464908171982944
+  - name: web-all_dressed-snazzy2-v18-v20--social_life
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/social_life/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/social_life/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0010174342571176327
+  - name: web-all_dressed-snazzy2-v18-v20--software_development
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/software_development/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/software_development/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.010466058607679208
+  - name: web-all_dressed-snazzy2-v18-v20--software
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/software/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/software/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.024647787959670427
+  - name: web-all_dressed-snazzy2-v18-v20--sports_and_fitness
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/sports_and_fitness/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/sports_and_fitness/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0028734345555476463
+  - name: web-all_dressed-snazzy2-v18-v20--transportation
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/transportation/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/transportation/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0021551814413849697
+  - name: web-all_dressed-snazzy2-v18-v20--travel_and_tourism
+    paths:
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset-decon-2/travel_and_tourism/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset-decon-2/travel_and_tourism/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0004839528467088147
+  - name: sponge
+    paths:
+    - gs://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/**/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.05736689711537108
+  - name: reddit-high
+    paths:
+    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0058714368674005965
+  - name: rcqa
+    paths:
+    - gs://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.019944868534512966
+  - name: nemotron-synth-qa
+    paths:
+    - gs://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.08105745706343108
+  - name: instruction-new-format
+    paths:
+    - gs://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw/tulu-3-midtrain-v0-data-simple-concat-with-therefore-template-decon/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.01644653886667288
+  - name: flan
+    paths:
+    - gs://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased-decon/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.08369764053222876
+  - name: r1_reasoning
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.014059806136222293
+  - name: gemini_reasoning
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.0017327183912688347
+  - name: llamanemotron_reasoning
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 4.978748646115104e-05
+  - name: openthoughts2
+    paths:
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-2/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.04177751699451067
+  - name: math-meta-reasoning
+    paths:
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.00789510327352459
+  - name: code-meta-reasoning
+    paths:
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 0.009485067718012451
