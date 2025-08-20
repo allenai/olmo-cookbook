@@ -1,7 +1,7 @@
 name: "web-with-social-reasoning-predict-olmo3-microanneal-5b"
 description: "OLMo3 7b 5B web with social reasoning microanneal with pref prediction"
 budget: "ai2/oe-base"
-workspace: "ai2/olmo-3-microanneals"
+workspace: "ai2/scottg"
 nodes: 4
 gpus: 8
 preemptible: true
@@ -11,7 +11,7 @@ sequence_length: 8192
 seed: 1337
 model: "olmo2_7B_swafix"
 tokenizer: "dolma2"
-priority: high
+priority: normal
 cluster: ai2/augusta-google-1
 rank_microbatch_size: 8192
 scheduler_type: linear
