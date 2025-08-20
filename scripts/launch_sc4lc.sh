@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 fi
 
 LITE_TASKS=(
-  "gen"
+  "gen::xlarge"
   "mbpp:3shot::olmo3:n32:v2"
   "minerva"
   "olmo3:dev:7b:mcqa:stem"
