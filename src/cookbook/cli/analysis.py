@@ -7,6 +7,7 @@ import pandas as pd
 
 from cookbook.analysis.constants import get_cache_path
 from cookbook.analysis.runners import run_instance_analysis
+from cookbook.analysis.utils.conversion import predictions_to_smallpond
 from cookbook.eval.datalake import FindExperiments, PredictionsAll
 
 logger = logging.getLogger(__name__)
@@ -50,13 +51,13 @@ def download(dashboard: str, force: bool = False, skip_on_fail: bool = False):
 
     logger.info(f"Found {len(experiments)} experiments in dashboard {dashboard}")
 
-    task_predictions = PredictionsAll.prun(
-        experiment_id=[experiment.experiment_id for experiment in experiments],
-        force=[force for _ in experiments],
-        skip_on_fail=[skip_on_fail for _ in experiments],
+    predictions_to_smallpond(
+        experiments=experiments,
+        output_path=prediction_path,
+        force=force,
+        skip_on_fail=skip_on_fail,
+        return_pandas=False
     )
-
-    PredictionsAll.to_parquet(task_predictions, output_path=prediction_path)
 
     logger.info(f"Saved predictions to {prediction_path}")
 

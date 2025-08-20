@@ -18,7 +18,6 @@ import requests
 from tqdm import tqdm
 from typing_extensions import Self
 
-from cookbook.analysis.utils.conversion import predictions_to_smallpond
 from cookbook.eval.cache import get_datalake_cache
 
 T = TypeVar("T")
@@ -375,12 +374,6 @@ class PredictionsAll(BaseDatalakeItem):
             all_predictions.append(task_predictions)
 
         return all_predictions
-
-    @classmethod
-    def to_parquet(cls, predictions: List[Predictions], output_path=None):
-        """Convert predictions to parquet using memory-efficient streaming approach."""
-        df = predictions_to_smallpond(predictions, output_path=output_path, return_pandas=True)
-        return df
 
 
 @dataclass
