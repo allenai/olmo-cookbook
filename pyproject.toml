@@ -48,8 +48,8 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    # this is branch tyler/lc-localadj-gloofix-ropescaling as of 2025-08-10
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@6d471e03aba208f547602fa66476d056cb52cf13",
+    # this is branch tyler/lc-localadj-gloofix-ropescaling-yarn-cpstride as of 2025-08-20
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@66e388cc861c5e32d7e306509fb43aaa28caea97",
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
