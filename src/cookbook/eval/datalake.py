@@ -348,6 +348,10 @@ class PredictionsAll(BaseDatalakeItem):
 
         all_predictions = []
         for metric in metrics:
+            if metric.task_idx is None:
+                # Skip aggregate tasks
+                continue
+
             if not (result := cache.get(experiment_id=experiment_id, task_idx=metric.task_idx, type="predictions")).success or force:
                 try:
                     response = requests.get(
@@ -424,6 +428,10 @@ class InstancesAll(BaseDatalakeItem):
 
         all_instances = []
         for metric in metrics:
+            if metric.task_idx is None:
+                # Skip aggregate tasks
+                continue
+            
             if not (result := cache.get(experiment_id=experiment_id, task_idx=metric.task_idx, type="inputs")).success or force:
                 try:
                     response = requests.get(

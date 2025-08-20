@@ -33,16 +33,6 @@ def get_predictions_schema():
         'primary_score': float,
         'bits_per_byte_corr': float,
         'pass_at_1': float,
-        'pass_at_2': float,
-        'pass_at_4': float,
-        'pass_at_10': float,
-        'pass_at_16': float,
-        'pass_at_32': float,
-        'maj_at_1': float,
-        'maj_at_2': float,
-        'maj_at_4': float,
-        'maj_at_16': float,
-        'maj_at_32': float,
         'exact_match': float,
         'exact_match_flex': float,
         'f1': float,
@@ -50,9 +40,20 @@ def get_predictions_schema():
         'label': str,
         'correct_choice': int,
         'model_answer': str,
-        'model_path': str,
+        'internal_model_name': str,
         'doc_id': int,
         'native_id': str,
+
+        # 'pass_at_2': float,
+        # 'pass_at_4': float,
+        # 'pass_at_10': float,
+        # 'pass_at_16': float,
+        # 'pass_at_32': float,
+        # 'maj_at_1': float,
+        # 'maj_at_2': float,
+        # 'maj_at_4': float,
+        # 'maj_at_16': float,
+        # 'maj_at_32': float,
 
         # 'logits_per_char': List[float],
         # 'bits_per_byte': List[float],
@@ -98,9 +99,10 @@ def get_questions_schema():
 
 
 def get_instance_id(pred):
-    if pred["native_id"] is not None:
+    # @david -- this handling is blursed. See python -c "print(type(str(None)))"
+    if pred["native_id"] is not None and pred["native_id"] != "None":
         return str(pred["native_id"])
-    elif pred["doc_id"] is not None:
+    elif pred["doc_id"] is not None and pred["doc_id"] != "None":
         return str(pred["doc_id"])
 
 
@@ -196,13 +198,15 @@ def _process_prediction_row(prediction, metrics):
     full_row = {
         "task_alias": metrics.alias,
         "task_name": metrics.task_name,
-        "model_name": metrics.model_config.get("model", None),
+        "model_name": metrics.model_config.get("model_path", None),
         "model_revision": metrics.model_config.get("revision", None),
-        "model_path": metrics.model_config.get("model_path", None),
+        "internal_model_name": metrics.model_config.get("model", None),
         **metrics.to_dict(),
-        **prediction.to_dict(),
         **model_output_dict,
     }
+
+    # Add prediction dict
+    full_row.update(prediction.to_dict())
 
     # Expand metrics dict but don't override existing columns
     for metric_key, metric_value in full_row["metrics"].items():
@@ -441,6 +445,7 @@ def _generic_experiment_worker(args, data_type):
     import pandas as pd
     import pyarrow as pa
     import pyarrow.parquet as pq
+    import time
     
     # Select schema and processing functions based on data type
     if data_type == "predictions":
@@ -459,6 +464,10 @@ def _generic_experiment_worker(args, data_type):
     batch_files = []
     current_chunk = []
     total_processed = 0
+    
+    # Create unique batch counter using timestamp and experiment ID to avoid filename collisions
+    batch_counter = 0
+    unique_prefix = f"{int(time.time() * 1000000)}_{experiment.experiment_id[:8]}"
     
     try:
         all_data = data_fetcher(experiment_id=experiment.experiment_id, force=force, skip_on_fail=skip_on_fail)
@@ -483,7 +492,8 @@ def _generic_experiment_worker(args, data_type):
                     
                     # Write chunk when it reaches target size
                     if len(current_chunk) >= chunk_size:
-                        batch_file = temp_dir / f"worker_{worker_id}_batch_{len(batch_files):06d}.parquet"
+                        batch_file = temp_dir / f"worker_{worker_id}_{unique_prefix}_batch_{batch_counter:06d}.parquet"
+                        batch_counter += 1
                         
                         # Convert to PyArrow table with consistent types
                         chunk_df = pd.DataFrame(current_chunk)
@@ -508,7 +518,7 @@ def _generic_experiment_worker(args, data_type):
         
         # Write final chunk if any remaining data
         if current_chunk:
-            batch_file = temp_dir / f"worker_{worker_id}_batch_{len(batch_files):06d}.parquet"
+            batch_file = temp_dir / f"worker_{worker_id}_{unique_prefix}_batch_{batch_counter:06d}.parquet"
             
             # Convert to PyArrow table with consistent types
             chunk_df = pd.DataFrame(current_chunk)
