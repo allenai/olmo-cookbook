@@ -8,7 +8,8 @@ import pandas as pd
 from cookbook.analysis.constants import get_cache_path
 from cookbook.analysis.runners import run_instance_analysis
 from cookbook.analysis.utils.conversion import construct_smallpond
-from cookbook.eval.datalake import FindExperiments, PredictionsAll
+from cookbook.eval.results import ExpandedTasks
+from cookbook.eval.datalake import FindExperiments
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,6 +31,7 @@ def cli():
     required=True,
     help="Dashboard name to analyze",
 )
+@click.option("-t", "--task", type=str, multiple=True, help="Tasks to filter by")
 @click.option(
     "--data-type",
     type=click.Choice(["predictions", "instances"]),
@@ -48,10 +50,13 @@ def cli():
     default=False,
     help="Skip tasks that fail instead of raising an error",
 )
-def download(dashboard: str, data_type: str = "predictions", force: bool = False, skip_on_fail: bool = False):
+def download(dashboard: str, task: list[str], data_type: str = "predictions", force: bool = False, skip_on_fail: bool = False):
     """Download and process evaluation results from the datalake to a dataframe."""
     cache_dir = get_cache_path(dashboard)
     output_path = cache_dir / f"{dashboard}_{data_type}.parquet"
+
+    tasks = ExpandedTasks.from_tasks(task)
+    expanded_tasks = tasks.all_column_tasks
 
     experiments = FindExperiments.run(dashboard=dashboard)
 
@@ -59,6 +64,7 @@ def download(dashboard: str, data_type: str = "predictions", force: bool = False
 
     construct_smallpond(
         experiments=experiments,
+        task_aliases=expanded_tasks,
         output_path=output_path,
         data_type=data_type,
         force=force,

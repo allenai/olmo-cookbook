@@ -11,7 +11,7 @@ import json
 from multiprocessing import Pool, cpu_count
 import time
 from typing import List
-from cookbook.eval.datalake import MetricsAll, PredictionsAll, Prediction, InstancesAll
+from cookbook.eval.datalake import Instances, MetricsAll, Predictions, PredictionsAll, Prediction, InstancesAll
 
 from tqdm import tqdm
 
@@ -428,19 +428,11 @@ def _cleanup_dataframe_for_pyarrow(df, worker_id=None):
     return cleaned_df
 
 
-def _process_prediction_worker(args):
-    return _generic_experiment_worker(args, "predictions")
-
-
-def _process_instances_worker(args):
-    return _generic_experiment_worker(args, "instances")
-
-
-def _generic_experiment_worker(args, data_type):
+def _generic_experiment_worker(args):
     """
     Worker function for processing a single experiment in parallel with enforced schema.
     """
-    experiment, temp_dir, chunk_size, force, skip_on_fail, worker_id = args
+    experiment, data_type, task_aliases, temp_dir, chunk_size, force, skip_on_fail, worker_id = args
     
     import pandas as pd
     import pyarrow as pa
@@ -474,11 +466,18 @@ def _generic_experiment_worker(args, data_type):
 
         for data_collection in all_data:
             metrics = data_collection.metrics
+            task_alias = metrics.alias
+
+            if task_aliases is not None and task_alias not in task_aliases:
+                # Only include requested tasks
+                continue
             
             if data_type == "predictions":
-                data_items = data_collection.predictions
+                data_items: Predictions = data_collection.predictions
             elif data_type == "instances":
-                data_items = data_collection.instances
+                data_items: Instances = data_collection.instances
+            else:
+                raise ValueError(data_type)
 
             for data_item in data_items:
                 try:
@@ -543,25 +542,13 @@ def _generic_experiment_worker(args, data_type):
 
 
 
-def construct_smallpond(experiments, output_path, data_type, chunk_size=50000, return_pandas=False, force=False, skip_on_fail=False):
-    import smallpond
-    import pandas as pd
+def construct_smallpond(experiments, task_aliases, output_path, data_type, chunk_size=50000, return_pandas=False, force=False, skip_on_fail=False):
     import pyarrow as pa
     import pyarrow.parquet as pq
-    
-    sp = smallpond.init()
-    
+     
     # Determine number of workers
     env_workers = os.environ.get('OE_EVAL_WORKERS')
     num_workers = int(env_workers) if env_workers else min(cpu_count(), len(experiments), 64)
-    
-    # Select worker function based on data type
-    if data_type == "predictions":
-        worker_func = _process_prediction_worker
-    elif data_type == "instances":
-        worker_func = _process_instances_worker
-    else:
-        raise ValueError(f"Unknown data_type: {data_type}")
     
     # Create temporary directory for batch processing
     temp_dir = Path(tempfile.mkdtemp(prefix=f"{data_type}_streaming_mp_"))
@@ -571,7 +558,7 @@ def construct_smallpond(experiments, output_path, data_type, chunk_size=50000, r
         
         # Prepare arguments for worker processes
         worker_args = [
-            (experiment, temp_dir, chunk_size, force, skip_on_fail, i % num_workers)
+            (experiment, data_type, task_aliases, temp_dir, chunk_size, force, skip_on_fail, i % num_workers)
             for i, experiment in enumerate(experiments)
         ]
         
@@ -581,7 +568,7 @@ def construct_smallpond(experiments, output_path, data_type, chunk_size=50000, r
         
         with Pool(processes=num_workers) as pool:
             # Use imap for better progress tracking
-            results = pool.imap(worker_func, worker_args)
+            results = pool.imap(_generic_experiment_worker, worker_args)
             
             for i, (batch_files, processed_count, experiment_id) in enumerate(tqdm(results, total=len(experiments), desc=f"Processing {data_type}")):
                 all_batch_files.extend(batch_files)
