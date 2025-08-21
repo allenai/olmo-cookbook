@@ -5,6 +5,9 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+MAX_LENGTH=${MAX_LENGTH:-65536}
+
+
 LITE_TASKS=(
   "gen::xlarge"
   "mbpp:3shot::olmo3:n32:v2"
@@ -37,7 +40,7 @@ ${eval_command} evaluate \
   --model-backend vllm \
   --dashboard peteish-LC-ruler \
   --budget ai2/oe-base \
-  --model-args "trust_remote_code=true,  chat_model=null, max_length=65536" \
+  --model-args "trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}" \
   --task-args "use_chat_format=false" \
   --vllm-use-v1-spec \
   --workspace ai2/oe-data \
