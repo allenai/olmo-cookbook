@@ -386,7 +386,7 @@ def _generic_experiment_worker(args):
         all_data = data_fetcher(experiment_id=experiment.experiment_id, force=force, skip_on_fail=skip_on_fail)
 
         for data_collection in all_data:
-            metrics = data_collection.metrics
+            metrics: MetricsAll = data_collection.metrics
             task_alias = metrics.alias
 
             if task_aliases is not None and task_alias not in task_aliases:
@@ -465,24 +465,22 @@ def construct_smallpond(experiments, task_aliases, output_path, data_type, chunk
     env_workers = os.environ.get('OE_EVAL_WORKERS')
     num_workers = int(env_workers) if env_workers else min(cpu_count(), len(experiments), 64)
     
-    # Create temporary directory for batch processing
     temp_dir = Path(tempfile.mkdtemp(prefix=f"{data_type}_streaming_mp_"))
     
     try:
         start_time = time.time()
         
-        # Prepare arguments for worker processes
+        # Prepare arguments for workers
         worker_args = [
             (experiment, data_type, task_aliases, temp_dir, chunk_size, force, skip_on_fail, i % num_workers)
             for i, experiment in enumerate(experiments)
         ]
         
-        # Process experiments in parallel
+        # Process experiments
         all_batch_files = []
         total_processed = 0
         
         with Pool(processes=num_workers) as pool:
-            # Use imap for better progress tracking
             results = pool.imap(_generic_experiment_worker, worker_args)
             
             pbar = tqdm(results, total=len(experiments), desc=f"Processing {data_type}")
