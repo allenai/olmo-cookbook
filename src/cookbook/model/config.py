@@ -5,10 +5,7 @@ from typing import Any, Optional
 import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
-from olmo_core.nn.transformer import (
-    TransformerBlockType,
-    TransformerConfig,
-)
+from olmo_core.nn.transformer import TransformerBlockType, TransformerConfig
 from olmo_core.optim import OptimConfig
 from olmo_core.train import TrainerConfig
 
