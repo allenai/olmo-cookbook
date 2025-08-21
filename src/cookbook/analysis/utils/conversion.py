@@ -12,7 +12,7 @@ from typing import List
 import numpy as np
 from tqdm import tqdm
 
-from cookbook.eval.datalake import Instances, InstancesAll, Predictions, PredictionsAll
+from cookbook.eval.datalake import Instance, Instances, InstancesAll, MetricsAll, Prediction, Predictions, PredictionsAll
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -183,7 +183,7 @@ def _enforce_schema(row, schema):
     return enforced_row
 
 
-def _process_prediction_row(prediction, metrics):
+def _process_prediction_row(prediction: Prediction, metrics: MetricsAll):
     """
     Process a single prediction row with common data cleaning logic.
     Returns the processed row ready for schema enforcement.
@@ -222,6 +222,12 @@ def _process_prediction_row(prediction, metrics):
 
     if "exact_match_flex" in full_row and isinstance(full_row["exact_match_flex"], bool):
         full_row["exact_match_flex"] = float(full_row["exact_match_flex"])
+        
+    if not isinstance(full_row["native_id"], str):
+        full_row["native_id"] = str(full_row["native_id"])
+
+    if not isinstance(full_row["label"], str):
+        full_row["label"] = str(full_row["label"])
 
     # Set default model_revision to "main"
     if not full_row.get("model_revision"):
@@ -235,12 +241,6 @@ def _process_prediction_row(prediction, metrics):
         full_row["bits_per_byte_corr"] = full_row["logits_per_byte_corr"]
     
     # Get instance ID
-    if not isinstance(full_row["native_id"], str):
-        full_row["native_id"] = str(full_row["native_id"])
-
-    if not isinstance(full_row["label"], str):
-        full_row["label"] = str(full_row["label"])
-
     full_row["instance_id"] = get_instance_id(full_row)
 
     # Get the instance-level primary_metric
@@ -269,7 +269,7 @@ def _process_prediction_row(prediction, metrics):
     return full_row
 
 
-def _process_question_row(instance, metrics):
+def _process_question_row(instance: Instance, metrics: MetricsAll):
     full_row = {
         "task_alias": metrics.alias,
         "task_name": metrics.task_name,
@@ -277,6 +277,7 @@ def _process_question_row(instance, metrics):
     }
 
     full_row["native_id"] = str(instance.native_id)
+    full_row["doc_id"] = str(instance.doc_id)
     full_row["label"] = str(instance.label)
     full_row["instance_id"] = get_instance_id(full_row)
 
@@ -503,7 +504,7 @@ def construct_smallpond(experiments, task_aliases, output_path, data_type, chunk
         final_output = Path(output_path)
         final_output.parent.mkdir(parents=True, exist_ok=True)
         
-        logger.info(f"Reading {len(all_batch_files)} batch files...")
+        logger.info(f"Reading batch files...")
         all_tables = []
         for batch_file in all_batch_files:
             table = pq.read_table(batch_file)
