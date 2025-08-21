@@ -27,7 +27,7 @@ dataset:
   sources:
   - name: code_fim
     paths:
-    - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/**/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon-50BT/sample-fim-weighted-pl-edu-score-decon-50BT/**/**/*.npy
     target_ratio: 0.22429484799295923
   - name: swallowcode
     paths:
