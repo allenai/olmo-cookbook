@@ -32,6 +32,7 @@ dataset:
   - name: swallowcode
     paths:
     - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/full_ts2_flow/btier_scor_processed-decon-sparkle/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.2138381759357751
   - name: megamatt
     paths:
