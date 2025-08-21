@@ -65,9 +65,12 @@ class DatalakeCache(Generic[T]):
         if self.do_not_cache:
             return DatalakeCacheResult(success=False, value=None)
 
-        if os.path.exists(cache_file := self._make_cache_path(**kwargs)) and not self.invalidate:
-            with smart_open.open(cache_file, "rt", encoding="utf-8") as f:
-                return DatalakeCacheResult(success=True, value=json.load(f))
+        try:
+            if os.path.exists(cache_file := self._make_cache_path(**kwargs)) and not self.invalidate:
+                with smart_open.open(cache_file, "rt", encoding="utf-8") as f:
+                    return DatalakeCacheResult(success=True, value=json.load(f))
+        except:
+            pass
 
         return DatalakeCacheResult(success=False, value=None)
 

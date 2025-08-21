@@ -32,6 +32,15 @@ class MiniFrame:
     def add_many(self, *elements: tuple[str, str, float | None]):
         for row, col, val in elements:
             self.add(row=row, col=col, val=val)
+    def sort_rows(
+        self,
+    ) -> "MiniFrame":
+        # breakpoint()
+        sorted_cols = sorted(list(self.columns))
+        new_frame = MiniFrame(title=self.title)
+        all_keys = {row for col in self._data for row in self._data[col]}
+        new_frame.add_many(*((row, col, self._data[col].get(row)) for col in sorted_cols for row in all_keys))
+        return new_frame
 
     def sort(
         self,

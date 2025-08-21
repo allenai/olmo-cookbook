@@ -778,6 +778,7 @@ def get_results(
             by_avg="avg" in sort_by or "average" in sort_by,
             reverse=not sort_descending,
         )
+        results = results.sort_rows()
     except StopIteration:
         # if no columns are left, we don't need to sort
         pass
