@@ -2,7 +2,7 @@ name: &name "olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip208
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 4
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
