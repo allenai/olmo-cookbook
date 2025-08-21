@@ -1,20 +1,18 @@
 from collections import defaultdict
-import os
-import tempfile
-import shutil
-import logging
-from pathlib import Path
-import pandas as pd
-import numpy as np
-import requests
 import json
+import logging
 from multiprocessing import Pool, cpu_count
+import os
+from pathlib import Path
+import shutil
+import tempfile
 import time
 from typing import List
-from cookbook.eval.datalake import Instances, MetricsAll, Predictions, PredictionsAll, Prediction, InstancesAll
 
+import numpy as np
 from tqdm import tqdm
 
+from cookbook.eval.datalake import Instances, InstancesAll, Predictions, PredictionsAll
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -122,6 +120,8 @@ def _truncate_for_display(value, max_length=500):
 
 def _enforce_schema(row, schema):
     """Enforce the exact schema. Uses NaN for missing data"""
+    import pandas as pd
+
     def get_default_value(expected_type):
         """Get default value for a type when column is missing or conversion fails."""
         if expected_type == str:
@@ -349,95 +349,15 @@ def _create_consistent_table_generic(chunk_df, type_mapping, worker_id=None):
     return consistent_table
 
 
-def _cleanup_dataframe_for_pyarrow(df, worker_id=None):
-    """
-    Clean up DataFrame to make it compatible with PyArrow conversion using the enforced schema.
-    """
-    import json
-    
-    schema = get_predictions_schema()
-    cleaned_df = df.copy()
-    
-    for col_name, expected_type in schema.items():
-        if col_name in cleaned_df.columns:
-            col_data = cleaned_df[col_name]
-            
-            try:
-                if expected_type == str:
-                    cleaned_df[col_name] = col_data.apply(
-                        lambda x: str(x) if x is not None else ""
-                    )
-                elif expected_type == int:
-                    if col_data.dtype == 'bool':
-                        cleaned_df[col_name] = col_data.astype('int64')
-                    elif col_data.dtype == 'object':
-                        def safe_int_convert(x):
-                            if x is None or pd.isna(x):
-                                return np.nan
-                            if isinstance(x, bool):
-                                return int(x)
-                            try:
-                                return int(float(x))
-                            except (ValueError, TypeError):
-                                return np.nan
-                        cleaned_df[col_name] = col_data.apply(safe_int_convert)
-                        # Convert to Int64 dtype to support NaN values
-                        cleaned_df[col_name] = cleaned_df[col_name].astype('Int64')
-                elif expected_type == float:
-                    if col_data.dtype == 'bool':
-                        cleaned_df[col_name] = col_data.astype('float64')
-                    elif col_data.dtype == 'object':
-                        def safe_float_convert(x):
-                            if x is None or pd.isna(x):
-                                return np.nan
-                            if isinstance(x, bool):
-                                return float(x)
-                            try:
-                                return float(x)
-                            except (ValueError, TypeError):
-                                return np.nan
-                        cleaned_df[col_name] = col_data.apply(safe_float_convert).astype('float64')
-                elif expected_type == List[float]:
-                    # Handle List[float] fields - ensure they are properly formatted lists
-                    def safe_list_float_convert(x):
-                        if x is None or pd.isna(x):
-                            return []
-                        if isinstance(x, list):
-                            # Clean the list to ensure no None values
-                            cleaned_list = []
-                            for item in x:
-                                if item is not None and not pd.isna(item):
-                                    try:
-                                        cleaned_list.append(float(item))
-                                    except (ValueError, TypeError):
-                                        continue
-                            return cleaned_list
-                        else:
-                            # Convert single value to list
-                            try:
-                                return [float(x)] if not pd.isna(x) else []
-                            except (ValueError, TypeError):
-                                return []
-                    
-                    cleaned_df[col_name] = col_data.apply(safe_list_float_convert)
-            except Exception as e:
-                logger.info(f"[Worker {worker_id}] ⚠️  Failed to clean column {col_name}: {e}")
-                # Keep original column if cleaning fails
-                continue
-    
-    return cleaned_df
-
-
 def _generic_experiment_worker(args):
     """
     Worker function for processing a single experiment in parallel with enforced schema.
     """
-    experiment, data_type, task_aliases, temp_dir, chunk_size, force, skip_on_fail, worker_id = args
-    
     import pandas as pd
-    import pyarrow as pa
     import pyarrow.parquet as pq
     import time
+
+    experiment, data_type, task_aliases, temp_dir, chunk_size, force, skip_on_fail, worker_id = args
     
     # Select schema and processing functions based on data type
     if data_type == "predictions":
@@ -494,12 +414,9 @@ def _generic_experiment_worker(args):
                         batch_file = temp_dir / f"worker_{worker_id}_{unique_prefix}_batch_{batch_counter:06d}.parquet"
                         batch_counter += 1
                         
-                        # Convert to PyArrow table with consistent types
+                        # Create table
                         chunk_df = pd.DataFrame(current_chunk)
-                        
-                        # Create table with consistent types for problematic fields
                         table = table_creator(chunk_df, worker_id=worker_id)
-                        
                         pq.write_table(table, batch_file)
                         
                         batch_files.append(batch_file)
@@ -519,12 +436,9 @@ def _generic_experiment_worker(args):
         if current_chunk:
             batch_file = temp_dir / f"worker_{worker_id}_{unique_prefix}_batch_{batch_counter:06d}.parquet"
             
-            # Convert to PyArrow table with consistent types
+            # Create table
             chunk_df = pd.DataFrame(current_chunk)
-            
-            # Create table with consistent types for problematic fields
             table = table_creator(chunk_df, worker_id=worker_id)
-            
             pq.write_table(table, batch_file)
             
             batch_files.append(batch_file)
@@ -570,14 +484,15 @@ def construct_smallpond(experiments, task_aliases, output_path, data_type, chunk
             # Use imap for better progress tracking
             results = pool.imap(_generic_experiment_worker, worker_args)
             
-            for i, (batch_files, processed_count, experiment_id) in enumerate(tqdm(results, total=len(experiments), desc=f"Processing {data_type}")):
+            pbar = tqdm(results, total=len(experiments), desc=f"Processing {data_type}")
+            for i, (batch_files, processed_count, experiment_id) in enumerate(pbar):
                 all_batch_files.extend(batch_files)
                 total_processed += processed_count
                 
                 if (i + 1) % 10 == 0:
                     elapsed = time.time() - start_time
                     rate = (i + 1) / elapsed if elapsed > 0 else 0
-                    logger.info(f"  Completed {i + 1}/{len(experiments)} experiments ({rate:.1f} exp/sec), {total_processed:,} rows processed")
+                    pbar.set_description(f"Processing {data_type} ({rate:.1f} exp/sec, {total_processed:,} rows)")
         
         elapsed_time = time.time() - start_time
 
@@ -585,16 +500,9 @@ def construct_smallpond(experiments, task_aliases, output_path, data_type, chunk
         logger.info(f"Created {len(all_batch_files)} batch files with {total_processed:,} total rows")
         
         # Concatenate all batch files efficiently
-        logger.info("Combining batch files...")
         final_output = Path(output_path)
-        
-        # Ensure output directory exists
         final_output.parent.mkdir(parents=True, exist_ok=True)
         
-        # Use PyArrow streaming with schema unification for maximum efficiency
-        logger.info("Combining batch files using streaming concatenation...")
-        
-        # Read all tables and unify schema (handle column order differences)
         logger.info(f"Reading {len(all_batch_files)} batch files...")
         all_tables = []
         for batch_file in all_batch_files:
@@ -604,17 +512,9 @@ def construct_smallpond(experiments, task_aliases, output_path, data_type, chunk
         # Concatenate tables
         logger.info("Concatenating tables...")
         unified_table = pa.concat_tables(all_tables)
-        
-        # Write the unified table
         pq.write_table(unified_table, final_output)
-        total_rows = unified_table.num_rows
-        
-        final_time = time.time() - start_time
 
-        logger.info(f"Total processing time: {final_time / 60:.1f} minutes")
-        logger.info(f"Processing rate: {total_rows / final_time:.0f} rows/sec")
-        logger.info(f"Streamed {total_rows:,} rows from {len(all_batch_files)} batch files")
-        logger.info(f"Final dataset saved to: {final_output}")
+        logger.info(f"Total processing time: {(time.time() - start_time) / 60:.1f} minutes")
         
     finally:
         # Clean up temporary directory
