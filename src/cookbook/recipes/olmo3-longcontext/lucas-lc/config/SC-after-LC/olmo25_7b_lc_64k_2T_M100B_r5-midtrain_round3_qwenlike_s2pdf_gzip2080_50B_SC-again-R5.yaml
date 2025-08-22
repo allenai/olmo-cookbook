@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B_SC-again-R5"
+name: &name "olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B_SC-again-R5-temp-pack"
 description: *name
 budget: "ai2/oe-base"
 workspace: ai2/long-contexts
@@ -6,7 +6,7 @@ nodes: 4
 gpus: 8
 preemptible: true
 max_tokens: 10_000_000_000
-global_batch_size: 2097152
+global_batch_size: 2_097_152
 sequence_length: 8192
 seed: 1337
 model: "olmo25_7b"
@@ -16,7 +16,7 @@ cluster: ai2/augusta-google-1
 rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 200
-activation_checkpointing: true
+activation_checkpointing: false
 # annealing:
 #   enabled: false
 
@@ -24,6 +24,7 @@ learning_rate: 0.00020712352850360292
 load_path: gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B-5554b47d/step11921
 load_state: false
 
+generate_doc_lengths: true
 dp_shard_degree: 1
 cp_degree: 8
 model_overrides:
