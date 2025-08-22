@@ -17,8 +17,9 @@ rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 200
 activation_checkpointing: true
-annealing:
-  enabled: false
+# annealing:
+#   enabled: false
+
 learning_rate: 0.00020712352850360292
 load_path: gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B-5554b47d/step11921
 load_state: false
