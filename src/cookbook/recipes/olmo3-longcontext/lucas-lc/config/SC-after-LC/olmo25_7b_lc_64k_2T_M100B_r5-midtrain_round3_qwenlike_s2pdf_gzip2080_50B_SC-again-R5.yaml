@@ -24,9 +24,9 @@ learning_rate: 0.00020712352850360292
 load_path: gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B-5554b47d/step11921
 load_state: false
 
-generate_doc_lengths: true
-dp_shard_degree: 1
-cp_degree: 8
+# generate_doc_lengths: true
+# dp_shard_degree: 1
+# cp_degree: 8
 model_overrides:
 - block.attention.rope.theta=8000000
 train_module_overrides:
