@@ -95,6 +95,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     nccl_debug: bool = False
     dp_shard_degree: Optional[int] = None
     cp_degree: Optional[int] = None
+    cp_head_stride: int = 1
     float8: bool = False
     activation_checkpointing: bool = False
     model_overrides: Optional[List[str]] = None

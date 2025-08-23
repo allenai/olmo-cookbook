@@ -210,6 +210,7 @@ class TransformerConfigBuilder:
     activation_checkpointing: bool
     dp_shard_degree: Optional[int]
     cp_degree: Optional[int]
+    cp_head_stride: int
     float8: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
@@ -237,6 +238,7 @@ class TransformerConfigBuilder:
         activation_checkpointing: bool = False,
         dp_shard_degree: Optional[int] = None,
         cp_degree: Optional[int] = None,
+        cp_head_stride: int = 1,
         float8: bool = False,
         model_overrides: Optional[List[str]] = None,
         train_module_overrides: Optional[List[str]] = None,
@@ -270,6 +272,7 @@ class TransformerConfigBuilder:
         self.activation_checkpointing = activation_checkpointing
         self.dp_shard_degree = dp_shard_degree
         self.cp_degree = cp_degree
+        self.cp_head_stride = cp_head_stride
         self.float8 = float8
         self.data_dir = "s3://ai2-llm"
         self.dataset_dtype = NumpyDatasetDType[dtype]
@@ -698,7 +701,7 @@ class TransformerConfigBuilder:
                 reduce_dtype=DType.float32,
                 shard_degree=self.dp_shard_degree,
             ),
-            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree)
+            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree, head_stride=self.cp_head_stride)
             if self.cp_degree
             else None,
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,
