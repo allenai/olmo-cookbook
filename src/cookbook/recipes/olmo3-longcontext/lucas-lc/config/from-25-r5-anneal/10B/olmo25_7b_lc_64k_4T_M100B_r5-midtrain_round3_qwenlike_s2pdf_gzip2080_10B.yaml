@@ -1,0 +1,151 @@
+name: &name "olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_10B"
+description: *name
+budget: ai2/oe-base
+workspace: ai2/long-contexts
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: urgent
+nodes: 8
+gpus: 8
+seed: 4123
+gc_interval: 200
+warmup_steps: 200
+learning_rate: 0.00020712352850360292
+metrics_config:
+  backend: wandb
+  project: olmo3-7b-long-context
+  entity: ai2-llm
+generate_doc_lengths: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-midtraining/anneal-round5-100B-olmo25_7b-anneal-4T-d9a403e4/step47684
+load_state: false
+model: olmo25_7b
+tokenizer: dolma2
+max_tokens: 10000000000
+global_batch_size: 4194304
+sequence_length: 65536
+max_target_sequence_length: 65536
+rank_microbatch_size: 65536
+scheduler_type: linear
+dp_shard_degree: 1
+cp_degree: 8
+float8: true
+eval_interval: 500
+model_overrides:
+- block.attention.rope.theta=8000000
+train_module_overrides:
+- scheduler.alpha_f=0.0
+
+
+dataset:
+  sources:
+  - name: SC-hqweb
+    target_ratio: 0.141666667
+    paths:
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/**/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0020/*.npy
+    - gs://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0020/*.npy
+  - name: SC-sponge
+    target_ratio: 0.00833336
+    paths:
+    - gs://ai2-llm/preprocessed/sponge/sponge_63_mixes/eli5_60%_decon_final/*.npy
+  - name: SC-code
+    target_ratio: 0.06666668
+    paths:
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/C/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/CSharp/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Cpp/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Go/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Java/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/JavaScript/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Markdown/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/PHP/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Python/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Ruby/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Rust/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/SQL/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Shell/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/Swift/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu-fim/weighted-pl-all/allenai/dolma2-tokenizer/TypeScript/**/*.npy
+  - name: SC-megamath
+    # 10% less the .0268 over 10% for dolminos2math
+    target_ratio: 0.04553335
+    paths:
+    - gs://ai2-llm/preprocessed/megamath_web_pro_max/allenai/dolma2-tokenizer/*.npy
+  - name: SC-dolminos2math
+    target_ratio: 0.021133333
+    paths:
+    # 10.7B
+    - gs://ai2-llm/preprocessed/dolmino-math-1124-retok/dolma2-tokenizer/*.npy
+    # 1.99B
+    # 850,859,688
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/allenai/dolma2-tokenizer/*.npy
+    # 898,733,958
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/allenai/dolma2-tokenizer/*.npy
+    # 240,590,634
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT_tokens/allenai/dolma2-tokenizer/*.npy
+  - name: SC-reddit
+    target_ratio: 0.03066667
+    paths:
+    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/allenai/dolma2-tokenizer/*.npy
+  - name: SC-instruction
+    target_ratio: 0.00266667
+    paths:
+    - gs://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/dolma2-tokenizer/tulu-3-midtrain-v0-data-simple-concat-with-new-line-with-generation-prompt/*.npy
+  - name: SC-reasoning
+    target_ratio: 0.01666667
+    paths:
+    - gs://ai2-llm/preprocessed/thinking-data/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/qwq-traces/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/s1k-gemini-traces/dolma2-tokenizer/*.npy
+    #1,144,531,442
+    - gs://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+    #366,757,554
+    - gs://ai2-llm/pretraining-data/sources/midtraining-reasoning/verifiable/gpt-41/allenai/dolma2-tokenizer/*.npy
+    #1,198,181,281
+    - gs://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
+
+  # Qwen-3 like setup. From their tech report:
+  #
+  # > All models are pre-trained on hundreds of billions of tokens with a sequence length of 32,768
+  # > tokens. The long context corpus includes 75% of text between 16,384 to 32,768 tokens in length,
+  # > and 25% of text between 4,096 to 16,384 in length.
+  #
+  # Our model was pretrained with 8k length and we want to extend to 64k, so we tweak the recipe to:
+  #
+  # - 75% of tokens are between 32,768 and 65,536 tokens in length
+  # - 25% of tokens are between 8,192 and 32,768 tokens in length
+
+
+  - name: LC-s2pdf_32k-64k
+    target_ratio: 0.4999999 # 75% of 66.6%
+    paths:
+      - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/**/allenai/dolma2-tokenizer/*.npy
+
+
+  - name: LC-s2pdf_8k-32k
+    target_ratio: 0.1666667 # 25% of 66.6%
+    paths:
+      - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/**/allenai/dolma2-tokenizer/*.npy
+      - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e14/**/allenai/dolma2-tokenizer/*.npy
