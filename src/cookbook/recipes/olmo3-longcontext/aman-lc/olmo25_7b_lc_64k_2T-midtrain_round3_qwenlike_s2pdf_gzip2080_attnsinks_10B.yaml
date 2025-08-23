@@ -44,8 +44,8 @@ eval_interval: 500
 #   - olmo2_dev_1b
 model_overrides:
   - block.attention.rope.theta=8000000
-  - use_flex=true
-  - use_sinks=true
+  - block.attention.use_flex=true
+  - block.attention.use_sinks=true
 
 
 dataset:
