@@ -19,6 +19,7 @@ OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
 OLMO_CORE_V2_COMMIT_HASH = "1662d0d4f3e628ebb68591e311cce68737c094c4"
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
 OLMO_CORE_CONVERT_DTYPES = ["float32", "bfloat16", "float16"]
+OLMO_CORE_CONVERT_FROM_HF_SCRIPT = "src/examples/huggingface/convert_checkpoint_from_hf.py"
 
 DEFAULT_OLMOE_TOKENIZER = "allenai/eleuther-ai-gpt-neox-20b-pii-special"
 DEFAULT_OLMO2_TOKENIZER = "allenai/dolma2-tokenizer"
@@ -634,28 +635,30 @@ MULTITURN_ALPACAEVAL_TASKS = [
     "self_compare_split_prompts",
 ]
 
+# For now, adapt has disabled some of the styled subtasks
+# https://github.com/allenai/oe-eval-internal/pull/601
 STYLED_TASKS = [
     "missense",
     "leetspeak",
     "grammar",
     "random_case",
-    "lower",
-    "upper",
+    # "lower",
+    # "upper",
     "keywords",
     "phonetic",
     "mechanical",
     "aae",
     "informal",
     "afrikaans_backtranslated",
-    "japanese_backtranslated",
-    "swahili_backtranslated",
+    # "japanese_backtranslated",
+    # "swahili_backtranslated",
 ]
 
 STYLED_TASKS_POPQA = [
     "leetspeak",
     "random_case",
-    "lower",
-    "upper",
+    # "lower",
+    # "upper",
     "phonetic",
     "mechanical",
 ]
