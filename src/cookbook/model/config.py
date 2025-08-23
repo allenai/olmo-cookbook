@@ -196,6 +196,26 @@ class WrappedTransformerConfig:
         )
         config.block.attention.use_flash = True
         return config
+    
+    @classmethod
+    def olmo28_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.8 test run
+        """
+        config = getattr(TransformerConfig, "olmo2_7B")(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size(),
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
+
 
     @classmethod
     def olmo2_7b_flash(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
