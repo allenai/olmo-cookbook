@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 fi
 
 model_path="$1"
-base_command="olmo-cookbook-eval evaluate \"${model_path}\" --priority high --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 --model-backend vllm --dashboard peteish-LC-ruler  --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\"  --vllm-use-v1-spec  --workspace ai2/oe-data  --beaker-image amandab/lc-only-adjust-rope-global-layers"
+base_command="olmo-cookbook-eval evaluate \"${model_path}\" --priority urgent --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 --model-backend vllm --dashboard peteish-LC-ruler  --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\"  --vllm-use-v1-spec  --workspace ai2/oe-data  --beaker-image amandab/lc-only-adjust-rope-global-layers --budget ai2/oe-base"
 
 # oe-eval-beaker/oe_eval_olmo3_auto"
 
@@ -15,17 +15,17 @@ base_command="olmo-cookbook-eval evaluate \"${model_path}\" --priority high --cl
 echo "Launching task: ruler:4k"
 eval "${base_command} --tasks ruler:4k -j 2"
 
-#echo "Launching task: ruler:8k"
-#eval "${base_command} --tasks ruler:8k -j 2"
+echo "Launching task: ruler:8k"
+eval "${base_command} --tasks ruler:8k -j 2"
 
-#echo "Launching task: ruler:16k"
-#eval "${base_command} --tasks ruler:16k -j 2"
+echo "Launching task: ruler:16k"
+eval "${base_command} --tasks ruler:16k -j 2"
 
 echo "Launching task: ruler:32k"
 eval "${base_command} --tasks ruler:32k -j 2"
 
-#echo "Launching task: ruler:64k"
-#eval "${base_command} --tasks ruler:64k -j 2"
+echo "Launching task: ruler:64k"
+eval "${base_command} --tasks ruler:64k -j 2"
 
 wait
 
