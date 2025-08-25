@@ -194,7 +194,8 @@ class WrappedTransformerConfig:
             force_full_attention_on_last_layer=True,
             pattern=[4096, 4096, 4096, -1],
         )
-        config.block.attention.use_flash = True
+        config.block.attention.use_flash = False
+        config.block.attention.use_flex = True
         return config
 
     @classmethod
@@ -208,7 +209,8 @@ class WrappedTransformerConfig:
             force_full_attention_on_last_layer=True,
             pattern=[-1, -1, -1, -1],
         )
-        config.block.attention.use_flash = True
+        config.block.attention.use_flash = False
+        config.block.attention.use_flex = True
         return config
 
     @classmethod
@@ -228,7 +230,8 @@ class WrappedTransformerConfig:
             force_full_attention_on_last_layer=True,
             pattern=[4097, 4097, 4097, -1],
         )
-        config.block.attention.use_flash = True
+        config.block.attention.use_flash = False
+        config.block.attention.use_flex = True
         config.block.attention.use_head_qk_norm = True
         return config
 
@@ -249,7 +252,8 @@ class WrappedTransformerConfig:
             force_full_attention_on_last_layer=True,
             pattern=[-1, -1, -1, -1],
         )
-        config.block.attention.use_flash = True
+        config.block.attention.use_flash = False
+        config.block.attention.use_flex = True
         config.block.attention.use_head_qk_norm = True
         return config
 
