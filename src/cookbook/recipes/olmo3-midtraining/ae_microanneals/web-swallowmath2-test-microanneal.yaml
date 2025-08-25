@@ -31,6 +31,6 @@ dataset:
     target_ratio: 0.5
   - name: swallowmath
     paths:
-    - s3://ai2-llm/preprocessed/megamath_web/swallow_mmw/beaker_outputs-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/megamath_web/swallow_mmw/beaker_outputs-decon/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.5
   
