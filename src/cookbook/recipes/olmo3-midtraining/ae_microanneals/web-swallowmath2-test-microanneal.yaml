@@ -1,5 +1,5 @@
-name: "test-web-swallowmath-5B-olmo25_7b-2T"
-description: "OLMo2.5 7b anneal to 5B Tokens web + swallowmath test"
+name: "test-web-swallowmath-sparkle-5B-olmo25_7b-2T"
+description: "OLMo2.5 7b anneal to 5B Tokens web + swallowmath test (sparkle)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 2
@@ -32,6 +32,6 @@ dataset:
   - name: swallowmath
     paths:
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/megamath_web/swallow_mmw/beaker_outputs-decon/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/megamath_web/swallow_mmw/beaker_outputs-decon-sparkle/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.5
   
