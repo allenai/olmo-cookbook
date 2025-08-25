@@ -83,6 +83,14 @@ models=(
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T-SC33_round5slim-LC67_s2pdf_gzip2080_pstar-10B-fe8c2599/step2385"
 )
 
+# 4T + 100B + rewarm
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_yarn-fullonly_10B-09e2f9a1/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B_SC-again-R5-temp-pack-0204e0e9/step4769"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_100B-082001b9/step23842"
+)
+
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
@@ -157,19 +165,9 @@ done
 ## Eval (SC)
 
 ```bash
-dashboard="olmo3-long-context"
-uv run olmo-cookbook-eval evaluate \
-    "/oe-training-default/${model}-hf" \
-    --tasks olmo3:dev:7b:main \
-    --priority urgent \
-    --cluster aus80g \
-    --partition-size 4 \
-    --num-gpus 1 \
-    --model-backend vllm \
-    --model-args trust_remote_code=true,max_length=4096 \
-    --use-gantry \
-    --dashboard ${dashboard} \
-    --oe-eval-branch davidh/olmo3 \
-    --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \
-    --workspace ai2/oe-data
+for model in "${models[@]}"; do
+    ./scripts/launch_sc4lc.sh /oe-training-default/${model}-hf
+done
 ```
+
+## Eval'ing core models
