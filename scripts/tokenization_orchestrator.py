@@ -147,13 +147,9 @@ class DataProcessor:
             print(f"Found ID field '{field_name}' of type {id_type} in {path}")
             return field_name, 'int' if id_type == 'int' else 'str'
         
-        # Fallback: check if 'text' field exists
-        if 'text' in first_line:
-            print(f"No ID field found in {path}, using 'text' field as fallback ID. Available fields: {list(first_line.keys())}")
-            return 'text', 'str'
-            
-        print(f"Warning: No ID or text field found in {path}. Available fields: {list(first_line.keys())}")
-        return None, None
+        # Fallback: return empty string to disable ID field
+        print(f"No ID field found in {path}, disabling ID field. Available fields: {list(first_line.keys())}")
+        return "", None
     
     def _remove_empty_files(self) -> Tuple[int, List[str]]:
         """Remove empty .jsonl.gz and .jsonl files and return count and paths of removed files."""
@@ -417,7 +413,7 @@ class DataProcessor:
         ]
         
         # Add ID field customizations if needed
-        if id_field_name and id_field_name != 'id':
+        if id_field_name is not None and id_field_name != 'id':
             cmd.extend(["--fields.id_field_name", id_field_name])
         
         if id_field_type == 'int':
