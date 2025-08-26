@@ -532,7 +532,7 @@ class TransformerConfigBuilder:
         # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
         return TransformerActivationCheckpointingConfig(
             mode=TransformerActivationCheckpointingMode.selected_modules,
-            modules=["blocks.*.feed_forward"],
+            modules=["blocks.*.attention"],
         )
 
     def get_float8_config(self):

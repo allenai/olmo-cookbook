@@ -29,7 +29,6 @@ load_path: gs://ai2-llm/checkpoints/OLMo25-from476838/step500680
 load_state: false
 model: "olmo25_7b"
 tokenizer: "dolma2"
-dtype: "bfloat16"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
 sequence_length: &seq_len 65536
@@ -48,6 +47,10 @@ model_overrides:
   - block.attention.use_flash=false
   - block.attention.use_flex=true
   - block.attention.use_sinks=true
+
+ac_config:
+  mode: selected_modules
+  modules: ["blocks.*.attention"]
 
 
 dataset:
