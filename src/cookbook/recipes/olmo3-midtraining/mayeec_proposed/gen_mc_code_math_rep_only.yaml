@@ -277,10 +277,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/allenai/dolma2-tokenizer/*.npy
     target_ratio: 0.02127590455114081
-  - name: openmathreasoning-fullthoughts-rewrite
-    paths:
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
   - name: tinymath-mind
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
