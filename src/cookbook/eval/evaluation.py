@@ -304,7 +304,12 @@ def evaluate_checkpoint(
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
+            # we also set gantry to use --yes to skip all confirmations
+            gantry_args_dict = {
+                "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                "yes": True,
+                **gantry_args_dict,
+            }
 
             # finally append gantry args
             local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
