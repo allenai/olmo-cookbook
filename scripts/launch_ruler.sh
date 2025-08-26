@@ -18,14 +18,17 @@ fi
 
 # if model path ends with -hf, then the backend is vllm; otherwise, it's olmo_core
 if [[ "$1" == *"-hf" ]]; then
-  backend="vllm"
+  backend="--model-backend vllm --vllm-use-v1-spec"
+  beaker_image="--beaker-image amandab/lc-only-adjust-rope-global-layers"
+  oe_eval_branch=""
 else
-  backend="olmo_core"
+  backend="--model-backend olmo_core"
+  beaker_image="--beaker-image tylerr/oe_eval_olmocore_091425"
+  oe_eval_branch="--oe-eval-branch tyler/olmocore-native-eval --use-gantry"
 fi
 
-
 model_path="$1"
-base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 --model-backend ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\"  --vllm-use-v1-spec  --workspace ai2/long-contexts  --beaker-image amandab/lc-only-adjust-rope-global-layers"
+base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
 
 
 echo "Launching task: ruler:4k"
