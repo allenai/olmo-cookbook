@@ -10,7 +10,7 @@ fi
 if command -v olmo-cookbook-eval &> /dev/null; then
   eval_command="olmo-cookbook-eval"
 elif command -v uv &> /dev/null && uv run olmo-cookbook-eval --help &> /dev/null; then
-  eval_command="uv run olmo-cookbook-eval"
+  eval_command="uv run --python=3.12 --extra=all  olmo-cookbook-eval"
 else
   echo "Error: olmo-cookbook-eval command not found. Please install it or ensure uv is available."
   exit 1
