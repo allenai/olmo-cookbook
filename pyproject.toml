@@ -49,7 +49,7 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@amanr/attnsink_test",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@amanr/attnsinkbf16",
     "datasets>=3,<4",  # workaround for pinned oe-eval version in olmocore
     "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",

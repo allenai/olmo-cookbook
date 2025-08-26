@@ -741,6 +741,7 @@ class TransformerConfigBuilder:
             max_grad_norm=1.0,
             scheduler=self.get_scheduler_config(),
             state_dict_load_opts={"strict": False},
+            
         )
 
         trainer_config = TrainerConfig(
