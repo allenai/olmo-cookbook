@@ -1,0 +1,3 @@
+s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/
+s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/
+s3://ai2-llm/pretraining-data/sources/midtraining-reasoning/math-meta-reasoning-fixed-decon/
