@@ -75,18 +75,18 @@ class BaseNamedTasksGroup:
     """
 
     # external, to be defined by subclasses
-    tasks: ClassVar[list[Union[str, re.Pattern, "BaseNamedTasksGroup"]]] = []
+    tasks: ClassVar[list[Union[str, "BaseNamedTasksGroup"]]] = []
 
     @property
     def name(self) -> str:
         return self.__class__.__name__
 
     @cached_property
-    def expanded_tasks(self) -> list[Union[str, re.Pattern]]:
+    def expanded_tasks(self) -> list[str]:
         """
         Return the list of tasks in this group, expanding any nested named groups.
         """
-        expanded_tasks: list[Union[str, re.Pattern]] = []
+        expanded_tasks: list[str] = []
         for task in self.tasks:
             if isinstance(task, BaseNamedTasksGroup):
                 expanded_tasks.extend(task.expanded_tasks)
@@ -109,56 +109,53 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
     """
     Base class for named tasks groups that are supposed to be averaged.
     """
+    def combine(self, results: MiniFrame) -> MiniFrame:
+        # filter results by task names; if we have no results at all, we create a new table.
+        filtered = results.keep_cols(*self.expanded_tasks) or MiniFrame(title=results.title)
 
-    def combine(self, results: MiniFrame) -> MiniFrame | None:
-        filtered_rows = results.keep_cols(*self.expanded_tasks)
-
-        combined_table = MiniFrame(title=results.title)
-
-        # Add empty values to all tasks
+        # it can be the case that some columns (tasks) have no scores for all models. in that case
+        # we iterate over all task names in this named group and add a None value for each model.
         for row in results.rows:
-            for task in self.expanded_tasks:
-                combined_table.add(col=task, row=row.name, val=None)
+            for metric in self.expanded_tasks:
+                filtered.add(col=metric, row=row.name, val=None, overwrite=False)
 
-        # each row here is a model
-        for row in filtered_rows.rows:
-            # we compute the average of the scores for this model; we set the average to None if
-            # there are missing scores or if there are no scores at all.
-            average: float | None = None
-            if len(row.values) > 0 and all(s is not None for s in row.values):
-                filtered_scores = [s for s in row.values if s is not None]
-                average = (sum(filtered_scores) / len(filtered_scores)) if filtered_scores else 0.0
+        # the following code computes the average of the scores for each model.
+        # the average is set to None if there are either no scores or if there are missing scores.
+        # otherwise, the average is the sum of the scores divided by the number of scores.
+        for row in filtered.rows:
+            average: float | None = (
+                (sum(row.values) / len(row.values))         # pyright: ignore
+                if all(s is not None for s in row.values) and len(row.values) > 0
+                else None
+            )
+            filtered.add(col=self.name, row=row.name, val=average)
 
-            # we add the average to the combined table
-            combined_table.add(col=self.name, row=row.name, val=average)
-
-        return combined_table
+        return filtered
 
 
 class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
     """
-    Base class for named tasks groups that include averages of other task groups (e.g., a macro average over all QA tasks, which includes MMLU)
+    Base class for named tasks groups that include averages of other task groups
+    (e.g., a macro average over all QA tasks, which includes MMLU)
     """
 
-    def combine(self, results: MiniFrame) -> MiniFrame | None:
+    def combine(self, results: MiniFrame) -> MiniFrame:
         filtered_rows = MiniFrame(title=results.title)
 
         # calculate the averages for all child task groups
-        child_task_names: Union[str | re.Pattern] = []
+        child_task_names: list[str] = []
         for task_or_named_group in self.tasks:
             if isinstance(task_or_named_group, BaseAverageNamedTasksGroup):
                 # get task groups (e.g., MMLURCGroup())
-                named_group: BaseAverageNamedTasksGroup = task_or_named_group
-                combined_table = named_group.combine(results)
+                combined_table = task_or_named_group.combine(results)
                 # If the named group is able to average all scores, add it!
-                named_group_col = combined_table.keep_cols(*[named_group.name])
-                child_task_names.append(named_group.name)
+                named_group_col = combined_table.keep_cols(*[task_or_named_group.name])
+                child_task_names.append(task_or_named_group.name)
                 filtered_rows = filtered_rows + named_group_col
-            elif isinstance(task_or_named_group, Union[str | re.Pattern]):
+            elif isinstance(task_or_named_group, str):
                 # get individual tasks (e.g., "arc_challenge:rc::olmes")
-                task: Union[str | re.Pattern] = task_or_named_group
-                task_col = results.keep_cols(*[task])
-                child_task_names.append(task)
+                task_col = results.keep_cols(*[task_or_named_group])
+                child_task_names.append(task_or_named_group)
                 filtered_rows = filtered_rows + task_col
             else:
                 raise TypeError(f"Task type not yet supported: {type(task_or_named_group)}.")
@@ -166,13 +163,12 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
         # Any tasks that do not exist for all models, add a "None" entry
         for row in results.rows:
             for task in child_task_names:
-                if not task in filtered_rows or filtered_rows[(task, row.name)] is None:
+                if task not in filtered_rows or filtered_rows[(task, row.name)] is None:
                     filtered_rows.add(col=task, row=row.name, val=None)
 
         # compute the average of averages
         # each row here is a model
         for row in list(filtered_rows.rows):
-
             # we compute the average of the scores for this model; we set the average to None if
             # there are missing scores or if there are no scores at all.
             average: float | None = None
@@ -184,21 +180,21 @@ class BaseAverageOfAveragesNamedTasksGroup(BaseAverageNamedTasksGroup):
             filtered_rows.add(col=self.name, row=row.name, val=average)
 
         return filtered_rows
-    
 
-class BaseTaskView(BaseAverageOfAveragesNamedTasksGroup):
+
+class BaseNamedTasksWithNoAverageGroup(BaseAverageOfAveragesNamedTasksGroup):
     """
-    Base class for tasks "views". In a task view, only the child tasks are averages 
-    
-    For example, "olmo3:dev:7b:main" is not a average, but contains "olmo3:dev:7b:mcqa" and "mmlu:mc" are task averages.
+    Base class for tasks "views". In a task view, only the child tasks are averages
+
+    For example, "olmo3:dev:7b:main" is not a average,
+    but contains "olmo3:dev:7b:mcqa" and "mmlu:mc" are task averages.
     """
-    def combine(self, results: MiniFrame) -> MiniFrame | None:
-        # Compute all the task averages
+    def combine(self, results: MiniFrame) -> MiniFrame:
+        # Compute all the task averages;
         out_table = super().combine(results)
 
         # Remove task view as a column in the table
-        if out_table is not None:
-            out_table = out_table.drop_cols(self.name)
+        out_table = out_table.drop_cols(self.name)
 
         return out_table
 
@@ -345,23 +341,53 @@ class MinervaGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva:n4")
+class MinervaN4Group(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::olmes:n4" for subtask in constants.ALL_MINERVA_TASKS]
+
+
+@NamedTasksGroupRegistry.register("minerva:n4:v2")
+class MinervaN4V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::olmes:n4:v2" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("minerva::hamish_zs_reasoning")
 class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
 
 
 @NamedTasksGroupRegistry.register("math")
-class MathGroup(BaseAverageNamedTasksGroup):
+class MathGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        "gsm8k::olmo1", 
+        "gsm8k::olmo1",
         "gsm8k::olmes",
-        [f"{subtask}::olmes" for subtask in constants.ALL_MINERVA_TASKS]
+        MinervaGroup()
     ]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb")
 class GsmSymbGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8")
+class GsmSymbN8Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8:v2")
+class GsmSymbN8V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:v2' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8:pass_at_4")
+class GsmSymbN8PassAt4Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:pass_at_4' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:n8:v2:pass_at_4")
+class GsmSymbN8V2PassAt4Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n8:v2:pass_at_4' for task in constants.ALL_GSM_SYMB_TASKS]
 
 
 @NamedTasksGroupRegistry.register("code")
@@ -407,6 +433,46 @@ class MultiPlEHEGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("multipl-e-mbpp")
 class MultiPlEMBPPGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32")
+class MultiPlEHEN32Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32")
+class MultiPlEMBPPN32Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:pass_at_16")
+class MultiPlEHEN32PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:pass_at_16' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:pass_at_16")
+class MultiPlEMBPPN32PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:pass_at_16' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:v2")
+class MultiPlEHEN32V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:v2")
+class MultiPlEMBPPN32V2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2' for task in constants.MULTIPL_E_MBPP_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:v2:pass_at_16")
+class MultiPlEHEN32V2PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2:pass_at_16' for task in constants.MULTIPL_E_HE_TASKS]
+
+
+@NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:v2:pass_at_16")
+class MultiPlEMBPPN32V2PassAt16Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:n32:v2:pass_at_16' for task in constants.MULTIPL_E_MBPP_TASKS]
 
 
 @NamedTasksGroupRegistry.register("fim")
@@ -501,6 +567,21 @@ def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
 for helmet_length in (int(2**i) for i in range(13, 18)):
     NamedTasksGroupRegistry.register(f"helmet:{helmet_length // 2 ** 10}k")(make_helmet_group(helmet_length))
 
+
+def make_ruler_group(ruler_length: int) -> Type[BaseAverageNamedTasksGroup]:
+    class RULERGroup(BaseAverageNamedTasksGroup):
+        tasks = [
+            task
+            for group_name, tasks in constants.RULER_SUITES.items()
+            for task in tasks
+            if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
+        ]
+
+    return RULERGroup
+
+
+for ruler_length in (int(2**i) for i in range(12, 18)):
+    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2 ** 10}k")(make_ruler_group(ruler_length))
 
 @NamedTasksGroupRegistry.register("minerva:bpb")
 class MinervaBpbGroup(BaseAverageNamedTasksGroup):
@@ -608,10 +689,29 @@ class Olmo3Dev7bMathGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v1")
+class Olmo3Dev7bMathV1Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Math
+        "gsm8k::olmo3:n8",
+        GsmSymbN8Group(),
+        MinervaN4Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
+class Olmo3Dev7bMathV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Math
+        "gsm8k::olmo3:n8:v2",
+        GsmSymbN8V2Group(),
+        MinervaN4V2Group(),
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen")
 class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Code
         "bigcodebench:3shot::olmo3",
         "codex_humaneval:3shot::olmo3",
         "deepseek_leetcode::olmo3",
@@ -620,6 +720,56 @@ class Olmo3Dev7bCodeGenGroup(BaseAverageOfAveragesNamedTasksGroup):
         MultiPlEHEGroup(),
         MultiPlEMBPPGroup(),
         # "crux-eval$", # we noticed I/O scores are noisy, so we don't include in the average
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v1")
+class Olmo3Dev7bCodeGenV1Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "bigcodebench:3shot::olmo3",
+        "codex_humaneval:3shot::olmo3:n32",
+        "deepseek_leetcode::olmo3:n32",
+        "ds1000:3shot::olmo3",
+        "mbpp:3shot::olmo3:n32",
+        MultiPlEHEN32Group(),
+        MultiPlEMBPPN32Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v1:n32:pass_at_16")
+class Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # We only use a subset of code gen benchmarks for pass@k for speed
+        "deepseek_leetcode::olmo3:n32:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:pass_at_16",
+        "mbpp:3shot::olmo3:n32:pass_at_16",
+        MultiPlEHEN32PassAt16Group(),
+        MultiPlEMBPPN32PassAt16Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v2")
+class Olmo3Dev7bCodeGenV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "bigcodebench:3shot::olmo3:v2",
+        "codex_humaneval:3shot::olmo3:n32:v2",
+        "deepseek_leetcode::olmo3:n32:v2",
+        "ds1000:3shot::olmo3:v2",
+        "mbpp:3shot::olmo3:n32:v2",
+        MultiPlEHEN32V2Group(),
+        MultiPlEMBPPN32V2Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen_mini:v2:n32:pass_at_16")
+class Olmo3Dev7bCodeGenMiniV2N32PassAt16Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # We only use a subset of code gen benchmarks for pass@k for speed
+        "deepseek_leetcode::olmo3:n32:v2:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:v2:pass_at_16",
+        "mbpp:3shot::olmo3:n32:v2:pass_at_16",
+        MultiPlEHEN32V2PassAt16Group(),
+        MultiPlEMBPPN32V2PassAt16Group(),
     ]
 
 
@@ -682,7 +832,7 @@ class Olmo3Dev7bMcqaNonSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
 
 
 @NamedTasksGroupRegistry.register("olmo2:paper")
-class Olmo2PaperGroup(BaseTaskView):
+class Olmo2PaperGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         "arc_challenge:rc::olmes",
         "arc_challenge:mc::olmes",
@@ -703,7 +853,7 @@ class Olmo2PaperGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:7b")
-class Olmo2Dev7bGroup(BaseTaskView):
+class Olmo2Dev7bGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         "arc_challenge:mc::olmes",
         "arc_easy:mc::olmes",
@@ -717,7 +867,7 @@ class Olmo2Dev7bGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo2:dev:1b")
-class Olmo2Dev1bGroup(BaseTaskView):
+class Olmo2Dev1bGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         "arc_challenge:rc::olmes",
         "arc_easy:rc::olmes",
@@ -729,7 +879,7 @@ class Olmo2Dev1bGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:main")
-class Olmo3Dev1bMainGroup(BaseTaskView):
+class Olmo3Dev1bMainGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         # re.compile(r"^olmo3:dev:1b:macro:w_avg$"),
         Olmo3Dev1bMathBpbGroup(),
@@ -748,7 +898,7 @@ class Olmo3Dev1bMainGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:main:hf")
-class Olmo3Dev1bMainHFGroup(BaseTaskView):
+class Olmo3Dev1bMainHFGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         "ultrachat_masked_ppl",
         "wildchat_masked_ppl",
@@ -756,7 +906,7 @@ class Olmo3Dev1bMainHFGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:main")
-class Olmo3Dev7bMainGroup(BaseTaskView):
+class Olmo3Dev7bMainGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         # re.compile(r"^olmo3:dev:7b:macro:w_avg$"),
         Olmo3Dev7bMcqaSTEMGroup(),
@@ -780,9 +930,65 @@ class Olmo3Dev7bMainGroup(BaseTaskView):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v1")
+class Olmo3Dev7bV1MainGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV1Group(),
+        Olmo3Dev7bCodeGenV1Group(),
+        Olmo3Dev7bCodeGenMiniV1N32PassAt16Group(),
+        Olmo3Dev7bCodeFimGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmo3:n8",
+        GsmSymbN8Group(),
+        GsmSymbN8PassAt4Group(),
+        MinervaN4Group(),
+        "minerva_math_500::olmo3:n32",
+        "minerva_math_500::olmo3:n32:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32",
+        "mbpp:3shot::olmo3:n32",
+        MultiPlEHEN32Group(),
+        MultiPlEMBPPN32Group(),
+        CruxEvalGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v2")
+class Olmo3Dev7bV2MainGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV2Group(),
+        Olmo3Dev7bCodeGenV2Group(),
+        Olmo3Dev7bCodeGenMiniV2N32PassAt16Group(),
+        Olmo3Dev7bCodeFimGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmo3:n8:v2",
+        GsmSymbN8V2Group(),
+        GsmSymbN8V2PassAt4Group(),
+        MinervaN4V2Group(),
+        "minerva_math_500::olmo3:n32:v2",
+        "minerva_math_500::olmo3:n32:v2:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:v2",
+        "mbpp:3shot::olmo3:n32:v2",
+        MultiPlEHEN32V2Group(),
+        MultiPlEMBPPN32V2Group(),
+        CruxEvalGroup(),
+    ]
+
+
 # This is a legacy group, please use the "v1" version!
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v0")
-class Olmo3DevMidtrainMainGroup(BaseTaskView):
+class Olmo3DevMidtrainV0MainGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         # Everything in this task set is 0-shot (except PopQA)
         # "alpaca_eval_v3::hamish_zs_reasoning",
@@ -804,17 +1010,11 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
 
 
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v1")
-class Olmo3DevMidtrainMainGroup(BaseTaskView):
+class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         # Everything in this task set is 0-shot
-        # "alpaca_eval_v3::hamish_zs_reasoning",
         "ifeval::hamish_zs_reasoning",
-        # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
-        # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
-        # "ifeval_ood::tulu-thinker", # this is held-out (for now?)
         StyledMath500ThinkerGroup(),
-        # StyledAlpacaEvalThinkerGroup(),
-        # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
         "gsm8k::zs_cot_latex",  #### from adapt: to replace "gsm8k::hamish_zs_reasoning"
         MinervaHamishZSReasoningGroup(),
         "minerva_math_500::hamish_zs_reasoning",
@@ -829,6 +1029,14 @@ class Olmo3DevMidtrainMainGroup(BaseTaskView):
         "popqa::olmo3:thinker",
         AgiEvalEnglishOLMo3ThinkerGroup(),
         MMLUOLMo3ThinkerGroup(),
+
+        ### These are API-based evals. To prevent large OpenAI costs, we disable.
+        # "alpaca_eval_v3::hamish_zs_reasoning",
+        # AlpacaEvalMTGroup(), # from @victoriag these should only be run on LC models (requires 32K context length)
+        # IFEvalMTThinkerGroup(), # task fails entirely, @victoriag currently debugging
+        # "ifeval_ood::tulu-thinker", # this is held-out (for now?)
+        # StyledAlpacaEvalThinkerGroup(),
+        # StyledPopQAThinkerGroup(), ### too slow: https://beaker.allen.ai/orgs/ai2/workspaces/olmo-3-evals/work/01JZNDSP4K41GEDJHP5VSPSPVD
         # "simpleqa::tulu-thinker",
 
         ### Not implemented
