@@ -31,7 +31,7 @@ model: "olmo25_7b"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
-sequence_length: &seq_len 65536
+sequence_length: &seq_len 4096
 max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
 scheduler_type: linear
