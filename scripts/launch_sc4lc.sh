@@ -31,13 +31,22 @@ for task in "${LITE_TASKS[@]}"; do
   tasks+=" --tasks ${task}"
 done
 
+
+# if model path ends with -hf, then the backend is vllm; otherwise, it's olmo_core
+if [[ "$1" == *"-hf" ]]; then
+  backend="vllm"
+else
+  backend="olmo_core"
+fi
+
+
 ${eval_command} evaluate \
   "$1" \
   --priority urgent \
   --cluster aus80g \
   --partition-size 4 \
   --num-gpus 1 \
-  --model-backend vllm \
+  --model-backend ${backend} \
   --dashboard peteish-LC-ruler \
   --budget ai2/oe-base \
   --model-args "trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}" \

@@ -85,9 +85,16 @@ models=(
 
 # 4T + 100B + rewarm
 models=(
-    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_yarn-fullonly_10B-09e2f9a1/step2385"
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_50B_SC-again-R5-temp-pack-0204e0e9/step4769"
     "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_100B-082001b9/step23842"
+)
+
+# these are all olmo-core models
+models=(
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_yarn-fullonly_10B-09e2f9a1/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_inst-reas-synth_yarn-fullonly_10B-a952512f/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_inst-reas-synth-nocode_yarn-fullonly_10B-114cfbc0/step2385"
+    "ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth_yarn-fullonly_10B-7b2e6b54/step2385"
 )
 
 
@@ -150,7 +157,6 @@ for url in "${urls[@]}"; do
     ./fetch_results.py -u ${url} >> ~/Downloads/results.csv
 done
 ```
-
 
 For ruler:
 

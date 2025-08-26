@@ -16,9 +16,16 @@ else
   exit 1
 fi
 
+# if model path ends with -hf, then the backend is vllm; otherwise, it's olmo_core
+if [[ "$1" == *"-hf" ]]; then
+  backend="vllm"
+else
+  backend="olmo_core"
+fi
+
 
 model_path="$1"
-base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 --model-backend vllm --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\"  --vllm-use-v1-spec  --workspace ai2/long-contexts  --beaker-image amandab/lc-only-adjust-rope-global-layers"
+base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 --model-backend ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\"  --vllm-use-v1-spec  --workspace ai2/long-contexts  --beaker-image amandab/lc-only-adjust-rope-global-layers"
 
 
 echo "Launching task: ruler:4k"
