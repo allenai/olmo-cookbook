@@ -709,7 +709,7 @@ class TransformerConfigBuilder:
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
         dp_config = train_module.TransformerDataParallelConfig(
-            name=DataParallelType.hsdp,
+            name=DataParallelType.fsdp,
             param_dtype=DType.bfloat16,
             shard_degree=self.dp_shard_degree,
         )
@@ -731,7 +731,7 @@ class TransformerConfigBuilder:
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,
             optim=self.get_optimizer_config(),
-            compile_model=False,
+            compile_model=True,
             dp_config=dp_config,
             tp_config=tp_config,
             cp_config=cp_config,
