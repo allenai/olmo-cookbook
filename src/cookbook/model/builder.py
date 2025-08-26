@@ -731,7 +731,7 @@ class TransformerConfigBuilder:
             rank_microbatch_size=rank_microbatch_size,
             max_sequence_length=self.sequence_length,
             optim=self.get_optimizer_config(),
-            compile_model=True,
+            compile_model=False,
             dp_config=dp_config,
             tp_config=tp_config,
             cp_config=cp_config,
