@@ -33,7 +33,7 @@ max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
 sequence_length: &seq_len 65536
 max_target_sequence_length: *seq_len
-rank_microbatch_size: *seq_len  # must be the same as sequence_length
+rank_microbatch_size: 16384 #*seq_len  # must be the same as sequence_length
 scheduler_type: linear
 
 dp_shard_degree: 8  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
