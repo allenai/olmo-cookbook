@@ -519,7 +519,6 @@ class TransformerConfigBuilder:
             optim_group_override_dict = (
                 getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
             )
-            fused = getattr(self.annealing, "fused", None) or fused
 
         group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
@@ -529,6 +528,7 @@ class TransformerConfigBuilder:
             betas=betas,
             group_overrides=group_overrides,
             foreach=foreach,
+            fused=fused,
         )
 
     def get_ac_config(self):
