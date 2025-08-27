@@ -1,4 +1,4 @@
-name: dclm-5xC-1b-cost-ablation-top-12-domains-25-samples.yaml
+name: dclm-5xC-1b-cost-ablation-top-12-domains-25-samples
 description: 5xC 1B DCLM proposed mix (rep=4) with d=12 domains, n=25 samples
 budget: ai2/oe-base
 workspace: ai2/dolma2
