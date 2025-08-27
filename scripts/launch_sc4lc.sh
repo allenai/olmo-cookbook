@@ -40,7 +40,7 @@ if [[ "$1" == *"-hf" ]]; then
 else
   backend="--model-backend olmo_core"
   beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
-  oe_eval_branch="--oe-eval-commit '5737f11e7b1a9f92404864d5f9a3d9114bad2db3' --use-gantry"
+  oe_eval_branch="--oe-eval-branch tyler/olmocore-native-eval --use-gantry"
 fi
 
 
@@ -55,7 +55,7 @@ ${eval_command} evaluate \
   --budget ai2/oe-base \
   --model-args "trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}" \
   --task-args "use_chat_format=false" \
-  --workspace ai2/oe-data \
+  --workspace ai2/long-contexts \
   ${beaker_image} \
   ${oe_eval_branch} \
   ${tasks}
