@@ -5,7 +5,7 @@ workspace: "ai2/dolma2"
 nodes: 1
 gpus: 1
 preemptible: true
-max_tokens: 2_632_230 # number of tokens in dataset
+max_tokens: 2_695_267_406 # number of tokens in dataset
 sequence_length: 2048
 seed: 1337
 learning_rate: 0.007276622186288963
