@@ -48,6 +48,8 @@ from olmo_core.train.common import LoadStrategy
 from olmo_core.train.train_module import (
     TransformerActivationCheckpointingConfig,
     TransformerActivationCheckpointingMode,
+    TransformerDataParallelWrappingStrategy
+
 )
 
 from cookbook.aliases import (
@@ -531,8 +533,8 @@ class TransformerConfigBuilder:
     def get_ac_config(self):
         # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
         return TransformerActivationCheckpointingConfig(
-            mode=TransformerActivationCheckpointingMode.full,
-            # modules=["blocks.*.attention"],
+            mode=TransformerActivationCheckpointingMode.selected_modules,
+            modules=["blocks.*.attention"],
         )
 
     def get_float8_config(self):
@@ -708,9 +710,11 @@ class TransformerConfigBuilder:
         load_path = self.load_path
         load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
 
-        dp_config = train_module.TransformerDataParallelConfig(
+        dp_config=train_module.TransformerDataParallelConfig(
             name=DataParallelType.fsdp,
             param_dtype=DType.bfloat16,
+            reduce_dtype=DType.float32,
+            wrapping_strategy=TransformerDataParallelWrappingStrategy.blocks,
             shard_degree=self.dp_shard_degree,
         )
         tp_config = train_module.TransformerTensorParallelConfig(degree=self.tp_degree) if self.tp_degree else None
