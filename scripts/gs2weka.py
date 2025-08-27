@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 
 import yaml
+from google.auth.exceptions import DefaultCredentialsError
+from google.cloud import storage
 
 
 def run_command(cmd, shell=False, errs_okay=False):
@@ -65,29 +67,122 @@ def get_beaker_name():
 
 def find_latest_checkpoint(beaker_name, yaml_name):
     """Find the latest checkpoint directory in GCS"""
-    # Construct the GCS path prefix
-    prefix = f"gs://ai2-llm/checkpoints/{beaker_name}/{yaml_name}-"
-
-    # Use gsutil to list directories with the prefix
-    cmd = ["gsutil", "ls", "-d", f"{prefix}*/step*/"]
+    # Construct the GCS path prefix (without gs://)
+    bucket_name = "ai2-llm"
+    prefix = f"checkpoints/{beaker_name}/{yaml_name}-"
 
     try:
-        output = run_command(cmd)
-        if not output:
-            print(f"No checkpoints found with prefix: {prefix}")
+        # Initialize the GCS client
+        client = storage.Client(project="ai2-allennlp")
+        bucket = client.bucket(bucket_name)
+
+        print(f"Searching for checkpoints with prefix: gs://{bucket_name}/{prefix}")
+
+        # List all blobs with the prefix
+        blobs = bucket.list_blobs(prefix=prefix)
+
+        # Find paths that match the pattern: prefix*/step*/
+        checkpoint_paths = []
+        for blob in blobs:
+            # Split the blob name into parts
+            parts = blob.name.split("/")
+
+            # Check if this looks like a checkpoint directory structure
+            # We want: checkpoints/{beaker_name}/{yaml_name}-{something}/step{something}/
+            if len(parts) >= 4:  # At least checkpoints/beaker/yaml-*/step*/
+                # Check if there's a step directory in the path
+                for i, part in enumerate(parts):
+                    if part.startswith("step") and i < len(parts) - 1:
+                        # Construct the directory path up to and including the step directory
+                        step_dir_path = "/".join(parts[: i + 1])
+                        full_path = f"gs://{bucket_name}/{step_dir_path}"
+
+                        if full_path not in checkpoint_paths:
+                            checkpoint_paths.append(full_path)
+                        break
+
+        if not checkpoint_paths:
+            print(f"No checkpoints found with prefix: gs://{bucket_name}/{prefix}")
             sys.exit(1)
 
-        # Get all matching paths
-        paths = output.strip().split("\n")
-
         # Sort paths to get the latest one (lexicographically)
-        paths.sort(reverse=True)
+        checkpoint_paths.sort(reverse=True)
 
-        return paths[0].rstrip("/")  # Remove trailing slash
+        print(f"Found {len(checkpoint_paths)} checkpoint directories")
+        print(f"Latest checkpoint: {checkpoint_paths[0]}")
 
-    except subprocess.CalledProcessError as e:
-        print(f"Error listing GCS directories: {e.stderr}")
-        print(f"Make sure you have access to gs://ai2-llm/checkpoints/{beaker_name}/{yaml_name}-* directories")
+        return checkpoint_paths[0]
+
+    except DefaultCredentialsError:
+        print("Error: Google Cloud credentials not found.")
+        print("Please set up authentication:")
+        print("1. Set GOOGLE_APPLICATION_CREDENTIALS environment variable:")
+        print("   export GOOGLE_APPLICATION_CREDENTIALS='/path/to/service-account-key.json'")
+        print("2. Or run: gcloud auth application-default login")
+        sys.exit(1)
+
+    except Exception as e:
+        print(f"Error listing GCS directories: {e}")
+        print(f"Make sure you have access to gs://{bucket_name}/{prefix}* directories")
+        sys.exit(1)
+
+
+# Alternative implementation that's more efficient for large buckets
+def find_latest_checkpoint_optimized(beaker_name, yaml_name):
+    """
+    More efficient version that uses prefix listing to avoid scanning all objects.
+    This works better when you have many files in the bucket.
+    """
+    bucket_name = "ai2-llm"
+    prefix = f"checkpoints/{beaker_name}/{yaml_name}-"
+
+    try:
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+
+        # Get all "directories" by using delimiter
+        # This is more efficient as it doesn't list individual files
+        blobs = bucket.list_blobs(prefix=prefix, delimiter="/")
+
+        # Collect all run directories (yaml_name-*)
+        run_prefixes = []
+        for page in blobs.pages:
+            run_prefixes.extend(page.prefixes)
+
+        if not run_prefixes:
+            print(f"No run directories found with prefix: gs://{bucket_name}/{prefix}")
+            sys.exit(1)
+
+        # For each run directory, find step directories
+        checkpoint_paths = []
+        for run_prefix in run_prefixes:
+            step_blobs = bucket.list_blobs(prefix=run_prefix, delimiter="/")
+
+            step_prefixes = []
+            for page in step_blobs.pages:
+                step_prefixes.extend(page.prefixes)
+
+            # Filter for step directories
+            for step_prefix in step_prefixes:
+                if "/step" in step_prefix:
+                    full_path = f"gs://{bucket_name}/{step_prefix.rstrip('/')}"
+                    checkpoint_paths.append(full_path)
+
+        if not checkpoint_paths:
+            print(f"No step directories found in runs matching: gs://{bucket_name}/{prefix}")
+            sys.exit(1)
+
+        # Sort paths to get the latest one
+        checkpoint_paths.sort(reverse=True)
+
+        print(f"Found {len(checkpoint_paths)} checkpoint directories")
+        print(f"Latest checkpoint: {checkpoint_paths[0]}")
+
+        return checkpoint_paths[0]
+
+    except Exception as e:
+        print(f"Error listing GCS directories: {e}")
+        print(f"Make sure you have access to gs://{bucket_name}/{prefix}* directories")
         sys.exit(1)
 
 
