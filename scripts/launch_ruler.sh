@@ -23,8 +23,8 @@ if [[ "$1" == *"-hf" ]]; then
   oe_eval_branch=""
 else
   backend="--model-backend olmo_core"
-  beaker_image="--beaker-image tylerr/oe_eval_olmocore_091425"
-  oe_eval_branch="--oe-eval-branch tyler/olmocore-native-eval --use-gantry"
+  beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
+  oe_eval_branch="--oe-eval-commit '5737f11e7b1a9f92404864d5f9a3d9114bad2db3' --use-gantry"
 fi
 
 model_path="$1"

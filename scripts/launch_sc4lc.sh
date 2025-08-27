@@ -34,9 +34,13 @@ done
 
 # if model path ends with -hf, then the backend is vllm; otherwise, it's olmo_core
 if [[ "$1" == *"-hf" ]]; then
-  backend="vllm"
+  backend="--model-backend vllm --vllm-use-v1-spec"
+  beaker_image="--beaker-image amandab/lc-only-adjust-rope-global-layers"
+  oe_eval_branch=""
 else
-  backend="olmo_core"
+  backend="--model-backend olmo_core"
+  beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
+  oe_eval_branch="--oe-eval-commit '5737f11e7b1a9f92404864d5f9a3d9114bad2db3' --use-gantry"
 fi
 
 
@@ -46,12 +50,12 @@ ${eval_command} evaluate \
   --cluster aus80g \
   --partition-size 4 \
   --num-gpus 1 \
-  --model-backend ${backend} \
+  ${backend} \
   --dashboard peteish-LC-ruler \
   --budget ai2/oe-base \
   --model-args "trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}" \
   --task-args "use_chat_format=false" \
-  --vllm-use-v1-spec \
   --workspace ai2/oe-data \
-  --beaker-image amandab/lc-only-adjust-rope-global-layers \
+  ${beaker_image} \
+  ${oe_eval_branch} \
   ${tasks}
