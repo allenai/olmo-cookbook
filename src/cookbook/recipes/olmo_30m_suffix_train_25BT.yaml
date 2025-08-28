@@ -20,5 +20,5 @@ dataset:
     - name: falcon-refinedweb
       target_ratio: 1.0
       paths:
-        - s3://ai2-llm/preprocessed/falcon-refinedweb/v0-0.05-heldout-complement-3B-sample-suffixes/documents/allenai/dolma2-tokenizer/*.npy
+        - s3://ai2-llm/preprocessed/falcon-refinedweb/v0-0.05-heldout-complement-3B-sample-suffixes/allenai/dolma2-tokenizer/*.npy
   
