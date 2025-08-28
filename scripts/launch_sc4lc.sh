@@ -40,7 +40,7 @@ if [[ "$1" == *"-hf" ]]; then
 else
   backend="--model-backend olmo_core"
   beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
-  oe_eval_branch="--oe-eval-branch tyler/olmocore-native-eval --use-gantry"
+  oe_eval_branch="--oe-eval-commit '3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7' --use-gantry"
 fi
 
 
@@ -58,4 +58,5 @@ ${eval_command} evaluate \
   --workspace ai2/long-contexts \
   ${beaker_image} \
   ${oe_eval_branch} \
-  ${tasks}
+  ${tasks} \
+  ${@:2}

@@ -70,8 +70,10 @@ def evaluate_checkpoint(
     # Install oe-eval toolkit
     oe_eval_dir = install_oe_eval(
         env=env,
-        commit_hash=oe_eval_commit,
-        commit_branch=oe_eval_branch,
+        # commit_hash=oe_eval_commit,
+        commit_hash=None,
+        # commit_branch=oe_eval_branch,
+        commit_branch=None,
         is_editable=use_gantry,
     )
 
@@ -309,6 +311,8 @@ def evaluate_checkpoint(
             gantry_args_dict = {
                 "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
                 "yes": True,
+                **({"ref": oe_eval_commit} if oe_eval_commit else {}),
+                **({"branch": oe_eval_branch} if oe_eval_branch else {}),
                 **gantry_args_dict,
             }
 
