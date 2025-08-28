@@ -176,3 +176,29 @@ done
 ```
 
 ## Eval'ing core models
+
+Short context
+
+```bash
+for model in "${models[@]}"; do
+    ./scripts/launch_sc4lc.sh /oe-training-default/${model}
+done
+```
+
+RULER
+
+```bash
+for model in "${models[@]}"; do
+    ./scripts/launch_ruler.sh /oe-training-default/${model}
+done
+```
+
+Fetch results
+
+```bash
+timestamp=$(date +%Y%m%d_%H%M%S)
+mkdir -p temp
+for model in "${models[@]}"; do
+    uv run --python 3.12 ./scripts/grab_ruler.py $(echo ${model} | sed -E 's#.*/([^/]+)/([^/]+)$#\1_\2#') | tee temp/ruler_results_${timestamp}.csv
+done
+```
