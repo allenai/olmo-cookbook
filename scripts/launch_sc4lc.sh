@@ -40,7 +40,7 @@ if [[ "$1" == *"-hf" ]]; then
 else
   backend="--model-backend olmo_core"
   beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
-  oe_eval_branch="--oe-eval-commit '3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7' --use-gantry"
+  oe_eval_branch="--oe-eval-commit 3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7 --use-gantry"
 fi
 
 
