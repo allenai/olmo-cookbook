@@ -1,4 +1,4 @@
-name: "suffix-train-27BT-olmo2-5xC-30m-dense-falcon"
+name: "suffix-train-27BT-olmo2-5xC-30m-dense-falcon-8gpu"
 description: "suffix train with 27B tokens on 30M params on falcon sample"
 budget: "ai2/oe-base"
 workspace: "ai2/dolma2"
