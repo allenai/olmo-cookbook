@@ -43,11 +43,17 @@ else
   oe_eval_branch="--oe-eval-commit 3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7 --use-gantry"
 fi
 
+if [[ "$1" == "gs"* ]]; then
+  # evaluate on augusta cluster
+  cluster="ai2/augusta-google-1"
+else
+  cluster="ai2/jupiter-cirrascale-2"
+fi
 
 ${eval_command} evaluate \
   "$1" \
   --priority urgent \
-  --cluster aus80g \
+  --cluster ${cluster} \
   --partition-size 4 \
   --num-gpus 1 \
   ${backend} \
