@@ -56,26 +56,26 @@ dataset:
     # 850,848,999
     - gs://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     # 898,733,958
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     # 240,590,380
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: reddit
     target_ratio: 0.059
     paths:
     # 9,860,465,314
-    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     # 21,390,279,634
-    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/reddit-rewrites/densesub_lowthresh_4omini_rewrite/documents-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: rcqa
     target_ratio: 0.03
     paths:
     # 4,215,210,848
-    - gs://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: nemotron-synth-qa
     target_ratio: .05
     paths:
     # 486,558,362,887
-    - gs://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   # - name: instruction
   #   target_ratio: 0.0
   #   paths:
@@ -85,43 +85,43 @@ dataset:
     target_ratio: 0.011
     paths:
     # 1,639,399,859
-    - gs://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/raw/tulu-3-midtrain-v0-data-simple-concat-with-therefore-template-decon/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: flan
     target_ratio: .05
     paths:
     # 17,055,708,123
-    - gs://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased-decon/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: r1_reasoning
     target_ratio: 0.01875
     paths:
     # 2,483,453,165
-    - gs://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: qwq_reasoning
     target_ratio: 0.01875
     paths:
     # 4,774,150,082
-    - gs://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: gemini_reasoning
     target_ratio: 0.0025
     paths:
     # 254,415,258
-    - gs://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: llamanemotron_reasoning
     target_ratio: .0125
     paths:
     # 20.9B
-    - gs://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: openthoughts2
     target_ratio: .0125
     paths:
     # 5,601,836,260
-    - gs://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: faeze_reasoning
     target_ratio: .01
     paths:
     # ORIGINALS
     # 1,198,073,462 --> actually code meta reasoning
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning/documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    # - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning/documents-decon-2/allenai/dolma2-tokenizer/*.npy
     # 366,757,554 --> has special tokens
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/documents-decon-2/allenai/dolma2-tokenizer/*.npy
     # 1,198,074,765 --> different version of code meta reasoning
@@ -129,7 +129,7 @@ dataset:
     ####
     # FIXES
     # 1,049,524,455 --> actual math meta reasoning
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
+    # - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
     # 364,483,656 --> verifiable/gpt-41 without special tokens
     - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
     # 73,752,560 --> verifiable/gpt-o4-mini without special tokens
@@ -140,6 +140,10 @@ dataset:
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
     # 1,199,242,351 --> actual code meta-reasoning with latex format
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
+    ####
+    # NEW NEW FORMAT
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
 
   # PDF 0.05
   - name: pdf-quality-art_design
