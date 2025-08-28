@@ -1,4 +1,4 @@
-name: "suffix-train-25BT-olmo2-5xC-30m-dense-falcon-1gpu"
+name: "suffix-train-25BT-olmo2-5xC-30m-dense-falcon-1gpu-gs"
 description: "suffix train with 25B tokens on 30M params on falcon sample"
 budget: "ai2/oe-base"
 workspace: "ai2/dolma2"
@@ -20,5 +20,5 @@ dataset:
     - name: falcon-refinedweb
       target_ratio: 1.0
       paths:
-        - s3://ai2-llm/preprocessed/falcon-refinedweb/v0-0.05-heldout-complement-3B-sample-suffixes/allenai/dolma2-tokenizer/*.npy
+        - gs://ai2-llm/preprocessed/falcon-refinedweb/v0-0.05-heldout-complement-3B-sample-suffixes/allenai/dolma2-tokenizer/*.npy
   
