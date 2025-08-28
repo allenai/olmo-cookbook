@@ -225,4 +225,9 @@ Now do evals on these
 for model in "${models[@]}"; do
     ./scripts/launch_ruler.sh ${model}
 done
+
+
+for model in "${models[@]}"; do
+    ./scripts/launch_sc4lc.sh ${model}
+done
 ```
