@@ -27,6 +27,7 @@ from olmo_core.optim import (
     OptimGroupOverride,
     Scheduler,
     SkipStepAdamWConfig,
+    AdamWConfig
     # WSD,
 )
 from olmo_core.optim.scheduler import WSD, CosWithWarmupAndLinearDecay, LinearWithWarmup
@@ -508,8 +509,8 @@ class TransformerConfigBuilder:
         weight_decay = 0.1
         betas = (0.9, 0.95)
         foreach = None
-        optim_group_override_dict = dict(params=["embeddings.weight"], opts=dict(weight_decay=0.0))
         fused = True
+        optim_group_override_dict = dict(params=["embeddings.weight"], opts=dict(weight_decay=0.0))
         if self.annealing is not None:
             scheduler_state, optimizer_state = self.get_state_from_checkpoint()
             lr = getattr(self.annealing, "initial_lr", None) or scheduler_state.starting_lr
@@ -522,7 +523,7 @@ class TransformerConfigBuilder:
 
         group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
-        return SkipStepAdamWConfig(
+        return AdamWConfig(
             lr=lr,
             weight_decay=weight_decay,
             betas=betas,
