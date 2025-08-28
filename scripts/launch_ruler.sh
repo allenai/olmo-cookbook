@@ -24,11 +24,18 @@ if [[ "$1" == *"-hf" ]]; then
 else
   backend="--model-backend olmo_core"
   beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
-  oe_eval_branch="--oe-eval-commit '5737f11e7b1a9f92404864d5f9a3d9114bad2db3' --use-gantry"
+  oe_eval_branch="--oe-eval-commit 3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7 --use-gantry"
+fi
+
+if [[ "$1" == "gs"* ]]; then
+  # evaluate on augusta cluster
+  cluster="ai2/augusta-google-1"
+else
+  cluster="ai2/jupiter-cirrascale-2"
 fi
 
 model_path="$1"
-base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ai2/jupiter-cirrascale-2 --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
+base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
 
 
 echo "Launching task: ruler:4k"
