@@ -1,5 +1,5 @@
-name: "anneal-round5-100B-olmo25_7b-anneal-6T-lrfix"
-description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (fixed wrong starting LR)"
+name: "anneal-round5-100B-olmo25_7b-anneal-6T-lrfix-sparkle-motion"
+description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (fixed wrong starting LR; switch to spakrle-motion decon for synth data)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 16
