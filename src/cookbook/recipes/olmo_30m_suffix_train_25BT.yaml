@@ -7,6 +7,7 @@ gpus: 8
 preemptible: true
 max_tokens: 25_000_000_000
 global_batch_size: 1212416
+device_batch_size: 151552
 sequence_length: 2048
 seed: 1337
 learning_rate: 0.007276622186288963
