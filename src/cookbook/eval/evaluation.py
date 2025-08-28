@@ -2,9 +2,9 @@ import json
 import re
 import shlex
 import subprocess
+import sys
 from copy import deepcopy
 from hashlib import md5
-import sys
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -112,14 +112,18 @@ def evaluate_checkpoint(
             cluster = "goog"
     elif scheme:
         raise ValueError(f"Unsupported scheme '{scheme}' in checkpoint path")
-    elif checkpoint_path.startswith("/") and any(re.match(rf"/{w}/", checkpoint_path) for w in WEKA_MOUNTS):
+    elif checkpoint_path.startswith("/weka/") or any(checkpoint_path.startswith(f"/{w}/") for w in WEKA_MOUNTS):
         print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
         for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
             clusters_to_exclude.add(cl)
-        checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
+
+        if checkpoint_path.startswith("/weka/"):
+            checkpoint_path = f"weka://{checkpoint_path[6:].rstrip('/')}"
+        else:
+            checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
 
     else:
-        print("Path is a huggingface model; I will add huggingface token to workspace")
+        print("Path is a huggingface hub model; I will add huggingface token to beaker workspace")
         if huggingface_secret:
             hf_token_secret = add_secret_to_beaker_workspace(
                 secret_name="HUGGING_FACE_HUB_TOKEN",
@@ -200,14 +204,11 @@ def evaluate_checkpoint(
     # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
     #          it's just the task alias that does not exist.
     EXCLUDE_FROM_LAUNCH = [
-        r'^mmlu_.*:bpb::olmes$',
-        r'^lambada:bpb$',
-        r'^.*:pass_at_.*$',
+        r"^mmlu_.*:bpb::olmes$",
+        r"^lambada:bpb$",
+        r"^.*:pass_at_.*$",
     ]
-    all_tasks = [
-        task for task in all_tasks
-        if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)
-    ]
+    all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
 
     # DOING SOME PRETTY PRINTING HERE #
     print(
@@ -304,7 +305,12 @@ def evaluate_checkpoint(
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
+            # we also set gantry to use --yes to skip all confirmations
+            gantry_args_dict = {
+                "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                "yes": True,
+                **gantry_args_dict,
+            }
 
             # finally append gantry args
             local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
@@ -324,8 +330,11 @@ def evaluate_checkpoint(
                 if "stop_sequences" in partition_task_args["generation_kwargs"]:
                     # Add the stop tokens if they do not exist
                     partition_task_args["generation_kwargs"]["stop_sequences"].extend(
-                        [stop_tok for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
-                         if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]]
+                        [
+                            stop_tok
+                            for stop_tok in infilling_dict["generation_kwargs"]["stop_sequences"]
+                            if stop_tok not in partition_task_args["generation_kwargs"]["stop_sequences"]
+                        ]
                     )
                 else:
                     partition_task_args["generation_kwargs"].update(infilling_dict["generation_kwargs"])
