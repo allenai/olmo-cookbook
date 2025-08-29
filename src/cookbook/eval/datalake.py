@@ -158,7 +158,7 @@ class FindExperiments(BaseDatalakeItem):
     _endpoint: ClassVar[str] = "bluelake/find-experiments/"
 
     @classmethod
-    def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000) -> list[Self]:
+    def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 100_000) -> list[Self]:
 
         # make sure at least one of dashboard or model_name is provided
         assert dashboard or model_name, "Either dashboard or model_name must be provided"
@@ -199,12 +199,12 @@ class Metrics:
     @property
     def bpb(self) -> float | None:
         return self.bits_per_byte_corr or self.logits_per_byte_corr
-    
+
     @property
     def pass_at_4(self) -> float | None:
         if "pass_at_4" in self.extra_metrics:
             return self.extra_metrics["pass_at_4"]
-    
+
     @property
     def pass_at_16(self) -> float | None:
         if "pass_at_16" in self.extra_metrics:
