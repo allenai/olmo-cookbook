@@ -1,5 +1,5 @@
-name: "anneal-round5-100B-olmo25_7b-anneal-6T-lrfix-sparkle-motion"
-description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (fixed wrong starting LR; switch to spakrle-motion decon for synth data)"
+name: "anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion"
+description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (keep high LR; switch to sparkle-motion decon for synth data)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 16
@@ -19,7 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-  # initial_lr: 0.00020712352850360292
+  initial_lr: 0.00020712352850360292
 load_path: gs://ai2-llm/checkpoints/OLMo25/step1413814
 load_state: false
 nccl_debug: true
@@ -131,9 +131,9 @@ dataset:
     # 1,049,524,455 --> actual math meta reasoning
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
     # 364,483,656 --> verifiable/gpt-41 without special tokens
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     # 73,752,560 --> verifiable/gpt-o4-mini without special tokens
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     ####
     # NEW FORMAT
     # 1,057,302,754 --> actual math meta-reasoning with latex format
@@ -142,8 +142,8 @@ dataset:
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
     ####
     # NEW NEW FORMAT
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
 
   # PDF 0.05
   - name: pdf-quality-art_design
