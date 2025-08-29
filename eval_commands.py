@@ -37,7 +37,7 @@ def print_eval_commands(gs_path):
     print("# Step 3: Evaluate on olmo3:dev:1b:main")
     print(f'''olmo-cookbook-eval evaluate \\
   "{weka_path}" \\
-  --tasks olmo3:dev:1b:main:bpb \\
+  --tasks olmo3:dev:1b:main \\
   --priority normal \\
   --cluster aus80g \\
   --partition-size 8 \\
