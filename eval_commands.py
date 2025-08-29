@@ -61,7 +61,7 @@ def print_eval_commands(gs_path):
   --cluster aus80g \\
   --partition-size 1 \\
   --num-gpus 1 \\
-  --model-backend vllm \\
+  --model-backend hf \\
   --model-args trust_remote_code=true \\
   --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \\
   --gantry-args hf_token=true \\
