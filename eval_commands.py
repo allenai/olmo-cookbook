@@ -37,14 +37,12 @@ def print_eval_commands(gs_path):
     print("# Step 3: Evaluate on olmo3:dev:1b:main")
     print(f'''olmo-cookbook-eval evaluate \\
   "{weka_path}" \\
-  --tasks olmo3:dev:1b:main \\
+  --tasks olmo3:dev:1b:main:bpb \\
   --priority normal \\
   --cluster aus80g \\
   --partition-size 8 \\
   --num-gpus 1 \\
   --model-backend olmo_core \\
-  --model-args trust_remote_code=true \\
-  --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \\
   --fim-tokens l2c \\
   --dashboard ianm-suffix-train \\
   --workspace ai2/olmo-3-microanneals''')
