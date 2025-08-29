@@ -43,7 +43,7 @@ def print_eval_commands(gs_path):
   --partition-size 8 \\
   --num-gpus 1 \\
   --model-backend vllm \\
-  --model-args trust_remote_code=true,max_length=2048 \\
+  --model-args trust_remote_code=true \\
   --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \\
   --fim-tokens l2c \\
   --vllm-use-v1-spec \\
@@ -53,6 +53,7 @@ def print_eval_commands(gs_path):
     print()
     
     print("# Step 4: Evaluate on paloma_falcon-refinedweb::paloma")
+    print("# Note: Using --gantry-args to pass HF token requirement to oe-eval-internal")
     print(f'''olmo-cookbook-eval evaluate \\
   "{hf_path}" \\
   --tasks paloma_falcon-refinedweb::paloma \\
@@ -61,8 +62,9 @@ def print_eval_commands(gs_path):
   --partition-size 1 \\
   --num-gpus 1 \\
   --model-backend vllm \\
-  --model-args trust_remote_code=true,max_length=2048 \\
+  --model-args trust_remote_code=true \\
   --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \\
+  --gantry-args hf_token=true \\
   --vllm-use-v1-spec \\
   --vllm-memory-utilization 0.7 \\
   --dashboard ianm-suffix-train \\
