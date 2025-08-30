@@ -44,7 +44,7 @@ dataset:
     target_ratio: 0.01698
     paths: 
     # 3,883,674,937
-    - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion/**/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
     target_ratio: 0.18302 
     paths:
