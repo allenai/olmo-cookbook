@@ -41,12 +41,12 @@ dataset:
     - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: megamatt
     # 20% less the ratio for dolminos2math
-    target_ratio: 0.01698
+    target_ratio: 0.01727
     paths: 
     # 3,883,674,937
     - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion/**/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.18302 
+    target_ratio: 0.18273 
     paths:
     # 5_624_449_531
     - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
