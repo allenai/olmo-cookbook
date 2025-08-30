@@ -41,12 +41,13 @@ dataset:
     - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: megamatt
     # 20% less the ratio for dolminos2math
-    target_ratio: 0.017263
+    target_ratio: 0.01726210713
     paths: 
     # 3,883,674,937
     - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion/**/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
-    target_ratio: 0.182737 
+    # 18,273,789,287
+    target_ratio: 0.18273789287
     paths:
     # 5_624_449_531
     - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
@@ -102,9 +103,9 @@ dataset:
     # 4,774,150,082
     - gs://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: gemini_reasoning
-    target_ratio: 0.0025
+    # new 245,738,848
+    target_ratio: 0.00245738848
     paths:
-    # 254,415,258
     - gs://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: llamanemotron_reasoning
     target_ratio: .0125
@@ -112,9 +113,9 @@ dataset:
     # 20.9B
     - gs://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: openthoughts2
-    target_ratio: .0125
-    paths:
     # 5,601,836,260
+    target_ratio: 0.01254261152
+    paths:
     - gs://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: faeze_reasoning
     target_ratio: .01
