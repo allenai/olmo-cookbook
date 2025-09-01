@@ -50,7 +50,7 @@ dataset:
     target_ratio: 0.18273789287
     paths:
     # 5_624_449_531
-    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-withids/allenai/dolma2-tokenizer/*.npy
     # 10,687,987,907
     - gs://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     # 1.99B
