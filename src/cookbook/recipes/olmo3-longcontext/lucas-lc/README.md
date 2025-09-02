@@ -98,6 +98,8 @@ models=(
 )
 
 
+
+
 for model in "${models[@]}"; do
     uv run --python 3.12 python -m cookbook.remote \
     gs://${model} \
@@ -215,6 +217,14 @@ models=(
     "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-c6bda7ae/step2385"
     "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth_yarn-fullonly_10B-78de8042/step2385"
     "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_inst-synth-code-noreas_yarn-fullonly_10B-404435b1/step2385"
+)
+
+
+# more through olmo-core. These have to do full eval.
+models=(
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5-nopdf-normcqa_5050_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-e804778a/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-7acf789f/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5-nopdf-normcqa_3367_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-35014840/step2385"
 )
 
 ```

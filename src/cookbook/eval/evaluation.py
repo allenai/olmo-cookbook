@@ -16,13 +16,12 @@ from cookbook.cli.utils import (
     make_eval_run_name,
 )
 from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
     FIM_TOKENS,
     OE_EVAL_LAUNCH_COMMAND,
     WEKA_MOUNTS,
 )
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
-
+from cookbook.utils.clusters import get_matching_clusters, is_gcs_cluster
 
 def evaluate_checkpoint(
     oe_eval_commit: str,
@@ -67,6 +66,10 @@ def evaluate_checkpoint(
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
     print(f"Using Python virtual environment at {env.name}")
 
+    # @soldni: if true, we will add huggingface token to beaker workspace; this is necessary if
+    #          the checkpoint path is a huggingface hub model, or for certain evals.
+    needs_hf_token = False
+
     # Install oe-eval toolkit
     oe_eval_dir = install_oe_eval(
         env=env,
@@ -106,7 +109,7 @@ def evaluate_checkpoint(
         # This is google cloud storage; for now, we just override cluster
         # so that it runs on augusta; credentials to fetch there are automatically
         # configured
-        if cluster != "goog" and cluster not in BEAKER_KNOWN_CLUSTERS["goog"]:
+        if not is_gcs_cluster(cluster):
             print(
                 "Checkpoint is stored in Google Cloud Storage, "
                 "but cluster is not set to 'goog'. Overriding cluster."
@@ -116,27 +119,16 @@ def evaluate_checkpoint(
         raise ValueError(f"Unsupported scheme '{scheme}' in checkpoint path")
     elif checkpoint_path.startswith("/weka/") or any(checkpoint_path.startswith(f"/{w}/") for w in WEKA_MOUNTS):
         print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
-        for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
+        for cl in get_matching_clusters("goog"):
             clusters_to_exclude.add(cl)
 
         if checkpoint_path.startswith("/weka/"):
             checkpoint_path = f"weka://{checkpoint_path[6:].rstrip('/')}"
         else:
             checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
-
     else:
         print("Path is a huggingface hub model; I will add huggingface token to beaker workspace")
-        if huggingface_secret:
-            hf_token_secret = add_secret_to_beaker_workspace(
-                secret_name="HUGGING_FACE_HUB_TOKEN",
-                secret_value=huggingface_secret,
-                workspace=workspace,
-                env=env,  # pyright: ignore
-            )
-            flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
-            gantry_args_dict = {"hf_token": "true", **gantry_args_dict}
-        else:
-            print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
+        needs_hf_token = True
 
     if use_backend_in_run_name:
         if name_suffix.strip():
@@ -154,7 +146,7 @@ def evaluate_checkpoint(
     )
 
     # replace nicknames for actual cluster names, joined with commas
-    beaker_clusters = ",".join(set(BEAKER_KNOWN_CLUSTERS.get(cluster, [cluster])).difference(clusters_to_exclude))
+    beaker_clusters = ",".join(set(get_matching_clusters(cluster)).difference(clusters_to_exclude))
 
     # set the beaker flags
     flags.append(f"--beaker-workspace '{workspace}'")
@@ -211,6 +203,35 @@ def evaluate_checkpoint(
         r"^.*:pass_at_.*$",
     ]
     all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
+
+
+    # @soldni: these evals are known to be private, thus requiring HF token
+    HF_TOKEN_REQUIRED_TASKS = [
+        r"^squad"
+    ]
+    tasks_with_hf_tokens = [
+        task for task in all_tasks if any(re.search(pattern, task) for pattern in HF_TOKEN_REQUIRED_TASKS)
+    ]
+    if len(tasks_with_hf_tokens) > 0:
+        print(f"These evals require HF token: {tasks_with_hf_tokens}")
+        needs_hf_token = True
+
+    # @soldni: switching to always push huggingface token to beaker workspace
+    if needs_hf_token:
+        if huggingface_secret:
+            hf_token_secret = add_secret_to_beaker_workspace(
+                secret_name="HUGGING_FACE_HUB_TOKEN",
+                secret_value=huggingface_secret,
+                workspace=workspace,
+                env=env,  # pyright: ignore
+            )
+            flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
+            gantry_args_dict = {"hf_token": "true", **gantry_args_dict}
+        else:
+            print(
+                "\n\nWARNING: Hugging Face token not provided; "
+                "this may cause issues with model download or evals.\n\n"
+            )
 
     # DOING SOME PRETTY PRINTING HERE #
     print(

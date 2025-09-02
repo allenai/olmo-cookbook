@@ -9,11 +9,12 @@ MAX_LENGTH=${MAX_LENGTH:-65536}
 
 
 LITE_TASKS=(
-  "gen::xlarge"
-  "mbpp:3shot::olmo3:n32:v2"
-  "minerva"
-  "olmo3:dev:7b:mcqa:stem"
-  "olmo3:dev:7b:mcqa:non_stem"
+  "squad::xlarge"
+  # "gen::xlarge"
+  # "mbpp:3shot::olmo3:n32:v2"
+  # "minerva"
+  # "olmo3:dev:7b:mcqa:stem"
+  # "olmo3:dev:7b:mcqa:non_stem"
 )
 
 # Check if olmo-cookbook-eval command is available
@@ -39,8 +40,8 @@ if [[ "$1" == *"-hf" ]]; then
   oe_eval_branch=""
 else
   backend="--model-backend olmo_core"
-  beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
-  oe_eval_branch="--oe-eval-commit 3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7 --use-gantry"
+  # beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
+  # oe_eval_branch="--oe-eval-commit b5d54da51e653d64807ecd05ce02a8d8817e2f85 --use-gantry"
 fi
 
 if [[ "$1" == "gs"* ]]; then

@@ -20,7 +20,6 @@ from cookbook.cli.utils import (
     remove_conflicting_packages,
 )
 from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
     DEFAULT_OLMO2_TOKENIZER,
     DEFAULT_OLMO_CORE_TOKENIZER,
     DEFAULT_OLMOE_TOKENIZER,
@@ -34,6 +33,7 @@ from cookbook.constants import (
     OLMOE_UNSHARD_SCRIPT,
     TRANSFORMERS_COMMIT_HASH,
 )
+from cookbook.utils.clusters import get_matching_clusters
 
 
 def convert_olmo_core_v2(
@@ -520,7 +520,7 @@ def run_checkpoint_conversion(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
-        for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
+        for cluster in get_matching_clusters(beaker_cluster):
             gantry_flags.append(f"--cluster {cluster}")
 
         install_flash_attention = (
