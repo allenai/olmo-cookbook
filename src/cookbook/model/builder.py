@@ -707,7 +707,7 @@ class TransformerConfigBuilder:
         )
 
         load_path = self.load_path
-        load_strategy = LoadStrategy.always if load_path else LoadStrategy.if_available
+        load_strategy = LoadStrategy.always if load_path else LoadStrategy.never
 
         dp_config=train_module.TransformerDataParallelConfig(
             name=DataParallelType.fsdp,
