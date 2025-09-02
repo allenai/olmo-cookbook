@@ -1,4 +1,4 @@
-name: 1b-5xC-dclm-s2pdf-patched
+name: 1b-5xC-dclm-stackedu-patched
 description: 1B 5xC DCLM+StackEdu proposed mix (rep=4) from patched swarm (47913b3cb4a5b90e)
 budget: ai2/oe-base
 workspace: ai2/dolma2
