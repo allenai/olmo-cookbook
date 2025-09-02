@@ -196,7 +196,7 @@ class WrappedTransformerConfig:
         )
         config.block.attention.use_flash = False
         config.block.attention.use_flex = True
-        # config.lm_head.loss_implementation = LMLossImplementation.fused_linear
+        config.lm_head.loss_implementation = LMLossImplementation.fused_linear
         return config
 
     @classmethod
