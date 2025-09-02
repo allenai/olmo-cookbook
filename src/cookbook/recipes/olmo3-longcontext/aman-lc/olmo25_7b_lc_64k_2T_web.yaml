@@ -53,14 +53,5 @@ activation_checkpointing: true
 dataset:
   sources:
   - name: web 
-    target_ratio: 0.5
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3_subsamples/midtrain_pools/6B/allenai/dolma2-tokenizer/*.npy
-  - name: code 
-    target_ratio: 0.4
-    paths:
-    - gs://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
-  - name: reasoning 
-    target_ratio: 0.1
-    paths:
-    - gs://ai2-llm/preprocessed/big-reasoning-traces/allenai/dolma2-tokenizer/*.npy
