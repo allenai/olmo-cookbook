@@ -5,6 +5,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+MAX_LENGTH=${MAX_LENGTH:-65536}
 
 # Check if olmo-cookbook-eval command is available
 if command -v olmo-cookbook-eval &> /dev/null; then
@@ -35,22 +36,32 @@ else
 fi
 
 model_path="$1"
-base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=65536\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
+base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
 
 
-echo "Launching task: ruler:4k"
-eval "${base_command} --tasks ruler:4k -j 2"
+if [ $MAX_LENGTH -ge 4096 ]; then
+  echo "Launching task: ruler:4k"
+  eval "${base_command} --tasks ruler:4k -j 2"
+fi
 
-echo "Launching task: ruler:8k"
-eval "${base_command} --tasks ruler:8k -j 2"
+if [ $MAX_LENGTH -ge 8192 ]; then
+  echo "Launching task: ruler:8k"
+  eval "${base_command} --tasks ruler:8k -j 2"
+fi
 
-echo "Launching task: ruler:16k"
-eval "${base_command} --tasks ruler:16k -j 2"
+if [ $MAX_LENGTH -ge 16384 ]; then
+  echo "Launching task: ruler:16k"
+  eval "${base_command} --tasks ruler:16k -j 2"
+fi
 
-echo "Launching task: ruler:32k"
-eval "${base_command} --tasks ruler:32k -j 2"
+if [ $MAX_LENGTH -ge 32768 ]; then
+  echo "Launching task: ruler:32k"
+  eval "${base_command} --tasks ruler:32k -j 2"
+fi
 
-echo "Launching task: ruler:64k"
-eval "${base_command} --tasks ruler:64k -j 2"
+if [ $MAX_LENGTH -ge 65536 ]; then
+  echo "Launching task: ruler:64k"
+  eval "${base_command} --tasks ruler:64k -j 2"
+fi
 
 wait
