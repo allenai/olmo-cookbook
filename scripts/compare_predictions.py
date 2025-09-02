@@ -141,7 +141,7 @@ def compare_continuations(
 
         if original_different:
             differences_found += 1
-            print(f"Doc ID: {doc_id}")
+            print(f"Doc ID: {record1_doc_id}")
 
             if query is not None and label is not None:
                 print(f"    Query:{query_padding}      {repr(query)}")
