@@ -15,7 +15,6 @@ TASKS = [
     "olmo3:dev:7b:mcqa:non_stem"
 ]
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("model", type=str, help="Model name or path")
