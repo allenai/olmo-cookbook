@@ -22,12 +22,12 @@ from olmo_core.float8 import AOFloat8LinearConfig, Float8Config
 from olmo_core.io import resource_path
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import (
+    WSD,
     CosWithWarmup,
     OptimConfig,
     OptimGroupOverride,
     Scheduler,
     SkipStepAdamWConfig,
-    WSD,
 )
 from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
@@ -87,6 +87,7 @@ class OptimizerState:
     betas: tuple[float, float]
     foreach: bool
     optim_group_override: dict | None = None
+
 
 @dataclass
 class TransformerConfigBuilder:
@@ -371,7 +372,7 @@ class TransformerConfigBuilder:
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
                 ephemeral_save_interval=100,
-                save_async=False,   # TODO: enable async saving when augusta stops being silly
+                save_async=False,  # TODO: enable async saving when augusta stops being silly
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
@@ -472,13 +473,15 @@ class TransformerConfigBuilder:
         dataset_config = NumpyDatasetConfig(
             paths=source_paths,
             source_mixture_config=mixture_config,
-            name=NumpyDatasetType.fsl,
+            name=NumpyDatasetType.packed_fsl,
             sequence_length=self.sequence_length,
             max_target_sequence_length=self.max_target_sequence_length,
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
             generate_doc_lengths=self.generate_doc_lengths,
+            source_group_size=8,
+            source_permutation_seed=123,
         )
 
         return dataset_config
@@ -512,7 +515,9 @@ class TransformerConfigBuilder:
             weight_decay = getattr(self.annealing, "weight_decay", None) or optimizer_state.weight_decay
             betas = getattr(self.annealing, "betas", None) or optimizer_state.betas
             foreach = getattr(self.annealing, "foreach", None) or optimizer_state.foreach
-            optim_group_override_dict = getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            optim_group_override_dict = (
+                getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+            )
 
         group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
@@ -673,7 +678,6 @@ class TransformerConfigBuilder:
 
         return scheduler_state, optimizer_state
 
-
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
         rank_microbatch_size = self.get_rank_microbatch_size()
@@ -701,7 +705,9 @@ class TransformerConfigBuilder:
                 reduce_dtype=DType.float32,
                 shard_degree=self.dp_shard_degree,
             ),
-            cp_config=train_module.TransformerContextParallelConfig.llama3(degree=self.cp_degree, head_stride=self.cp_head_stride)
+            cp_config=train_module.TransformerContextParallelConfig.llama3(
+                degree=self.cp_degree, head_stride=self.cp_head_stride
+            )
             if self.cp_degree
             else None,
             ac_config=self.get_ac_config() if self.activation_checkpointing else None,

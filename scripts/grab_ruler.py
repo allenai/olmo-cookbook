@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import sys
 import json
-import subprocess
-import shutil
 import re
+import shutil
+import subprocess
+import sys
+
 
 def main():
     if len(sys.argv) < 2:
@@ -21,8 +22,7 @@ def main():
     elif shutil.which("uv"):
         # Check if uv run olmo-cookbook-eval works
         try:
-            subprocess.run(["uv", "run", "olmo-cookbook-eval", "--help"],
-                         capture_output=True, check=True)
+            subprocess.run(["uv", "run", "olmo-cookbook-eval", "--help"], capture_output=True, check=True)
             eval_command = "uv run olmo-cookbook-eval"
         except (subprocess.CalledProcessError, FileNotFoundError):
             pass
@@ -34,7 +34,7 @@ def main():
     ruler_sets = ["ruler:4k", "ruler:8k", "ruler:16k", "ruler:32k", "ruler:64k"]
 
     for ruler_set in ruler_sets:
-        print(f"Grabbing {ruler_set}", file=sys.stderr)
+        # print(f"Grabbing {ruler_set}", file=sys.stderr)
 
         # Build the command
         cmd = f"{eval_command} results --dashboard {dashboard_name} --tasks '^{ruler_set}$' -m '{model_name}' --format json"
@@ -58,7 +58,7 @@ def main():
                 "cwe",
                 "fwe",
                 "qa_1",
-                "qa_2"
+                "qa_2",
             ]
 
             csv_out = [""] * (len(order) + 3)
@@ -94,6 +94,7 @@ def main():
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON output: {e}", file=sys.stderr)
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
