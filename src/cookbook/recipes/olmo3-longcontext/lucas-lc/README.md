@@ -241,3 +241,21 @@ for model in "${models[@]}"; do
     ./scripts/launch_sc4lc.sh ${model}
 done
 ```
+
+Now grab the results
+
+```bash
+timestamp=$(date +%Y%m%d_%H%M%S)
+mkdir -p temp
+
+# ruler
+
+for model in "${models[@]}"; do
+    uv run scripts/grab_ruler.py $(echo ${model} | sed -E 's#.*/([^/]+)/([^/]+)$#\1_\2#') >> temp/ruler_results_${timestamp}.csv
+done
+
+
+for model in "${models[@]}"; do
+    uv run scripts/grab_sc4lc.py $(echo ${model} | sed -E 's#.*/([^/]+)/([^/]+)$#\1_\2#') >> temp/sc4lc_results_${timestamp}.csv
+done
+```
