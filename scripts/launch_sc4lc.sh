@@ -9,12 +9,11 @@ MAX_LENGTH=${MAX_LENGTH:-65536}
 
 
 LITE_TASKS=(
-  "squad::xlarge"
-  # "gen::xlarge"
-  # "mbpp:3shot::olmo3:n32:v2"
-  # "minerva"
-  # "olmo3:dev:7b:mcqa:stem"
-  # "olmo3:dev:7b:mcqa:non_stem"
+  "gen::xlarge"
+  "mbpp:3shot::olmo3:n32:v2"
+  "minerva"
+  "olmo3:dev:7b:mcqa:stem"
+  "olmo3:dev:7b:mcqa:non_stem"
 )
 
 # Check if olmo-cookbook-eval command is available
@@ -46,7 +45,7 @@ fi
 
 if [[ "$1" == "gs"* ]]; then
   # evaluate on augusta cluster
-  cluster="ai2/augusta-google-1"
+  cluster="ai2/augusta"
 else
   cluster="ai2/jupiter-cirrascale-2"
 fi

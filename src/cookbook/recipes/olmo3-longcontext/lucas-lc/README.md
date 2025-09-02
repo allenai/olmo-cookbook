@@ -210,13 +210,13 @@ done
 Paths (with `gs` prefix now)
 
 ```bash
+
+# these are all olmo-core models
 models=(
-    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth_yarn-fullonly_10B-a98eaba6/step2385"
-    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_yarn-fullonly_10B-correct-warmup-9710a6b1/step2385"
-    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-8684448f/step2385"
-    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-c6bda7ae/step2385"
-    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth_yarn-fullonly_10B-78de8042/step2385"
-    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_inst-synth-code-noreas_yarn-fullonly_10B-404435b1/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_yarn-fullonly_10B-09e2f9a1/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_inst-reas-synth_yarn-fullonly_10B-a952512f/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_inst-reas-synth-nocode_yarn-fullonly_10B-114cfbc0/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_4T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth_yarn-fullonly_10B-7b2e6b54/step2385"
 )
 
 
