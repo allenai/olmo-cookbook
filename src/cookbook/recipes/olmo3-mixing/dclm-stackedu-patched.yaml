@@ -125,10 +125,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Cpp/**/*.npy
     target_ratio: 0.006822871880105392
-  - name: stack-edu:Go
-    paths:
-    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Go/**/*.npy
-    target_ratio: 0.0
   - name: stack-edu:Java
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Java/**/*.npy
@@ -153,10 +149,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Ruby/**/*.npy
     target_ratio: 8.197179969897058e-05
-  - name: stack-edu:Rust
-    paths:
-    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Rust/**/*.npy
-    target_ratio: 0.0
   - name: stack-edu:Shell
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Shell/**/*.npy
