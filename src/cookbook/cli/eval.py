@@ -339,6 +339,12 @@ def convert_checkpoint(
 )
 @click.option("-n", "--num-gpus", type=int, default=1, help="Set number of GPUs")
 @click.option(
+    "--use-hf-token/--no-use-hf-token",
+    default=False,
+    type=bool,
+    help="If true, always mount huggingface token as beaker secret",
+)
+@click.option(
     "-x",
     "--extra-args",
     type=str,
@@ -510,6 +516,7 @@ def evaluate_model(
     remote_output_prefix: str,
     extra_args: str,
     batch_size: int,
+    use_hf_token: bool,
     dry_run: bool,
     beaker_image: str,
     beaker_retries: int,
@@ -601,6 +608,7 @@ def evaluate_model(
         dashboard=dashboard,
         model_backend=model_backend,
         tasks=tasks,
+        use_hf_token=use_hf_token,
         partition_size=partition_size,
         remote_output_prefix=remote_output_prefix,
         extra_args=extra_args,

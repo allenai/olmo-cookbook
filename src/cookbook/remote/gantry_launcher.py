@@ -1,16 +1,13 @@
 import shlex
 import subprocess
 from dataclasses import InitVar, dataclass
-from typing import ClassVar, Optional
 
 from cookbook.cli.utils import (
     PythonEnv,
     add_secret_to_beaker_workspace,
-    discover_weka_mount,
     install_beaker_py,
-    remove_conflicting_packages,
 )
-from cookbook.constants import BEAKER_KNOWN_CLUSTERS
+from cookbook.utils.clusters import get_matching_clusters
 
 from .base import LocatedPath
 
@@ -34,7 +31,7 @@ class GantryLauncher:
         # setup beaker-py
         install_beaker_py(env=self._env)
 
-        for cluster in BEAKER_KNOWN_CLUSTERS.get(self.cluster, [self.cluster]):
+        for cluster in get_matching_clusters(self.cluster):
             self._flags.append(f"--cluster {cluster}")
 
     def add_mount(self, path: str):
