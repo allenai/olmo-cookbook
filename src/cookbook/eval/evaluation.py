@@ -68,12 +68,15 @@ def evaluate_checkpoint(
     print(f"Using Python virtual environment at {env.name}")
 
     # Install oe-eval toolkit
+    # @soldni: we don't switch branch in oe-eval anymore; rather, we take advantage of gantry to submit
+    # jobs with different branches.
     oe_eval_dir = install_oe_eval(
         env=env,
-        # commit_hash=oe_eval_commit,
         commit_hash=None,
-        # commit_branch=oe_eval_branch,
         commit_branch=None,
+        # leaving these here for reference; but using gantry now!
+        # commit_hash=oe_eval_commit,
+        # commit_branch=oe_eval_branch,
         is_editable=use_gantry,
     )
 
