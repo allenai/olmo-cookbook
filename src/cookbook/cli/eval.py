@@ -571,26 +571,11 @@ def evaluate_model(
             name_suffix=name_suffix.strip(),
         )
 
-<<<<<<< HEAD
-        # Call the dashboard to get all the missing results
-        missing_tasks = get_results(
-            dashboard,
-            model_name,
-            tasks,
-            format="return_missing",
-            sort_by="avg",
-            sort_column_name=None,
-            sort_descending=None,
-            force=False,
-            skip_on_fail=True,
-        )
-=======
         # to find what to backfill with, we get all results for this dashboard, then filter them
         # to match this model name, and finally find all missing tasks in results.
         dashboard_table = make_dashboard_table(dashboard=dashboard)
         results = make_results_from_dashboard(dashboard_table=dashboard_table, tasks=tasks, models=[model_name])
         missing_tasks = find_missing_tasks(results=results)
->>>>>>> origin/main
 
         # Override our tasks with the missing set
         if missing_tasks and model_name in missing_tasks:
@@ -701,21 +686,6 @@ def get_results(
     force: bool,
     skip_on_fail: bool,
 ) -> None:
-<<<<<<< HEAD
-    # compile tasks names into regex patterns (if possible)
-    compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
-
-    # we partition between single tasks and named groups; we also keep a set of all tasks names,
-    # which we will use later to print any missing tasks.
-    named_groups: list[BaseNamedTasksGroup] = []
-    columns_filter_tasks: list[str | re.Pattern] = compiled_tasks[:]
-    for compiled_task in compiled_tasks:
-        matching_groups = [NamedTasksGroupRegistry.get(ng) for ng in NamedTasksGroupRegistry.search(compiled_task)]
-        named_groups.extend(matching_groups)
-        columns_filter_tasks.extend(t for ng in matching_groups for t in ng.expanded_tasks)
-
-=======
->>>>>>> origin/main
     # we get the metrics table from the datalake
     dashboard_table = make_dashboard_table(
         dashboard=dashboard,
@@ -734,18 +704,7 @@ def get_results(
     missing_tasks = find_missing_tasks(results=results)
 
     # we gotta let the user know if there are any missing tasks
-<<<<<<< HEAD
-    print_missing_tasks(
-        missing_tasks=missing_tasks,
-        rows_filter_models=rows_filter_models,
-        columns_filter_tasks=columns_filter_tasks,
-    )
-
-    if format == "return_missing":
-        return missing_tasks
-=======
     print_missing_tasks(missing_tasks=missing_tasks, models=models, tasks=tasks)
->>>>>>> origin/main
 
     # okay we got all results! now time to sort them depending on the user's request
     try:
