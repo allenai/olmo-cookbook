@@ -475,7 +475,7 @@ class TransformerConfigBuilder:
             source_mixture_config=mixture_config,
             name=NumpyDatasetType.packed_fsl,
             sequence_length=self.sequence_length,
-            max_target_sequence_length=self.max_target_sequence_length,
+            # max_target_sequence_length=self.max_target_sequence_length,
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
