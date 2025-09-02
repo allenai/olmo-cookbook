@@ -5,11 +5,11 @@ import olmo_core.train.train_module as train_module
 from olmo_core.config import Config
 from olmo_core.data import NumpyDataLoaderConfig, NumpyDatasetConfig, TokenizerConfig
 from olmo_core.nn.attention import SlidingWindowAttentionConfig
+from olmo_core.nn.lm_head import LMLossImplementation
 from olmo_core.nn.rope import ABFRoPEScalingConfig, YaRNRoPEScalingConfig, PIRoPEScalingConfig
 from olmo_core.nn.transformer import TransformerBlockConfig, TransformerBlockType, TransformerConfig
 from olmo_core.optim import OptimConfig
 from olmo_core.train import TrainerConfig
-
 
 class Tokenizers(Enum):
     dolma2 = TokenizerConfig.dolma2()
@@ -196,6 +196,7 @@ class WrappedTransformerConfig:
         )
         config.block.attention.use_flash = False
         config.block.attention.use_flex = True
+        config.lm_head.loss_implementation = LMLossImplementation.fused_linear
         return config
 
     @classmethod

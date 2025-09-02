@@ -532,8 +532,8 @@ class TransformerConfigBuilder:
     def get_ac_config(self):
         # NOTE: This is pretty broad, we can make this more fine-grained if we find it useful
         return TransformerActivationCheckpointingConfig(
-            mode=TransformerActivationCheckpointingMode.selected_modules,
-            modules=["blocks.*.attention"],
+            mode=TransformerActivationCheckpointingMode.budget,
+            activation_memory_budget=0.5,
         )
 
     def get_float8_config(self):
