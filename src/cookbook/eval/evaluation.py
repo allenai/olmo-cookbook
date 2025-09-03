@@ -69,12 +69,8 @@ def evaluate_checkpoint(
     print(f"Using Python virtual environment at {env.name}")
 
     # Install oe-eval toolkit
-    # @soldni: we don't switch branch in oe-eval anymore; rather, we take advantage of gantry to submit
-    # jobs with different branches.
     oe_eval_dir = install_oe_eval(
         env=env,
-        # commit_hash=None,
-        # commit_branch=None,
         # leaving these here for reference; but using gantry now!
         commit_hash=oe_eval_commit,
         commit_branch=oe_eval_branch,
@@ -330,11 +326,9 @@ def evaluate_checkpoint(
             gantry_args_dict = {
                 "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
                 "yes": True,
-                # **({"ref": oe_eval_commit} if oe_eval_commit else {}),
-                # **({"branch": oe_eval_branch} if oe_eval_branch else {}),
+                **({"ref": oe_eval_commit} if oe_eval_commit else {}),
                 **gantry_args_dict,
             }
-
             # finally append gantry args
             local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
 
@@ -371,6 +365,8 @@ def evaluate_checkpoint(
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
             print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
+            breakpoint()
+
             output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
             print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
             if output.returncode != 0:
