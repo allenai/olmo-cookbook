@@ -23,6 +23,7 @@ from cookbook.constants import (
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.utils.clusters import get_matching_clusters, is_gcs_cluster
 
+
 def evaluate_checkpoint(
     oe_eval_commit: str,
     oe_eval_branch: str,
@@ -72,11 +73,11 @@ def evaluate_checkpoint(
     # jobs with different branches.
     oe_eval_dir = install_oe_eval(
         env=env,
-        commit_hash=None,
-        commit_branch=None,
+        # commit_hash=None,
+        # commit_branch=None,
         # leaving these here for reference; but using gantry now!
-        # commit_hash=oe_eval_commit,
-        # commit_branch=oe_eval_branch,
+        commit_hash=oe_eval_commit,
+        commit_branch=oe_eval_branch,
         is_editable=use_gantry,
     )
 
@@ -204,11 +205,8 @@ def evaluate_checkpoint(
     ]
     all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
 
-
     # @soldni: these evals are known to be private, thus requiring HF token
-    HF_TOKEN_REQUIRED_TASKS = [
-        r"^squad"
-    ]
+    HF_TOKEN_REQUIRED_TASKS = [r"^squad"]
     tasks_with_hf_tokens = [
         task for task in all_tasks if any(re.search(pattern, task) for pattern in HF_TOKEN_REQUIRED_TASKS)
     ]
@@ -332,8 +330,8 @@ def evaluate_checkpoint(
             gantry_args_dict = {
                 "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
                 "yes": True,
-                **({"ref": oe_eval_commit} if oe_eval_commit else {}),
-                **({"branch": oe_eval_branch} if oe_eval_branch else {}),
+                # **({"ref": oe_eval_commit} if oe_eval_commit else {}),
+                # **({"branch": oe_eval_branch} if oe_eval_branch else {}),
                 **gantry_args_dict,
             }
 
