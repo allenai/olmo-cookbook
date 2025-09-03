@@ -98,6 +98,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     cp_head_stride: int = 1
     float8: bool = False
     activation_checkpointing: bool = False
+    dataset_overrides: Optional[List[str]] = None
     model_overrides: Optional[List[str]] = None
     train_module_overrides: Optional[List[str]] = None
     scheduler_type: SchedulerType = SchedulerType.COS_LINEAR

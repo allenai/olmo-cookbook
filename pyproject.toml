@@ -48,8 +48,12 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    # this is branch tyler/lc-localadj-gloofix-ropescaling-yarn-cpstride as of 2025-08-20
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@66e388cc861c5e32d7e306509fb43aaa28caea97",
+    # # this is branch tyler/lc-localadj-gloofix-ropescaling-yarn-cpstride as of 2025-08-20
+    # "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@66e388cc861c5e32d7e306509fb43aaa28caea97",
+    #
+    # switching to branch that allows chunking of masking.
+    # this is checkpoint in soldni/lc-gloofix-ropescaleing-yarn-hack-packing as of 2025-09-03
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@267dd9c18e70dcef209c8ce0f2c6bb01f01f14e2",
     "beaker-py>=1.17.11,<2",
     "GitPython>=3.0,<4.0",
     "wandb",

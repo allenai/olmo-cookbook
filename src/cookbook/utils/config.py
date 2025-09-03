@@ -181,6 +181,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         scheduler_type=base_config.scheduler_type,
         annealing=base_config.annealing,
         hard_stop=base_config.hard_stop,
+        dataset_overrides=base_config.dataset_overrides,
         model_overrides=base_config.model_overrides,
         train_module_overrides=base_config.train_module_overrides,
         activation_checkpointing=base_config.activation_checkpointing,

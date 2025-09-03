@@ -2,7 +2,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Any
 
 import gcsfs
 import olmo_core.train.train_module as train_module
@@ -123,6 +123,7 @@ class TransformerConfigBuilder:
         rank_microbatch_size (Optional[int]): The rank microbatch size.
         warmup_steps (Optional[int]): The number of warmup steps for the scheduler.
         scheduler_type (SchedulerType): The type of scheduler to use. Default is SchedulerType.COS_LINEAR.
+        dataset_overrides (Optional[List[str]]): Optional dotlist overrides for the dataset configuration.
         model_overrides (Optional[List[str]]): Optional dotlist overrides for the model configuration.
         train_module_overrides (Optional[List[str]]): Optional dotlist overrides for the train module configuration.
         activation_checkpointing (bool): Whether to enable activation checkpointing.
@@ -181,7 +182,6 @@ class TransformerConfigBuilder:
     model_identifier: ModelConfigIdentifier
     transformer_config: TransformerConfig
     group_id: str
-    cluster: str
     beaker_user: str
     s3: bool
     seed: int
@@ -198,6 +198,7 @@ class TransformerConfigBuilder:
     cluster: str
     downstream_evaluators: List[DownstreamEvaluator]  # type: ignore
     scheduler_type: SchedulerType
+    dataset_overrides: Optional[List[str]]
     model_overrides: Optional[List[str]]
     train_module_overrides: Optional[List[str]]
     hard_stop: Optional[Duration]
@@ -241,6 +242,7 @@ class TransformerConfigBuilder:
         cp_head_stride: int = 1,
         float8: bool = False,
         model_overrides: Optional[List[str]] = None,
+        dataset_overrides: Optional[List[str]] = None,
         train_module_overrides: Optional[List[str]] = None,
         load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = None,
         annealing: Optional[AnnealConfig] = None,
@@ -266,6 +268,7 @@ class TransformerConfigBuilder:
         self.tokenizer = self.get_tokenizer_config(tokenizer=tokenizer)
         self.model_overrides = model_overrides
         self.train_module_overrides = train_module_overrides
+        self.dataset_overrides = dataset_overrides
         self.transformer_config = WrappedTransformerConfig.from_model_identifier(model_identifier, self.tokenizer)
         self.beaker_user = beaker_user.strip()
         self.profile = profile
@@ -318,7 +321,7 @@ class TransformerConfigBuilder:
             raise e
 
     def get_warmup_steps(self) -> int:
-        if not self.warmup_steps == None:
+        if self.warmup_steps is not None:
             logger.info(f"Using user-defined warmup steps: {self.warmup_steps}")
             return self.warmup_steps
 
@@ -375,8 +378,9 @@ class TransformerConfigBuilder:
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
-            "garbage_collector": GarbageCollectorCallback(
-                **{"gc_interval": self.gc_interval} if self.gc_interval else {}
+            "garbage_collector": (
+                GarbageCollectorCallback(gc_interval=self.gc_interval)
+                if self.gc_interval else GarbageCollectorCallback(),
             ),
         }
 
@@ -504,7 +508,7 @@ class TransformerConfigBuilder:
         weight_decay = 0.033
         betas = (0.9, 0.95)
         foreach = True
-        optim_group_override_dict = dict(params=["embeddings.weight"], opts=dict(weight_decay=0.0))
+        optim_group_override_dict: dict[str, Any] = dict(params=["embeddings.weight"], opts=dict(weight_decay=0.0))
 
         if self.annealing is not None:
             scheduler_state, optimizer_state = self.get_state_from_checkpoint()
@@ -512,7 +516,12 @@ class TransformerConfigBuilder:
             weight_decay = getattr(self.annealing, "weight_decay", None) or optimizer_state.weight_decay
             betas = getattr(self.annealing, "betas", None) or optimizer_state.betas
             foreach = getattr(self.annealing, "foreach", None) or optimizer_state.foreach
-            optim_group_override_dict = getattr(self.annealing, "optim_group_override", None) or optimizer_state.optim_group_override
+
+            annealing_optim_group_override = getattr(self.annealing, "optim_group_override", None)
+            if annealing_optim_group_override:
+                optim_group_override_dict = annealing_optim_group_override
+            elif isinstance(optimizer_state.optim_group_override, dict):
+                optim_group_override_dict = optimizer_state.optim_group_override
 
         group_overrides = [OptimGroupOverride(**optim_group_override_dict)] if optim_group_override_dict else []
 
@@ -599,7 +608,7 @@ class TransformerConfigBuilder:
         except KeyError:
             # Now try olmo_core v1 config format
             try:
-                base_lr: int = config["optim"]["lr"]
+                base_lr = config["optim"]["lr"]
                 scheduler_config = config["trainer"]["callbacks"]["lr_scheduler"]["scheduler"]
             except Exception as e:
                 logger.error(
@@ -730,14 +739,17 @@ class TransformerConfigBuilder:
         if self.model_overrides:
             logger.info("Applying model overrides:")
             logger.info(self.model_overrides)
-
             self.transformer_config = self.transformer_config.merge(dotlist=self.model_overrides)
 
         if self.train_module_overrides:
             logger.info("Applying train module overrides:")
             logger.info(self.train_module_overrides)
-
             train_module_config = train_module_config.merge(dotlist=self.train_module_overrides)
+
+        if self.dataset_overrides:
+            logger.info("Applying dataset overrides:")
+            logger.info(self.dataset_overrides)
+            dataset_config = dataset_config.merge(dotlist=self.dataset_overrides)
 
         return ModelTrainConfig(
             init_seed=self.seed,
