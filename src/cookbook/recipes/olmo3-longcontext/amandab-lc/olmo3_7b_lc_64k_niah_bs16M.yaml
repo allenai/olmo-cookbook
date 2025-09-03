@@ -1,0 +1,51 @@
+# Example recipe for OLMo3 7b swafix high-throughput configuration for 65k context length
+# Needs updates with actual training dataset and hyperparameters
+# Benchmarked at 9.3k TPS/device on 2x8 H100s, should scale almost linearly to Nx8 H100s
+name: "olmo3_7b_lc_64k_niah_bs16M"
+description: "OLMo3 7B @ 7T w/ swafix trained up to 64k context length with NIAH synthetic docs only"
+budget: "ai2/oe-base"
+workspace: "ai2/long-contexts"
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: urgent
+nodes: 4
+gpus: 8
+seed: 4123
+
+gc_interval: 200
+
+annealing:
+  enabled: true
+
+metrics_config:
+  backend: wandb
+  project: "olmo3-7b-long-context"
+  entity: "ai2-llm"
+
+generate_doc_lengths: true  # enable intra-document masking
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step467000
+load_state: false
+model: "olmo3_7B_swafix"
+tokenizer: "dolma2"
+max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
+# global_batch_size: 2_097_152  # switched to 2M batch size to match midtraining
+global_batch_size: 16_777_216  # 16M tokens like pretraining
+sequence_length: &seq_len 65536
+max_target_sequence_length: *seq_len
+rank_microbatch_size: *seq_len  # must be the same as sequence_length
+scheduler_type: linear
+warmup_steps: 0
+dp_shard_degree: 1  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+cp_degree: 8
+float8: true  # NOTE: it might be preferable to disable float8 for anneal / long context training
+eval_interval: 500
+# downstream_evaluators:
+#   - olmo2_dev_1b
+model_overrides:
+  - block.attention.rope.theta=8000000
+dataset:
+  sources:
+  - name: niah
+    # should be almost exactly 10B tokens in this subset in total
+    target_ratio: 1.0 
+    paths:

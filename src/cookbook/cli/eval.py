@@ -728,6 +728,8 @@ def get_results(
     else:
         raise ValueError(f"Invalid format: {format}")
 
+    return results
+
 
 @click.option("-d", "--dashboard", type=str, required=True, help="Set dashboard name")
 @click.option(
