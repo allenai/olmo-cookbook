@@ -2,7 +2,7 @@ name: &name "olmo25_7b_lc_64k_2T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip208
 description: *name
 budget: ai2/oe-base
 workspace: ai2/long-contexts
-cluster: ai2/augusta-google-1
+cluster: ai2/jupiter-cirrascale-1
 preemptible: true
 priority: urgent
 nodes: 4
