@@ -40,4 +40,4 @@ dataset:
   - name: All files
     target_ratio: 1.0
     paths:
-    - gs://ai2-llm/preprocessed/tylerr/lc-reshard/v0.1/allenai/dolma2-tokenizer/**/*.npy
+    - s3://ai2-llm/preprocessed/tylerr/lc-reshard/v0.2/allenai/dolma2-tokenizer/**/*.npy
