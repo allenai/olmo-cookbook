@@ -1,11 +1,11 @@
-name: mjicroanneal2.5-mj-tinyMATH2PoT_uncurse
-description: mjicroanneal just for the PoT of TinyMATH2
+name: mjicroanneal-mj-tinyMATH4PoT2_uncurse
+description: mjicroanneal just for the PoT2 of TinyMATH4 (rerun, uncursed?)
 budget: ai2/oe-base
 workspace: ai2/olmo-3-microanneals
 nodes: 2
 gpus: 8
 preemptible: true
-max_tokens: 414_687_378
+max_tokens: 479_294_178
 global_batch_size: 2_097_152
 sequence_length: 8_192
 seed: 42_069
@@ -19,7 +19,7 @@ warmup_steps: 0
 activation_checkpointing: true
 annealing:
   enabled: true
-load_path: gs://ai2-llm/checkpoints/OLMo25/step1413814
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step289000
 load_state: false
 dataset:
   sources:
@@ -30,4 +30,4 @@ dataset:
   - name: SPECIFIC_HQ_DATA
     target_ratio: 0.5
     paths:
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH2/PoT/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH4/pot_data2/allenai/dolma2-tokenizer/*.npy
