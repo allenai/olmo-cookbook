@@ -369,19 +369,25 @@ dataset:
 
 
   - name: LC-s2pdf-YAKE_32k-64k
-    target_ratio: 0.1627
+    target_ratio: 0.1223
     paths:
+      # total size: 6,119,477,658
       - s3://ai2-llm/preprocessed/LC_synth/yake_s2pdf/olmo32b_s18/length_2e15/allenai/dolma2-tokenizer/*.npy
       - s3://ai2-llm/preprocessed/LC_synth/yake_s2pdf/qwen25-32b_s71/length_2e15/allenai/dolma2-tokenizer/*.npy
       - s3://ai2-llm/preprocessed/LC_synth/yake_s2pdf/gpt5nano_s514/length_2e15/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf-CWE_32k-64k
-    target_ratio: 0.094
+    target_ratio: 0.0391
     paths:
       # total size: 1,491,802,795
       - s3://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15/allenai/dolma2-tokenizer/*.npy
       # total size: 467,035,267
       - s3://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321/allenai/dolma2-tokenizer/*.npy
+
+  - name: LC-s2pdf_32k-64k
+    target_ratio: 0.0953
+    paths:
+      - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/**/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf_8k-32k
     target_ratio: 0.0833
