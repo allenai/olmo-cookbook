@@ -238,6 +238,12 @@ def convert_checkpoint_from_hf(
     default=None,
     help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
 )
+@click.option(
+    "--experimental-with-flash-attn",
+    is_flag=True,
+    help="If converting OLMo Core v2 checkpoint, use experimental flash attention.",
+    default=False,
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -268,6 +274,7 @@ def convert_checkpoint(
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
+    experimental_with_flash_attn: bool = False,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -299,6 +306,7 @@ def convert_checkpoint(
         use_system_python=use_system_python,
         skip_validation=skip_validation,
         dtype=dtype,
+        experimental_with_flash_attn=experimental_with_flash_attn,
     )
 
 
@@ -339,6 +347,12 @@ def convert_checkpoint(
     help="Set priority for evaluation jobs.",
 )
 @click.option("-n", "--num-gpus", type=int, default=1, help="Set number of GPUs")
+@click.option(
+    "--use-hf-token/--no-use-hf-token",
+    default=False,
+    type=bool,
+    help="If true, always mount huggingface token as beaker secret",
+)
 @click.option(
     "-x",
     "--extra-args",
@@ -511,6 +525,7 @@ def evaluate_model(
     remote_output_prefix: str,
     extra_args: str,
     batch_size: int,
+    use_hf_token: bool,
     dry_run: bool,
     beaker_image: str,
     beaker_retries: int,
@@ -602,6 +617,7 @@ def evaluate_model(
         dashboard=dashboard,
         model_backend=model_backend,
         tasks=tasks,
+        use_hf_token=use_hf_token,
         partition_size=partition_size,
         remote_output_prefix=remote_output_prefix,
         extra_args=extra_args,

@@ -1,5 +1,3 @@
-import json
-
 TRANSFORMERS_GIT_URL = "https://github.com/huggingface/transformers.git"
 TRANSFORMERS_COMMIT_HASH = "241c04d36867259cdf11dbb4e9d9a60f9cb65ebc"  # v4.47.1
 
@@ -29,8 +27,10 @@ BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
 BEAKER_DEFAULT_BUDGET = "ai2/oe-base"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
-BEAKER_PY_MAX_VERSION = "1.34.1"
-BEAKER_GANTRY_MAX_VERSION = "1.14.1"
+BEAKER_PY_MIN_VERSION = "1.36.4"
+BEAKER_PY_MAX_VERSION = "2"
+BEAKER_GANTRY_MIN_VERSION = "1.17.1"
+BEAKER_GANTRY_MAX_VERSION = "2"
 
 OLMO_TYPES = ["olmoe", "olmo2", "olmo-core", "olmo-core-v2"]
 
@@ -81,6 +81,34 @@ BEAKER_KNOWN_CLUSTERS = {
         "ai2/ceres-cirrascale",
     ],
 }
+
+NEW_CLUSTER_ALIASES = {
+    "ai2/allennlp": "ai2/allennlp-elanding-a100-40g",
+    "ai2/allennlp-dev-a100-sea": "ai2/allennlp-elanding-a100-40g",
+    "ai2/augusta-batch-h100-dsm-tcpxo": "ai2/augusta-google-1",
+    "ai2/augusta": "ai2/augusta-google-1",
+    "ai2/ceres-dev-h100-aus-ib": "ai2/ceres-cirrascale",
+    "ai2/ceres": "ai2/ceres-cirrascale",
+    "ai2/jupiter-batch-h100-aus-ib": "ai2/jupiter-cirrascale-2",
+    "ai2/jupiter": "ai2/jupiter-cirrascale-2",
+    "ai2/neptune-dev-l40-aus": "ai2/neptune-cirrascale",
+    "ai2/neptune": "ai2/neptune-cirrascale",
+    "ai2/phobos-dev-aus": "ai2/phobos-cirrascale",
+    "ai2/phobos": "ai2/phobos-cirrascale",
+    "ai2/prior-dev-a6000-sea": "ai2/prior-elanding",
+    "ai2/prior": "ai2/prior-elanding",
+    "ai2/prior-rtx8000": "ai2/prior-elanding-rtx8000",
+    "ai2/prior-dev-rtx8000-sea": "ai2/prior-elanding-rtx8000",
+    "ai2/rhea-dev-a6000-aus": "ai2/rhea-cirrascale",
+    "ai2/rhea": "ai2/rhea-cirrascale",
+    "ai2/saturn-dev-a100-aus": "ai2/saturn-cirrascale",
+    "ai2/saturn": "ai2/saturn-cirrascale",
+    "ai2/titan-batch-b200-aus-ib": "ai2/titan-cirrascale",
+    "ai2/titan": "ai2/titan-cirrascale",
+    "ai2/triton-dev-l40-aus": "ai2/triton-cirrascale",
+    "ai2/triton": "ai2/triton-cirrascale",
+}
+
 
 MMLU_CATEGORIES = [
     "mmlu_abstract_algebra",
