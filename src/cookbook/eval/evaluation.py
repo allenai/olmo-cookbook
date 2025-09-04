@@ -202,7 +202,11 @@ def evaluate_checkpoint(
     all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
 
     # @soldni: these evals are known to be private, thus requiring HF token
-    HF_TOKEN_REQUIRED_TASKS = [r"^squad"]
+    HF_TOKEN_REQUIRED_TASKS = [
+        r"^squad",  # all squad tasks are based on allenai/squad and allenai/squad_v2, which are private datasets
+        r"^gpqa",
+        r"^basic_skills"
+    ]
     tasks_with_hf_tokens = [
         task for task in all_tasks if any(re.search(pattern, task) for pattern in HF_TOKEN_REQUIRED_TASKS)
     ]
