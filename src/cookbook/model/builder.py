@@ -380,7 +380,7 @@ class TransformerConfigBuilder:
             "profiler": ProfilerCallback(enabled=self.profile),
             "garbage_collector": (
                 GarbageCollectorCallback(gc_interval=self.gc_interval)
-                if self.gc_interval else GarbageCollectorCallback(),
+                if self.gc_interval else GarbageCollectorCallback()
             ),
         }
 
