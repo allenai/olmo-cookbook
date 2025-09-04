@@ -168,6 +168,8 @@ def convert_olmo_core_v2(
             if os.path.exists(generation_config_file):
                 with open(generation_config_file, "r") as f:
                     generation_config = json.load(f)
+
+            # @soldni: this is to stop type checking from complaining
             assert isinstance(generation_config, dict), "generation_config.json should be a dictionary"
 
             if "eos_token_id" in generation_config and "pad_token_id" not in generation_config:
