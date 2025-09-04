@@ -478,6 +478,7 @@ def run_checkpoint_conversion(
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
+    experimental_with_flash_attn: bool = False,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -523,11 +524,9 @@ def run_checkpoint_conversion(
         for cluster in get_matching_clusters(beaker_cluster):
             gantry_flags.append(f"--cluster {cluster}")
 
-        install_flash_attention = (
-            "uv sync --no-build-isolation-package flash-attn &&"
-            if olmo_type == "olmo-core-v2"
-            else ""
-        )
+        install_flash_attention = ""
+        if experimental_with_flash_attn and olmo_type == "olmo-core-v2":
+            install_flash_attention = "pip install --no-build-isolation-package flash-attn &&"
 
         remote_command = [
             "pip install uv && uv pip install . --system &&",

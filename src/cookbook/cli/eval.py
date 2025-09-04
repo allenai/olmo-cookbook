@@ -237,6 +237,12 @@ def convert_checkpoint_from_hf(
     default=None,
     help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
 )
+@click.option(
+    "--experimental-with-flash-attn",
+    is_flag=True,
+    help="If converting OLMo Core v2 checkpoint, use experimental flash attention.",
+    default=False,
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -267,6 +273,7 @@ def convert_checkpoint(
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
+    experimental_with_flash_attn: bool = False,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -298,6 +305,7 @@ def convert_checkpoint(
         use_system_python=use_system_python,
         skip_validation=skip_validation,
         dtype=dtype,
+        experimental_with_flash_attn=experimental_with_flash_attn,
     )
 
 

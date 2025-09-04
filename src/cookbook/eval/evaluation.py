@@ -116,8 +116,8 @@ def evaluate_checkpoint(
         raise ValueError(f"Unsupported scheme '{scheme}' in checkpoint path")
     elif checkpoint_path.startswith("/weka/") or any(checkpoint_path.startswith(f"/{w}/") for w in WEKA_MOUNTS):
         print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
-        for cl in get_matching_clusters("goog"):
-            clusters_to_exclude.add(cl)
+        for cluster_name in get_matching_clusters("goog"):
+            clusters_to_exclude.add(cluster_name)
 
         if checkpoint_path.startswith("/weka/"):
             checkpoint_path = f"weka://{checkpoint_path[6:].rstrip('/')}"
@@ -369,7 +369,6 @@ def evaluate_checkpoint(
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
             print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
-            breakpoint()
 
             output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
             print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
