@@ -15,11 +15,11 @@ from cookbook.cli.utils import (
     remove_conflicting_packages,
 )
 from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
     OLMO_CORE_CONVERT_FROM_HF_SCRIPT,
     OLMO_CORE_V2_COMMIT_HASH,
     TRANSFORMERS_COMMIT_HASH,
 )
+from cookbook.utils.clusters import get_matching_clusters
 
 
 def convert_hf_to_olmo_core_v2(
@@ -161,7 +161,7 @@ def run_checkpoint_conversion_from_hf(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
-        for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
+        for cluster in get_matching_clusters(beaker_cluster):
             gantry_flags.append(f"--cluster {cluster}")
 
         remote_command = [
