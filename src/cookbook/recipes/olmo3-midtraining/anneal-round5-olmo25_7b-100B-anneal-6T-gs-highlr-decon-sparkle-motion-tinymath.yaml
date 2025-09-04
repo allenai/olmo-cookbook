@@ -43,17 +43,17 @@ dataset:
     # 21,264,298,392
     target_ratio: 0.2
     paths:
-    # 5_624_449_531
-    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-withids/allenai/dolma2-tokenizer/*.npy
-    # 10,687,987,907
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
-    # 1.99B
-    # 850,848,999
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
-    # 898,733,958
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
-    # 240,590,380
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    # # 5_624_449_531
+    # - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-withids/allenai/dolma2-tokenizer/*.npy
+    # # 10,687,987,907
+    # - gs://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    # # 1.99B
+    # # 850,848,999
+    # - gs://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    # # 898,733,958
+    # - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
+    # # 240,590,380
+    # - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
     #tinyMATH2_2stud
     # 554_919_635
     - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH2/PoT_MIND_requests/MIND_2stud_merged-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
