@@ -299,3 +299,19 @@ for model in "${models[@]}"; do
     SUITE="full" ./scripts/launch_sc4lc.sh ${model}
 done
 ```
+
+do helmet on these
+
+```shell
+
+models=(
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-7acf789f/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-c6bda7ae/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_SC-core-hack_yarn-fullonly_10B-52b36661/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_6634_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_50B-0868833e/step11921"
+)
+
+for model in "${models[@]}"; do
+    TIMEOUT=0 PRIORITY=urgent NUM_GPUS=8 WORKSPACE=ai2/long-contexts BACKEND=olmo_core MODEL_NAME_OR_PATH=${model} ./gantry_eval.sh
+done
+```
