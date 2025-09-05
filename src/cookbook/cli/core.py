@@ -211,7 +211,7 @@ class ConfigLengths:
     "-b",
     "--budget",
     type=str,
-    default="ai2/oe-data",
+    default="ai2/oe-base",
     help="Budget to use for the job.",
 )
 @click.option(
@@ -252,9 +252,9 @@ def launch(
     olmo_core_dir = install_olmo_core(commit_hash=olmo_core_commit_hash, env=env)
 
     config_names = {str(p.stem): p for p in (Path(olmo_core_dir) / OLMO_CORE_EXAMPLES_BASE_DIR).glob("*.py")}
-    assert (
-        model in config_names or (Path(olmo_core_dir) / model).exists()
-    ), f"Model {model} not found in {config_names}"
+    assert model in config_names or (Path(olmo_core_dir) / model).exists(), (
+        f"Model {model} not found in {config_names}"
+    )
     model_script_path = str(config_names.get(model, Path(model)).relative_to(olmo_core_dir))
 
     flags: list[str] = []
