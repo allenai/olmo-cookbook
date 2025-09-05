@@ -284,3 +284,18 @@ for model in "${models[@]}"; do
     uv run scripts/grab_sc4lc.py $(echo ${model} | sed -E 's#.*/([^/]+)/([^/]+)$#\1_\2#') >> temp/sc4lc_results_${timestamp}.csv
 done
 ```
+
+
+full eval for these models
+
+```shell
+models=(
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-7acf789f/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round3_qwenlike_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-c6bda7ae/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_SC-core-hack_yarn-fullonly_10B-52b36661/step2385"
+)
+
+for model in "${models[@]}"; do
+    SUITE="full" ./scripts/launch_sc4lc.sh ${model}
+done
+```

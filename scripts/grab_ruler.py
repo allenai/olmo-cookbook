@@ -84,7 +84,13 @@ def main():
 
                 csv_out[0] = task_length
                 csv_out[1] = model_name_from_data
-                csv_out[order.index(task_name) + 3] = str(float(task_value) * 100)
+
+                try:
+                    task_value = str(float(task_value) * 100)
+                except TypeError:
+                    task_value = "-"
+
+                csv_out[order.index(task_name) + 3] = task_value
 
             print(",".join(csv_out))
 

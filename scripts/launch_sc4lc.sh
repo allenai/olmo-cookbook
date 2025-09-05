@@ -6,15 +6,26 @@ if [ -z "$1" ]; then
 fi
 
 MAX_LENGTH=${MAX_LENGTH:-65536}
+SUITE=${SUITE:-lite}
+PARALLEL=${PARALLEL:-4}
 
 
-LITE_TASKS=(
-  "gen::xlarge"
-  "mbpp:3shot::olmo3:n32:v2"
-  "minerva"
-  "olmo3:dev:7b:mcqa:stem"
-  "olmo3:dev:7b:mcqa:non_stem"
-)
+if [ "$SUITE" == "lite" ]; then
+  TASKS_NAMES=(
+    "gen::xlarge"
+    "mbpp:3shot::olmo3:n32:v2"
+    "minerva"
+    "olmo3:dev:7b:mcqa:stem"
+    "olmo3:dev:7b:mcqa:non_stem"
+  )
+elif [ "$SUITE" == "full" ]; then
+  TASKS_NAMES=(
+    "olmo3:dev:7b:main:v2"
+  )
+else
+  echo "Invalid suite: '${SUITE}'; must be either 'lite' or 'full'"
+  exit 1
+fi
 
 # Check if olmo-cookbook-eval command is available
 if command -v olmo-cookbook-eval &> /dev/null; then
@@ -27,7 +38,7 @@ else
 fi
 
 tasks=""
-for task in "${LITE_TASKS[@]}"; do
+for task in "${TASKS_NAMES[@]}"; do
   tasks+=" --tasks ${task}"
 done
 
@@ -54,7 +65,7 @@ ${eval_command} evaluate \
   "$1" \
   --priority urgent \
   --cluster ${cluster} \
-  --partition-size 4 \
+  --partition-size ${PARALLEL} \
   --num-gpus 1 \
   ${backend} \
   --dashboard peteish-LC-ruler \
