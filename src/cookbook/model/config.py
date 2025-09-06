@@ -186,6 +186,20 @@ class WrappedTransformerConfig:
             qk_norm=DefaultTransformerProperties.qk_norm,
             block_name=DefaultTransformerProperties.block_type,
         )
+        
+    @classmethod
+    def olmo25_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 retrofit
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
 
     @classmethod
     def olmo25_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
