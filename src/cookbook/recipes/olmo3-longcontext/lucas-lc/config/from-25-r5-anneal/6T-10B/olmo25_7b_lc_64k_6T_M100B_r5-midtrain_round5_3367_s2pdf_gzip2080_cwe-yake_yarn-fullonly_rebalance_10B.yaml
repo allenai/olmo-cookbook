@@ -341,7 +341,7 @@ dataset:
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/food_dining/allenai/dolma2-tokenizer/*.npy
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e14/food_dining/allenai/dolma2-tokenizer/.*npy
   - name: LC-s2pdf-NAT-8k_32k-games
-    target_ratio: 0.01153976232
+    target_ratio: 0.01739521463
     paths:
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/games/allenai/dolma2-tokenizer/*.npy
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e14/games/allenai/dolma2-tokenizer/.*npy
@@ -423,7 +423,8 @@ dataset:
     paths:
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/food_dining/allenai/dolma2-tokenizer/*.npy
   - name: _patch-LC_32k-64k-games
-    target_ratio: 0.03470857721
+
+    target_ratio: 0.0288531249
     paths:
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/games/allenai/dolma2-tokenizer/*.npy
   - name: _patch-LC_32k-64k-hardware
