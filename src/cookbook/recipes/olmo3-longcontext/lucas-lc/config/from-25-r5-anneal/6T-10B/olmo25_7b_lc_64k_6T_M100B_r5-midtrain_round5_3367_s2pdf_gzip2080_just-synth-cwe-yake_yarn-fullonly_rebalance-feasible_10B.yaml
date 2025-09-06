@@ -295,11 +295,6 @@ dataset:
     paths:
     - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_partitioned/allenai/dolma2-tokenizer/software_dev/*.npy
     - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321_partioned/allenai/dolma2-tokenizer/software_dev/*.npy
-  - name: LC-s2pdf-CWE_32k-64k-software
-    target_ratio: 0.0057107712
-    paths:
-    - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_partitioned/allenai/dolma2-tokenizer/software/*.npy
-    - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321_partioned/allenai/dolma2-tokenizer/software/*.npy
   - name: LC-s2pdf-CWE_32k-64k-sports_fitness
     target_ratio: 0.0014183128
     paths:
@@ -460,7 +455,7 @@ dataset:
     paths:
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/social_life/allenai/dolma2-tokenizer/*.npy
   - name: _patch-LC_32k-64k-software
-    target_ratio: 0.027730518224
+    target_ratio: 0.03344128942
     paths:
     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/software/allenai/dolma2-tokenizer/*.npy
   - name: _patch-LC_32k-64k-software_dev
