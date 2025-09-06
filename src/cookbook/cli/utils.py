@@ -569,7 +569,7 @@ def install_transformers(
     subprocess.run(shlex.split(f"{env.pip} install 'accelerate>=0.26.0'"), check=True, env=env.path())
 
     print("Installing torchao to fully support Huggingface model conversion...")
-    subprocess.run(shlex.split(f"{env.pip} install 'torchao'"), check=True, env=env.path())
+    subprocess.run(shlex.split(f"{env.pip} install 'torchao==0.11.0'"), check=True, env=env.path())
 
     return transformers_dir
 
