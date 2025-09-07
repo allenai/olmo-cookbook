@@ -188,7 +188,7 @@ class WrappedTransformerConfig:
         """
         An 8B Llama3-like model config.
         """
-        return getattr(TransformerConfig, "llama_like")(
+        config = getattr(TransformerConfig, "llama_like")(
             d_model=4096,
             vocab_size=tokenizer.padded_vocab_size(),
             n_layers=kwargs.pop("n_layers", 32),
@@ -198,7 +198,10 @@ class WrappedTransformerConfig:
             hidden_size_multiplier=1.3,
             hidden_size_multiple_of=1024,
             **kwargs,
+            
         )
+        config.block.attention.use_flash = True
+        return config
 
 
 
