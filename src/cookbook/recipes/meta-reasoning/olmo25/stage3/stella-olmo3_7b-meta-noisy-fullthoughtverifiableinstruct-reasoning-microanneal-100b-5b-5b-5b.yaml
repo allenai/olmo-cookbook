@@ -1,5 +1,5 @@
-name: "microanneal-warmup-meta-noisy-fullthoughtverifiableinstruct-reasoning-olmo3-microanneal-100b-5b-5b-5b-lr8.8e-05"
-description: "OLMo3 7b 5B fullthoughtverifiableinstruct reasoning microanneal w/ warmup - continue from 100B nonreasoning + 5B meta + 5B noisy reasoning - lr 8.8e-05"
+name: "microanneal-olmo25-meta-noisy-fullthoughtverifiableinstruct-reasoning-microanneal-100b-5b-5b-5b-lr8.8e-05"
+description: "OLMo2.5 7b 5B fullthoughtverifiableinstruct reasoning microanneal w/ warmup - continue from 100B nonreasoning + 5B meta + 5B noisy reasoning - lr 8.8e-05"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -9,7 +9,7 @@ max_tokens: 5_000_000_000
 global_batch_size: 2097152
 sequence_length: 8192
 seed: 1337
-model: "olmo2_7B_swafix"
+model: "olmo25_7b"
 tokenizer: "dolma2"
 priority: high
 cluster: ai2/augusta-google-1
@@ -21,7 +21,7 @@ learning_rate: 8.8e-05
 annealing:
   enabled: false
   initial_lr: 8.8e-05
-load_path: gs://ai2-llm/checkpoints/stellal/microanneal-warmup-meta-noisy-reasoning-olmo3-microanneal-100b-5b-5b-lr8.8e-05-14bceb22/step2385
+load_path: gs://ai2-llm/checkpoints/stellal/microanneal-olmo25-meta-noisy-reasoning-olmo3-microanneal-100b-5b-5b-lr8.8e-05-efca8fd1/step2385
 load_state: false
 dataset:
   sources:
