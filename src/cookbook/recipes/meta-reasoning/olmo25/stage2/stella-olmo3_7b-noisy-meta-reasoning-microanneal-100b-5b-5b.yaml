@@ -21,7 +21,7 @@ learning_rate: 8.8e-05
 annealing:
   enabled: false
   initial_lr: 8.8e-05
-load_path: gs://ai2-llm/checkpoints/stellal/microanneal-warmup-noisy-reasoning-olmo3-microanneal-100b-5b-lr8.8e-05-361edbd4/step2385
+load_path: gs://ai2-llm/checkpoints/stellal/microanneal-olmo25-noisy-reasoning-microanneal-100b-5b-lr8.8e-05-fa13e557/step2385
 load_state: false
 dataset:
   sources:

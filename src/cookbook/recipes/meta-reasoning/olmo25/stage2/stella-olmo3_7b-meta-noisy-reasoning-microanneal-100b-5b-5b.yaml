@@ -1,5 +1,5 @@
-name: "microanneal-warmup-meta-noisy-reasoning-olmo3-microanneal-100b-5b-5b-lr8.8e-05"
-description: "OLMo3 7b 5B noisy reasoning microanneal w/ warmup - continue from 100B + 5B meta - lr 8.8e-05"
+name: "microanneal-olmo25-meta-noisy-reasoning-olmo3-microanneal-100b-5b-5b-lr8.8e-05"
+description: "OLMo2.5 7b 5B noisy reasoning microanneal w/ warmup - continue from 100B + 5B meta - lr 8.8e-05"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
 nodes: 4
@@ -21,7 +21,7 @@ learning_rate: 8.8e-05
 annealing:
   enabled: false
   initial_lr: 8.8e-05
-load_path: gs://ai2-llm/checkpoints/stellal/microanneal-warmup-meta-reasoning-olmo3-microanneal-100b-5b-lr8.8e-05-be8a7123/step2385
+load_path: gs://ai2-llm/checkpoints/stellal/microanneal-olmo25-meta-reasoning-microanneal-100b-5b-lr8.8e-05-549b06ae/step2385
 load_state: false
 dataset:
   sources:
