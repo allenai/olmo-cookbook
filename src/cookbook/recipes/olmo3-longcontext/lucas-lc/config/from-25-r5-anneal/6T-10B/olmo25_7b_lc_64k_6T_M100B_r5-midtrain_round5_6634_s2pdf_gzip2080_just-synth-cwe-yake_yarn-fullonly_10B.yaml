@@ -41,36 +41,36 @@ dataset:
   - name: SC-ROUND5-sponge
     target_ratio: 0.03473789024
     paths:
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/**/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/**/allenai/dolma2-tokenizer/*.npy
   - name: SC-ROUND5-code_fim
     target_ratio: 0.06947578048
     paths:
     # 21,390,279,634
-    - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/**/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/**/**/*.npy
   - name: SC-ROUND5-swallowcode
     target_ratio: 0.06947578048
     paths:
     # 18,833,636,683
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon/allenai/dolma2-tokenizer/*.npy
   - name: SC-ROUND5-megamatt
     target_ratio: 0.01179698753
     paths:
     # 3,883,674,937
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: SC-ROUND5-dolminos2math
     target_ratio: 0.1271545734
     paths:
     # 5_624_449_531
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
     # 10,687,987,907
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-2/allenai/dolma2-tokenizer/*.npy
     # 1.99B
     # 850,848,999
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-2/allenai/dolma2-tokenizer/*.npy
     # 898,733,958
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
     # 240,590,380
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-2/allenai/dolma2-tokenizer/*.npy
   - name: SC-ROUND5-reddit
     target_ratio: 0.04099071048
     paths:
@@ -372,17 +372,17 @@ dataset:
     target_ratio: 0.1223
     paths:
       # total size: 6,119,477,658
-      - s3://ai2-llm/preprocessed/LC_synth/yake_s2pdf/olmo32b_s18/length_2e15/allenai/dolma2-tokenizer/*.npy
-      - s3://ai2-llm/preprocessed/LC_synth/yake_s2pdf/qwen25-32b_s71/length_2e15/allenai/dolma2-tokenizer/*.npy
-      - s3://ai2-llm/preprocessed/LC_synth/yake_s2pdf/gpt5nano_s514/length_2e15/allenai/dolma2-tokenizer/*.npy
+      - gs://ai2-llm/preprocessed/LC_synth/yake_s2pdf/olmo32b_s18/length_2e15/allenai/dolma2-tokenizer/*.npy
+      - gs://ai2-llm/preprocessed/LC_synth/yake_s2pdf/qwen25-32b_s71/length_2e15/allenai/dolma2-tokenizer/*.npy
+      - gs://ai2-llm/preprocessed/LC_synth/yake_s2pdf/gpt5nano_s514/length_2e15/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf-CWE_32k-64k
     target_ratio: 0.0391
     paths:
       # total size: 1,491,802,795
-      - s3://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15/allenai/dolma2-tokenizer/*.npy
+      - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15/allenai/dolma2-tokenizer/*.npy
       # total size: 467,035,267
-      - s3://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321/allenai/dolma2-tokenizer/*.npy
+      - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf_32k-64k
     target_ratio: 0.0953
