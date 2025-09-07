@@ -338,8 +338,8 @@ class TransformerConfigBuilder:
         callbacks = {
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
-                ephemeral_save_interval=100,
-                save_async=True,
+                ephemeral_save_interval=None,
+                save_async=False,
             ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
@@ -368,7 +368,6 @@ class TransformerConfigBuilder:
                     project=self.metrics_config.project.strip(),
                     entity=self.metrics_config.entity.strip(),
                     group=self.group_id.strip(),
-                    cancel_check_interval=10,
                     enabled=True,
                 )
             if MetricBackend.comet in self.metrics_config.backends:
@@ -384,8 +383,7 @@ class TransformerConfigBuilder:
                     name=self.run_name.strip(),
                     workspace=self.metrics_config.workspace.strip(),
                     project=self.metrics_config.project.strip(),
-                    enabled=True,
-                    cancel_check_interval=10,
+                    enabled=True
                 )
 
         if self.lm_evaluator:
