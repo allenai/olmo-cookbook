@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5-longer_6634_s2pdf_gzip20.0_cwe-yake_yarn-fullonly_10B"
+name: &name "olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5-longer_6634_s2pdf_gzip2080_cwe-yake_yarn-fullonly_10B"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/long-contexts
@@ -35,6 +35,7 @@ eval_interval: 500
 train_module_overrides:
 - scheduler.alpha_f=0.0
 
+
 dataset:
   sources:
 
@@ -44,203 +45,203 @@ dataset:
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e15/**/*.npy
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e14/**/*.npy
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e13/**/*.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/politics/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/transportation/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/food_and_dining/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/art_and_design/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/politics/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/religion/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/entertainment/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/industrial/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/crime_and_law/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/sports_and_fitness/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/history_and_geography/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/politics/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/social_life/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/electronics_and_hardware/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/home_and_hobbies/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/history_and_geography/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/history_and_geography/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-0.00000.npy
-    target_ratio: 0.03508771
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/politics/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/transportation/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/food_and_dining/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/art_and_design/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/politics/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/religion/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/entertainment/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/industrial/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/crime_and_law/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/sports_and_fitness/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/history_and_geography/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/politics/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/education_and_jobs/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/social_life/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/literature/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/electronics_and_hardware/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/games/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/home_and_hobbies/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/health/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/history_and_geography/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/history_and_geography/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software_development/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/finance_and_business/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-0-00000.npy
+    target_ratio: 0.03508771926315789
   - name: SC-ROUND5-LENGTH-code_fim
     paths:
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.16/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.00/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.10/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.19/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.03/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0.04/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.03/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.11/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0.14/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.09/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.19/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.17/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.08/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.06/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0.03/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.05/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.13/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.15/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.08/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.04/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0.13/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.03/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.01/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.04/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.00/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.14/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.14/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0.06/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0.00/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.03/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.04/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.13/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.05/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.05/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.10/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.06/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.14/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.19/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0.10/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0.11/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.11/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.07/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.19/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0.04/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.19/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0.15/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0.02/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.14/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.17/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.12/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0.05/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.03/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.01/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.11/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.00/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0.05/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0.06/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0.02/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.13/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.02/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.16/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.16/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.01/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.01/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.07/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0.05/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.12/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.09/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.19/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.17/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.19/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.13/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.11/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.12/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.19/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.11/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0.03/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0.17/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.09/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.15/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.01/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.04/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.09/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0.01/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0.08/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0.07/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0.15/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.13/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.19/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.12/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.09/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.17/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0.15/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0.00/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.11/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0.06/part-1-0.000.npy
-    target_ratio: 0.07017543
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0016/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0000/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0010/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0019/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0003/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0004/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0003/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0011/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0014/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0009/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0019/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0017/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0008/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0006/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0003/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0005/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0013/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0015/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0008/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0004/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0013/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0003/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0001/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0004/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0000/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0014/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0014/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0006/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0000/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0003/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0004/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0013/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0005/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0005/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0010/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0006/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0014/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0019/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0010/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0011/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0011/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0007/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0019/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0004/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0019/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0015/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0002/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0014/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0017/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0012/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0005/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0003/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0001/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0011/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0000/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Cpp/bucket_0005/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0006/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0002/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0013/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0002/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0016/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0016/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0001/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0001/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0007/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/JavaScript/bucket_0005/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0012/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0009/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0019/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0017/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0019/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0013/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0011/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0012/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0019/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0011/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0003/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0017/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0009/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0015/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Shell/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0001/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0004/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0009/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/CSharp/bucket_0001/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0008/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/TypeScript/bucket_0007/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Python/bucket_0015/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0013/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0019/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0012/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0009/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0017/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/SQL/bucket_0015/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0000/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0011/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0006/part-1-00000.npy
+    target_ratio: 0.07017543852631578
   - name: SC-ROUND5-LENGTH-swallowcode
     paths:
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-14-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-02-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-01-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-08-0.000.npy
-    target_ratio: 0.07017543
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-14-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-02-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-01-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-08-00000.npy
+    target_ratio: 0.07017543852631578
   - name: SC-ROUND5-LENGTH-megamatt
     paths:
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/**/*.npy
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/**/*.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.3-50/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-46/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-10/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-26/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-10/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-46/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-33/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-30/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-30/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-33/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-42/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-10/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-30/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.3-40/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.3-40/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-22/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.3-40/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.3-23/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-30/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-18/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-26/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-18/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-20.4-38/part-4-0.000.npy
-    target_ratio: 0.01211375
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2023-50/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-46/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-10/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-26/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-10/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-46/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-33/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-30/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-30/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-33/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-42/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-10/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-30/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2023-40/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2023-40/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-22/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2023-40/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2023-23/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-30/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-18/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-26/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-18/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-38/part-4-00000.npy
+    target_ratio: 0.012113759377359925
   - name: SC-ROUND5-LENGTH-dolminos2math
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e13/**/*.npy
@@ -253,250 +254,254 @@ dataset:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/flat_dolmino_math-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/**/*.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/**/*.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/MIND/data/processed-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/**/*.npy
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-00.00000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-13-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-12-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-08-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-09-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-11-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-14-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-01-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-15-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-07-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-06-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-04-0.000.npy
-    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-10.00000.npy
-    target_ratio: 0.12823711
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/tinyMATH/PoT/processed_data/processed-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-00-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-13-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-12-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-08-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-09-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-11-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-14-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-01-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-15-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-07-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-06-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-04-00000.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-10-00000.npy
+    target_ratio: 0.12823711767527163
   - name: SC-ROUND5-LENGTH-reddit
     paths:
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-0.00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-0-00000.npy
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/**/*.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-4-0.000.npy
-    target_ratio: 0.03940350
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-4-00000.npy
+    target_ratio: 0.04140350873052631
   - name: SC-ROUND5-LENGTH-rcqa
     paths:
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-0.00000.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-0-00000.npy
     - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/**/*.npy
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-0.00000.npy
-    target_ratio: 0.02105263
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-0-00000.npy
+    target_ratio: 0.021052631557894736
   - name: SC-ROUND5-LENGTH-nemotron-synth-qa
     paths:
     - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/**/*.npy
     - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/**/*.npy
-    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-1-0.010.npy
-    target_ratio: 0.03308771
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-1-00010.npy
+    target_ratio: 0.03508771926315789
   - name: SC-ROUND5-LENGTH-instruction-new-format
     paths:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e16/**/*.npy
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/**/*.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-2-0.000.npy
-    target_ratio: 0.00771929
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-2-00000.npy
+    target_ratio: 0.0077192982378947355
   - name: SC-ROUND5-LENGTH-flan
     paths:
-    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e16/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/part-0.00000.npy
+    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e16/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/part-0-00000.npy
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/**/*.npy
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e13/**/*.npy
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/**/*.npy
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/**/*.npy
-    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-15-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-01-0.000.npy
-    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-12-0.000.npy
-    target_ratio: 0.03508771
+    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-15-00000.npy
+    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-01-00000.npy
+    - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-12-00000.npy
+    target_ratio: 0.03508771926315789
   - name: SC-ROUND5-LENGTH-r1_reasoning
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/**/*.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-0.000.npy
-    target_ratio: 0.01315789
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-00000.npy
+    target_ratio: 0.01315789472368421
   - name: SC-ROUND5-LENGTH-qwq_reasoning
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-7-0.000.npy
-    target_ratio: 0.01315789
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-7-00000.npy
+    target_ratio: 0.01315789472368421
   - name: SC-ROUND5-LENGTH-gemini_reasoning
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-1-0.000.npy
-    target_ratio: 0.00172448
+    - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-1-00000.npy
+    target_ratio: 0.0017244831421351658
   - name: SC-ROUND5-LENGTH-llamanemotron_reasoning
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-15-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-08-0.000.npy
-    target_ratio: 0.00877192
+    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-15-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-08-00000.npy
+    target_ratio: 0.008771929815789472
   - name: SC-ROUND5-LENGTH-openthoughts2
     paths:
-    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-04-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-12-0.000.npy
-    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-13-0.000.npy
-    target_ratio: 0.00880183
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-04-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-12-00000.npy
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-13-00000.npy
+    target_ratio: 0.008801832636812203
   - name: SC-ROUND5-LENGTH-faeze_reasoning
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/**/*.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/**/*.npy
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-1-0.000.npy
-    target_ratio: 0.00701754
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-1-00000.npy
+    target_ratio: 0.007017543852631578
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--adult_content
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-6-0.000.npy
-    target_ratio: 0.00017943
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-6-00000.npy
+    target_ratio: 0.00017943403490828526
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--art_and_design
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/adult_content/part-3-0.000.npy
-    target_ratio: 0.00198178
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/adult_content/part-3-00000.npy
+    target_ratio: 0.00198178140152699
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--crime_and_law
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-12-0.000.npy
-    target_ratio: 0.00462350
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-12-00000.npy
+    target_ratio: 0.004623505609411582
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--education_and_jobs
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-08-0.000.npy
-    target_ratio: 0.00677470
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-08-00000.npy
+    target_ratio: 0.006774701045856878
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--electronics_and_hardware
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/sports_and_fitness/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/sports_and_fitness/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-0.00000.npy
-    target_ratio: 0.00546918
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/sports_and_fitness/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/sports_and_fitness/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-0-00000.npy
+    target_ratio: 0.005469185257688709
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--entertainment
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/crime_and_law/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/finance_and_business/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/social_life/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/science_math_and_technology/part-04-0.000.npy
-    target_ratio: 0.01416326
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/crime_and_law/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/finance_and_business/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/social_life/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/science_math_and_technology/part-04-00000.npy
+    target_ratio: 0.015163269458520942
+  - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--fashion_and_beauty
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-00-00000.npy
+    target_ratio: 2.011929822549474e-05
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--finance_and_business
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-11-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/industrial/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-2-0.000.npy
-    target_ratio: 0.00641561
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-11-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/industrial/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-2-00000.npy
+    target_ratio: 0.006415617537444031
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--food_and_dining
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-7-0.000.npy
-    target_ratio: 0.00211981
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-7-00000.npy
+    target_ratio: 0.00221981333111352
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--games
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/adult_content/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/games/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-02-0.000.npy
-    target_ratio: 0.01087291
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/adult_content/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/games/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-02-00000.npy
+    target_ratio: 0.010872916831232345
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--health
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/health/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/crime_and_law/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/science_math_and_technology/part-10.00000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-08-0.000.npy
-    target_ratio: 0.01472278
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/health/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/crime_and_law/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/science_math_and_technology/part-10-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-08-00000.npy
+    target_ratio: 0.01572278279129476
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--history_and_geography
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/food_and_dining/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-08-0.000.npy
-    target_ratio: 0.00429372
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/food_and_dining/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-08-00000.npy
+    target_ratio: 0.004293729118513288
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--home_and_hobbies
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-03-0.000.npy
-    target_ratio: 0.00144455
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-03-00000.npy
+    target_ratio: 0.0014445536827659726
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--industrial
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-05-0.000.npy
-    target_ratio: 0.00247972
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-05-00000.npy
+    target_ratio: 0.002479725260678169
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--literature
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-12-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/electronics_and_hardware/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/travel_and_tourism/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/finance_and_business/part-7-0.000.npy
-    target_ratio: 0.01076548
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-12-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/electronics_and_hardware/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/travel_and_tourism/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/finance_and_business/part-7-00000.npy
+    target_ratio: 0.010765483498006444
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--politics
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/health/part-7-0.000.npy
-    target_ratio: 0.00341440
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/health/part-7-00000.npy
+    target_ratio: 0.0034144094702698007
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--religion
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-1-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/history_and_geography/part-06-0.000.npy
-    target_ratio: 0.00312035
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/history_and_geography/part-06-00000.npy
+    target_ratio: 0.0031203582424936763
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--science_math_and_technology
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-2-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/travel_and_tourism/part-3-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/history_and_geography/part-05-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-09-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/fashion_and_beauty/part-5-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-02-0.000.npy
-    target_ratio: 0.03219718
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/travel_and_tourism/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/history_and_geography/part-05-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-09-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/fashion_and_beauty/part-5-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-02-00000.npy
+    target_ratio: 0.0331971855808379
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--social_life
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-12-0.000.npy
-    target_ratio: 0.00072650
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-12-00000.npy
+    target_ratio: 0.0007265080694489306
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--software_development
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/industrial/part-7-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-0.00000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-01-0.000.npy
-    target_ratio: 0.00747338
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/industrial/part-7-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-01-00000.npy
+    target_ratio: 0.0074733831504213534
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--software
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-15-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-14-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-6-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-00.00000.npy
-    target_ratio: 0.01759997
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-15-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-14-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-6-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-00-00000.npy
+    target_ratio: 0.017599974368364937
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--sports_and_fitness
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/fashion_and_beauty/part-4-0.000.npy
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-14-0.000.npy
-    target_ratio: 0.00205180
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/fashion_and_beauty/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-14-00000.npy
+    target_ratio: 0.0020518017523341635
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--transportation
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-05-0.000.npy
-    target_ratio: 0.00153892
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-05-00000.npy
+    target_ratio: 0.0015389266651277401
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--travel_and_tourism
     paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0.18_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-02-0.000.npy
-    target_ratio: 0.00034557
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-02-00000.npy
+    target_ratio: 0.0003455708768474116
 
 
   - name: LC-s2pdf-YAKE_32k-64k
-    target_ratio: 0.12240368
+    target_ratio: 0.1223
     paths:
       # total size: 6,119,477,658
       - gs://ai2-llm/preprocessed/LC_synth/yake_s2pdf/olmo32b_s18/length_2e15/allenai/dolma2-tokenizer/*.npy
@@ -504,20 +509,20 @@ dataset:
       - gs://ai2-llm/preprocessed/LC_synth/yake_s2pdf/gpt5nano_s514/length_2e15/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf-CWE_32k-64k
-    target_ratio: 0.03935000
+    target_ratio: 0.0391
     paths:
       # total size: 1,491,802,795
       - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15/allenai/dolma2-tokenizer/*.npy
-      # total size: 467,0.5,267
+      # total size: 467,035,267
       - gs://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf_32k-64k
-    target_ratio: 0.09535000
+    target_ratio: 0.0953
     paths:
       - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e15/**/allenai/dolma2-tokenizer/*.npy
 
   - name: LC-s2pdf_8k-32k
-    target_ratio: 0.08335000
+    target_ratio: 0.0833
     paths:
       - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/**/allenai/dolma2-tokenizer/*.npy
       - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e14/**/allenai/dolma2-tokenizer/*.npy
