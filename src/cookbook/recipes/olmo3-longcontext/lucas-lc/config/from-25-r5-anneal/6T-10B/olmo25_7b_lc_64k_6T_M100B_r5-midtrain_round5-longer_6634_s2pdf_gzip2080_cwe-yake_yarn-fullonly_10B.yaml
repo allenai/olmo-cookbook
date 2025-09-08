@@ -11,13 +11,13 @@ gpus: 8
 seed: 4123
 gc_interval: 200
 warmup_steps: 200
-learning_rate: 0.00020712
+learning_rate: 0.00020712352850360292
 metrics_config:
   backend: wandb
   project: olmo3-7b-long-context
   entity: ai2-llm
 generate_doc_lengths: true
-load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-6T-e2b30.73/step47684
+load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-6T-e2b30a73/step47684
 load_state: false
 model: olmo25_7b_yarn_fullonly
 tokenizer: dolma2
@@ -34,7 +34,6 @@ float8: true
 eval_interval: 500
 train_module_overrides:
 - scheduler.alpha_f=0.0
-
 
 dataset:
   sources:
