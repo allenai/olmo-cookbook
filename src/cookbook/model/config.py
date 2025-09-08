@@ -205,11 +205,11 @@ class WrappedTransformerConfig:
         OLMo2.5 retrofit w/ full attn
         """
         config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
-        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
-            force_full_attention_on_first_layer=False,
-            force_full_attention_on_last_layer=True,
-            pattern=[-1, -1, -1, -1],
-        )
+        # config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+        #     force_full_attention_on_first_layer=False,
+        #     force_full_attention_on_last_layer=True,
+        #     pattern=[-1, -1, -1, -1],
+        # )
         config.block.attention.use_flash = False
         config.block.attention.use_flex = True
         config.lm_head.loss_implementation = LMLossImplementation.fused_linear
