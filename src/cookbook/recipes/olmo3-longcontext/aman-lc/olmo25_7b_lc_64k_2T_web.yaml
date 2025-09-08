@@ -47,7 +47,6 @@ model_overrides:
   - block.attention.use_flash=false
   - block.attention.use_flex=true
   - block.attention.use_sinks=true
-  - lm_head.loss_implementation = LMLossImplementation.fused_linear
 
 activation_checkpointing: true
 
