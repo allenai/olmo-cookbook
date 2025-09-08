@@ -100,7 +100,7 @@ dataset:
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/software/part-1-00000.npy
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-1-00000.npy
     - s3://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2-partition/allenai/dolma2-tokenizer/eli5_60pct_filter-decon-2-partition/length_2e12/science_math_and_technology/part-0-00000.npy
-    target_ratio: 0.03508771926315789
+    target_ratio: 0.03508771
   - name: SC-ROUND5-LENGTH-code_fim
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0016/part-2-00000.npy
@@ -205,7 +205,7 @@ dataset:
     - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Java/bucket_0000/part-0-00000.npy
     - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0011/part-2-00000.npy
     - s3://ai2-llm/preprocessed/stack-edu/fim-weighted-pl-edu-score-decon-partition/allenai/dolma2-tokenizer/fim-weighted-pl-edu-score-decon-partition/length_2e16/Markdown/bucket_0006/part-1-00000.npy
-    target_ratio: 0.07017543852631578
+    target_ratio: 0.07017543
   - name: SC-ROUND5-LENGTH-swallowcode
     paths:
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-0-00000.npy
@@ -213,7 +213,7 @@ dataset:
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-02-00000.npy
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-01-00000.npy
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-08-00000.npy
-    target_ratio: 0.07017543852631578
+    target_ratio: 0.07017543
   - name: SC-ROUND5-LENGTH-megamatt
     paths:
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/**/*.npy
@@ -241,7 +241,7 @@ dataset:
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-26/part-1-00000.npy
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-18/part-4-00000.npy
     - s3://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/CC-MAIN-2024-38/part-4-00000.npy
-    target_ratio: 0.012113759377359925
+    target_ratio: 0.01211375
   - name: SC-ROUND5-LENGTH-dolminos2math
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/OpenMathReasoning/OpenMathReasoning-rewrite-full-thoughts/jsonls-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e13/**/*.npy
@@ -268,7 +268,7 @@ dataset:
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-06-00000.npy
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-04-00000.npy
     - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-10-00000.npy
-    target_ratio: 0.12823711767527163
+    target_ratio: 0.12823711
   - name: SC-ROUND5-LENGTH-reddit
     paths:
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-0-00000.npy
@@ -282,7 +282,7 @@ dataset:
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-7-00000.npy
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-6-00000.npy
     - s3://ai2-llm/preprocessed/reddit-rewrites/densesub_highthresh_microanneal_4omini_rewrite/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e08/part-4-00000.npy
-    target_ratio: 0.04140350873052631
+    target_ratio: 0.04140350
   - name: SC-ROUND5-LENGTH-rcqa
     paths:
     - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/part-0-00000.npy
@@ -293,13 +293,13 @@ dataset:
     - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-4-00000.npy
     - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-1-00000.npy
     - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-0-00000.npy
-    target_ratio: 0.021052631557894736
+    target_ratio: 0.02105263
   - name: SC-ROUND5-LENGTH-nemotron-synth-qa
     paths:
     - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e11/**/*.npy
     - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/**/*.npy
     - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e09/part-1-00010.npy
-    target_ratio: 0.03508771926315789
+    target_ratio: 0.03508771
   - name: SC-ROUND5-LENGTH-instruction-new-format
     paths:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e16/**/*.npy
@@ -312,7 +312,7 @@ dataset:
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-7-00000.npy
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-1-00000.npy
     - s3://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-2-00000.npy
-    target_ratio: 0.0077192982378947355
+    target_ratio: 0.00771929
   - name: SC-ROUND5-LENGTH-flan
     paths:
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e16/part-0-00000.npy
@@ -324,7 +324,7 @@ dataset:
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-15-00000.npy
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-01-00000.npy
     - s3://ai2-llm/preprocessed/tulu_flan/v1-FULLDECON-HARD-TRAIN-60M-shots_all-upweight_1-dialog_false-sep_rulebased/documents-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e10/part-12-00000.npy
-    target_ratio: 0.03508771926315789
+    target_ratio: 0.03508771
   - name: SC-ROUND5-LENGTH-r1_reasoning
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/**/*.npy
@@ -335,29 +335,29 @@ dataset:
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-5-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-0-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-00000.npy
-    target_ratio: 0.01315789472368421
+    target_ratio: 0.01315789
   - name: SC-ROUND5-LENGTH-qwq_reasoning
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-6-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-3-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-7-00000.npy
-    target_ratio: 0.01315789472368421
+    target_ratio: 0.01315789
   - name: SC-ROUND5-LENGTH-gemini_reasoning
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/gemini-redo-reformatted-ngram-no-special-tokens-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-1-00000.npy
-    target_ratio: 0.0017244831421351658
+    target_ratio: 0.00172448
   - name: SC-ROUND5-LENGTH-llamanemotron_reasoning
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-15-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-08-00000.npy
-    target_ratio: 0.008771929815789472
+    target_ratio: 0.00877192
   - name: SC-ROUND5-LENGTH-openthoughts2
     paths:
     - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e15/part-0-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-04-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-12-00000.npy
     - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e14/part-13-00000.npy
-    target_ratio: 0.008801832636812203
+    target_ratio: 0.00880183
   - name: SC-ROUND5-LENGTH-faeze_reasoning
     paths:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/**/*.npy
@@ -366,78 +366,78 @@ dataset:
     - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-2-00000.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-0-00000.npy
     - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id-decon-sparkle-motion-partition/allenai/dolma2-tokenizer/length_2e12/part-1-00000.npy
-    target_ratio: 0.007017543852631578
+    target_ratio: 0.00701754
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--adult_content
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-6-00000.npy
-    target_ratio: 0.00017943403490828526
+    target_ratio: 0.00017943
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--art_and_design
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/adult_content/part-3-00000.npy
-    target_ratio: 0.00198178140152699
+    target_ratio: 0.00198178
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--crime_and_law
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-12-00000.npy
-    target_ratio: 0.004623505609411582
+    target_ratio: 0.00462350
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--education_and_jobs
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-08-00000.npy
-    target_ratio: 0.006774701045856878
+    target_ratio: 0.00677470
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--electronics_and_hardware
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/sports_and_fitness/part-3-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/sports_and_fitness/part-4-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-0-00000.npy
-    target_ratio: 0.005469185257688709
+    target_ratio: 0.00546918
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--entertainment
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/crime_and_law/part-6-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/finance_and_business/part-0-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/social_life/part-6-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/science_math_and_technology/part-04-00000.npy
-    target_ratio: 0.015163269458520942
-  - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--fashion_and_beauty
-    paths:
-    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-00-00000.npy
-    target_ratio: 2.011929822549474e-05
+    target_ratio: 0.01516326
+  # - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--fashion_and_beauty
+  #   paths:
+  #   - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-00-00000.npy
+  #   target_ratio: 2.011929822549474e-05
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--finance_and_business
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-11-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/industrial/part-1-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-2-00000.npy
-    target_ratio: 0.006415617537444031
+    target_ratio: 0.00641561
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--food_and_dining
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-5-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-7-00000.npy
-    target_ratio: 0.00221981333111352
+    target_ratio: 0.00221981
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--games
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/adult_content/part-4-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/games/part-5-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-02-00000.npy
-    target_ratio: 0.010872916831232345
+    target_ratio: 0.01087291
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--health
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/health/part-1-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/crime_and_law/part-4-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/science_math_and_technology/part-10-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-08-00000.npy
-    target_ratio: 0.01572278279129476
+    target_ratio: 0.01547646
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--history_and_geography
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software/part-6-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/food_and_dining/part-7-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-08-00000.npy
-    target_ratio: 0.004293729118513288
+    target_ratio: 0.00429372
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--home_and_hobbies
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-03-00000.npy
-    target_ratio: 0.0014445536827659726
+    target_ratio: 0.00144455
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--industrial
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-05-00000.npy
-    target_ratio: 0.002479725260678169
+    target_ratio: 0.00247972
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--literature
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-12-00000.npy
@@ -446,19 +446,19 @@ dataset:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-7-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/travel_and_tourism/part-2-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/finance_and_business/part-7-00000.npy
-    target_ratio: 0.010765483498006444
+    target_ratio: 0.00976548
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--politics
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-0-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/health/part-7-00000.npy
-    target_ratio: 0.0034144094702698007
+    target_ratio: 0.00341440
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--religion
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-1-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software/part-7-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-7-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/history_and_geography/part-06-00000.npy
-    target_ratio: 0.0031203582424936763
+    target_ratio: 0.00312035
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--science_math_and_technology
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/software_development/part-2-00000.npy
@@ -467,37 +467,37 @@ dataset:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-09-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/fashion_and_beauty/part-5-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-02-00000.npy
-    target_ratio: 0.0331971855808379
+    target_ratio: 0.03019718
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--social_life
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/literature/part-12-00000.npy
-    target_ratio: 0.0007265080694489306
+    target_ratio: 0.00072650
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--software_development
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/industrial/part-7-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/transportation/part-0-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-01-00000.npy
-    target_ratio: 0.0074733831504213534
+    target_ratio: 0.00707338
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--software
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-15-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-14-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/education_and_jobs/part-6-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/entertainment/part-00-00000.npy
-    target_ratio: 0.017599974368364937
+    target_ratio: 0.01559997
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--sports_and_fitness
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/fashion_and_beauty/part-4-00000.npy
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-14-00000.npy
-    target_ratio: 0.0020518017523341635
+    target_ratio: 0.00205180
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--transportation
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/politics/part-05-00000.npy
-    target_ratio: 0.0015389266651277401
+    target_ratio: 0.00153892
   - name: SC-ROUND5-LENGTH-web-all_dressed-snazzy2-v18-v20--travel_and_tourism
     paths:
     - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset-decon-2-partition/allenai/dolma2-tokenizer/length_2e16/religion/part-02-00000.npy
-    target_ratio: 0.0003455708768474116
+    target_ratio: 0.00034557
 
 
   - name: LC-s2pdf-YAKE_32k-64k
