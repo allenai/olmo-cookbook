@@ -406,6 +406,14 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def olmo25_7b_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b(tokenizer)
+        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
+            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
+        )
+        return config
+
+    @classmethod
     def olmo3_7B_swafix_yarn_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         Temporary OLMo3 7B "swafix" config until it is merged into olmo-core
