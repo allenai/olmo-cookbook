@@ -1,0 +1,23 @@
+name: "suffix-train-olmo2-5xC-30m-dense-dolma2-100B-baseline"
+description: "suffix train baseline 30M @ 5xC scale on dolma2 100B"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 1
+preemptible: true
+max_tokens: 2_910_233_600
+sequence_length: 2048
+seed: 1337
+learning_rate: 0.007276622186288963
+model: "olmo_30m"
+tokenizer: "dolma2"
+weka: false
+priority: normal
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+    - name: dolma2-100b
+      target_ratio: 1.0
+      paths:
+        - gs://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
+  
