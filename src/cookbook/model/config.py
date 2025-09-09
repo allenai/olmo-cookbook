@@ -313,6 +313,9 @@ class WrappedTransformerConfig:
         config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
             factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
         )
+        config.block.attention.use_flash = False
+        config.block.attention.use_flex = True
+        config.lm_head.loss_implementation = LMLossImplementation.fused_linear
         return config
 
     @classmethod

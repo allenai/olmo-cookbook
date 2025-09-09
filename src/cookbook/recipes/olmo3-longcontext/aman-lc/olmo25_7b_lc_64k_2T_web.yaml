@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_12T-midtrain_round3_qwenlike_s2pdf_gzip2080_attnsinks_10B"
+name: &name "olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_attnsinks_10B"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -25,9 +25,9 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: false  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/OLMo25-from476838/step500680
+load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-6T-e2b30a73/step47684
 load_state: false
-model: "olmo25_7b_fullattn"
+model: "olmo25_7b_yarn_fullonly"
 tokenizer: "dolma2"
 max_tokens: 10_000_000  # 1B tokens TODO: update if needed
 global_batch_size: 4_194_304
@@ -43,7 +43,6 @@ eval_interval: 500
 # downstream_evaluators:
 #   - olmo2_dev_1b
 model_overrides:
-  - block.attention.rope.theta=8000000
   - block.attention.use_flash=false
   - block.attention.use_flex=true
   - block.attention.use_sinks=true
