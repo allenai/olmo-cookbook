@@ -21,7 +21,7 @@ load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal
 load_state: false
 model: olmo25_7b_fullattn
 tokenizer: dolma2
-max_tokens: 10000000000
+max_tokens: 1000000000
 global_batch_size: 4194304
 sequence_length: 65536
 max_target_sequence_length: 65536
