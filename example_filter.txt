@@ -1,0 +1,15 @@
+# Example filter file with different scenarios
+
+# Single doc ID, single task
+(0, ["arc_challenge:mc"])
+
+# Single doc ID, multiple tasks
+(1, ["arc_challenge:mc", "hellaswag:mc"])
+
+# Multiple doc IDs (as list), single task  
+([2, 3, 4], ["mmlu:mc"])
+
+# Mixed scenarios
+(10, ["winogrande:mc"])
+([15, 16], ["gsm8k:cot"])
+(20, ["arc_challenge:mc", "arc_easy:mc"])

@@ -1,0 +1,3 @@
+(0, ["arc_challenge:mc"])
+(1, ["arc_challenge:mc"])
+(5, ["arc_challenge:mc"])

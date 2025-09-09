@@ -1,0 +1,8 @@
+# Test filter file for the working experiment
+# Using some actual doc_ids from the prediction data
+(1, ["arc_challenge:mc"])
+(2, ["arc_challenge:mc"])
+(3, ["arc_challenge:mc"])
+
+
+  64.07    ,    75.55    ,    68.34    ,    39.58    ,    11.60    ,    40.13    ,    0.70     ,    85.80    ,  63.73  ,    58.97    ,  87.04   ,    61.49    ,    32.43    ,   57.39    ,   24.82    ,    15.00    ,   59.20    ,    14.02    ,   23.60    ,    6.78     ,   11.73    ,   24.31 
