@@ -36,7 +36,7 @@ max_target_sequence_length: *seq_len
 rank_microbatch_size: *seq_len  # must be the same as sequence_length
 scheduler_type: linear
 
-dp_shard_degree: 8  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
+dp_shard_degree: 4  # shard_degree=1 === DDP, shard_degree=world_size === FSDP
 tp_degree: 8
 float8: false  # NOTE: it might be preferable to disable float8 for anneal / long context training
 eval_interval: 500
