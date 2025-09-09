@@ -154,6 +154,15 @@ def install_beaker_py(
 ) -> None:
     env = env or PythonEnv.null()
 
+    cmd = [
+        env.pip,
+        "install",
+        f"beaker-py<={beaker_py_max_version}",
+        f"beaker-gantry<={beaker_gantry_max_version}",
+    ]
+
+    subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
+    
     try:
         return check_beaker_dependencies(
             env=env,
@@ -342,7 +351,8 @@ def check_if_secret_exists_in_beaker_workspace(
 ) -> bool:
     try:
         import beaker  # pyright: ignore
-    except ImportError:
+    except ImportError as e:
+        breakpoint()
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
