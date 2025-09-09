@@ -28,7 +28,7 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
-    "pyarrow>=19.0,<20"
+    "huggingface-hub[hf-transfer]>=0.34,<0.35",
 ]
 
 [project.optional-dependencies]
@@ -38,7 +38,7 @@ dev = [
     "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py>=1,<2",
+    "beaker-py>=1.17.1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -50,7 +50,7 @@ checkpoints = [
 ]
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@edd4bbdd395f64bf912d806460554c6f7075f4eb",
-    "beaker-py>=1,<2",
+    "beaker-py>=1.17.1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]

@@ -20,7 +20,6 @@ from cookbook.cli.utils import (
     remove_conflicting_packages,
 )
 from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
     DEFAULT_OLMO2_TOKENIZER,
     DEFAULT_OLMO_CORE_TOKENIZER,
     DEFAULT_OLMOE_TOKENIZER,
@@ -34,6 +33,7 @@ from cookbook.constants import (
     OLMOE_UNSHARD_SCRIPT,
     TRANSFORMERS_COMMIT_HASH,
 )
+from cookbook.utils.clusters import get_matching_clusters
 
 
 def convert_olmo_core_v2(
@@ -168,6 +168,8 @@ def convert_olmo_core_v2(
             if os.path.exists(generation_config_file):
                 with open(generation_config_file, "r") as f:
                     generation_config = json.load(f)
+
+            # @soldni: this is to stop type checking from complaining
             assert isinstance(generation_config, dict), "generation_config.json should be a dictionary"
 
             if "eos_token_id" in generation_config and "pad_token_id" not in generation_config:
@@ -478,6 +480,7 @@ def run_checkpoint_conversion(
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
+    experimental_with_flash_attn: bool = False,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -520,14 +523,12 @@ def run_checkpoint_conversion(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
-        for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
+        for cluster in get_matching_clusters(beaker_cluster):
             gantry_flags.append(f"--cluster {cluster}")
 
-        install_flash_attention = (
-            "uv sync --no-build-isolation-package flash-attn &&"
-            if olmo_type == "olmo-core-v2"
-            else ""
-        )
+        install_flash_attention = ""
+        if experimental_with_flash_attn and olmo_type == "olmo-core-v2":
+            install_flash_attention = "pip install --no-build-isolation-package flash-attn &&"
 
         remote_command = [
             "pip install uv && uv pip install . --system &&",

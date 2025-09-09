@@ -24,16 +24,16 @@ from cookbook.constants import (
     TRANSFORMERS_COMMIT_HASH,
     TRANSFORMERS_GIT_URL,
 )
-from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.eval.conversion import run_checkpoint_conversion
 from cookbook.eval.conversion_from_hf import run_checkpoint_conversion_from_hf
 from cookbook.eval.datalake import AddToDashboard, FindExperiments, RemoveFromDashboard
 from cookbook.eval.evaluation import evaluate_checkpoint
+from cookbook.eval.named_tasks import NamedTasksGroupRegistry
 from cookbook.eval.results import (
-    make_dashboard_table,
-    print_missing_tasks,
     find_missing_tasks,
-    make_results_from_dashboard
+    make_dashboard_table,
+    make_results_from_dashboard,
+    print_missing_tasks,
 )
 
 logger = logging.getLogger(__name__)
@@ -237,6 +237,12 @@ def convert_checkpoint_from_hf(
     default=None,
     help="If converting OLMo Core v2 checkpoint, the dtype to convert model weights to.",
 )
+@click.option(
+    "--experimental-with-flash-attn",
+    is_flag=True,
+    help="If converting OLMo Core v2 checkpoint, use experimental flash attention.",
+    default=False,
+)
 def convert_checkpoint(
     beaker_allow_dirty: bool,
     beaker_budget: str,
@@ -267,6 +273,7 @@ def convert_checkpoint(
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
+    experimental_with_flash_attn: bool = False,
 ):
     run_checkpoint_conversion(
         beaker_allow_dirty=beaker_allow_dirty,
@@ -298,6 +305,7 @@ def convert_checkpoint(
         use_system_python=use_system_python,
         skip_validation=skip_validation,
         dtype=dtype,
+        experimental_with_flash_attn=experimental_with_flash_attn,
     )
 
 
@@ -328,7 +336,7 @@ def convert_checkpoint(
     "--partition-size",
     type=int,
     default=0,
-    help="How many tasks to evaluate in parallel. Set to 0 (default) to evaluate all tasks in sequence.",
+    help="How many tasks to evaluate per job. Set to 0 (default) to evaluate all tasks in sequence. Set to 1 for maximum parallelism.",
 )
 @click.option(
     "-y",
@@ -338,6 +346,12 @@ def convert_checkpoint(
     help="Set priority for evaluation jobs.",
 )
 @click.option("-n", "--num-gpus", type=int, default=1, help="Set number of GPUs")
+@click.option(
+    "--use-hf-token/--no-use-hf-token",
+    default=False,
+    type=bool,
+    help="If true, always mount huggingface token as beaker secret",
+)
 @click.option(
     "-x",
     "--extra-args",
@@ -386,9 +400,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMoCore)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
@@ -510,6 +524,7 @@ def evaluate_model(
     remote_output_prefix: str,
     extra_args: str,
     batch_size: int,
+    use_hf_token: bool,
     dry_run: bool,
     beaker_image: str,
     beaker_retries: int,
@@ -578,7 +593,7 @@ def evaluate_model(
         missing_tasks = find_missing_tasks(results=results)
 
         # Override our tasks with the missing set
-        if model_name in missing_tasks:
+        if missing_tasks and model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
             print(f"Found no missing tasks for {model_name}")
@@ -601,6 +616,7 @@ def evaluate_model(
         dashboard=dashboard,
         model_backend=model_backend,
         tasks=tasks,
+        use_hf_token=use_hf_token,
         partition_size=partition_size,
         remote_output_prefix=remote_output_prefix,
         extra_args=extra_args,
