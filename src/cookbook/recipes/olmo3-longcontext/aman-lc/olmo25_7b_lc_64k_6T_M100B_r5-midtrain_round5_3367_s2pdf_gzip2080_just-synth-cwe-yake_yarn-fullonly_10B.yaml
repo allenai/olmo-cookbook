@@ -19,7 +19,7 @@ metrics_config:
 generate_doc_lengths: false
 load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-6T-e2b30a73/step47684
 load_state: false
-model: olmo25_7b_yarn_fullonly
+model: olmo25_7b_fullattn
 tokenizer: dolma2
 max_tokens: 10000000000
 global_batch_size: 4194304
@@ -35,6 +35,7 @@ train_module_overrides:
 - scheduler.alpha_f=0.0
 
 model_overrides:
+  - block.attention.rope.theta=8000000
   - block.attention.use_flash=false
   - block.attention.use_flex=true
   - block.attention.use_sinks=true
