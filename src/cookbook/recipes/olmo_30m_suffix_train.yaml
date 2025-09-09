@@ -1,0 +1,23 @@
+name: "suffix-train-olmo2-5xC-30m-dense-falcon"
+description: "suffix train baseline 30M @ 5xC scale on falcon sample"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 1
+preemptible: true
+max_tokens: 2_632_230 # number of tokens in dataset TODO!
+sequence_length: 2048
+seed: 1337
+learning_rate: 0.007276622186288963
+model: "olmo_30m"
+tokenizer: "dolma2"
+weka: false
+priority: normal
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+    - name: falcon-refinedweb
+      target_ratio: 1.0
+      paths:
+        - gs://ai2-llm/preprocessed/falcon-refinedweb/v0-0.05-heldout-complement-3B-sample-suffixes/documents/allenai/dolma2-tokenizer/*.npy
+  
