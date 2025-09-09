@@ -400,8 +400,8 @@ dataset:
       # total size: 467,035,267
       - s3://ai2-llm/preprocessed/LC_synth/cwe_s2pdf/length_2e15_gpt-5-mini-4321/allenai/dolma2-tokenizer/*.npy
 
-  - name: LC-s2pdf_8k-32k
-    target_ratio: 0.167 # 25% of 66.6%
-    paths:
-      - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/**/allenai/dolma2-tokenizer/*.npy
-      - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e14/**/allenai/dolma2-tokenizer/*.npy
+  # - name: LC-s2pdf_8k-32k
+  #   target_ratio: 0.167 # 25% of 66.6%
+  #   paths:
+  #     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e13/**/allenai/dolma2-tokenizer/*.npy
+  #     - gs://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve_norefs_mdtables_v2_denylisted_reshard_length-buckets_compression-decon-2/length_2e14/**/allenai/dolma2-tokenizer/*.npy
