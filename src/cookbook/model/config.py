@@ -406,6 +406,14 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def olmo2_7b_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo2_7b_flash(tokenizer)
+        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
+            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
+        )
+        return config
+
+    @classmethod
     def olmo25_7b_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         config = cls.olmo25_7b(tokenizer)
         config.block.attention.rope.scaling = YaRNRoPEScalingConfig(

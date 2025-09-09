@@ -126,7 +126,7 @@ def main():
     parser.add_argument("--num-workers", type=int, default=10, help="Number of workers")
     parser.add_argument("--google-cloud-token", type=str, default=None, help="Google Cloud token")
     parser.add_argument("--allow-dirty", action="store_true", help="Allow dirty operations")
-    parser.add_argument("--budget", type=str, default="ai2/oe-data", help="Budget")
+    parser.add_argument("--budget", type=str, default="ai2/oe-base", help="Budget")
     parser.add_argument("--cluster", type=str, default="aus", help="Clusters to run on")
     parser.add_argument("--dry-run", action="store_true", help="Dry run")
     parser.add_argument("--gpus", type=int, default=0, help="Number of GPUs")

@@ -26,7 +26,7 @@ DEFAULT_OLMO2_TOKENIZER = "allenai/dolma2-tokenizer"
 DEFAULT_OLMO_CORE_TOKENIZER = "allenai/OLMo-2-1124-7B"
 
 BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
-BEAKER_DEFAULT_BUDGET = "ai2/oe-data"
+BEAKER_DEFAULT_BUDGET = "ai2/oe-base"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
 BEAKER_PY_MAX_VERSION = "1.34.1"
@@ -52,33 +52,33 @@ WEKA_MOUNTS = [
 
 BEAKER_KNOWN_CLUSTERS = {
     "aus": [
-        "ai2/jupiter-cirrascale-2",
-        "ai2/neptune-cirrascale",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/jupiter",
+        "ai2/neptune",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
     "aus80g": [
-        "ai2/jupiter-cirrascale-2",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/jupiter",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
-    "goog": ["ai2/augusta-google-1"],
+    "goog": ["ai2/augusta"],
     "h100": [
-        "ai2/augusta-google-1",
-        "ai2/jupiter-cirrascale-2",
-        "ai2/ceres-cirrascale",
+        "ai2/augusta",
+        "ai2/jupiter",
+        "ai2/ceres",
     ],
     "a100": [
-        "ai2/saturn-cirrascale",
+        "ai2/saturn",
     ],
     "l40": [
-        "ai2/neptune-cirrascale",
+        "ai2/neptune",
     ],
     "80g": [
-        "ai2/augusta-google-1",
-        "ai2/jupiter-cirrascale-2",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/augusta",
+        "ai2/jupiter",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
 }
 
