@@ -23,8 +23,8 @@ load_state: false
 model: olmo25_7b_yarn_fullonly
 tokenizer: dolma2
 # hopefull just 1 step
-max_tokens: *global_batch_size
 global_batch_size: &global_batch_size 4_194_304
+max_tokens: *global_batch_size
 sequence_length: 65536
 max_target_sequence_length: 65536
 rank_microbatch_size: 65536
