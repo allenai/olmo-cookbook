@@ -373,7 +373,7 @@ class TransformerConfigBuilder:
         callbacks = {
             "checkpointer": CheckpointerCallback(
                 save_interval=self.save_interval,
-                ephemeral_save_interval=1,
+                ephemeral_save_interval=None,
                 save_async=False,   # TODO: enable async saving when augusta stops being silly
             ),
             "config_saver": ConfigSaverCallback(),
