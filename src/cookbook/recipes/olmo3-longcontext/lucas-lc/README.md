@@ -238,6 +238,15 @@ models=(
     "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5_3367_s2pdf_gzip2080_just-synth-cwe-yake_round3web_yarn-fullonly_10B-40c04221/step2385"
 )
 
+# latest models
+
+models=(
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634_s2pdf_gzip2080_cwe-mixed-yake-olmo_yarn-fullonly_10B-777de843/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634_s2pdf_gzip2080_cwe-yake-og_yarn-fullonly_10B-bdca4c59/step2385"
+    "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweF-yake-all-olmo_yarn-fullonly_10B-ae75302b/step2385"
+)
+
+
 ```
 
 Now do evals on these
@@ -267,7 +276,6 @@ models=(
     "gs://ai2-llm/checkpoints/lucas/olmo25_7b_lc_64k_6T_M100B_r5-midtrain_round5-nopdf-normcqa_3367_s2pdf_gzip2080_just-synth-cwe-yake_yarn-fullonly_10B-35014840/step2385"
     "gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-6T-e2b30a73/step47684"
 )
-
 
 timestamp=$(date +%Y%m%d_%H%M%S)
 mkdir -p temp
