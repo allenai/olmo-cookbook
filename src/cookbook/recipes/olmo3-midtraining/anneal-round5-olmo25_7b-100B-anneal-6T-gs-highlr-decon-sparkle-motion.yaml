@@ -17,10 +17,6 @@ rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 0
 activation_checkpointing: true
-annealing:
-  enabled: false
-  initial_lr: 0.00020712352850360292
-load_state: false
 nccl_debug: true
 dataset:
   sources:
@@ -30,18 +26,18 @@ dataset:
     - gs://ai2-llm/preprocessed/sponge_63_mixes/eli5_60pct_filter-decon-2/**/allenai/dolma2-tokenizer/*.npy
   - name: code_fim
     target_ratio: 0.1
-    paths: 
+    paths:
     # 21,390,279,634
     - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon/**/**/*.npy
   - name: swallowcode
     target_ratio: 0.1
-    paths: 
+    paths:
     # 18,833,636,683
     - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle-motion/allenai/dolma2-tokenizer/*.npy
   - name: megamatt
     # 20% less the ratio for dolminos2math
     target_ratio: 0.01726210713
-    paths: 
+    paths:
     # 3,883,674,937
     - gs://ai2-llm/preprocessed/megamath_web_pro_max/beaker_rewrites-decon-sparkle-motion/**/allenai/dolma2-tokenizer/*.npy
   - name: dolminos2math
