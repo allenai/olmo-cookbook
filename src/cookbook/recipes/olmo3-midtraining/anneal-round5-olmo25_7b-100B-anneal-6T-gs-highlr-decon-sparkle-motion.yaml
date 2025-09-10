@@ -18,7 +18,7 @@ scheduler_type: linear
 warmup_steps: 0
 activation_checkpointing: true
 annealing:
-  enabled: true
+  enabled: false
   initial_lr: 0.00020712352850360292
 load_state: false
 nccl_debug: true
