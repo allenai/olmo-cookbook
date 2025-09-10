@@ -195,15 +195,14 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     trainer = None
 
     if not dry_run:
-        #dataset = config.dataset.build()
-        dataset = config.dataset.prepare()
+        dataset = config.dataset.build()
         model = config.model.build(init_device="meta")
         train_module = config.train_module.build(model)
         data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
         trainer = config.trainer.build(train_module, data_loader)
 
         # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
-        #if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
+        # if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
         #    logger.info(
         #        f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
         #    )

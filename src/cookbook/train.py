@@ -55,7 +55,8 @@ def train(
         logger.error("Failed to build training config! Exiting...")
         raise click.Abort()
 
-    #trainer.fit()
+    logger.info("Exiting before train.fit()!")
+    # trainer.fit()
 
 
 if __name__ == "__main__":
