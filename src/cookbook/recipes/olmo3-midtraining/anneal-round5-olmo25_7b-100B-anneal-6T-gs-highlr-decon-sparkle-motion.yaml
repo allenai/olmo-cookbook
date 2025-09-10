@@ -12,7 +12,7 @@ seed: 1337
 model: "olmo25_7b"
 tokenizer: "dolma2"
 priority: normal
-cluster: ai2/triton
+cluster: ai2/titan
 rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 0
