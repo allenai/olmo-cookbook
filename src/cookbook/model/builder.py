@@ -371,6 +371,11 @@ class TransformerConfigBuilder:
 
     def build_callbacks(self) -> Dict[str, Callback]:
         callbacks = {
+            "checkpointer": CheckpointerCallback(
+                save_interval=self.save_interval,
+                ephemeral_save_interval=1,
+                save_async=False,   # TODO: enable async saving when augusta stops being silly
+            ),
             "config_saver": ConfigSaverCallback(),
             "profiler": ProfilerCallback(enabled=self.profile),
             "garbage_collector": (
