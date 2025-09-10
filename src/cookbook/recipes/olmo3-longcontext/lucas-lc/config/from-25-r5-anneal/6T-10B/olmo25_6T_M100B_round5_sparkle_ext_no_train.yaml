@@ -30,7 +30,6 @@ max_target_sequence_length: 65536
 rank_microbatch_size: 65536
 save_interval: 1
 eval_interval: 1
-ephemeral_save_interval: 1
 scheduler_type: linear
 dp_shard_degree: 1
 cp_degree: 8
