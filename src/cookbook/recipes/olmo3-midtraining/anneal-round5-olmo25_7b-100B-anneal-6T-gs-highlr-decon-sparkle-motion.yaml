@@ -1,9 +1,9 @@
-name: "anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion"
+name: "anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-bailey-final-macroanneal"
 description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (keep high LR; switch to sparkle-motion decon for synth data)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 16
-gpus: 8
+nodes: 1
+gpus: 0
 preemptible: true
 max_tokens: 100_000_000_000
 global_batch_size: 2097152
@@ -12,7 +12,7 @@ seed: 1337
 model: "olmo25_7b"
 tokenizer: "dolma2"
 priority: high
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta-triton
 rank_microbatch_size: 16384
 scheduler_type: linear
 warmup_steps: 0
@@ -20,7 +20,6 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 0.00020712352850360292
-load_path: gs://ai2-llm/checkpoints/OLMo25/step1413814
 load_state: false
 nccl_debug: true
 dataset:
