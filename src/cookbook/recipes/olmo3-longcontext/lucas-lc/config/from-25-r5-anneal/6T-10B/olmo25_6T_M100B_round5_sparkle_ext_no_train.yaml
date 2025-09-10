@@ -23,17 +23,18 @@ load_state: false
 model: olmo25_7b_yarn_fullonly
 tokenizer: dolma2
 # hopefull just 1 step
-global_batch_size: &global_batch_size 4_194_304
-max_tokens: *global_batch_size
+global_batch_size: 4_194_304
+max_tokens: 10_000_000_000
 sequence_length: 65536
 max_target_sequence_length: 65536
 rank_microbatch_size: 65536
+save_interval: 1
+eval_interval: 1
 scheduler_type: linear
 dp_shard_degree: 1
 cp_degree: 8
 cp_head_stride: 8
 float8: true
-eval_interval: 500
 train_module_overrides:
 - scheduler.alpha_f=0.0
 
