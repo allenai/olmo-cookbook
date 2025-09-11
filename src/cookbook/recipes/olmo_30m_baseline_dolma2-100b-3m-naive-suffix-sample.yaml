@@ -19,6 +19,8 @@ extra_env:
   CUDA_LAUNCH_BLOCKING: "1"
   TORCH_SHOW_CPP_STACKTRACES: "1"
   TORCH_USE_CUDA_DSA: "1"
+model_overrides:
+  - train_module.compile_model=false
 dataset:
   sources:
     - name: dolma2-100b-3M-naive-suffix-sample
