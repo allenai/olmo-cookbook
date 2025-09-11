@@ -101,12 +101,8 @@ def mk_instance_cmd(
         "-C",
         str(config.path),
     ]
-
-    # Prepend explicit env for reliability in runtime shell
-    if config.extra_env:
-        env_prefix = ["env"] + [f"{k}={v}" for k, v in config.extra_env.items()]
-        return env_prefix + base_cmd
-
+    # Do not prefix with 'env' here because the runtime wraps this with torchrun.
+    # Environment variables are injected via Beaker env_vars in mk_launch_configs.
     return base_cmd
 
 
@@ -200,6 +196,45 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         train_module = config.train_module.build(model)
         data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
         trainer = config.trainer.build(train_module, data_loader)
+
+        # Install a Python-side safety check to catch invalid token indices before CUDA ops.
+        # This avoids relying on CUDA stack traces when indices are out of bounds.
+        try:
+            import torch
+            import torch.nn as nn
+
+            def _install_embedding_index_asserts(root_module: "torch.nn.Module") -> int:
+                installed = 0
+
+                def _check_indices(module: nn.Embedding, inputs):
+                    if not inputs:
+                        return
+                    indices = inputs[0]
+                    if not torch.is_tensor(indices):
+                        return
+                    # Move small stats to CPU for checks without large sync
+                    try:
+                        min_id = int(indices.min().item())
+                        max_id = int(indices.max().item())
+                    except Exception:
+                        return
+                    if min_id < 0 or max_id >= module.num_embeddings:
+                        raise RuntimeError(
+                            f"Embedding index out of range: min={min_id}, max={max_id}, num_embeddings={module.num_embeddings}"
+                        )
+
+                for submodule in root_module.modules():
+                    if isinstance(submodule, nn.Embedding):
+                        submodule.register_forward_pre_hook(_check_indices)
+                        installed += 1
+                return installed
+
+            model_for_hooks = getattr(train_module, "model", None) or model
+            installed_count = _install_embedding_index_asserts(model_for_hooks)
+            if installed_count > 0:
+                logger.info(f"Installed embedding index asserts on {installed_count} embedding modules")
+        except Exception as hook_exc:
+            logger.warning(f"Failed to install embedding index asserts: {hook_exc}")
 
         # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
         if not trainer.maybe_load_checkpoint(trainer.save_folder) and base_config.load_path:
