@@ -89,8 +89,7 @@ def mk_instance_cmd(
     instance: ExperimentInstance, config: ExperimentConfig, group_id: str, beaker_user: str
 ) -> List[str]:
     """Build a command for launching an experiment instance."""
-
-    return [
+    base_cmd = [
         "src/cookbook/train.py",
         "train",
         "-n",
@@ -102,6 +101,13 @@ def mk_instance_cmd(
         "-C",
         str(config.path),
     ]
+
+    # Prepend explicit env for reliability in runtime shell
+    if config.extra_env:
+        env_prefix = ["env"] + [f"{k}={v}" for k, v in config.extra_env.items()]
+        return env_prefix + base_cmd
+
+    return base_cmd
 
 
 _REMOTE_FS_CACHE: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] | None = None
