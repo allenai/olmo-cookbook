@@ -240,7 +240,10 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             preemptible=group.config.preemptible,
             beaker_image="petew/olmo-core-tch270cu128",
             priority=group.config.priority,
-            env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
+            env_vars=[
+                BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN"),
+                *[BeakerEnvVar(name=k, value=v) for k, v in group.config.extra_env.items()],
+            ],
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
                 BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
