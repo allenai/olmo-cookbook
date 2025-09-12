@@ -34,7 +34,6 @@ eval_interval: 500
 train_module_overrides:
 - scheduler.alpha_f=0.0
 
-dataloader: packing
 
 dataset:
   sources:
