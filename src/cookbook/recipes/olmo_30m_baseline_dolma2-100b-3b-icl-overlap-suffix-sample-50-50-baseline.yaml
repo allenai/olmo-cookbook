@@ -17,12 +17,9 @@ priority: normal
 cluster: ai2/augusta-google-1
 dataset:
   sources:
-    - name: dolma2-100b-3B-icl-overlap-suffix-sample
-      target_ratio: 0.5
+    - name: dolma2-100b-3B-icl-overlap-suffix-sample-dolma2-100b-50-50
+      target_ratio: 1.0
       paths:
         - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-3b-sample-suffix-icl-overlap/allenai/dolma2-tokenizer/*.npy
-    - name: dolma2-100b
-      target_ratio: 0.5
-      paths:
         - gs://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
   
