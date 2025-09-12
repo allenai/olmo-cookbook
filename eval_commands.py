@@ -57,9 +57,9 @@ def print_eval_commands(gs_path):
   --cluster aus80g \\
   --partition-size 1 \\
   --num-gpus 1 \\
-  --model-backend olmo_core \\
+  --model-backend hf \\
+  --model-args trust_remote_code=true \\
   --gantry-args hf_token=true \\
-  --use-hf-token \\
   --dashboard ianm-suffix-train \\
   --workspace ai2/olmo-3-microanneals''')
 
