@@ -51,15 +51,16 @@ def print_eval_commands(gs_path):
     print("# Step 4: Evaluate on paloma:all (all Paloma corpora)")
     print("# Note: Using --gantry-args to pass HF token requirement to oe-eval-internal")
     print(f'''olmo-cookbook-eval evaluate \\
-  "{hf_path}" \\
+  "{weka_path}" \\
   --tasks paloma:all \\
   --priority normal \\
   --cluster aus80g \\
   --partition-size 1 \\
   --num-gpus 1 \\
-  --model-backend vllm \\
-  --model-args trust_remote_code=true \\
+  --model-backend olmo_core \\
   --gantry-args hf_token=true \\
+  --use-gantry \\
+  --use-hf-token \\
   --dashboard ianm-suffix-train \\
   --workspace ai2/olmo-3-microanneals''')
 
