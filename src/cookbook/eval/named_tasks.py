@@ -395,6 +395,50 @@ class CodeGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.ALL_CODEX_TASKS]
 
 
+@NamedTasksGroupRegistry.register("paloma:all")
+class PalomaAllGroup(BaseNamedTasksGroup):
+    tasks = [
+        "paloma_4chan_meta_sep::paloma",
+        "paloma_c4_100_domains::paloma",
+        "paloma_c4_en::paloma",
+        "paloma_dolma-v1_5::paloma",
+        "paloma_dolma_100_programing_languages::paloma",
+        "paloma_dolma_100_subreddits::paloma",
+        "paloma_falcon-refinedweb::paloma",
+        "paloma_gab::paloma",
+        "paloma_m2d2_s2orc_unsplit::paloma",
+        "paloma_m2d2_wikipedia_unsplit::paloma",
+        "paloma_manosphere_meta_sep::paloma",
+        "paloma_mc4::paloma",
+        "paloma_ptb::paloma",
+        "paloma_redpajama::paloma",
+        "paloma_twitterAAE_HELM_fixed::paloma",
+        "paloma_wikitext_103::paloma",
+    ]
+
+
+@NamedTasksGroupRegistry.register("paloma")
+class PalomaGroup(BaseNamedTasksGroup):
+    tasks = [
+        "paloma_4chan_meta_sep::paloma",
+        "paloma_c4_100_domains::paloma",
+        "paloma_c4_en::paloma",
+        "paloma_dolma-v1_5::paloma",
+        "paloma_dolma_100_programing_languages::paloma",
+        "paloma_dolma_100_subreddits::paloma",
+        "paloma_falcon-refinedweb::paloma",
+        "paloma_gab::paloma",
+        "paloma_m2d2_s2orc_unsplit::paloma",
+        "paloma_m2d2_wikipedia_unsplit::paloma",
+        "paloma_manosphere_meta_sep::paloma",
+        "paloma_mc4::paloma",
+        "paloma_ptb::paloma",
+        "paloma_redpajama::paloma",
+        "paloma_twitterAAE_HELM_fixed::paloma",
+        "paloma_wikitext_103::paloma",
+    ]
+
+
 @NamedTasksGroupRegistry.register("agi_eval")
 class AgiEvalGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:1shot::olmes" for task in constants.AGI_EVAL_ENGLISH_TASKS]

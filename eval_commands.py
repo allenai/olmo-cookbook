@@ -48,11 +48,11 @@ def print_eval_commands(gs_path):
   --workspace ai2/olmo-3-microanneals''')
     print()
     
-    print("# Step 4: Evaluate on paloma_falcon-refinedweb::paloma")
+    print("# Step 4: Evaluate on paloma:all (all Paloma corpora)")
     print("# Note: Using --gantry-args to pass HF token requirement to oe-eval-internal")
     print(f'''olmo-cookbook-eval evaluate \\
   "{weka_path}" \\
-  --tasks paloma_falcon-refinedweb::paloma \\
+  --tasks paloma:all \\
   --priority normal \\
   --cluster aus80g \\
   --partition-size 1 \\
