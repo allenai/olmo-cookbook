@@ -59,6 +59,7 @@ def print_eval_commands(gs_path):
   --num-gpus 1 \\
   --model-backend olmo_core \\
   --gantry-args hf_token=true \\
+  --use-hf-token \\
   --dashboard ianm-suffix-train \\
   --workspace ai2/olmo-3-microanneals''')
 
