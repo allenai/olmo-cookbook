@@ -21,5 +21,5 @@ dataset:
       target_ratio: 1.0
       paths:
         - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-3b-sample-suffix-icl-overlap/allenai/dolma2-tokenizer/*.npy
-        - gs://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
+        - s3://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
   
