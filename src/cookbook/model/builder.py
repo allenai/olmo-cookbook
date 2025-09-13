@@ -480,7 +480,7 @@ class TransformerConfigBuilder:
             mix_base_dir=self.root_dir,
             work_dir=self.dataset_cache,
             generate_doc_lengths=self.generate_doc_lengths,
-            source_group_size=4,
+            source_group_size=8,
             source_permutation_seed=123,
         )
 
