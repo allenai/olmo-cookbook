@@ -61,6 +61,7 @@ def print_eval_commands(gs_path):
   --gantry-args hf_token=true \\
   --use-gantry \\
   --use-hf-token \\
+  --beaker-image oe-eval-beaker/oe_eval_olmo3_auto \\
   --dashboard ianm-suffix-train \\
   --workspace ai2/olmo-3-microanneals''')
 
