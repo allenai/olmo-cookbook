@@ -52,7 +52,7 @@ def print_eval_commands(gs_path):
     print("# Note: Using --gantry-args to pass HF token requirement to oe-eval-internal")
     print(f'''olmo-cookbook-eval evaluate \\
   "{weka_path}" \\
-  --tasks paloma:all \\
+  --tasks paloma_falcon-refinedweb::paloma \\
   --priority normal \\
   --cluster aus80g \\
   --partition-size 1 \\
