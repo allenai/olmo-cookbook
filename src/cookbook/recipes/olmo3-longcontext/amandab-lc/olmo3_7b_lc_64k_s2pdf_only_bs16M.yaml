@@ -5,7 +5,7 @@ name: "olmo3_7b_lc_64k_s2pdf_only_bs16M_1B"
 description: "OLMo3 7B @ 7T w/ swafix trained up to 64k context length for 1B with s2pdf docs only"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 preemptible: true
 priority: urgent
 nodes: 4

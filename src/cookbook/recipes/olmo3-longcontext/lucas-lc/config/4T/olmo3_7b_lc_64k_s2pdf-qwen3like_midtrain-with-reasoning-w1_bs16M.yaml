@@ -5,7 +5,7 @@ name: "olmo3_7b_lc_64k_s2pdf-qwen3like_midtrain-with-reasoning-w1_bs16M"
 description: "OLMo3 7B w/ swafix trained up to 64k context length with a Qwen3-like mix of s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 preemptible: true
 priority: urgent
 nodes: 4

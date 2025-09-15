@@ -142,7 +142,7 @@ You can use `--format json` to see full results when model names are long.
 You can launch any OLMo core training script using the cookbook.
 By default, any script in [src/scripts/train](https://github.com/allenai/OLMo-core/tree/main/src/scripts/train) can be launched.
 
-Here's an example of how to train a 1B model for 50B tokens on 16 GPUs on the `ai2/augusta-google-1` cluster.
+Here's an example of how to train a 1B model for 50B tokens on 16 GPUs on the `ai2/augusta` cluster.
 
 ```shell
 olmo-cookbook-core launch \
@@ -151,7 +151,7 @@ olmo-cookbook-core launch \
   -n 50e9T \
   -i petew/olmo-core-tch260cu126-v2.0.1 \
   -p urgent \
-  -c ai2/augusta-google-1 \
+  -c ai2/augusta \
   -g 16
 ```
 
@@ -162,7 +162,7 @@ Let's break down the command:
 - `-n 50e9T`: The number of tokens to train on (50B tokens).
 - `-i petew/olmo-core-tch260cu126-v2.0.1`: The image to use for training.
 - `-p urgent`: The priority of the job.
-- `-c ai2/augusta-google-1`: The cluster to use for training.
+- `-c ai2/augusta`: The cluster to use for training.
 - `-g 16`: The number of GPUs to use for training.
 
 Use the `--dry-run` flag to print the command without launching the job; to view all available flags, run `olmo-cookbook-core launch --help`.

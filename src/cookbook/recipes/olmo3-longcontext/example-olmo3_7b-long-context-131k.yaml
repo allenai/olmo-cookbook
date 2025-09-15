@@ -5,7 +5,7 @@ name: "olmo3-7b-long-context-extension-131k-example"
 description: "OLMo3 7b swafix high-throughput configuration for 131k context length"
 budget: "ai2/oe-base"
 workspace: "ai2/oe-data"
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 preemptible: true
 priority: urgent
 nodes: 2

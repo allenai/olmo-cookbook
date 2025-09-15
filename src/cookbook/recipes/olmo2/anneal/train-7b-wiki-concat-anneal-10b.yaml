@@ -13,7 +13,7 @@ model: "olmo2_7B"
 tokenizer: "dolma2"
 priority: high
 eval_interval: 250
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 rank_microbatch_size: 8192
 scheduler_type: linear
 warmup_steps: 0

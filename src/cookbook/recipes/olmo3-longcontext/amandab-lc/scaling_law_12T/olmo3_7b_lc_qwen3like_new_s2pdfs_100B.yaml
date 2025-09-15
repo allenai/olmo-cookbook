@@ -6,7 +6,7 @@ name: "olmo3_7B-12T_100B_global_lc_64k_new_s2pdf-qwen3like_midtrain-with-reasoni
 description: "OLMo3 7B @12T w/ swafix trained w/ 4M batch size for 100B tokens up to 64k context length with a Qwen3-like mix of (NEW) s2pdfs and midtraining recipe from week 1"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 preemptible: true
 priority: urgent
 nodes: 16

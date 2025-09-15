@@ -5,7 +5,7 @@ name: "olmo3_7b_lc_64k_s2pdf-8k-64k_midtrain-with-reasoning-w1_batch16M"
 description: "OLMo3 7B w/ swafix trained up to 64k context length with a natural distribution of sequences between 8k and 64k from s2pdfs and midtraining recipe from week 1; 16M batch size"
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 preemptible: true
 priority: urgent
 nodes: 4

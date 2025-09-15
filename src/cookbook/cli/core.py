@@ -150,7 +150,7 @@ class ConfigLengths:
     "-c",
     "--cluster",
     type=str,
-    default="ai2/jupiter-cirrascale-2",
+    default="ai2/jupiter",
     help="Cluster(s) to use for training",
 )
 @click.option(

@@ -13,7 +13,7 @@ seed: 1337
 model: "olmo2_1B_v2"
 tokenizer: "dolma2"
 priority: high
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 activation_checkpointing: true
 eval_interval: 10
 dataset:

@@ -5,7 +5,7 @@ name: "olmo3_7B-12T_10B_full_attn_yolo_bs4M_warmup"
 description: "Clone of OLMo3 7B @12T 10B run but turning on full attention everywhere..."
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/augusta-google-1
+cluster: ai2/augusta
 preemptible: true
 priority: urgent
 nodes: 8

@@ -11,7 +11,7 @@ seed: 1337
 model: "olmo2_1B"
 tokenizer: "dolma2"
 priority: high
-cluster: ai2/jupiter-cirrascale-2
+cluster: ai2/jupiter
 weka: true
 dataset:
   sources:

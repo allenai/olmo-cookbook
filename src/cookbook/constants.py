@@ -52,33 +52,33 @@ WEKA_MOUNTS = [
 
 BEAKER_KNOWN_CLUSTERS = {
     "aus": [
-        "ai2/jupiter-cirrascale-2",
+        "ai2/jupiter",
         "ai2/neptune-cirrascale",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
     "aus80g": [
-        "ai2/jupiter-cirrascale-2",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/jupiter",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
-    "goog": ["ai2/augusta-google-1"],
+    "goog": ["ai2/augusta"],
     "h100": [
-        "ai2/augusta-google-1",
-        "ai2/jupiter-cirrascale-2",
-        "ai2/ceres-cirrascale",
+        "ai2/augusta",
+        "ai2/jupiter",
+        "ai2/ceres",
     ],
     "a100": [
-        "ai2/saturn-cirrascale",
+        "ai2/saturn",
     ],
     "l40": [
         "ai2/neptune-cirrascale",
     ],
     "80g": [
-        "ai2/augusta-google-1",
-        "ai2/jupiter-cirrascale-2",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/augusta",
+        "ai2/jupiter",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
 }
 

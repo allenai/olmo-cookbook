@@ -13,7 +13,7 @@ model: "olmo2_1B_v2"
 tokenizer: "dolma2"
 priority: high
 eval_interval: 250
-cluster: ai2/jupiter-cirrascale-2
+cluster: ai2/jupiter
 rank_microbatch_size: 32768
 weka: true
 dataset:

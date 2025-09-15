@@ -12,7 +12,7 @@ model: "olmo2_190M"
 tokenizer: "dolma2"
 priority: high
 learning_rate: 1.8e-3
-cluster: ai2/saturn-cirrascale
+cluster: ai2/saturn
 eval_interval: 100
 downstream_evaluators:
   - codex_humaneval_gold_bpb_0shot
