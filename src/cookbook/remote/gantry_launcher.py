@@ -31,7 +31,7 @@ class GantryLauncher:
         # setup beaker-py
         install_beaker_py(env=self._env)
 
-        for cluster in get_matching_clusters(self.cluster):
+        for cluster in set(get_matching_clusters(self.cluster)):
             self._flags.append(f"--cluster {cluster}")
 
     def add_mount(self, path: str):
