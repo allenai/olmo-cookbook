@@ -523,7 +523,7 @@ def run_checkpoint_conversion(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
-        for cluster in get_matching_clusters(beaker_cluster):
+        for cluster in set(get_matching_clusters(beaker_cluster)):
             gantry_flags.append(f"--cluster {cluster}")
 
         install_flash_attention = ""
