@@ -113,10 +113,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/travel_and_tourism/dolma2-tokenizer/*.npy
     target_ratio: 0.0025383734183760855
-  - name: s2pdf:adult
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/adult/*.npy
-    target_ratio: 0.0
   - name: s2pdf:art_design
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/art_design/*.npy
@@ -133,22 +129,10 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/entertainment/*.npy
     target_ratio: 3.930936450538942e-05
-  - name: s2pdf:fashion_beauty
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/fashion_beauty/*.npy
-    target_ratio: 0.0
   - name: s2pdf:finance_business
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/finance_business/*.npy
     target_ratio: 3.2731521678671645e-05
-  - name: s2pdf:food_dining
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/food_dining/*.npy
-    target_ratio: 0.0
-  - name: s2pdf:games
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/games/*.npy
-    target_ratio: 0.0
   - name: s2pdf:health
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/health/*.npy
@@ -181,19 +165,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/software_dev/*.npy
     target_ratio: 0.027311195511726734
-  - name: s2pdf:software
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/software/*.npy
-    target_ratio: 0.0
-  - name: s2pdf:sports_fitness
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/sports_fitness/*.npy
-    target_ratio: 0.0
   - name: s2pdf:transportation
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/transportation/*.npy
     target_ratio: 1.0146571387437543e-05
-  - name: s2pdf:travel
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/travel/*.npy
-    target_ratio: 0.0
