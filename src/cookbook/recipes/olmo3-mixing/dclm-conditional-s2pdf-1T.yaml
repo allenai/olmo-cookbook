@@ -102,6 +102,7 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software_development/dolma2-tokenizer/*.npy
     target_ratio: 0.4153159863555796
+    repetition_factor: 1.65
   - name: dclm:sports_and_fitness
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/sports_and_fitness/dolma2-tokenizer/*.npy
