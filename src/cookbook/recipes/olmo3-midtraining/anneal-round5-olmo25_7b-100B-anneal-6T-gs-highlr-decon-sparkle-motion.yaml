@@ -1,4 +1,4 @@
-name: "anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-bailey-final-macroanneal"
+name: "anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-bailey-final-macroanneal-uses_gs"
 description: "OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (keep high LR; switch to sparkle-motion decon for synth data)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
