@@ -1,4 +1,4 @@
-name: s2pdf:1b-5xC-s2pdf-conditional-all-dressed-one-node
+name: 1b-5xC-s2pdf-conditional-all-dressed-one-node
 description: 1B 5xC S2PDF + All Dressed one node conditional mix (8ccc3dd77c122421)
 budget: ai2/oe-base
 workspace: ai2/dolma2
