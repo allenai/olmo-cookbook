@@ -1,4 +1,25 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10,<3.14"
+# dependencies = [
+#   "dolma>=0.9.0",
+#   "huggingface-hub[hf-transfer]>=0.34,<0.35",
+#   "boto3",
+#   "gcsfs",
+#   "s3fs",
+#   "requests",
+#   "rich",
+#   "platformdirs",
+#   "pydantic",
+#   "smart_open",
+#   "yaspin",
+#   "PyYAML>=6.0,<7.0",
+#   "paramiko>=3.5,<3.6",
+#   "tabulate",
+#   "packaging>=24.2",
+#   "tqdm>=4.67.1",
+# ]
+# ///
 """
 Tokenization orchestrator for downloading, tokenizing, and uploading data.
 
@@ -275,7 +296,7 @@ class DataProcessor:
         # Download tokenizer (skip in dry run)
         tokenizer_dir = self.local_dir / "tokenizer"
         if not self.dry_run and not tokenizer_dir.exists():
-            cmd = ["uv", "run", "huggingface-cli", "download", self.tokenizer, "--local-dir", str(tokenizer_dir)]
+            cmd = ["huggingface-cli", "download", self.tokenizer, "--local-dir", str(tokenizer_dir)]
             success, output = self._run_command(cmd, "Downloading tokenizer")
             if not success:
                 print(f"Failed to download tokenizer: {output}")
@@ -398,7 +419,7 @@ class DataProcessor:
         
         # Build tokenization command
         cmd = [
-            "uv", "run", "dolma", "tokens",
+            "dolma", "tokens",
             "--documents", doc_path,
             "--destination", str(dest_path),
             "--tokenizer.name_or_path", str(tokenizer_dir / "tokenizer.json"),
