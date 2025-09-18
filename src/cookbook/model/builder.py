@@ -273,10 +273,15 @@ class TransformerConfigBuilder:
             # NOTE: work_dir must be a local path, not a url
             self.work_dir = f"/tmp/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
-        if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
+        elif (
+            any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka
+        ):
             self.root_dir = "/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
             self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            self.work_dir = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
+
+        else:
             self.work_dir = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
