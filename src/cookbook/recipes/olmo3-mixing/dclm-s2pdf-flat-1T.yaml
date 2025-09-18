@@ -113,10 +113,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/travel_and_tourism/dolma2-tokenizer/*.npy
     target_ratio: 0.0007286785243200914
-  - name: s2pdf:adult
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/adult/*.npy
-    target_ratio: 0.0
   - name: s2pdf:art_design
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/art_design/*.npy
@@ -133,10 +129,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/entertainment/*.npy
     target_ratio: 0.00010462502452190491
-  - name: s2pdf:fashion_beauty
-    paths:
-    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/fashion_beauty/*.npy
-    target_ratio: 0.0
   - name: s2pdf:finance_business
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/finance_business/*.npy
