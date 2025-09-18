@@ -28,7 +28,7 @@ from olmo_core.optim import (
     Scheduler,
     SkipStepAdamWConfig,
 )
-from olmo_core.optim.scheduler import CosWithWarmupAndLinearDecay, LinearWithWarmup
+from olmo_core.optim.scheduler import WSD, CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
     BeakerCallback,
@@ -66,7 +66,6 @@ from cookbook.model.config import (
     WrappedTransformerConfig,
 )
 from cookbook.model.evaluators import DownstreamEvaluator, get_tasks_for_groups
-from cookbook.model.schedulers import WSD
 
 logger = logging.getLogger(__name__)
 
@@ -462,9 +461,7 @@ class TransformerConfigBuilder:
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
                 warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
             ),
-            SchedulerType.WSD: lambda: WSD(
-                warmup_steps=self.get_warmup_steps(),
-            ),
+            SchedulerType.WSD: lambda: WSD(warmup=self.get_warmup_steps()),
         }
 
         return scheduler_map[self.scheduler_type]()

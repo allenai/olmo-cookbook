@@ -26,6 +26,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
+from cookbook.model.config import ModelTrainConfig
 from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
@@ -151,7 +152,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
-    config = TransformerConfigBuilder(
+    config: ModelTrainConfig = TransformerConfigBuilder(
         beaker_user=beaker_user,
         cluster=base_config.cluster,
         downstream_evaluators=base_config.downstream_evaluators,
