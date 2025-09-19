@@ -34,6 +34,18 @@ def _count_tokens_for_file(path: PathOrStr, dtype: NumpyDatasetDType) -> int:
     return _bytes_to_tokens(get_file_size(path), dtype)
 
 
+def get_leaf_configs(source_config: SourceConfig) -> List[Tuple[str, List[str]]]:
+    """Return a list of (name, paths) tuples representing the leaf nodes.
+       This is important when we have data sources that are divided into topics.
+    """
+    if source_config.topics:
+        return [
+            (f"{source_config.name}:{topic.name}", topic.paths)
+            for topic in source_config.topics
+        ]
+    else:
+        return [(source_config.name, source_config.paths)]
+
 def get_token_counts_and_ratios(
     source_configs: list[SourceConfig], dtype: NumpyDatasetDType, use_cache: bool
 ) -> Tuple[dict[str, float], int]:
@@ -49,7 +61,7 @@ def get_token_counts_and_ratios(
         try:
             with open(cache_path, "r") as f:
                 logger.info(
-                    "Source distribution cache found, using cached values! This can be disabled by setting use_cache=False."
+                    f"Source distribution cache found at {cache_path}, using cached values! This can be disabled by setting use_cache=False."
                 )
                 obj = json.load(f)
                 return (obj["relative_sizes"], obj["total_tokens"])
@@ -59,6 +71,13 @@ def get_token_counts_and_ratios(
     token_counts = defaultdict(int)
 
     filesystems = {}
+    leaf_configs: list[SourceConfig] = [] 
+    for sc in source_configs:                         
+        leaf_configs.extend(
+            SourceConfig(name=leaf_name, paths=leaf_paths)
+            for leaf_name, leaf_paths in get_leaf_configs(sc)
+        )
+    source_configs = leaf_configs
 
     # Pre-check each source for mixed schemes and create appropriate filesystem clients
     for source in source_configs:
