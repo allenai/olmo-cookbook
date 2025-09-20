@@ -50,7 +50,7 @@ poormanray run -n $cluster_name -c 'uv run dolma'
 
 and check if a dolma command is found.
 
-## Step 2: Download data to node
+## Step 2: Connect to machine and setup
 
 Use `list` to get IP of the machine:
 
@@ -71,48 +71,68 @@ Now SSH into the machine and download the data using `s5cmd`. I recommend doing 
 
 ```bash
 ssh ec2-user@xxx.yyy.zzz.ttt
-
-s5cmd cp -sp \
-    "s3://ai2-llm/pretraining-data/sources/dataset-name/documents/*" \
-    "/mnt/raid0/ai2-llm/pretraining-data/sources/dataset-name/documents"
 ```
 
-make sure to use "*" at the end of source path, and a trailing / at the end of destination.
+## Step 3: Download data to node
 
-## Step 3: Tokenize the  data
+Write a line separated file of the paths you want to tokenize. These can be s3 paths to a specific object, to a prefix containing jsonl files, or to a prefix with a single level of subdirectories (e.g. different domains) which then contain jsonl files.
+```bash
+cat <<EOF > s3_paths.txt
+s3://path1/to/data/
+s3://path2/to/specific/file.jsonl.gz
+EOF
+```
+
+download cookbook
+```bash
+https://github.com/allenai/olmo-cookbook.git
+```
+
+Use the orchestrator to download (NOTE: all tokenizer_orchestrator commands must be run from ~ so that dolma is available)
+```bash
+uv run python olmo-cookbook/scripts/tokenizer_orchestrator.py download s3_paths.txt
+```
+
+
+## Step 4: Tokenize the  data
 
 Now you can tokenize as follows:
 
 ```bash
-tokenizer="allenai/dolma2-tokenizer"
+uv run python olmo-cookbook/scripts/tokenizer_orchestrator.py tokenize s3_paths.txt
+```
 
-uv run huggingface-cli download $tokenizer --local-dir /mnt/raid0/tokenizer
-
-uv run dolma tokens \
-    --documents "/mnt/raid0/ai2-llm/pretraining-data/sources/dataset-name/documents/*" \
-    --destination "/mnt/raid0/ai2-llm/preprocessed/dataset-name/${tokenizer}" \
-    --tokenizer.name_or_path /mnt/raid0/tokenizer/tokenizer.json \
-    --tokenizer.eos_token_id 100257 \
-    --tokenizer.pad_token_id 100277 \
-    --no-tokenizer.segment_before_tokenization \
-    --tokenizer.encode_special_tokens \
-    --processes $(python3 -c "import multiprocessing; print(multiprocessing.cpu_count())") \
-    --max_size 4_000_000_000 \
-    --sample_ring_prop \
-    --dtype uint32
+You may need to trouble shoot some failed tokenization jobs (issues such as missing IDs or metadata files mixed with jsonl). You can use the following command to look for the bad outputs from these:
+```bash
+find /mnt/raid0/ai2-llm/preprocessed/ -type f -exec du -h {} + | awk '$1=="4.0K"' | less
 ```
 
 ## Step 4: Upload data to S3
 
-Finish by uploading the data to S3.
+
+This needs gcloud installed:
+```bash
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-456.0.0-linux-x86_64.tar.gz && tar -xf google-cloud-cli-456.0.0-linux-x86_64.tar.gz && ./google-cloud-sdk/install.sh -q
+gcloud auth login
+gcloud config set project ai2-allennlp
+```
+
+Finish by uploading the data to S3 and GS
+
 
 ```bash
-s5cmd cp -sp \
-    "/mnt/raid0/ai2-llm/preprocessed/dataset-name/${tokenizer}/*" \
-    "s3://ai2-llm/preprocessed/dataset-name/${tokenizer}/"
+uv run python olmo-cookbook/scripts/tokenizer_orchestrator.py upload s3_paths.txt
 ```
 
 And then terminate the cluster.
+
+## Step 5: Get your paths to use in a config
+
+```bash
+uv run python olmo-cookbook/scripts/tokenizer_orchestrator.py destination_paths s3_paths.txt
+```
+
+## Step 5: Clean up
 
 ```bash
 poormanray terminate -n $cluster_name
