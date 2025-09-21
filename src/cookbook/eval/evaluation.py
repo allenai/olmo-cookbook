@@ -4,7 +4,6 @@ import re
 import shlex
 import subprocess
 import sys
-from collections.abc import Mapping
 from copy import deepcopy
 from hashlib import md5
 from typing import Optional
@@ -19,9 +18,13 @@ from cookbook.cli.utils import (
     install_oe_eval,
     make_eval_run_name,
 )
-from cookbook.constants import BEAKER_KNOWN_CLUSTERS, FIM_TOKENS, OE_EVAL_LAUNCH_COMMAND, WEKA_MOUNTS
+from cookbook.constants import (
+    FIM_TOKENS,
+    OE_EVAL_LAUNCH_COMMAND,
+    WEKA_MOUNTS,
+)
 from cookbook.eval.named_tasks import NamedTasksGroupRegistry
-from cookbook.eval.results import make_dashboard_table
+from cookbook.utils.clusters import get_matching_clusters, is_gcs_cluster
 
 
 def evaluate_checkpoint(
@@ -62,6 +65,7 @@ def evaluate_checkpoint(
     use_backend_in_run_name: bool,
     name_suffix: str,
     num_shots: int | None,
+    use_hf_token: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -70,6 +74,7 @@ def evaluate_checkpoint(
     # Install oe-eval toolkit
     oe_eval_dir = install_oe_eval(
         env=env,
+        # leaving these here for reference; but using gantry now!
         commit_hash=oe_eval_commit,
         commit_branch=oe_eval_branch,
         is_editable=use_gantry,
@@ -104,7 +109,7 @@ def evaluate_checkpoint(
         # This is google cloud storage; for now, we just override cluster
         # so that it runs on augusta; credentials to fetch there are automatically
         # configured
-        if cluster != "goog" and cluster not in BEAKER_KNOWN_CLUSTERS["goog"]:
+        if not is_gcs_cluster(cluster):
             print(
                 "Checkpoint is stored in Google Cloud Storage, "
                 "but cluster is not set to 'goog'. Overriding cluster."
@@ -112,25 +117,18 @@ def evaluate_checkpoint(
             cluster = "goog"
     elif scheme:
         raise ValueError(f"Unsupported scheme '{scheme}' in checkpoint path")
-    elif checkpoint_path.startswith("/") and any(re.match(rf"/{w}/", checkpoint_path) for w in WEKA_MOUNTS):
+    elif checkpoint_path.startswith("/weka/") or any(checkpoint_path.startswith(f"/{w}/") for w in WEKA_MOUNTS):
         print("Checkpoint is stored in Weka; I will remove cluster that have no WEKA.")
-        for cl in BEAKER_KNOWN_CLUSTERS["goog"]:
-            clusters_to_exclude.add(cl)
-        checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
+        for cluster_name in get_matching_clusters("goog"):
+            clusters_to_exclude.add(cluster_name)
 
-    else:
-        print("Path is a huggingface model; I will add huggingface token to workspace")
-        if huggingface_secret:
-            hf_token_secret = add_secret_to_beaker_workspace(
-                secret_name="HUGGING_FACE_HUB_TOKEN",
-                secret_value=huggingface_secret,
-                workspace=workspace,
-                env=env,  # pyright: ignore
-            )
-            flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
-            gantry_args_dict = {"hf_token": "true", **gantry_args_dict}
+        if checkpoint_path.startswith("/weka/"):
+            checkpoint_path = f"weka://{checkpoint_path[6:].rstrip('/')}"
         else:
-            print("\n\nWARNING: Hugging Face token not provided; this may cause issues with model download.\n\n")
+            checkpoint_path = f"weka://{checkpoint_path.lstrip('/').rstrip('/')}"
+    else:
+        print("Path is a huggingface hub model; I will add huggingface token to beaker workspace")
+        use_hf_token = True
 
     if use_backend_in_run_name:
         if name_suffix.strip():
@@ -148,7 +146,7 @@ def evaluate_checkpoint(
     )
 
     # replace nicknames for actual cluster names, joined with commas
-    beaker_clusters = ",".join(set(BEAKER_KNOWN_CLUSTERS.get(cluster, [cluster])).difference(clusters_to_exclude))
+    beaker_clusters = ",".join(set(get_matching_clusters(cluster)).difference(clusters_to_exclude))
 
     # set the beaker flags
     flags.append(f"--beaker-workspace '{workspace}'")
@@ -198,9 +196,45 @@ def evaluate_checkpoint(
     print("Launching evals on the following tasks:")
     pprint(all_tasks)
 
-    # @davidh we have a few specific tasks that are not implemented in oe-eval as standalone tasks
-    EXCLUDE_FROM_LAUNCH = [r"^mmlu_.*:bpb::olmes$", r"^lambada:bpb$"]
+    # @davidh: we have a few specific tasks that are not implemented in oe-eval as standalone tasks
+    # @soldni: to clarify: this is fine, since these tasks are computed anyway as part of the non-bpb version,
+    #          it's just the task alias that does not exist.
+    EXCLUDE_FROM_LAUNCH = [
+        r"^mmlu_.*:bpb::olmes$",
+        r"^lambada:bpb$",
+        r"^.*:pass_at_.*$",
+    ]
     all_tasks = [task for task in all_tasks if not any(re.match(pattern, task) for pattern in EXCLUDE_FROM_LAUNCH)]
+
+    # @soldni: these evals are known to be private, thus requiring HF token
+    HF_TOKEN_REQUIRED_TASKS = [
+        r"^squad",  # all squad tasks are based on allenai/squad and allenai/squad_v2, which are private datasets
+        r"^gpqa",
+        r"^basic_skills"
+    ]
+    tasks_with_hf_tokens = [
+        task for task in all_tasks if any(re.search(pattern, task) for pattern in HF_TOKEN_REQUIRED_TASKS)
+    ]
+    if len(tasks_with_hf_tokens) > 0:
+        print(f"These evals require HF token: {tasks_with_hf_tokens}")
+        use_hf_token = True
+
+    # @soldni: switching to always push huggingface token to beaker workspace
+    if use_hf_token:
+        if huggingface_secret:
+            hf_token_secret = add_secret_to_beaker_workspace(
+                secret_name="HUGGING_FACE_HUB_TOKEN",
+                secret_value=huggingface_secret,
+                workspace=workspace,
+                env=env,  # pyright: ignore
+            )
+            flags.append(f"--gantry-secret-hf-read-only '{hf_token_secret}'")
+            gantry_args_dict = {"hf_token": "true", **gantry_args_dict}
+        else:
+            print(
+                "\n\nWARNING: Hugging Face token not provided; "
+                "this may cause issues with model download or evals.\n\n"
+            )
 
     # DOING SOME PRETTY PRINTING HERE #
     print(
@@ -297,8 +331,13 @@ def evaluate_checkpoint(
                 local_flags.append(f"--beaker-retries {beaker_retries}")
 
             # user might want to disable vllm v1 spec because its causing eval failures
-            gantry_args_dict = {"env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}", **gantry_args_dict}
-
+            # we also set gantry to use --yes to skip all confirmations
+            gantry_args_dict = {
+                "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                "yes": True,
+                **({"ref": oe_eval_commit} if oe_eval_commit else {}),
+                **gantry_args_dict,
+            }
             # finally append gantry args
             local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
 
@@ -335,6 +374,7 @@ def evaluate_checkpoint(
             # run oe-eval
             cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
             print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
+
             output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
             print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
             if output.returncode != 0:
