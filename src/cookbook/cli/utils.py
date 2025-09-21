@@ -222,15 +222,19 @@ def install_oe_eval(
                 text=True
             )
             if result.returncode != 0 or not result.stdout:
-                return None
-            remote_commit = result.stdout.split()[0]
+                # Fallback to re-clone below
+                oe_eval_dir = None
+            else:
+                remote_commit = result.stdout.split()[0]
 
-            if installed_commit == remote_commit:
-                print(f"Current commit matches remote {branch} in {oe_eval_dir}")
-                return oe_eval_dir
+                if installed_commit == remote_commit:
+                    assert oe_eval_dir is not None
+                    print(f"Current commit matches remote {branch} in {oe_eval_dir}")
+                    return oe_eval_dir
         else:
             # Check if commit matches user-specified commit
             if installed_commit == commit_hash:
+                assert oe_eval_dir is not None
                 print(f"Found existing OE-Eval install with matching hash in {oe_eval_dir}")
                 return oe_eval_dir
 
@@ -424,14 +428,33 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
     # current directory
     current_dir = os.getcwd()
 
+    # Prefer HTTPS with token if available to avoid SSH prompts/hangs
+    token = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
+    resolved_url = git_url
+    if token and "github.com" in git_url:
+        # Convert common SSH forms to HTTPS with token
+        if git_url.startswith("git@github.com:"):
+            path = git_url.split(":", 1)[1]
+            resolved_url = f"https://{token}@github.com/{path}"
+        elif git_url.startswith("ssh://git@github.com/"):
+            path = git_url.split("github.com/", 1)[1]
+            resolved_url = f"https://{token}@github.com/{path}"
+        elif git_url.startswith("https://github.com/") and "@github.com" not in git_url:
+            path = git_url.split("https://github.com/", 1)[1]
+            resolved_url = f"https://{token}@github.com/{path}"
+
+    # Ensure non-interactive git to fail fast if no credentials
+    git_env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GIT_SSH_COMMAND": "ssh -oBatchMode=yes -o StrictHostKeyChecking=accept-new"}
+
     tmp_dir = None
     try:
         tmp_dir = mkdtemp()
 
-        print(f"Cloning repository from {git_url} to {tmp_dir}...")
+        masked_url = resolved_url.replace(token, "***") if token else resolved_url
+        print(f"Cloning repository from {masked_url} to {tmp_dir}...")
 
         # Base clone command with minimal history
-        cmd = shlex.split(f"git clone --depth 1 {git_url}")
+        cmd = shlex.split(f"git clone --depth 1 {resolved_url}")
 
         if commit_hash:
             cmd.append("--no-checkout")
@@ -439,24 +462,36 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
         cmd.append(tmp_dir)
 
         # Execute clone
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, env=git_env, timeout=300)
 
         if commit_branch:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
-            subprocess.run(shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True)
-            subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
+            subprocess.run(
+                shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"),
+                check=True,
+                env=git_env,
+                timeout=120,
+            )
+            subprocess.run(
+                shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"),
+                check=True,
+                env=git_env,
+                timeout=60,
+            )
 
         if commit_hash:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
-            subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
-            subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
+            subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True, env=git_env, timeout=120)
+            subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True, env=git_env, timeout=60)
 
         return tmp_dir
 
     except Exception as e:
-        print(f"Error cloning repository at '{git_url}' {f' (commit {commit_hash})' if commit_hash else ''}: {e}")
+        print(
+            f"Error cloning repository at '{git_url}' {f' (commit {commit_hash})' if commit_hash else ''}: {e}"
+        )
         if tmp_dir:
             print(f"Cleaning up {tmp_dir}...")
             shutil.rmtree(tmp_dir, ignore_errors=True)

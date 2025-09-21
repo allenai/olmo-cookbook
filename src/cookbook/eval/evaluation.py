@@ -77,6 +77,18 @@ def evaluate_checkpoint(
         is_editable=use_gantry,
     )
 
+    # Ensure hf_transfer is available to speed up and harden HF downloads
+    try:
+        subprocess.run(
+            shlex.split(f"{env.pip} install 'huggingface-hub[hf_transfer]'"),
+            check=True,
+            env=env.path(),
+            capture_output=True,
+        )
+    except Exception as _:
+        # Non-fatal; continue without hf_transfer
+        pass
+
     # this is where we store all fixed flags to pass to oe-eval
     flags: list[str] = []
 
@@ -327,8 +339,13 @@ def evaluate_checkpoint(
 
             # user might want to disable vllm v1 spec because its causing eval failures
             # we also set gantry to use --yes to skip all confirmations
+            # Build environment string for gantry; include HF transfer to make hub downloads more robust
+            env_vars = [
+                f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                "HF_HUB_ENABLE_HF_TRANSFER=1",
+            ]
             gantry_args_dict = {
-                "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                "env": ",".join(env_vars),
                 "yes": True,
                 **({"ref": oe_eval_commit} if oe_eval_commit else {}),
                 **gantry_args_dict,
