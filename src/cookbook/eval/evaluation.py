@@ -339,14 +339,13 @@ def evaluate_checkpoint(
 
             # user might want to disable vllm v1 spec because its causing eval failures
             # we also set gantry to use --yes to skip all confirmations
-            # Build environment list for gantry; include HF transfer to make hub downloads more robust
-            env_vars = [
-                f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
-                "HF_HUB_ENABLE_HF_TRANSFER=1",
-            ]
+            # Build env for gantry; oe-eval expects a single KEY=VAL string here
+            if model_backend == "vllm":
+                env_value = f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}"
+            else:
+                env_value = "HF_HUB_ENABLE_HF_TRANSFER=1"
             gantry_args_dict = {
-                # Pass as list so downstream parser can split KEY=VAL safely
-                "env": env_vars,
+                "env": env_value,
                 "yes": True,
                 **({"ref": oe_eval_commit} if oe_eval_commit else {}),
                 **gantry_args_dict,
