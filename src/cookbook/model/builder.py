@@ -27,6 +27,13 @@ from olmo_core.optim import (
     OptimGroupOverride,
     SkipStepAdamWConfig,
 )
+from olmo_core.optim.scheduler import (
+    WSD,
+    CosWithWarmup,
+    CosWithWarmupAndLinearDecay,
+    LinearWithWarmup,
+    Scheduler,
+)
 from olmo_core.optim.scheduler import WSD, CosWithWarmupAndLinearDecay, LinearWithWarmup
 from olmo_core.train import Duration, TrainerConfig
 from olmo_core.train.callbacks import (
