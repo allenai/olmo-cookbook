@@ -96,7 +96,7 @@ dataset:
     target_ratio: 0.01875
     paths:
     # 2,483,453,165
-    - gs://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/big-reasoning-traces-reformatted-keyword-filter-datecutoff-chinese-ngram-no-special-tokens/allenai/dolma2-tokenizer/*.npy
   - name: qwq_reasoning
     target_ratio: 0.01875
     paths:
