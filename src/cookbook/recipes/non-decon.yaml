@@ -33,7 +33,7 @@ dataset:
     target_ratio: 0.1
     paths: 
     # 21,390,279,634
-    - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score/**/**/*.npy
+    - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score/**/**/*.npy
   - name: swallowcode
     target_ratio: 0.1
     paths: 
