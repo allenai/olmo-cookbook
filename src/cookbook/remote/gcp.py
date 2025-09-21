@@ -64,6 +64,9 @@ def download_gcs_prefix(
     credentials: GoogleCloudToken | None = None,
 ):
     protocol, bucket_name, prefix = (p := urlparse(remote_path)).scheme, p.netloc, p.path.lstrip("/")
+    # Ensure trailing slash to avoid prefix collisions (e.g., step1000 matching step10000)
+    if prefix and not prefix.endswith("/"):
+        prefix = prefix + "/"
     assert protocol in ("gs", "gcs"), "Only GCS and GS protocols are supported"
 
     client = credentials.apply() if credentials else (client or storage.Client())
