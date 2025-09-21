@@ -71,7 +71,7 @@ dataset:
     target_ratio: 0.03
     paths:
     # 4,215,210,848
-    - gs://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/wiki_psgqa_rewrites/psgqa_rewrites_v1/allenai/dolma2-tokenizer/*.npy
   - name: nemotron-synth-qa
     target_ratio: .05
     paths:
