@@ -101,7 +101,7 @@ dataset:
     target_ratio: 0.01875
     paths:
     # 4,774,150,082
-    - gs://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/qwq-redo-reformatted-ngram-no-special-tokens/allenai/dolma2-tokenizer/*.npy
   - name: gemini_reasoning
     # new 245,738,848
     target_ratio: 0.00245738848
