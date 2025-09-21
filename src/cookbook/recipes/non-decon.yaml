@@ -86,7 +86,7 @@ dataset:
     target_ratio: 0.011
     paths:
     # 1,639,399,859
-    - gs://ai2-llm/preprocessed/ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/tulu-3-sft-for-olmo-3-midtraining/partitioned/v0-data-simple-concat-with-double-new-line-with-generation-prompt/allenai/dolma2-tokenizer/*.npy
   - name: flan
     target_ratio: .05
     paths:
