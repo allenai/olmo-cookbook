@@ -111,12 +111,12 @@ dataset:
     target_ratio: .0125
     paths:
     # 20.9B
-    - gs://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/llama-nemotron-processed-chinese-filtered-ngram-filtered-with-token-counts/allenai/dolma2-tokenizer/*.npy
   - name: openthoughts2
     # 5,601,836,260
     target_ratio: 0.01254261152
     paths:
-    - gs://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/thinking-data/openthoughts2-filtered-chinese-filtered-ngram-filtered-with-token-counts-stripped/allenai/dolma2-tokenizer/*.npy
   - name: faeze_reasoning
     target_ratio: .01
     paths:
@@ -132,9 +132,9 @@ dataset:
     # 1,049,524,455 --> actual math meta reasoning
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
     # 364,483,656 --> verifiable/gpt-41 without special tokens
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents/allenai/dolma2-tokenizer/*.npy
     # 73,752,560 --> verifiable/gpt-o4-mini without special tokens
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high/allenai/dolma2-tokenizer/*.npy
     ####
     # NEW FORMAT
     # 1,057,302,754 --> actual math meta-reasoning with latex format
@@ -143,8 +143,8 @@ dataset:
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-latex-delim-decon/allenai/dolma2-tokenizer/*.npy
     ####
     # NEW NEW FORMAT
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id/allenai/dolma2-tokenizer/*.npy
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/midtraining-reasoning/code-meta-reasoning-cleaned-latex-delim-randomly-cleaned-with-id/allenai/dolma2-tokenizer/*.npy
 
   # PDF 0.05
   - name: pdf-quality-art_design
