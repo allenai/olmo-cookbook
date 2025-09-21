@@ -242,120 +242,120 @@ dataset:
   - name: web-all_dressed-snazzy2-v18-v20--adult_content
     target_ratio: 0.0002556935
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/adult_content/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/adult_content/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/adult_content/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/adult_content/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--art_and_design
     target_ratio: 0.0028240385
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/art_and_design/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/art_and_design/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/art_and_design/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/art_and_design/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--crime_and_law
     target_ratio: 0.0065884955
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/crime_and_law/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/crime_and_law/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/crime_and_law/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/crime_and_law/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--education_and_jobs
     target_ratio: 0.0096539490
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/education_and_jobs/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/education_and_jobs/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/education_and_jobs/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/education_and_jobs/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--electronics_and_hardware
     target_ratio: 0.0077935890
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/electronics_and_hardware/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/electronics_and_hardware/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/electronics_and_hardware/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/electronics_and_hardware/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--entertainment
     target_ratio: 0.0216076590
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/entertainment/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/entertainment/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/entertainment/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/entertainment/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--fashion_and_beauty
     target_ratio: 0.0000286700
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/fashion_and_beauty/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/fashion_and_beauty/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/fashion_and_beauty/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/fashion_and_beauty/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--finance_and_business
     target_ratio: 0.0091422550
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/finance_and_business/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/finance_and_business/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/finance_and_business/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/finance_and_business/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--food_and_dining
     target_ratio: 0.0031632340
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/food_and_dining/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/food_and_dining/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/food_and_dining/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/food_and_dining/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--games
     target_ratio: 0.0154939065
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/games/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/games/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/games/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/games/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--health
     target_ratio: 0.0224049655
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/health/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/health/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/health/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/health/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--history_and_geography
     target_ratio: 0.0061185640
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/history_and_geography/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/history_and_geography/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/history_and_geography/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/history_and_geography/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--home_and_hobbies
     target_ratio: 0.0020584890
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/home_and_hobbies/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/home_and_hobbies/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/home_and_hobbies/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/home_and_hobbies/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--industrial
     target_ratio: 0.0035336085
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/industrial/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/industrial/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/industrial/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/industrial/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--literature
     target_ratio: 0.0153408140
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/literature/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/literature/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/literature/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/literature/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--politics
     target_ratio: 0.0048655335
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/politics/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/politics/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/politics/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/politics/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--religion
     target_ratio: 0.0044465105
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/religion/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/religion/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/religion/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/religion/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--science_math_and_technology
     target_ratio: 0.0473059895
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/science_math_and_technology/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/science_math_and_technology/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/science_math_and_technology/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/science_math_and_technology/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--social_life
     target_ratio: 0.0010352740
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/social_life/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/social_life/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/social_life/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/social_life/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--software_development
     target_ratio: 0.0106495710
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/software_development/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/software_development/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/software_development/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/software_development/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--software
     target_ratio: 0.0250799635
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/software/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/software/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/software/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/software/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--sports_and_fitness
     target_ratio: 0.0029238175
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/sports_and_fitness/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/sports_and_fitness/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/sports_and_fitness/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/sports_and_fitness/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--transportation
     target_ratio: 0.0021929705
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/transportation/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/transportation/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/transportation/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/transportation/allenai/dolma2-tokenizer/*.npy
   - name: web-all_dressed-snazzy2-v18-v20--travel_and_tourism
     target_ratio: 0.0004924385
     paths:
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0018_subset/travel_and_tourism/allenai/dolma2-tokenizer/*.npy
-    - s3://ai2-llm/preprocessed/all_dressed_v3_weborganizer_ft_dclm_plus2_vigintiles/vigintile_0020_subset/travel_and_tourism/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0018_subset/travel_and_tourism/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/weborganizer_ft/dclm_plus2_vigintiles/vigintile_0020_subset/travel_and_tourism/allenai/dolma2-tokenizer/*.npy
