@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 0.00020712352850360292
-load_path: gs://ai2-llm/checkpoints/OLMo25/step1413814
+ load_path: s3://ai2-llm/checkpoints/OLMo25/step1413814
 load_state: false
 nccl_debug: true
 dataset:
@@ -33,12 +33,12 @@ dataset:
     target_ratio: 0.1
     paths: 
     # 21,390,279,634
-    - gs://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score/**/**/*.npy
+    - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score/**/**/*.npy
   - name: swallowcode
     target_ratio: 0.1
     paths: 
     # 18,833,636,683
-    - gs://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data/allenai/dolma2-tokenizer/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data/allenai/dolma2-tokenizer/*.npy
   - name: megamatt
     # 20% less the ratio for dolminos2math
     target_ratio: 0.01726210713
