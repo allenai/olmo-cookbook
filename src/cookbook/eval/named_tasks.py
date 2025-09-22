@@ -686,41 +686,41 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:bpb")
 class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Core OLMES
-        MMLUBpbGroup(),
-        "arc_easy:bpb::olmes:full",
-        "arc_challenge:bpb::olmes:full",
-        "csqa:bpb::olmes:full",
-        "hellaswag:bpb::olmes:full",
-        "winogrande:bpb::olmes:full",
-        "socialiqa:bpb::olmes:full",
-        "piqa:bpb::olmes:full",
+        # Core OLMES (RC) — BPB variants
+        "arc_easy:rc:bpb::olmes:full",
+        "arc_challenge:rc:bpb::olmes:full",
+        "csqa:rc:bpb::olmes:full",
+        "hellaswag:rc:bpb::olmes:full",
+        "winogrande:rc:bpb::olmes:full",
+        "socialiqa:rc:bpb::olmes:full",
+        "piqa:rc:bpb::olmes:full",
 
-        # Gen OLMES
-        "coqa:bpb::gen2mc",
-        "drop:bpb::gen2mc",
-        "jeopardy:bpb::gen2mc",
-        "naturalqs:bpb::gen2mc",
-        "squad:bpb::gen2mc",
+        # MMLU (RC) — BPB variants
+        *[f"{category}:rc:bpb::olmes" for category in constants.MMLU_CATEGORIES],
 
-        # Math
+        # Gen OLMES (RC via gen2mc) — BPB variants
+        "coqa:rc:bpb::gen2mc",
+        "drop:rc:bpb::gen2mc",
+        "jeopardy:rc:bpb::gen2mc",
+        "naturalqs:rc:bpb::gen2mc",
+        "squad:rc:bpb::gen2mc",
+
+        # Math (BPB)
         MinervaBpbGroup(),
 
-        # Code
+        # Code (BPB)
         Olmo3Dev1bCodeBpbGroup(),
 
-        # New OLMo 3
-        "sciq:bpb::olmo3",
-        "qasper_yesno:bpb::olmes",
-        "basic_skills:bpb::olmes",
-        "lab_bench_dbqa:bpb",
-        "lab_bench_protocolqa:bpb",
+        # New OLMo 3 QA-style (RC) — BPB variants
+        "sciq:rc:bpb::olmo3",
+        "qasper_yesno:rc:bpb::olmes",
+        *[f"{task}:rc:bpb::olmes" for task in constants.BASIC_SKILLS],
+        "sciriff_yesno:rc:bpb::olmes",
+
+        # Misc
         "lambada:bpb",
-        "medmcqa:bpb::none",
-        "medqa_en:bpb::none",
-        "sciriff_yesno:bpb::olmes",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
+        # "ultrachat_masked_ppl",  # not BPB; enable if desired
+        # "wildchat_masked_ppl",   # not BPB; enable if desired
     ]
 
 
