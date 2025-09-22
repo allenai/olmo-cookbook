@@ -20,7 +20,7 @@ activation_checkpointing: true
 annealing:
   enabled: true
   initial_lr: 0.00020712352850360292
- load_path: s3://ai2-llm/checkpoints/OLMo25/step1413814
+load_path: s3://ai2-llm/checkpoints/OLMo25/step1413814
 load_state: false
 nccl_debug: true
 dataset:
