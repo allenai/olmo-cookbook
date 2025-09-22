@@ -687,13 +687,13 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
 class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # Core OLMES (RC) — BPB variants
-        "arc_easy:rc:bpb::olmes:full",
-        "arc_challenge:rc:bpb::olmes:full",
-        "csqa:rc:bpb::olmes:full",
-        "hellaswag:rc:bpb::olmes:full",
-        "winogrande:rc:bpb::olmes:full",
-        "socialiqa:rc:bpb::olmes:full",
-        "piqa:rc:bpb::olmes:full",
+        "arc_easy:rc:bpb::olmes",
+        "arc_challenge:rc:bpb::olmes",
+        "csqa:rc:bpb::olmes",
+        "hellaswag:rc:bpb::olmes",
+        "winogrande:rc:bpb::olmes",
+        "socialiqa:rc:bpb::olmes",
+        "piqa:rc:bpb::olmes",
 
         # MMLU (RC) — BPB variants
         *[f"{category}:rc:bpb::olmes" for category in constants.MMLU_CATEGORIES],

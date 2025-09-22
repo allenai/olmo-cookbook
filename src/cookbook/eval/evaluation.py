@@ -256,9 +256,9 @@ def evaluate_checkpoint(
     # we need to partition tasks based on whether they are mc, gen, or rc
     partitioned_tasks = {}
     for task in all_tasks:
-        if ":rc::" in task:
+        if ":rc::" in task or ":rc:bpb::" in task:
             partitioned_tasks.setdefault("rc", []).append(task)
-        elif ":mc::" in task:
+        elif ":mc::" in task or ":mc:bpb::" in task:
             partitioned_tasks.setdefault("mc", []).append(task)
         elif "fim_" in task:
             partitioned_tasks.setdefault("fim", []).append(task)
