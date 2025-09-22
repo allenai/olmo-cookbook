@@ -293,6 +293,21 @@ def run_func_in_venv(fn):
     return wrapper
 
 
+def _get_beaker_account_name(client):
+    """Get account name from beaker client, handling both old and new API versions."""
+    if hasattr(client, 'account') and hasattr(client.account, 'name'):
+        return client.account.name
+    elif hasattr(client, 'user_name'):
+        return client.user_name
+    else:
+        # Fallback: try to get account info from whoami
+        try:
+            account_info = client.account.whoami()
+            return account_info.name
+        except:
+            raise RuntimeError("Unable to determine account name from beaker client")
+
+
 @run_func_in_venv
 def add_secret_to_beaker_workspace(
     secret_name: str,
@@ -306,11 +321,11 @@ def add_secret_to_beaker_workspace(
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.account.name}_{secret_name}"
+    full_secret_name = f"{_get_beaker_account_name(client)}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         write_secret = False
-    except beaker.exceptions.SecretNotFound:
+    except beaker.exceptions.BeakerSecretNotFound:
         write_secret = True
 
     if write_secret or overwrite:
@@ -338,7 +353,7 @@ def get_beaker_user() -> str:
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env()
-    return client.account.name
+    return _get_beaker_account_name(client)
 
 
 @run_func_in_venv
@@ -352,11 +367,11 @@ def check_if_secret_exists_in_beaker_workspace(
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.account.name}_{secret_name}"
+    full_secret_name = f"{_get_beaker_account_name(client)}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         return True
-    except beaker.exceptions.SecretNotFound:
+    except beaker.exceptions.BeakerSecretNotFound:
         return False
 
 

@@ -1046,3 +1046,19 @@ class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
         # adapt tool use benchmarks
         # adapt safety benchmarks
     ]
+
+
+ARTISANAL_SOURCES = [
+    "ams_notes",
+    "cornell",
+    "econlib",
+    "encyclopedia_math",
+    "medline",
+    "medlineplus",
+    "plato",
+    "skeptic",
+]
+
+@NamedTasksGroupRegistry.register("artisanal")
+class ArtisanalGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"artisanal_{source}" for source in ARTISANAL_SOURCES]
