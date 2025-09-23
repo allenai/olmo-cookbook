@@ -133,7 +133,7 @@ dataset:
     # 1,049,524,455 --> actual math meta reasoning
     # - weka://oe-training-default/ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
     # 364,483,656 --> verifiable/gpt-41 without special tokens
-    - weka://oe-training-default/ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents/allenai/dolma2-tokenizer/*.npy
+    - weka://oe-training-default/ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
     # 73,752,560 --> verifiable/gpt-o4-mini without special tokens
     - weka://oe-training-default/ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high/allenai/dolma2-tokenizer/*.npy
     ####
