@@ -2,7 +2,7 @@ name: "anneal-round5-100B-olmo25_7b-anneal-6T-non-decon"
 description: "non-decon OLMo2.5 7b anneal to 100B Tokens on Round 5 midtraining mix from 6T ckpt (keep high LR)"
 budget: "ai2/oe-base"
 workspace: "ai2/olmo-3-microanneals"
-nodes: 2
+nodes: 16
 gpus: 8
 preemptible: true
 max_tokens: 100_000_000_000
@@ -132,7 +132,7 @@ dataset:
     # 1,049,524,455 --> actual math meta reasoning
     # - gs://ai2-llm/preprocessed/midtraining-reasoning/math-meta-reasoning-fixed-decon/allenai/dolma2-tokenizer/*.npy
     # 364,483,656 --> verifiable/gpt-41 without special tokens
-    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents-decon-2/allenai/dolma2-tokenizer/*.npy
+    - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/gpt-41/cleaned-documents/allenai/dolma2-tokenizer/*.npy
     # 73,752,560 --> verifiable/gpt-o4-mini without special tokens
     - gs://ai2-llm/preprocessed/midtraining-reasoning/verifiable/o4-mini-high/allenai/dolma2-tokenizer/*.npy
     ####
