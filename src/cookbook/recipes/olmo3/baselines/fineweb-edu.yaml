@@ -19,7 +19,7 @@ dataset:
   sources:
   - name: fineweb-edu
     paths:
-    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/**/*.npy
     target_ratio: 1
 downstream_evaluators:
 - olmo2_dev_1b
