@@ -1,0 +1,26 @@
+name: dclm
+description: DCLM (text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train). https://arxiv.org/abs/2406.11794
+budget: ai2/oe-base
+workspace: ai2/dolma2
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: high
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+dataset:
+  sources:
+  - name: dclm
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train/allenai/dolma2-tokenizer/*.npy
+    target_ratio: 1
+downstream_evaluators:
+- olmo2_dev_1b
+lm_evaluator: true
