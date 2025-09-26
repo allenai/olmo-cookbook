@@ -850,7 +850,7 @@ class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
     ]
 
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v2")
-class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
+class Olmo3DevMidtrainV2MainGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         "ifeval::olmo3:midtrain",
         "gsm8k::olmo3:midtrain",
