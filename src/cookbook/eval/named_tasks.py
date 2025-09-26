@@ -249,6 +249,11 @@ class MMLUOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:cot::olmo3:thinker" for category in constants.MMLU_CATEGORIES]
 
 
+@NamedTasksGroupRegistry.register("mmlu:cot::olmo3:midtrain")
+class MMLUMidtrainGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:cot::olmo3:midtrain" for category in constants.MMLU_CATEGORIES]
+
+
 @NamedTasksGroupRegistry.register("core:rc")
 class CoreRCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:rc::olmes" for task in constants.ALL_CORE_TASKS]
@@ -351,6 +356,11 @@ class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva_math::olmo3:midtrain")
+class MinervaMidtrainReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::olmo3:midtrain" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -388,6 +398,11 @@ class AgiEvalGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::olmo3:thinker")
 class AgiEvalEnglishOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"agi_eval_{task}:0shot_cot::olmo3:thinker" for task in constants.AGI_EVAL_ENGLISH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("agi_eval_english::olmo3:midtrain")
+class AgiEvalEnglishMidtrainGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"agi_eval_{task}::olmo3:midtrain" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("starcoder")
@@ -443,6 +458,11 @@ class MtMbppV2fixGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("bbh:cot::olmo3:thinker")
 class BBHOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"bbh_{category}:cot::olmo3:thinker" for category in constants.BBH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::olmo3:midtrain")
+class BBHMidtrainThinkerGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::olmo3:midtrain" for category in constants.BBH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
@@ -827,4 +847,25 @@ class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
         "popqa::olmo3:thinker",
         AgiEvalEnglishOLMo3ThinkerGroup(),
         MMLUOLMo3ThinkerGroup(),
+    ]
+
+@NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v2")
+class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        "ifeval::olmo3:midtrain",
+        "gsm8k::olmo3:midtrain",
+        MinervaMidtrainReasoningGroup(),
+        "minerva_math_500::olmo3:midtrain",
+        "aime:2024::olmo3:midtrain",
+        "aime:2025::olmo3:midtrain",
+        "omega_500::olmo3:midtrain",
+        "codex_humanevalplus::olmo3:midtrain",
+        "mbppplus::olmo3:midtrain",
+        "livecodebench_codegeneration::olmo3:midtrain",
+        BBHMidtrainThinkerGroup(),
+        "gpqa::olmo3:midtrain",
+        "zebralogic::olmo3:midtrain",
+        "popqa::olmo3:midtrain",
+        AgiEvalEnglishMidtrainGroup(),
+        MMLUMidtrainGroup(),
     ]
