@@ -506,6 +506,19 @@ class Omega0ShotCoTGroup(BaseAverageNamedTasksGroup):
                 tasks += [f"omega_{broad_cate}_{sub_cate}_{target_split}:0-shot-chat"]
 
 
+@NamedTasksGroupRegistry.register("omega::olmo3:midtrain")
+class OmegaMidtrainGroup(BaseAverageNamedTasksGroup):
+    tasks = []
+    for broad_cate in constants.OMEGA_SUB_CATEGORIES:
+        if broad_cate == "explorative":
+            target_splits = ["test_in", "test_out"]
+        else:
+            target_splits = ["test"]
+        for sub_cate in constants.OMEGA_SUB_CATEGORIES[broad_cate]:
+            for target_split in target_splits:
+                tasks += [f"omega_{broad_cate}_{sub_cate}_{target_split}::olmo3:midtrain"]
+
+
 def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
     class HelmetGroup(BaseAverageNamedTasksGroup):
         tasks = [
@@ -849,6 +862,7 @@ class Olmo3DevMidtrainV1MainGroup(BaseNamedTasksWithNoAverageGroup):
         MMLUOLMo3ThinkerGroup(),
     ]
 
+
 @NamedTasksGroupRegistry.register("olmo3:dev:midtrain:v2")
 class Olmo3DevMidtrainV2MainGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
@@ -859,6 +873,7 @@ class Olmo3DevMidtrainV2MainGroup(BaseNamedTasksWithNoAverageGroup):
         "aime:2024::olmo3:midtrain",
         "aime:2025::olmo3:midtrain",
         "omega_500::olmo3:midtrain",
+        OmegaMidtrainGroup(),
         "codex_humanevalplus::olmo3:midtrain",
         "mbppplus::olmo3:midtrain",
         "livecodebench_codegeneration::olmo3:midtrain",
