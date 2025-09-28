@@ -109,10 +109,16 @@ def convert_olmo_core_v2(
             if not os.path.exists(config_json_file):
                 raise FileNotFoundError(f"Could not find 'config.yaml' or 'config.json' in {input_dir}")
 
-            print("Converting 'config.json' to 'config.yaml'...")
-            with open(config_json_file, "r") as json_file, open(config_file, "w") as yaml_file:
-                config = json.load(json_file)
-                yaml.dump(config, yaml_file)
+           # print("Converting 'config.json' to 'config.yaml' in temp location...")
+           # import tempfile
+           # temp_dir = tempfile.mkdtemp()
+           # config_file = os.path.join(temp_dir, "config.yaml")
+            
+            #with open(config_json_file, "r") as json_file, open(config_file, "w") as yaml_file:
+            #    config = json.load(json_file)
+            #    yaml.dump(config, yaml_file)
+            
+            #directories_to_clean_up.append(temp_dir)
 
         print("Converting OLMo core V2 weights to Huggingface format...")
         os.makedirs(huggingface_output_dir, exist_ok=True)
@@ -523,7 +529,7 @@ def run_checkpoint_conversion(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
-        for cluster in set(get_matching_clusters(beaker_cluster)):
+        for cluster in get_matching_clusters(beaker_cluster):
             gantry_flags.append(f"--cluster {cluster}")
 
         install_flash_attention = ""
