@@ -1,5 +1,3 @@
-import json
-
 TRANSFORMERS_GIT_URL = "https://github.com/huggingface/transformers.git"
 TRANSFORMERS_COMMIT_HASH = "241c04d36867259cdf11dbb4e9d9a60f9cb65ebc"  # v4.47.1
 
@@ -29,8 +27,10 @@ BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
 BEAKER_DEFAULT_BUDGET = "ai2/oe-base"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
-BEAKER_PY_MAX_VERSION = "1.34.1"
-BEAKER_GANTRY_MAX_VERSION = "1.14.1"
+BEAKER_PY_MIN_VERSION = "1.36.4"
+BEAKER_PY_MAX_VERSION = "2"
+BEAKER_GANTRY_MIN_VERSION = "1.17.1"
+BEAKER_GANTRY_MAX_VERSION = "2"
 
 OLMO_TYPES = ["olmoe", "olmo2", "olmo-core", "olmo-core-v2"]
 
@@ -52,35 +52,63 @@ WEKA_MOUNTS = [
 
 BEAKER_KNOWN_CLUSTERS = {
     "aus": [
-        "ai2/jupiter-cirrascale-2",
-        "ai2/neptune-cirrascale",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/jupiter",
+        "ai2/neptune",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
     "aus80g": [
-        "ai2/jupiter-cirrascale-2",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/jupiter",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
-    "goog": ["ai2/augusta-google-1"],
+    "goog": ["ai2/augusta"],
     "h100": [
-        "ai2/augusta-google-1",
-        "ai2/jupiter-cirrascale-2",
-        "ai2/ceres-cirrascale",
+        "ai2/augusta",
+        "ai2/jupiter",
+        "ai2/ceres",
     ],
     "a100": [
-        "ai2/saturn-cirrascale",
+        "ai2/saturn",
     ],
     "l40": [
-        "ai2/neptune-cirrascale",
+        "ai2/neptune",
     ],
     "80g": [
-        "ai2/augusta-google-1",
-        "ai2/jupiter-cirrascale-2",
-        "ai2/saturn-cirrascale",
-        "ai2/ceres-cirrascale",
+        "ai2/augusta",
+        "ai2/jupiter",
+        "ai2/saturn",
+        "ai2/ceres",
     ],
 }
+
+NEW_CLUSTER_ALIASES = {
+    "ai2/allennlp-elanding-a100-40g": "ai2/allennlp",
+    "ai2/allennlp-dev-a100-sea": "ai2/allennlp",
+    "ai2/augusta-batch-h100-dsm-tcpxo": "ai2/augusta",
+    "ai2/augusta-google-1": "ai2/augusta",
+    "ai2/ceres-dev-h100-aus-ib": "ai2/ceres",
+    "ai2/ceres-cirrascale": "ai2/ceres",
+    "ai2/jupiter-batch-h100-aus-ib": "ai2/jupiter",
+    "ai2/jupiter-cirrascale-2": "ai2/jupiter",
+    "ai2/neptune-dev-l40-aus": "ai2/neptune",
+    "ai2/neptune-cirrascale": "ai2/neptune",
+    "ai2/phobos-dev-aus": "ai2/phobos",
+    "ai2/phobos-cirrascale": "ai2/phobos",
+    "ai2/prior-dev-a6000-sea": "ai2/prior",
+    "ai2/prior-elanding": "ai2/prior",
+    "ai2/prior-elanding-rtx8000": "ai2/prior-rtx8000",
+    "ai2/prior-dev-rtx8000-sea": "ai2/prior-rtx8000",
+    "ai2/rhea-dev-a6000-aus": "ai2/rhea",
+    "ai2/rhea-cirrascale": "ai2/rhea",
+    "ai2/saturn-dev-a100-aus": "ai2/saturn",
+    "ai2/saturn-cirrascale": "ai2/saturn",
+    "ai2/titan-batch-b200-aus-ib": "ai2/titan",
+    "ai2/titan-cirrascale": "ai2/titan",
+    "ai2/triton-dev-l40-aus": "ai2/triton",
+    "ai2/triton-cirrascale": "ai2/triton",
+}
+
 
 MMLU_CATEGORIES = [
     "mmlu_abstract_algebra",
@@ -920,253 +948,3 @@ OE_EVAL_GIT_URL = "git@github.com:allenai/oe-eval-internal.git"
 OE_EVAL_COMMIT_HASH = None
 OE_EVAL_LAUNCH_COMMAND = "oe_eval/launch.py"
 BEAKER_PRIORITIES = ["low", "normal", "high", "urgent"]
-
-
-# # # # # # # # # # # # # LEGACY NAMED GROUPS # # # # # # # # # # # # #
-# The following named/display groups are preserved as reference only. #
-# Do NOT uncomment them, use new named_tasks.py instead.              #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# ALL_NAMED_GROUPS = {
-#     "mmlu:rc": [f"{category}:rc::olmes" for category in MMLU_CATEGORIES],
-#     "mmlu:mc": [f"{category}:mc::olmes" for category in MMLU_CATEGORIES],
-#     "core:rc": [f"{task}:rc::olmes" for task in ALL_CORE_TASKS],
-#     "core:mc": [f"{task}:mc::olmes" for task in ALL_CORE_TASKS],
-#     "basic:rc": [f"{task}:rc::olmes" for task in BASIC_SKILLS],
-#     "basic:mc": [f"{task}:mc::olmes" for task in BASIC_SKILLS],
-#     "mmlu_pro:mc": [f"{category}:mc::none" for category in MMLU_PRO_CATEGORIES],
-#     "gen": ALL_GEN_TASKS,
-#     "gen-no-jp": [task for task in ALL_GEN_TASKS if task != "jeopardy::olmes"],
-#     "minerva": ALL_MINERVA_TASKS,
-#     "math": ALL_MATH_TASKS,
-#     "gsm-symb": ALL_GSM_SYMB_TASKS,
-#     "code": ALL_CODEX_TASKS,
-#     "agi_eval": ALL_AGI_EVAL_TASKS,
-#     "starcoder": STARCODER_CODEX_TASKS,
-#     "starcoder::pass@1": STARCODER_PASS_AT_1_TASKS,
-#     "code-no-bcb": [task for task in ALL_CODEX_TASKS if "bigcodebench" not in task],
-#     "fim": FIM_TASKS,
-#     "mt_mbpp": [f"mt_mbpp:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
-#     "mt_mbpp_v2fix": [f"mt_mbpp_v2fix:{language}" for language in MULTILINGUAL_MBPP_LANGUAGES],
-# }
-
-# for helmet_length in (int(2**i) for i in range(13, 18)):
-#     ALL_NAMED_GROUPS[f"helmet:{helmet_length // 2 ** 10}k"] = list(
-#         set(
-#             task
-#             for group_name, tasks in HELMET_SUITES.items()
-#             for task in tasks
-#             if group_name.endswith(f"__{helmet_length}::suite") and not group_name.startswith("helmet_all")
-#         )
-#     )
-
-
-# ALL_DISPLAY_TASKS = {
-#     "olmo2:paper": [
-#         r"arc_challenge:(rc|mc)::olmes$",
-#         r"hellaswag:(rc|mc)::olmes$",
-#         r"winogrande:(rc|mc)::olmes$",
-#         r"naturalqs::olmes$",
-#         r"drop::olmes$",
-#         r"agieval.*::olmes$",
-#         r"^gsm8k::olmes$",
-#         r"^mmlu:rc$",
-#         r"^mmlu:mc$",
-#         r"^mmlu_pro:mc$",
-#         r"^agi_eval$",
-#         r"^triviaqa::olmes$",
-#     ],
-#     "olmo2:dev:7b": [
-#         r"arc_challenge:mc.*",
-#         r"arc_easy:mc.*",
-#         r"hellaswag:mc.*",
-#         r"naturalqs.*",
-#         r"^gsm8k::olmo1$",
-#         r"^mmlu:mc$",
-#         r"^core:mc$",
-#         r"^gen$",
-#     ],
-#     "olmo2:dev:1b": [
-#         r"arc_challenge:rc.*",
-#         r"arc_easy:rc.*",
-#         r"hellaswag:rc.*",
-#         r"^gsm8k::olmo1$",
-#         r"^mmlu:rc$",
-#         r"^core:rc$",
-#     ],
-#     "olmo3:dev:1b": [
-#         "^arc_challenge.*olmes",     # should return mc, rc, bpb variants, full or not
-#         "^arc_easy.*olmes",
-#         "^basic_skills.*olmes",
-#         "^codex_humaneval.*3shot",
-#         "^coqa.*gen2mc",
-#         "^csqa.*olmes",
-#         "^drop.*gen2mc",
-#         "^hellaswag.*olmes",
-#         "^jeopardy.*gen2mc",
-#         "^lab_bench.*",
-#         "^lambada.*",
-#         "^mbpp.*3shot",
-#         "^medmcqa.*none",
-#         "^medqa.*none",
-#         "^minerva.*olmes$",     # doesn't return average
-#         # "minerva",
-#         "^mmlu.*olmes$",    # doesn't return average
-#         # "mmlu:rc",
-#         "^mt_mbpp_v2fix.*",           # still returns average
-#         "^naturalqs.*gen2mc",
-#         "^piqa.*olmes",
-#         "^qasper_yesno.*olmes",
-#         "^sciq.*olmo3",
-#         "^sciriff_yesno.*olmes",
-#         "^socialiqa.*olmes",
-#         "^squad.*gen2mc",
-#         "^winogrande.*olmes",
-#         "ultrachat_masked_ppl",
-#         "wildchat_masked_ppl",
-#     ],
-#     "olmo3:dev:1b:mini": [
-#         "^arc_challenge:rc.*",
-#         "^arc_easy:rc.*",
-#         "^codex_humaneval.*3shot",
-#         "^hellaswag:rc.*olmes",
-#         "^mbpp.*3shot",
-#         "^minerva$",
-#         "^mt_mbpp_v2fix$",
-#         "^winogrande:rc.*olmes",
-#         "basic:rc",
-#         "core:rc"
-#         "mmlu:bpb",
-#         "mmlu:rc",
-#     ],
-#     "olmo3:dev:7b:mini": [
-#         "^arc_challenge:mc::olmes:full",
-#         "^arc_easy:mc::olmes:full",
-#         "^hellaswag:rc.*olmes",
-#         "^codex_humaneval::olmo3",
-#         "^mbpp:3shot::olmo3",
-#         "^gsm-symb$",
-#         "^minerva$",
-#         "^mt_mbpp_v2fix$",
-#         "^core:mc$",
-#         "^mmlu:mc$",
-#     ],
-#     "helmet:8k": [r"^helmet:8k$"],
-#     "helmet:16k": [r"^helmet:16k$"],
-#     "helmet:32k": [r"^helmet:32k$"],
-#     "helmet:64k": [r"^helmet:64k$"],
-#     "helmet:128k": [r"^helmet:128k$"],
-# }
-
-
-# SHORT_NAMES = {
-#      r"::olmes$": "",
-#      r"::olmes:full$": "",
-#      r"^gsm8k::olmo1$": "GSM*",
-#      r"^naturalqs": "NQ",
-#      r"^(arc\_\w)\w+": r"\1",
-#      r"^hellaswag": "HSwag",
-
-
-#      r"^winogrande": "WinoG",
-#      r"^codex_humaneval": "humaneval",
-#      r"::olmo3$": "",
-#      r"::none$": "",
-#      r":3shot": "",
-#      r"::full$": "",
-#  }
-
-
-# ALL_EVAL_TASKS = {
-#     "olmo2:paper": [
-#         "olmo_2_heldout::olmes",
-#         "olmo_2_generative::olmes",
-#         "core_9mcqa::olmes", # evaluates both mc and rc
-#         "mmlu:mc::olmes",
-#         "mmlu:rc::olmes",
-#         "triviaqa::olmes"
-#     ],
-#     "olmo3:dev:1b:vllm": [
-#         "arc_challenge:rc::olmes:full",
-#         "arc_easy:rc::olmes:full",
-#         "basic_skills:rc::olmes",
-#         "codex_humaneval:3shot:bpb::none",
-#         "coqa:rc::gen2mc",
-#         "csqa:rc::olmes:full",
-#         "drop:rc::gen2mc",
-#         "hellaswag:rc::olmes:full",
-#         "jeopardy:rc::gen2mc",
-#         "lab_bench_dbqa",
-#         "lab_bench_protocolqa",
-#         "lambada",
-#         "mbpp:3shot:bpb::none",
-#         "medmcqa:rc::none",
-#         "medqa_en:rc::none",
-#         "minerva_math::olmes",
-#         "mmlu:rc::olmes",
-#         "mt_mbpp_v2fix",
-#         "naturalqs:rc::gen2mc",
-#         "piqa:rc::olmes:full",
-#         "qasper_yesno:rc::olmes",
-#         "sciq:rc::olmo3",
-#         "sciriff_yesno:rc::olmes",
-#         "socialiqa:rc::olmes:full",
-#         "squad:rc::gen2mc",
-#         "winogrande:rc::olmes:full",
-#     ],
-#     "olmo3:dev:1b:hf": [
-#         "ultrachat_masked_ppl",
-#         "wildchat_masked_ppl",
-#     ],
-#     "olmo3:dev:7b:vllm": [
-#         "arc_challenge:mc::xlarge",
-#         "arc_easy:mc::xlarge",
-#         "basic_skills:rc::olmes",
-#         "bigcodebench:3shot::olmo3",
-#         "codex_humaneval:3shot::olmo3",
-#         "codex_humanevalfim_multi:temp0.2",
-#         "codex_humanevalfim_random:temp0.2",
-#         "codex_humanevalfim_single:temp0.2",
-#         "coqa::xlarge",
-#         "coqa:mc::gen2mc",
-#         "cruxeval_input:pass@5",
-#         "cruxeval_output:pass@5",
-#         "csqa:mc::xlarge",
-#         "deepseek_leetcode::olmo3",
-#         "drop::xlarge",
-#         "drop:mc::gen2mc",
-#         "ds1000:3shot::olmo3",
-#         "gsm_symbolic::olmo3",
-#         "gsm_symbolic:p1::olmo3",
-#         "gsm_symbolic:p2::olmo3",
-#         "gsm8k::olmes",
-#         "hellaswag:rc::xlarge",
-#         "jeopardy::xlarge",
-#         "jeopardy:mc::gen2mc",
-#         "lab_bench_dbqa:mc",
-#         "lab_bench_protocolqa:mc",
-#         "lambada",
-#         "mbpp:3shot::olmo3",
-#         "medmcqa:mc::none",
-#         "medqa_en:mc::none",
-#         "minerva_math::olmes",
-#         "mmlu:mc::olmes",
-#         "mt_mbpp_v2fix",
-#         "multipl_e:6lang::olmo3",
-#         "naturalqs::xlarge",
-#         "naturalqs:mc::gen2mc",
-#         "openbookqa:mc::xlarge",
-#         "piqa:mc::xlarge",
-#         "qasper_yesno:mc::olmes",
-#         "sciq:mc::xlarge",
-#         "sciriff_yesno:mc::olmes",
-#         "socialiqa:mc::xlarge",
-#         "squad::xlarge",
-#         "squad:mc::gen2mc",
-#         "winogrande:rc::xlarge",
-#     ],
-#     "olmo3:dev:7b:hf": [
-#         "ultrachat_masked_ppl",
-#         "wildchat_masked_ppl",
-#     ],
-# }
