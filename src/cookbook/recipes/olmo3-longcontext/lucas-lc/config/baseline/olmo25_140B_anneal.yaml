@@ -1,0 +1,35 @@
+name: &name "anneal-olmo25_7b-142B-same-data"
+description: *name
+budget: "ai2/oe-base"
+workspace: "ai2/oe-data"
+nodes: 8
+gpus: 8
+preemptible: true
+max_tokens: 10_000_000_000
+global_batch_size: 4_194_304
+sequence_length: 8192
+seed: 1337
+model: "olmo25_7b"
+tokenizer: "dolma2"
+priority: urgent
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+  initial_lr: 0.00029952
+load_path: gs://ai2-llm/checkpoints/OLMo25/step34000
+load_state: false
+nccl_debug: true
+dataset:
+  sources:
+    - name: dolma2
+      target_ratio: 1
+      paths:
+        - gs://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2/*/*.npy
+        - gs://ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/arxiv/*.npy
+        - gs://ai2-llm/preprocessed/dolma2-0625/v0.2/allenai/dolma2-tokenizer/s2pdf/*/*.npy
+        - gs://ai2-llm/preprocessed/dolma2-0625/v0.2/allenai/dolma2-tokenizer/stack-edu/*/*.npy
+        - gs://ai2-llm/preprocessed/dolma2-0625/v0.2/allenai/dolma2-tokenizer/wikipedia/*.npy
