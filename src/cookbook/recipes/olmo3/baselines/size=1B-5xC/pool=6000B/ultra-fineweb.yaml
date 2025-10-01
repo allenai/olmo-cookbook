@@ -1,16 +1,17 @@
-# Sampled 4 files with 15,999,997,871 tokens (pool target: 6,000,000,000,000, scaled target: 14,073,348,123, total size: 659,999,713,154)
+# Sampled 4 files with 15,999,996,329 tokens (pool target: 6,000,000,000,000, scaled target: 14,073,348,123, total size: 659,999,713,154)
 budget: ai2/oe-base
 cluster: ai2/augusta-google-1
 dataset:
   sources:
   - name: ultra-fineweb
     paths:
-    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-01-00005.npy
-    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-01-00000.npy
-    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-07-00004.npy
-    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-08-00008.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-03-00005.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-07-00007.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-01-00006.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-06-00001.npy
     target_ratio: 1
-description: Ultra FineWeb. https://arxiv.org/abs/2505.05427
+description: Ultra FineWeb. https://arxiv.org/abs/2505.05427, for 1B-5xC with 6000B
+  target pool
 downstream_evaluators:
 - olmo2_dev_1b
 global_batch_size: 2097152
@@ -18,7 +19,7 @@ gpus: 8
 lm_evaluator: true
 max_tokens: 127939584000
 model: olmo2_1B_v2
-name: ultra-fineweb
+name: ultra-fineweb-1B-5xC-6000B
 nodes: 2
 preemptible: true
 priority: high
