@@ -1,0 +1,33 @@
+# Sampled 7 files with 13,997,387,084 tokens (pool target: 6,000,000,000,000, scaled target: 11,614,773,585, total size: 544,699,610,056)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: hq
+    paths:
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-08-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-33-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-30-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-15-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-55-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-42-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-04-00001.npy
+    target_ratio: 1
+description: Baseline Nemotron CC, High Quality (HQ) subset. https://arxiv.org/abs/2412.02595
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: nemotron-cc-hq
+nodes: 2
+preemptible: true
+priority: high
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/dolma2

@@ -1,0 +1,64 @@
+# Sampled 38 files with 130,331,815,467 tokens (pool target: 1,000,000,000,000, scaled target: 127,939,584,000, total size: 1,274,409,830,038)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: fineweb-edu
+    paths:
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2021-49/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2018-26/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2020-05/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2020-45/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2015-35/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2016-40/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-23/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2023-23/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-42/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-52/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2021-25/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2022-21/part-4-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2015-48/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2019-18/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2019-30/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-49/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2016-30/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-26/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2022-21/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2021-43/part-2-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-39/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2018-13/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2020-10/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-41/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-39/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2023-14/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2015-11/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-15/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2019-35/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2018-43/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2018-34/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2020-05/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2016-36/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2022-40/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2018-47/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2024-10/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-22/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2016-07/part-2-00000.npy
+    target_ratio: 1
+description: FineWeb Edu. https://arxiv.org/abs/2406.17557
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: fineweb-edu
+nodes: 2
+preemptible: true
+priority: high
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/dolma2

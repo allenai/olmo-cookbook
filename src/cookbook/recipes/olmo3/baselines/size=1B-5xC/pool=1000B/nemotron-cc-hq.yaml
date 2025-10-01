@@ -1,0 +1,50 @@
+# Sampled 24 files with 71,853,329,069 tokens (pool target: 1,000,000,000,000, scaled target: 69,688,641,515, total size: 544,699,610,056)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: hq
+    paths:
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-27-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-11-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-26-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-53-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-14-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-33-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-14-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-05-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-15-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-32-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-29-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-12-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-06-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-55-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-16-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-08-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-60-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-26-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-39-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-31-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-45-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-02-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-47-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/allenai/dolma2-tokenizer/quality=high/kind=actual/kind2=actual/part-15-00000.npy
+    target_ratio: 1
+description: Baseline Nemotron CC, High Quality (HQ) subset. https://arxiv.org/abs/2412.02595
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: nemotron-cc-hq
+nodes: 2
+preemptible: true
+priority: high
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/dolma2

@@ -1,0 +1,67 @@
+# Sampled 41 files with 128,699,965,545 tokens (pool target: 4,000,000,000,000, scaled target: 127,939,584,000, total size: 11,567,932,920,105)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: fineweb
+    paths:
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2024-10/part-09-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2020-34/part-03-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2023-23/part-12-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2014-15/part-02-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2020-29/part-04-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2016-44/part-13-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2022-21/part-15-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2020-24/part-00-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-43/part-12-00003.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-31/part-07-00003.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-43/part-03-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-04/part-09-00003.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2013-20/part-00-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-43/part-01-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-34/part-00-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-04/part-13-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-31/part-06-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-43/part-08-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-21/part-02-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2016-30/part-04-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-34/part-07-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-22/part-11-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-39/part-15-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-39/part-13-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2023-40/part-08-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2016-30/part-14-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-49/part-01-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2023-50/part-08-00003.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-13/part-04-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2020-29/part-10-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2016-44/part-13-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2021-17/part-10-00003.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2015-48/part-02-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2014-49/part-12-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2020-40/part-14-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2013-48/part-09-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2023-14/part-03-00003.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2022-05/part-00-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2015-14/part-05-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2017-51/part-07-00002.npy
+    - s3://ai2-llm/preprocessed/fineweb/raw/allenai/dolma2-tokenizer/CC-MAIN-2024-18/part-15-00001.npy
+    target_ratio: 1
+description: FineWeb. https://arxiv.org/abs/2406.17557
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: fineweb
+nodes: 2
+preemptible: true
+priority: high
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/dolma2
