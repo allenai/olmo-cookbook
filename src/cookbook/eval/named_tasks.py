@@ -284,6 +284,11 @@ class ARCMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.ARC_TASKS]
 
 
+@NamedTasksGroupRegistry.register("arc:bpb::full")
+class ARCBPBFullGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:bpb::olmes:full" for category in constants.ARC_TASKS]
+
+
 @NamedTasksGroupRegistry.register("arc:rc::full")
 class ARCRCFullGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:rc::olmes:full" for category in constants.ARC_TASKS]
@@ -571,6 +576,38 @@ class Olmo3Dev1bCodeBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
         "codex_humaneval:3shot:bpb::none",
         "mbpp:3shot:bpb::none",
         MtMbppV2fixGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:bpb")
+class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCBPBFullGroup(),
+        MMLUBpbGroup(),
+        "csqa:bpb::olmes:full",
+        "hellaswag:bpb::olmes:full",
+        "winogrande:bpb::olmes:full",
+        "socialiqa:bpb::olmes:full",
+        "piqa:bpb::olmes:full",
+
+        # Gen OLMES
+        "coqa:bpb::gen2mc",
+        "drop:bpb::gen2mc",
+        "jeopardy:bpb::gen2mc",
+        "naturalqs:bpb::gen2mc",
+        "squad:bpb::gen2mc",
+
+        # New OLMo 3
+        "sciq:bpb::olmo3",
+        "qasper_yesno:bpb::olmes",
+        "basic_skills:bpb::olmes",
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:bpb::none",
+        "medqa_en:bpb::none",
+        "sciriff_yesno:bpb::olmes",
     ]
 
 
