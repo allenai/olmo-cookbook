@@ -1,7 +1,7 @@
 name: fineweb-edu
 description: FineWeb Edu. https://arxiv.org/abs/2406.17557
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/oe-data
 nodes: 2
 gpus: 8
 preemptible: true

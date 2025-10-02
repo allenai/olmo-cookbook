@@ -27,4 +27,4 @@ seed: 1337
 sequence_length: 4096
 tokenizer: dolma2
 weka: false
-workspace: ai2/dolma2
+workspace: ai2/oe-data

@@ -1,7 +1,7 @@
 name: dclm
 description: DCLM (text_openhermes_reddit_eli5_vs_rw_v2_bigram_200k_train). https://arxiv.org/abs/2406.11794
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/oe-data
 nodes: 2
 gpus: 8
 preemptible: true

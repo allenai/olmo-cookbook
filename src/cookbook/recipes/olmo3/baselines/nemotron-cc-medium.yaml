@@ -1,7 +1,7 @@
 name: nemotron-cc-medium
 description: Baseline Nemotron CC, Medium subset. https://arxiv.org/abs/2412.02595
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/oe-data
 nodes: 2
 gpus: 8
 preemptible: true

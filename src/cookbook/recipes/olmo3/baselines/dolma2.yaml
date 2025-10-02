@@ -1,7 +1,7 @@
 name: dolma2
 description: Dolma 2 mix.
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/oe-data
 nodes: 2
 gpus: 8
 preemptible: true

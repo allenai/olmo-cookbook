@@ -1,7 +1,7 @@
 name: dolma2-no-math-no-code
 description: Dolma 2 mix without StackEdu and FineMath.
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/oe-data
 nodes: 2
 gpus: 8
 preemptible: true
