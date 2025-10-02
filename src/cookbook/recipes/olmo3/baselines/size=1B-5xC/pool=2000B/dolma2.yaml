@@ -1018,7 +1018,7 @@ model: olmo2_1B_v2
 name: dolma2-1B-5xC-2000B
 nodes: 2
 preemptible: true
-priority: high
+priority: urgent
 rank_microbatch_size: 32768
 seed: 1337
 sequence_length: 4096
