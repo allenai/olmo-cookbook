@@ -178,7 +178,6 @@ def make_results_from_dashboard(
     expanded_tasks = ExpandedTasks.from_tasks(tasks)
     expanded_models = ExpandedModels.from_models(models or [])
 
-
     # start by filtering in all the single tasks
     results = dashboard_table.keep_cols(*expanded_tasks.single_tasks)
 
