@@ -309,6 +309,11 @@ class ARCMCXlargeGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::xlarge" for category in constants.ARC_TASKS]
 
 
+@NamedTasksGroupRegistry.register("basic:bpb")
+class BasicBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:bpb::olmes" for task in constants.BASIC_SKILLS]
+
+
 @NamedTasksGroupRegistry.register("basic:rc")
 class BasicRCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:rc::olmes" for task in constants.BASIC_SKILLS]
@@ -601,7 +606,7 @@ class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
         # New OLMo 3
         "sciq:bpb::olmo3",
         "qasper_yesno:bpb::olmes",
-        "basic_skills:bpb::olmes",
+        BasicBpbGroup(),
         "lab_bench_dbqa:bpb",
         "lab_bench_protocolqa:bpb",
         "lambada:bpb",
@@ -646,40 +651,14 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:bpb")
 class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Core OLMES
-        "arc:bpb::full$",
-        "mmlu:bpb$",
-        "csqa:bpb::olmes:full",
-        "hellaswag:bpb::olmes:full",
-        "winogrande:bpb::olmes:full",
-        "socialiqa:bpb::olmes:full",
-        "piqa:bpb::olmes:full",
-
-        # Gen OLMES
-        "coqa:bpb::gen2mc",
-        "drop:bpb::gen2mc",
-        "jeopardy:bpb::gen2mc",
-        "naturalqs:bpb::gen2mc",
-        "squad:bpb::gen2mc",
+        # QA
+        Olmo3Dev1bQaBpbGroup(),
 
         # Math
         MinervaBpbGroup(),
 
         # Code
         Olmo3Dev1bCodeBpbGroup(),
-
-        # New OLMo 3
-        "sciq:bpb::olmo3",
-        "qasper_yesno:bpb::olmes",
-        "basic_skills:bpb::olmes",
-        "lab_bench_dbqa:bpb",
-        "lab_bench_protocolqa:bpb",
-        "lambada:bpb",
-        "medmcqa:bpb::none",
-        "medqa_en:bpb::none",
-        "sciriff_yesno:bpb::olmes",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
     ]
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
