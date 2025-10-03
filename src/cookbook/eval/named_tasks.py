@@ -284,6 +284,11 @@ class ARCMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.ARC_TASKS]
 
 
+@NamedTasksGroupRegistry.register("arc:bpb::full")
+class ARCBPBFullGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:bpb::olmes:full" for category in constants.ARC_TASKS]
+
+
 @NamedTasksGroupRegistry.register("arc:rc::full")
 class ARCRCFullGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:rc::olmes:full" for category in constants.ARC_TASKS]
@@ -302,6 +307,11 @@ class ARCRCXlargeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("arc:mc::xlarge")
 class ARCMCXlargeGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::xlarge" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("basic:bpb")
+class BasicBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:bpb::olmes" for task in constants.BASIC_SKILLS]
 
 
 @NamedTasksGroupRegistry.register("basic:rc")
@@ -574,6 +584,38 @@ class Olmo3Dev1bCodeBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:bpb")
+class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCBPBFullGroup(),
+        MMLUBpbGroup(),
+        "csqa:bpb::olmes:full",
+        "hellaswag:bpb::olmes:full",
+        "winogrande:bpb::olmes:full",
+        "socialiqa:bpb::olmes:full",
+        "piqa:bpb::olmes:full",
+
+        # Gen OLMES
+        "coqa:bpb::gen2mc",
+        "drop:bpb::gen2mc",
+        "jeopardy:bpb::gen2mc",
+        "naturalqs:bpb::gen2mc",
+        "squad:bpb::gen2mc",
+
+        # New OLMo 3
+        "sciq:bpb::olmo3",
+        "qasper_yesno:bpb::olmes",
+        BasicBpbGroup(),
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:bpb::none",
+        "medqa_en:bpb::none",
+        "sciriff_yesno:bpb::olmes",
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:rc")
 class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -609,40 +651,14 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:bpb")
 class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Core OLMES
-        "arc:bpb::full$",
-        "mmlu:bpb$",
-        "csqa:bpb::olmes:full",
-        "hellaswag:bpb::olmes:full",
-        "winogrande:bpb::olmes:full",
-        "socialiqa:bpb::olmes:full",
-        "piqa:bpb::olmes:full",
-
-        # Gen OLMES
-        "coqa:bpb::gen2mc",
-        "drop:bpb::gen2mc",
-        "jeopardy:bpb::gen2mc",
-        "naturalqs:bpb::gen2mc",
-        "squad:bpb::gen2mc",
+        # QA
+        Olmo3Dev1bQaBpbGroup(),
 
         # Math
         MinervaBpbGroup(),
 
         # Code
         Olmo3Dev1bCodeBpbGroup(),
-
-        # New OLMo 3
-        "sciq:bpb::olmo3",
-        "qasper_yesno:bpb::olmes",
-        "basic_skills:bpb::olmes",
-        "lab_bench_dbqa:bpb",
-        "lab_bench_protocolqa:bpb",
-        "lambada:bpb",
-        "medmcqa:bpb::none",
-        "medqa_en:bpb::none",
-        "sciriff_yesno:bpb::olmes",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
     ]
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
