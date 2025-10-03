@@ -1,0 +1,38 @@
+# Sampled 11 files with 42,805,381,637 tokens (pool target: 6,000,000,000,000, scaled target: 41,739,044,935, total size: 1,957,441,643,823)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: medium
+    paths:
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-092-00003.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-013-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-020-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-089-00003.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-103-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-003-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-043-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-107-00002.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-033-00000.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-094-00001.npy
+    - s3://ai2-llm/preprocessed/Nemotron-CC/v0/quality=medium/kind=actual/kind2=actual/allenai/dolma2-tokenizer/part-105-00001.npy
+    target_ratio: 1
+description: Baseline Nemotron CC, Medium subset. https://arxiv.org/abs/2412.02595,
+  for 1B-5xC with 6000B target pool
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: nemotron-cc-medium-1B-5xC-6000B
+nodes: 2
+preemptible: true
+priority: urgent
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/oe-data
