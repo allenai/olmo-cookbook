@@ -4,8 +4,8 @@ budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
-priority: urgent
-nodes: 8
+priority: high
+nodes: 4
 gpus: 8
 seed: 4123
 
