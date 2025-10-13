@@ -1,0 +1,26 @@
+name: fineweb-edu
+description: FineWeb Edu. https://arxiv.org/abs/2406.17557
+budget: ai2/oe-base
+workspace: ai2/oe-data
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: urgent
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+dataset:
+  sources:
+  - name: fineweb-edu
+    paths:
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/**/*.npy
+    target_ratio: 1
+downstream_evaluators:
+- olmo2_dev_1b
+lm_evaluator: true
