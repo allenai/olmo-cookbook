@@ -371,6 +371,11 @@ class MinervaMidtrainReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmo3:midtrain" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("deepmind_math::olmo3:heldout")
+class DeepmindMathHeldoutGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"deepmind_math_{cat}::olmo3:heldout" for cat in constants.DEEPMIND_MATH_CATEGORIES]
+
+
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -473,6 +478,11 @@ class BBHOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("bbh:cot::olmo3:midtrain")
 class BBHMidtrainThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"bbh_{category}:cot::olmo3:midtrain" for category in constants.BBH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::olmo3:heldout")
+class BBHHeldoutGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::olmo3:heldout" for category in constants.BBH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
@@ -899,4 +909,39 @@ class Olmo3DevMidtrainV2MainGroup(BaseNamedTasksWithNoAverageGroup):
         "popqa::olmo3:midtrain",
         AgiEvalEnglishMidtrainGroup(),
         MMLUMidtrainGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:base_heldout")
+class Olmo3BaseHeldoutGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        BBHHeldoutGroup(),
+        MMLUProMCGroup(),
+        DeepmindMathHeldoutGroup(),
+        "lbpp::olmo3",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:paper")
+class Olmo3PaperGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        # olmo3:base_easy
+        Olmo3Dev1bMathBpbGroup(),
+        Olmo3Dev1bCodeBpbGroup(),
+        Olmo3Dev1bQaBpbGroup(),
+        Olmo3Dev1bQaRcGroup(),
+
+        # olmo3:base
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV2Group(),
+        Olmo3Dev7bCodeGenV2Group(),
+        Olmo3Dev7bCodeFimGroup(),
+
+        # olmo3:base_chat
+        Olmo3DevMidtrainV2MainGroup(),
+
+        # olmo3:heldout
+        Olmo3BaseHeldoutGroup(),
     ]
