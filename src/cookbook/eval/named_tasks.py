@@ -625,6 +625,37 @@ class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
         "sciriff_yesno:bpb::olmes",
     ]
 
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:bpb:v2")
+class Olmo3Dev1bQaBpbV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCBPBFullGroup(),
+        MMLUBpbGroup(),
+        "csqa:bpb::olmes:full",
+        "hellaswag:bpb::olmes:full",
+        "winogrande:bpb::olmes:full",
+        "socialiqa:bpb::olmes:full",
+        "piqa:bpb::olmes:full",
+
+        # Gen OLMES
+        "coqa:bpb::gen2mc:xlarge",
+        "drop:bpb::gen2mc:xlarge",
+        "jeopardy:bpb::gen2mc:xlarge",
+        "naturalqs:bpb::gen2mc:xlarge",
+        "squad:bpb::gen2mc:xlarge",
+
+        # New OLMo 3
+        "sciq:bpb::olmo3",
+        "qasper_yesno:bpb::olmes",
+        BasicBpbGroup(),
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:bpb::none",
+        "medqa_en:bpb::none",
+        "sciriff_yesno:bpb::olmes",
+    ]
+
 
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:rc")
 class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
@@ -644,6 +675,38 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
         "jeopardy:rc::gen2mc",
         "naturalqs:rc::gen2mc",
         "squad:rc::gen2mc",
+
+        # New OLMo 3
+        "sciq:rc::olmo3",
+        "qasper_yesno:rc::olmes",
+        BasicRCGroup(),
+        "lab_bench_dbqa",
+        "lab_bench_protocolqa",
+        "lambada",
+        "medmcqa:rc::none",
+        "medqa_en:rc::none",
+        "sciriff_yesno:rc::olmes",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:rc:v2")
+class Olmo3Dev1bQaRcV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCRCFullGroup(),
+        MMLURCGroup(),
+        "csqa:rc::olmes:full",
+        "hellaswag:rc::olmes:full",
+        "winogrande:rc::olmes:full",
+        "socialiqa:rc::olmes:full",
+        "piqa:rc::olmes:full",
+
+        # Gen OLMES
+        "coqa:rc::gen2mc:xlarge",
+        "drop:rc::gen2mc:xlarge",
+        "jeopardy:rc::gen2mc:xlarge",
+        "naturalqs:rc::gen2mc:xlarge",
+        "squad:rc::gen2mc:xlarge",
 
         # New OLMo 3
         "sciq:rc::olmo3",
@@ -756,6 +819,23 @@ class Olmo3Dev7bMcqaNonSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
         "jeopardy:mc::gen2mc",
         "naturalqs:mc::gen2mc",
         "squad:mc::gen2mc",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:non_stem:v2")
+class Olmo3Dev7bMcqaNonSTEMV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        MMLUHumanitiesMCGroup(),
+        MMLUSocialSciencesMCGroup(),
+        MMLUOtherMCGroup(),
+        "csqa:mc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
+        "coqa:mc::gen2mc:xlarge",
+        "drop:mc::gen2mc:xlarge",
+        "jeopardy:mc::gen2mc:xlarge",
+        "naturalqs:mc::gen2mc:xlarge",
+        "squad:mc::gen2mc:xlarge",
     ]
 
 
@@ -928,12 +1008,12 @@ class Olmo3PaperGroup(BaseNamedTasksWithNoAverageGroup):
         # olmo3:base_easy
         Olmo3Dev1bMathBpbGroup(),
         Olmo3Dev1bCodeBpbGroup(),
-        Olmo3Dev1bQaBpbGroup(),
-        Olmo3Dev1bQaRcGroup(),
+        Olmo3Dev1bQaBpbV2Group(),
+        Olmo3Dev1bQaRcV2Group(),
 
         # olmo3:base
         Olmo3Dev7bMcqaSTEMGroup(),
-        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMV2Group(),
         Olmo3Dev7bGenGroup(),
         Olmo3Dev7bMathV2Group(),
         Olmo3Dev7bCodeGenV2Group(),
