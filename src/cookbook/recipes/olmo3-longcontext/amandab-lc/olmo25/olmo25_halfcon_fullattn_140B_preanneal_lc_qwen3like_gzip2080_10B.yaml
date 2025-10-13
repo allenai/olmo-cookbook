@@ -1,10 +1,10 @@
-name: &name "olmo25_halfcontext_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "olmo25_halfcontext_fixed_init_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
-priority: urgent
+priority: low
 nodes: 4
 gpus: 8
 seed: 4123
@@ -25,7 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/amandab/OLMo2.5-halfcontext/step34000
+load_path: gs://ai2-llm/checkpoints/amandab/OLMo2.5-half-context-fixed-init/step34000
 load_state: false
 model: "olmo25_7b_fullattn"
 tokenizer: "dolma2"
