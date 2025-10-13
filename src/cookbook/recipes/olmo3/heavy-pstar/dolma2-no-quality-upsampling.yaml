@@ -1,0 +1,23 @@
+name: pstar-dolma2
+description: p* baseline on dolma2 distribution (no quality upsampling)
+budget: ai2/oe-base
+workspace: ai2/oe-data
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: high
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+dataset:
+  sources:
+  -
+downstream_evaluators:
+- olmo2_dev_1b
+lm_evaluator: true
