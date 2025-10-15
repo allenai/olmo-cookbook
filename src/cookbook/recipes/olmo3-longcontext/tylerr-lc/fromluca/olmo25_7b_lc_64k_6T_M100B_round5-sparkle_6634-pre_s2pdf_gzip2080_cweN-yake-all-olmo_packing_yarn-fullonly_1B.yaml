@@ -1,0 +1,42 @@
+name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_50B"
+description: *name
+budget: ai2/oe-base
+workspace: ai2/long-contexts
+cluster: ai2/augusta-google-1
+preemptible: true
+priority: high
+nodes: 32
+gpus: 8
+seed: 4123
+gc_interval: 200
+warmup_steps: 10
+learning_rate: 0.00020712352850360292
+metrics_config:
+  backend: wandb
+  project: olmo3-7b-long-context
+  entity: ai2-llm
+generate_doc_lengths: true
+load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-8730626c/step47684
+load_state: false
+model: olmo25_7b_yarn_fullonly
+tokenizer: dolma2
+max_tokens: 1000000000 # 1B
+global_batch_size: 4194304
+sequence_length: 65536
+max_target_sequence_length: 65536
+rank_microbatch_size: 65536
+scheduler_type: linear
+dp_shard_degree: 1
+cp_degree: 8
+cp_head_stride: 8
+float8: true
+eval_interval: 500
+train_module_overrides:
+  - scheduler.alpha_f=0.0
+
+dataset:
+  sources:
+    - name: All files
+      target_ratio: 1.0
+      paths:
+        - gs://ai2-llm/preprocessed/tylerr/lc-reshard-final/v0.6/allenai/dolma2-tokenizer/*.npy
