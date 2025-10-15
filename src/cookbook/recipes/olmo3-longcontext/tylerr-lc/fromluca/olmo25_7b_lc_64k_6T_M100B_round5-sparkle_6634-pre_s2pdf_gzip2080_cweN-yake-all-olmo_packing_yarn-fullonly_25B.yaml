@@ -1,4 +1,4 @@
-name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_50B"
+name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_25B"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/long-contexts
