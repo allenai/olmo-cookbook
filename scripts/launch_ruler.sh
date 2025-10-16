@@ -6,6 +6,7 @@ if [ -z "$1" ]; then
 fi
 
 MAX_LENGTH=${MAX_LENGTH:-65536}
+PRIORITY=${PRIORITY:-urgent}
 
 # Check if olmo-cookbook-eval command is available
 if command -v olmo-cookbook-eval &> /dev/null; then
@@ -22,8 +23,9 @@ if [[ "$1" == *"-hf" ]]; then
   backend="--model-backend vllm --vllm-use-v1-spec"
   beaker_image="--beaker-image amandab/lc-only-adjust-rope-global-layers"
   oe_eval_branch=""
-else
-  backend="--model-backend olmo_core"
+else:
+  guessed_backend=${BACKEND:-olmo_core}
+  backend="--model-backend ${guessed_backend}"
   # beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
   # oe_eval_branch="--oe-eval-commit 3d53a693a9236cbdb1bac0543b599e0bd7f3c2d7 --use-gantry"
 fi
@@ -32,11 +34,12 @@ if [[ "$1" == "gs"* ]]; then
   # evaluate on augusta cluster
   cluster="ai2/augusta-google-1"
 else
-  cluster="ai2/jupiter-cirrascale-2"
+  cluster="${CLUSTER:-ai2/jupiter-cirrascale-2}"
 fi
 
+
 model_path="$1"
-base_command="${eval_command} evaluate \"${model_path}\" --priority urgent --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
+base_command="${eval_command} evaluate \"${model_path}\" --priority ${PRIORITY} --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
 
 
 if [ $MAX_LENGTH -ge 4096 ]; then
