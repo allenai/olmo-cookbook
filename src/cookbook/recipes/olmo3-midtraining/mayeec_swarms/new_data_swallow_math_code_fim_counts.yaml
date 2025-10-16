@@ -1,0 +1,45 @@
+name: test
+description: test
+budget: ai2/oe-base
+workspace: ai2/olmo-3-microanneals
+nodes: 2
+gpus: 8
+preemptible: true
+max_tokens: 5000000000
+global_batch_size: 2097152
+sequence_length: 8192
+seed: 1337
+model: olmo2_7B_swafix
+tokenizer: dolma2
+priority: high
+cluster: ai2/augusta-google-1
+rank_microbatch_size: 16384
+scheduler_type: linear
+warmup_steps: 0
+activation_checkpointing: true
+annealing:
+  enabled: true
+load_path: gs://ai2-llm/checkpoints/OLMo3-7B-swafix/step756906
+load_state: false
+variants: 1
+allow_repetition: false
+minimum_weight: 0.00001
+min_strength: 0.1
+max_strength: 25
+sample_multiplier: 400
+mix_temperature: 0.65
+dataset:
+  sources:
+  - name: swallowcode
+    paths:
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/scor_final_data-decon-sparkle/allenai/dolma2-tokenizer/*.npy
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowcode/full_ts2_flow/btier_scor_processed-decon-sparkle/allenai/dolma2-tokenizer/*.npy
+  - name: code_fim
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/sample-fim-weighted-pl-edu-score-decon-50BT/**/*.npy
+  - name: swallowmath_new
+    paths:
+    - s3://ai2-llm/preprocessed/megamath_web/swallow_mmw/beaker_outputs-decon/allenai/dolma2-tokenizer/*.npy
+  - name: swallowmath_old
+    paths:
+    - s3://ai2-llm/preprocessed/tokyotech-llm/swallowmath/beaker_outputs-decon-2/allenai/dolma2-tokenizer/*.npy
