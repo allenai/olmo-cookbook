@@ -1,11 +1,11 @@
-name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_25B"
+name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_10B"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/long-contexts
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: high
-nodes: 2
+nodes: 1
 gpus: 8
 seed: 4123
 gc_interval: 200
@@ -20,7 +20,7 @@ load_path: gs://ai2-llm/checkpoints/allysone/anneal-round5-100B-olmo25_7b-anneal
 load_state: false
 model: olmo25_7b_yarn_fullonly
 tokenizer: dolma2
-max_tokens: 25000000000 # 25B
+max_tokens: 5000000000 # 50B
 global_batch_size: 4194304
 sequence_length: 65536
 max_target_sequence_length: 65536
