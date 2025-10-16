@@ -125,13 +125,13 @@ dataset:
         - gs://ai2-llm/pretraining-data/sources/midtraining-reasoning/code-meta-reasoning/allenai/dolma2-tokenizer/*.npy
 
     - name: prolong-books
-      target_ratio: 0.375
+      target_ratio: 0.3333333
       paths:
         - s3://ai2-llm/preprocessed/long_contexts/prolong_long_raw/books/*.npy
         - s3://ai2-llm/preprocessed/long_contexts/prolong_long_raw/textbooks/*.npy
 
     - name: prolong-code
-      target_ratio: 0.375
+      target_ratio: 0.3333333
       paths:
         - s3://ai2-llm/preprocessed/long_contexts/prolong_long_raw/code/code_1/*.npy
         - s3://ai2-llm/preprocessed/long_contexts/prolong_long_raw/code/code_2/*.npy
