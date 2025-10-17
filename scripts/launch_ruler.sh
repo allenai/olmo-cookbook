@@ -18,12 +18,18 @@ else
   exit 1
 fi
 
+# matching model name
+model=$1
+model="${model##*( )}"      # trim leading spaces
+model="${model%%*( )}"      # trim trailing spaces
+shopt -s extglob     # enable extended globbing
+
 # if model path ends with -hf, then the backend is vllm; otherwise, it's olmo_core
-if [[ "$1" == *"-hf" ]]; then
+if [[ $model == *-hf ]]; then
   backend="--model-backend vllm --vllm-use-v1-spec"
   beaker_image="--beaker-image amandab/lc-only-adjust-rope-global-layers"
   oe_eval_branch=""
-else:
+else
   guessed_backend=${BACKEND:-olmo_core}
   backend="--model-backend ${guessed_backend}"
   # beaker_image="--beaker-image tylerr/oe_eval_olmocore_082725"
