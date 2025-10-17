@@ -45,7 +45,7 @@ fi
 
 
 model_path="$1"
-base_command="${eval_command} evaluate \"${model_path}\" --priority ${PRIORITY} --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}\"  --task-args \"use_chat_format=false\" --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
+base_command="${eval_command} evaluate \"${model_path}\" --priority ${PRIORITY} --cluster ${cluster} --num-gpus 1 ${backend} --dashboard peteish-LC-ruler --budget ai2/oe-base --model-args \"trust_remote_code=true,  chat_model=null, max_length=${MAX_LENGTH}\"  --task-args \"use_chat_format=false\" --gantry-args='install=echo' --workspace ai2/long-contexts ${beaker_image} ${oe_eval_branch}"
 
 
 if [ $MAX_LENGTH -ge 4096 ]; then
