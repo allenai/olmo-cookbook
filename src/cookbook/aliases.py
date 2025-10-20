@@ -115,7 +115,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     shared_filesystem: bool = False
     weka: bool = False
     eval_interval: int = 200
-    save_interval: int = 1000
+    save_interval: int = 250
     warmup_steps: Optional[int] = None
     path: Path
 
