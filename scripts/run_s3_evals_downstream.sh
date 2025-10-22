@@ -102,7 +102,7 @@ for parent in "${parents[@]}"; do
     s3_step_path="${s3_parent%/}/${step_name}"
     echo "Evaluating checkpoint: ${s3_step_path}"
     olmo-cookbook-eval evaluate "${s3_step_path}" \
-      --tasks mmlu:bpb \
+      --tasks olmo3:dev:1b:main \
       --priority low \
       --cluster ai2/titan \
       --partition-size 8 \
