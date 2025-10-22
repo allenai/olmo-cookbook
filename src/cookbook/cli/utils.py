@@ -18,6 +18,8 @@ from cookbook.constants import (
     AI2_OLMO_CORE_GIT_URL,
     AI2_OLMO_GIT_URL,
     BEAKER_GANTRY_MAX_VERSION,
+    BEAKER_GANTRY_MIN_VERSION,
+    BEAKER_PY_MIN_VERSION,
     BEAKER_PY_MAX_VERSION,
     OE_EVAL_GIT_URL,
     TRANSFORMERS_GIT_URL,
@@ -150,7 +152,9 @@ def get_aws_secret_access_key() -> Optional[str]:
 def install_beaker_py(
     env: Optional[PythonEnv] = None,
     beaker_py_max_version: Optional[str] = BEAKER_PY_MAX_VERSION,
+    beaker_py_min_version: Optional[str] = BEAKER_PY_MIN_VERSION,
     beaker_gantry_max_version: Optional[str] = BEAKER_GANTRY_MAX_VERSION,
+    beaker_gantry_min_version: Optional[str] = BEAKER_GANTRY_MIN_VERSION,
 ) -> None:
     env = env or PythonEnv.null()
 
@@ -158,6 +162,8 @@ def install_beaker_py(
         return check_beaker_dependencies(
             env=env,
             beaker_py_max_version=beaker_py_max_version,
+            beaker_py_min_version=beaker_py_min_version,
+            beaker_gantry_min_version=beaker_gantry_min_version,
             beaker_gantry_max_version=beaker_gantry_max_version,
         )
     except Exception:
@@ -568,6 +574,9 @@ def install_transformers(
     print("Installing accelerate to fully support Huggingface model conversion...")
     subprocess.run(shlex.split(f"{env.pip} install 'accelerate>=0.26.0'"), check=True, env=env.path())
 
+    print("Installing torchao to fully support Huggingface model conversion...")
+    subprocess.run(shlex.split(f"{env.pip} install 'torchao'"), check=True, env=env.path())
+
     return transformers_dir
 
 
@@ -596,7 +605,9 @@ def remove_conflicting_packages(env: Optional[PythonEnv] = None):
 
 def check_beaker_dependencies(
     env: Optional[PythonEnv] = None,
+    beaker_py_min_version: Optional[str] = BEAKER_PY_MIN_VERSION,
     beaker_py_max_version: Optional[str] = BEAKER_PY_MAX_VERSION,
+    beaker_gantry_min_version: Optional[str] = BEAKER_GANTRY_MIN_VERSION,
     beaker_gantry_max_version: Optional[str] = BEAKER_GANTRY_MAX_VERSION,
 ):
     env = env or PythonEnv.null()
@@ -607,8 +618,11 @@ def check_beaker_dependencies(
         iter([r for r in output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     beaker_py_version = Version(beaker_py_version_string.split(":")[1].strip())
-    if beaker_py_max_version is not None and beaker_py_version > Version(beaker_py_max_version):
-        raise RuntimeError(f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}")
+
+    if beaker_py_max_version is not None and beaker_py_version >= Version(beaker_py_max_version):
+        raise RuntimeError(f"beaker-py version v{beaker_py_version} not supported; use <{beaker_py_max_version}")
+    if beaker_py_min_version is not None and beaker_py_version < Version(beaker_py_min_version):
+        raise RuntimeError(f"beaker-py version v{beaker_py_version} not supported; use >={beaker_py_min_version}")
 
     gantry_output = subprocess.run(
         shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path()
@@ -619,10 +633,12 @@ def check_beaker_dependencies(
         iter([r for r in gantry_output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     gantry_version = Version(gantry_version_string.split(":")[1].strip())
-    if beaker_gantry_max_version is not None and gantry_version > Version(beaker_gantry_max_version):
+    if beaker_gantry_max_version is not None and gantry_version >= Version(beaker_gantry_max_version):
         raise RuntimeError(
-            f"beaker-gantry version {gantry_version} not supported; use {beaker_gantry_max_version}"
+            f"beaker-gantry v{gantry_version} not supported; use <{beaker_gantry_max_version}"
         )
+    if beaker_gantry_min_version is not None and gantry_version < Version(beaker_gantry_min_version):
+        raise RuntimeError(f"beaker-gantry v{gantry_version} not supported; use >={beaker_gantry_min_version}")
 
 
 def find_repository_root(current: Union[str, Path] = __file__) -> Path:

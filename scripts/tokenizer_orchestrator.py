@@ -34,8 +34,7 @@ class DataProcessor:
                  output_prefix: str = "ai2-llm/preprocessed/",
                  local_dir: str = "/mnt/raid0",
                  tokenizer: str = "allenai/dolma2-tokenizer",
-                 dry_run: bool = False,
-                 disable_s3_upload: bool = False):
+                 dry_run: bool = False):
         self.input_file = input_file
         # Don't strip slashes from remote_prefix as it needs to keep s3:// format
         self.remote_prefix = remote_prefix
@@ -45,7 +44,6 @@ class DataProcessor:
         self.tokenizer = tokenizer
         self.tokenizer_suffix = tokenizer.replace('/', '_')
         self.dry_run = dry_run
-        self.disable_s3_upload = disable_s3_upload
         
         # Read input paths
         self.paths = self._read_input_paths()
@@ -459,10 +457,7 @@ class DataProcessor:
                 if self.dry_run:
                     print(f"Would upload file tokenization:")
                     print(f"  Local:  {local_tokenized_path}")
-                    if self.disable_s3_upload:
-                        print(f"  S3:     (disabled)")
-                    else:
-                        print(f"  S3:     {s3_remote_dest}")
+                    print(f"  S3:     {s3_remote_dest}")
                     print(f"  GCS:    {gcs_remote_dest}")
                 
             else:
@@ -486,10 +481,7 @@ class DataProcessor:
                             sub_s3_remote_dest = f"{self.remote_prefix}{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
                             sub_gcs_remote_dest = f"gs://{self.output_prefix.rstrip('/')}/{relative_path.rstrip('/')}/{subdir.name}/{self.tokenizer}/"
                             print(f"  Subdir: {sub_local_path}")
-                            if self.disable_s3_upload:
-                                print(f"    S3:  (disabled)")
-                            else:
-                                print(f"    S3:  {sub_s3_remote_dest}")
+                            print(f"    S3:  {sub_s3_remote_dest}")
                             print(f"    GCS: {sub_gcs_remote_dest}")
                     else:
                         for subdir in subdirs:
@@ -501,17 +493,14 @@ class DataProcessor:
                                 errors.append(f"Tokenized data not found: {sub_local_path}")
                                 continue
                             
-                            # Upload to S3 (unless disabled)
-                            if not self.disable_s3_upload:
-                                s3_cmd = ["s5cmd", "sync", f"{sub_local_path}/", sub_s3_remote_dest]
-                                success, output = self._run_command(s3_cmd, f"Uploading {sub_local_path} to S3")
-                                
-                                if not success:
-                                    errors.append(f"Failed to upload {sub_local_path} to S3: {output}")
-                                else:
-                                    print(f"Successfully uploaded to S3: {sub_s3_remote_dest}")
+                            # Upload to S3
+                            s3_cmd = ["s5cmd", "sync", f"{sub_local_path}/", sub_s3_remote_dest]
+                            success, output = self._run_command(s3_cmd, f"Uploading {sub_local_path} to S3")
+                            
+                            if not success:
+                                errors.append(f"Failed to upload {sub_local_path} to S3: {output}")
                             else:
-                                print(f"Skipping S3 upload for {sub_local_path} (disabled)")
+                                print(f"Successfully uploaded to S3: {sub_s3_remote_dest}")
                             
                             # Upload to GCS - try gcloud storage first, fallback to gsutil
                             # gcloud storage rsync often handles auth better than gsutil
@@ -537,10 +526,7 @@ class DataProcessor:
                     if self.dry_run:
                         print(f"Would upload regular directory:")
                         print(f"  Local:  {local_tokenized_path}")
-                        if self.disable_s3_upload:
-                            print(f"  S3:     (disabled)")
-                        else:
-                            print(f"  S3:     {s3_remote_dest}")
+                        print(f"  S3:     {s3_remote_dest}")
                         print(f"  GCS:    {gcs_remote_dest}")
             
             if self.dry_run:
@@ -550,17 +536,14 @@ class DataProcessor:
                 errors.append(f"Tokenized data not found: {local_tokenized_path}")
                 continue
             
-            # Upload to S3 (unless disabled)
-            if not self.disable_s3_upload:
-                s3_cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", s3_remote_dest]
-                success, output = self._run_command(s3_cmd, f"Uploading {local_tokenized_path} to S3")
-                
-                if not success:
-                    errors.append(f"Failed to upload {local_tokenized_path} to S3: {output}")
-                else:
-                    print(f"Successfully uploaded to S3: {s3_remote_dest}")
+            # Upload to S3
+            s3_cmd = ["s5cmd", "sync", f"{local_tokenized_path}/", s3_remote_dest]
+            success, output = self._run_command(s3_cmd, f"Uploading {local_tokenized_path} to S3")
+            
+            if not success:
+                errors.append(f"Failed to upload {local_tokenized_path} to S3: {output}")
             else:
-                print(f"Skipping S3 upload for {local_tokenized_path} (disabled)")
+                print(f"Successfully uploaded to S3: {s3_remote_dest}")
             
             # Upload to GCS - try gcloud storage first, fallback to gsutil
             # gcloud storage rsync often handles auth better than gsutil
@@ -686,8 +669,6 @@ def main():
                        help="Tokenizer to use (default: allenai/dolma2-tokenizer)")
     parser.add_argument("--dry-run", action="store_true",
                        help="Show what would be done without actually executing commands")
-    parser.add_argument("--no-s3-upload", action="store_true",
-                       help="Disable S3 uploads (only upload to GCS)")
     
     args = parser.parse_args()
     
@@ -704,8 +685,7 @@ def main():
         output_prefix=args.output_prefix,
         local_dir=args.local_dir,
         tokenizer=args.tokenizer,
-        dry_run=args.dry_run,
-        disable_s3_upload=args.no_s3_upload
+        dry_run=args.dry_run
     )
     
     # Execute command

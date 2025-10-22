@@ -1,0 +1,1 @@
+s3://ai2-llm/pretraining-data/sources/Nemotron-CC/v0/quality=high/kind=synthetic/kind2=diverse_qa_pairs

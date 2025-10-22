@@ -28,19 +28,17 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
+    "huggingface-hub[hf-transfer]>=0.34,<0.35",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff",
-    "mypy>=1.0,<1.4",
-    "ruff",
-    "mypy>=1.0,<1.4",
+    "ruff>=0.12.8",
     "boto3-stubs[essential,ec2,s3,ssm]",
     "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py>=1,<2",
+    "beaker-py>=1.17.1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -51,8 +49,8 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@tylerr/olmo3-scripts-swafix-foreachopt",
-    "beaker-py>=1,<2",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@7afdc3ed67f00b090aae11b5101ef147160274cc", #c779ca546cc3194e73e7491aaefcdffbed042c65",
+    "beaker-py>=1.17.1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]
