@@ -1,5 +1,6 @@
-name: dclm-5xC-1b-cost-ablation-top-24-domains-75-samples
-description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=75 samples
+name: dclm-5xC-1b-cost-ablation-top-24-domains-75-samples-seed-0
+description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=75 samples, s=0
+  seed
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
@@ -20,120 +21,120 @@ dataset:
   - name: adult_content
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/adult_content/dolma2-tokenizer/*.npy
-    target_ratio: 3.0088621801166827e-05
+    target_ratio: 0.00026517202125798223
     repetition_factor: 4
   - name: art_and_design
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/art_and_design/dolma2-tokenizer/*.npy
-    target_ratio: 8.41141532617888e-05
+    target_ratio: 0.00020738257193171525
     repetition_factor: 4
   - name: crime_and_law
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/crime_and_law/dolma2-tokenizer/*.npy
-    target_ratio: 0.00040097080231094723
+    target_ratio: 0.000613238833046792
     repetition_factor: 4
   - name: education_and_jobs
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/education_and_jobs/dolma2-tokenizer/*.npy
-    target_ratio: 0.0005742116205020939
+    target_ratio: 0.0014074037804574526
     repetition_factor: 4
   - name: electronics_and_hardware
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/electronics_and_hardware/dolma2-tokenizer/*.npy
-    target_ratio: 0.00016642230440122664
+    target_ratio: 0.00048680246749377323
     repetition_factor: 4
   - name: entertainment
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/entertainment/dolma2-tokenizer/*.npy
-    target_ratio: 0.003636196810322652
+    target_ratio: 0.0027618173719176214
     repetition_factor: 4
   - name: fashion_and_beauty
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/fashion_and_beauty/dolma2-tokenizer/*.npy
-    target_ratio: 0.00011591897326447692
+    target_ratio: 5.2919848083384104e-05
     repetition_factor: 4
   - name: finance_and_business
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/finance_and_business/dolma2-tokenizer/*.npy
-    target_ratio: 0.0008848691658744368
+    target_ratio: 0.001332865055844926
     repetition_factor: 4
   - name: food_and_dining
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/food_and_dining/dolma2-tokenizer/*.npy
-    target_ratio: 0.00014926451226701472
+    target_ratio: 0.0007646094804179529
     repetition_factor: 4
   - name: games
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/games/dolma2-tokenizer/*.npy
-    target_ratio: 0.0008083490395786691
+    target_ratio: 0.0012506307030282534
     repetition_factor: 4
   - name: health
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/health/dolma2-tokenizer/*.npy
-    target_ratio: 0.1303897137337495
+    target_ratio: 0.19896536585528438
     repetition_factor: 4
   - name: history_and_geography
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/history_and_geography/dolma2-tokenizer/*.npy
-    target_ratio: 0.0007960322181989392
+    target_ratio: 0.0027644600650559834
     repetition_factor: 4
   - name: home_and_hobbies
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/home_and_hobbies/dolma2-tokenizer/*.npy
-    target_ratio: 0.00021468968230506038
+    target_ratio: 0.0008520592786551064
     repetition_factor: 4
   - name: industrial
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/industrial/dolma2-tokenizer/*.npy
-    target_ratio: 0.00019412204336913212
+    target_ratio: 0.00014907493683744084
     repetition_factor: 4
   - name: literature
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/literature/dolma2-tokenizer/*.npy
-    target_ratio: 0.010212307313108236
+    target_ratio: 0.10408569637181203
     repetition_factor: 4
   - name: politics
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/politics/dolma2-tokenizer/*.npy
-    target_ratio: 0.0008943913400881656
+    target_ratio: 0.0014218766079098976
     repetition_factor: 4
   - name: religion
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/religion/dolma2-tokenizer/*.npy
-    target_ratio: 0.0005883490707236717
+    target_ratio: 0.0007186460647892325
     repetition_factor: 4
   - name: science_math_and_technology
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/science_math_and_technology/dolma2-tokenizer/*.npy
-    target_ratio: 0.3056406536413613
+    target_ratio: 0.28904322588479225
     repetition_factor: 4
   - name: social_life
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/social_life/dolma2-tokenizer/*.npy
-    target_ratio: 0.0006407497988427946
+    target_ratio: 0.0017005395791213078
     repetition_factor: 4
   - name: software
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software/dolma2-tokenizer/*.npy
-    target_ratio: 0.129839525452001
+    target_ratio: 0.00022113078772113237
     repetition_factor: 4
   - name: software_development
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software_development/dolma2-tokenizer/*.npy
-    target_ratio: 0.411615178693972
+    target_ratio: 0.38983422092132436
     repetition_factor: 4
   - name: sports_and_fitness
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/sports_and_fitness/dolma2-tokenizer/*.npy
-    target_ratio: 0.0018374465678016054
+    target_ratio: 0.0004007249823663816
     repetition_factor: 4
   - name: transportation
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/transportation/dolma2-tokenizer/*.npy
-    target_ratio: 0.0002465413947935419
+    target_ratio: 0.0004932274902922183
     repetition_factor: 4
   - name: travel_and_tourism
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/travel_and_tourism/dolma2-tokenizer/*.npy
-    target_ratio: 3.9893046100556185e-05
+    target_ratio: 0.00020690904055844744
     repetition_factor: 4

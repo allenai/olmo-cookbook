@@ -1,5 +1,5 @@
-name: dclm-5xC-1b-cost-ablation-top-6-domains-125-samples
-description: 5xC 1B DCLM proposed mix (rep=4) with d=6 domains, n=125 samples
+name: dclm-5xC-1b-cost-ablation-top-6-domains-7-samples-seed-1
+description: 5xC 1B DCLM proposed mix (rep=4) with d=6 domains, n=7 samples, s=1 seed
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
@@ -20,30 +20,30 @@ dataset:
   - name: entertainment
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/entertainment/dolma2-tokenizer/*.npy
-    target_ratio: 0.05825859069817805
+    target_ratio: 0.0006503883145775951
     repetition_factor: 4
   - name: finance_and_business
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/finance_and_business/dolma2-tokenizer/*.npy
-    target_ratio: 0.003859769514041466
+    target_ratio: 0.0003321536960961005
     repetition_factor: 4
   - name: games
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/games/dolma2-tokenizer/*.npy
-    target_ratio: 0.004776597183320955
+    target_ratio: 0.0005002131068844
     repetition_factor: 4
   - name: health
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/health/dolma2-tokenizer/*.npy
-    target_ratio: 0.10363520809773208
+    target_ratio: 0.33625391858102593
     repetition_factor: 4
   - name: politics
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/politics/dolma2-tokenizer/*.npy
-    target_ratio: 0.004061985326555081
+    target_ratio: 0.0006149795406675812
     repetition_factor: 4
   - name: science_math_and_technology
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/science_math_and_technology/dolma2-tokenizer/*.npy
-    target_ratio: 0.8254078491801723
+    target_ratio: 0.6616483467607484
     repetition_factor: 4
