@@ -1,6 +1,5 @@
 name: dclm-5xC-1b-cost-ablation-top-24-domains-75-samples-seed-1
-description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=75 samples, s=1
-  seed
+description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=75 samples, s=1 seed
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
@@ -11,7 +10,7 @@ sequence_length: 4096
 seed: 1337
 model: olmo2_1B_v2
 tokenizer: dolma2
-priority: normal
+priority: high
 cluster: ai2/augusta-google-1
 weka: false
 rank_microbatch_size: 32768

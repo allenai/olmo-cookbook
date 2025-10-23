@@ -10,7 +10,7 @@ sequence_length: 4096
 seed: 1337
 model: olmo2_1B_v2
 tokenizer: dolma2
-priority: normal
+priority: high
 cluster: ai2/augusta-google-1
 weka: false
 rank_microbatch_size: 32768
