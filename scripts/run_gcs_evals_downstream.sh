@@ -101,7 +101,7 @@ for parent in "${parents[@]}"; do
     local_step_path="${local_parent%/}/${step_name}"
     echo "Evaluating checkpoint: ${local_step_path}"
     olmo-cookbook-eval evaluate "${local_step_path}" \
-      --tasks mmlu:bpb \
+      --tasks olmo3:dev:1b:main \
       --priority normal \
       --cluster aus80g \
       --partition-size 8 \
