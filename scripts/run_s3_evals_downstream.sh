@@ -103,8 +103,8 @@ for parent in "${parents[@]}"; do
     echo "Evaluating checkpoint: ${s3_step_path}"
     olmo-cookbook-eval evaluate "${s3_step_path}" \
       --tasks olmo3:dev:1b:bpb \
-      --priority low \
-      --cluster ai2/titan \
+      --priority normal \
+      --cluster aus80g \
       --partition-size 8 \
       --num-gpus 1 \
       --beaker-retries 3 \
