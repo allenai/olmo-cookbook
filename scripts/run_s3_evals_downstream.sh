@@ -20,7 +20,7 @@ USAGE
 dashboard=""
 hf_token=""
 parents=()
-allowed_steps=("step5000" "step10000" "step15000" "step20000") # "step22204"
+allowed_steps=("step5000" "step10000" "step15000" "step20000" "step22204")
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -102,7 +102,7 @@ for parent in "${parents[@]}"; do
     s3_step_path="${s3_parent%/}/${step_name}"
     echo "Evaluating checkpoint: ${s3_step_path}"
     olmo-cookbook-eval evaluate "${s3_step_path}" \
-      --tasks olmo3:dev:1b:bpb \
+      --tasks mmlu:bpb \
       --priority normal \
       --cluster aus80g \
       --partition-size 8 \

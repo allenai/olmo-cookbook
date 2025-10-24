@@ -20,6 +20,7 @@ USAGE
 dashboard=""
 hf_token=""
 parents=()
+allowed_steps=("step5000" "step10000" "step15000" "step20000" "step22204")
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -88,6 +89,16 @@ for parent in "${parents[@]}"; do
   while IFS= read -r step_name; do
     [[ -z "${step_name}" ]] && continue
     step_name="${step_name%%/}"
+    # Check if this step is in the allowed list
+    is_allowed=false
+    for s in "${allowed_steps[@]}"; do
+      if [[ "${step_name}" == "${s}" ]]; then
+        is_allowed=true
+        break
+      fi
+    done
+    [[ "${is_allowed}" != true ]] && continue
+    
     s3_step_path="${s3_parent%/}/${step_name}"
     echo "Evaluating checkpoint: ${s3_step_path}"
     olmo-cookbook-eval evaluate "${s3_step_path}" \
