@@ -152,11 +152,51 @@ dataset:
     - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
     repetition_factor: 1
     target_ratio: 0.01502511351333008
+  - name: s2pdf:adult_content
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/adult_content/**/*.npy
+    repetition_factor: 1
+    target_ratio: 3.125615654710719e-05
+  - name: s2pdf:art_and_design
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/art_and_design/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.0007062896375574914
+  - name: s2pdf:crime_and_law
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/crime_and_law/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.0043830632214124175
+  - name: s2pdf:education_and_jobs
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/education_and_jobs/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.014084377942795141
+  - name: s2pdf:electronics_and_hardware
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/electronics_and_hardware/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.000739739732938576
   - name: s2pdf:entertainment
     paths:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/entertainment/**/*.npy
     repetition_factor: 1
     target_ratio: 0.0006175644473393615
+  - name: s2pdf:fashion_and_beauty
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/fashion_and_beauty/**/*.npy
+    repetition_factor: 1
+    target_ratio: 5.734024455197136e-05
+  - name: s2pdf:finance_and_business
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/finance_and_business/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.006237043414952947
+  - name: s2pdf:food_and_dining
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/food_and_dining/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.00023718858229417712
   - name: s2pdf:games
     paths:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/games/**/*.npy
@@ -167,6 +207,16 @@ dataset:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/health/**/*.npy
     repetition_factor: 1
     target_ratio: 0.011090572047528764
+  - name: s2pdf:history_and_geography
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/history_and_geography/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.0026897191153462396
+  - name: s2pdf:home_and_hobbies
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/home_and_hobbies/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.0003998761640661682
   - name: s2pdf:industrial
     paths:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/industrial/**/*.npy
@@ -187,16 +237,41 @@ dataset:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/religion/**/*.npy
     repetition_factor: 1
     target_ratio: 0.0025628288072331324
+  - name: s2pdf:science_math_and_technology
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/science_math_and_technology/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.04364914644691118
+  - name: s2pdf:social_life
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/social_life/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.00032742551384845847
   - name: s2pdf:software
     paths:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/software/**/*.npy
     repetition_factor: 1
     target_ratio: 0.000927970536847551
+  - name: s2pdf:software_development
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/software_development/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.00424125770789516
+  - name: s2pdf:sports_and_fitness
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/sports_and_fitness/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.0005561472219114068
   - name: s2pdf:transportation
     paths:
     - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/transportation/**/*.npy
     repetition_factor: 1
     target_ratio: 0.0017411689635528566
+  - name: s2pdf:travel_and_tourism
+    paths:
+    - s3://ai2-llm/preprocessed/olmo3-final/s2pdfs/allenai/dolma2-tokenizer/travel_and_tourism/**/*.npy
+    repetition_factor: 1
+    target_ratio: 0.00021533837968669932
   - name: stack-edu:C
     paths:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/C/*.npy
