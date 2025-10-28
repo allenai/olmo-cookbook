@@ -1,0 +1,59 @@
+# Sampled 32 files with 127,999,948,437 tokens (pool target: 500,000,000,000, scaled target: 127,939,584,000, total size: 659,999,713,154)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: ultra-fineweb
+    paths:
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-15-00009.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-10-00006.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-08-00005.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-00-00004.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-03-00006.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-10-00010.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-01-00001.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-04-00007.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-07-00003.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-12-00000.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-02-00000.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-02-00004.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-08-00002.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-03-00008.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-03-00005.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-14-00002.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-01-00003.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-01-00005.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-04-00009.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-05-00000.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-12-00006.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-10-00009.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-13-00002.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-10-00003.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-15-00002.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-10-00005.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-08-00009.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-04-00002.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-05-00008.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-03-00003.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-05-00007.npy
+    - s3://ai2-llm/preprocessed/ultra-fineweb/raw/allenai/dolma2-tokenizer/part-15-00010.npy
+    target_ratio: 1
+description: Ultra FineWeb. https://arxiv.org/abs/2505.05427, for 1B-5xC with 500B
+  target pool
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: ultra-fineweb-1B-5xC-500B
+nodes: 2
+preemptible: true
+priority: urgent
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/oe-data

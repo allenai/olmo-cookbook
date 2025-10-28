@@ -1,0 +1,37 @@
+# Sampled 10 files with 29,093,049,564 tokens (pool target: 6,000,000,000,000, scaled target: 27,174,577,250, total size: 1,274,409,830,038)
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - name: fineweb-edu
+    paths:
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-04/part-1-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-13/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-39/part-0-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2022-49/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2021-39/part-3-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2015-48/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2017-09/part-2-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2021-39/part-1-00000.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2014-10/part-0-00001.npy
+    - s3://ai2-llm/preprocessed/fineweb-edu/raw/data/allenai/dolma2-tokenizer/CC-MAIN-2018-51/part-3-00000.npy
+    target_ratio: 1
+description: FineWeb Edu. https://arxiv.org/abs/2406.17557, for 1B-5xC with 6000B
+  target pool
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: fineweb-edu-1B-5xC-6000B
+nodes: 2
+preemptible: true
+priority: urgent
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/oe-data

@@ -1,0 +1,1027 @@
+budget: ai2/oe-base
+cluster: ai2/augusta-google-1
+dataset:
+  sources:
+  - max_repetition: 1.01
+    name: adult_content 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0013/*.npy
+    target_ratio: 8.426793791434144e-07
+  - max_repetition: 1.01
+    name: adult_content 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0014/*.npy
+    target_ratio: 7.762977826921902e-06
+  - max_repetition: 1.01
+    name: adult_content 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0015/*.npy
+    target_ratio: 3.2767045010541565e-05
+  - max_repetition: 1.01
+    name: adult_content 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0016/*.npy
+    target_ratio: 0.00011750040798030764
+  - max_repetition: 1.01
+    name: adult_content 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0017/*.npy
+    target_ratio: 0.0003447757374665503
+  - max_repetition: 1.01
+    name: adult_content 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0018/*.npy
+    target_ratio: 0.0005950299578615018
+  - max_repetition: 1.01
+    name: adult_content 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/adult_content/vigintile_0020/*.npy
+    target_ratio: 4.543900465556365e-05
+  - max_repetition: 1.01
+    name: art_and_design 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0012/*.npy
+    target_ratio: 3.923567627429209e-06
+  - max_repetition: 1.01
+    name: art_and_design 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0013/*.npy
+    target_ratio: 3.678001108586286e-05
+  - max_repetition: 1.01
+    name: art_and_design 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0014/*.npy
+    target_ratio: 0.0001435093685120259
+  - max_repetition: 1.01
+    name: art_and_design 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0015/*.npy
+    target_ratio: 0.00039238863480500465
+  - max_repetition: 1.01
+    name: art_and_design 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0016/*.npy
+    target_ratio: 0.0009242732951065809
+  - max_repetition: 1.01
+    name: art_and_design 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0017/*.npy
+    target_ratio: 0.0019885255662640488
+  - max_repetition: 1.1468435148604883
+    name: art_and_design 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0018/*.npy
+    target_ratio: 0.0040280863201103976
+  - max_repetition: 1.8769132088581064
+    name: art_and_design 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/art_and_design/vigintile_0020/*.npy
+    target_ratio: 0.00497958690922983
+  - max_repetition: 1.01
+    name: crime_and_law 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0011/*.npy
+    target_ratio: 6.394083813640896e-06
+  - max_repetition: 1.01
+    name: crime_and_law 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0012/*.npy
+    target_ratio: 5.6397709311700706e-05
+  - max_repetition: 1.01
+    name: crime_and_law 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0013/*.npy
+    target_ratio: 0.00020086259667071737
+  - max_repetition: 1.01
+    name: crime_and_law 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0014/*.npy
+    target_ratio: 0.000518424262519095
+  - max_repetition: 1.01
+    name: crime_and_law 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0015/*.npy
+    target_ratio: 0.0011628168008675807
+  - max_repetition: 1.01
+    name: crime_and_law 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0016/*.npy
+    target_ratio: 0.0024333864469661855
+  - max_repetition: 1.1280617131474588
+    name: crime_and_law 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0017/*.npy
+    target_ratio: 0.004755199965552851
+  - max_repetition: 1.9505520218588772
+    name: crime_and_law 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0018/*.npy
+    target_ratio: 0.008772860881894022
+  - max_repetition: 3.080495866584709
+    name: crime_and_law 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/crime_and_law/vigintile_0020/*.npy
+    target_ratio: 0.011328487127527797
+  - max_repetition: 1.01
+    name: education_and_jobs 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0011/*.npy
+    target_ratio: 1.0799517516450119e-05
+  - max_repetition: 1.01
+    name: education_and_jobs 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0012/*.npy
+    target_ratio: 9.518887294741925e-05
+  - max_repetition: 1.01
+    name: education_and_jobs 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0013/*.npy
+    target_ratio: 0.0003456245481095517
+  - max_repetition: 1.01
+    name: education_and_jobs 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0014/*.npy
+    target_ratio: 0.0009049074432222023
+  - max_repetition: 1.01
+    name: education_and_jobs 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0015/*.npy
+    target_ratio: 0.0020527414804536685
+  - max_repetition: 1.01
+    name: education_and_jobs 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0016/*.npy
+    target_ratio: 0.004109832594388418
+  - max_repetition: 1.1164633960369046
+    name: education_and_jobs 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0017/*.npy
+    target_ratio: 0.0073924685402318325
+  - max_repetition: 1.8430027311253816
+    name: education_and_jobs 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0018/*.npy
+    target_ratio: 0.012467032030169616
+  - max_repetition: 2.7903095301346736
+    name: education_and_jobs 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/education_and_jobs/vigintile_0020/*.npy
+    target_ratio: 0.015498195701516105
+  - max_repetition: 1.01
+    name: electronics_and_hardware 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0011/*.npy
+    target_ratio: 7.952815520932048e-06
+  - max_repetition: 1.01
+    name: electronics_and_hardware 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0012/*.npy
+    target_ratio: 7.008539733808061e-05
+  - max_repetition: 1.01
+    name: electronics_and_hardware 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0013/*.npy
+    target_ratio: 0.00024709887715775334
+  - max_repetition: 1.01
+    name: electronics_and_hardware 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0014/*.npy
+    target_ratio: 0.0006546137911199344
+  - max_repetition: 1.01
+    name: electronics_and_hardware 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0015/*.npy
+    target_ratio: 0.0015014638545204856
+  - max_repetition: 1.01
+    name: electronics_and_hardware 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0016/*.npy
+    target_ratio: 0.0031876099689048623
+  - max_repetition: 1.6421673999571762
+    name: electronics_and_hardware 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0017/*.npy
+    target_ratio: 0.005981942288592318
+  - max_repetition: 2.769190527111353
+    name: electronics_and_hardware 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0018/*.npy
+    target_ratio: 0.010119403833312871
+  - max_repetition: 4.246885063023003
+    name: electronics_and_hardware 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/electronics_and_hardware/vigintile_0020/*.npy
+    target_ratio: 0.012753944113313405
+  - max_repetition: 1.01
+    name: entertainment 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0012/*.npy
+    target_ratio: 2.8067056318823717e-05
+  - max_repetition: 1.01
+    name: entertainment 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0013/*.npy
+    target_ratio: 0.00026348526607100636
+  - max_repetition: 1.01
+    name: entertainment 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0014/*.npy
+    target_ratio: 0.0009907590480988232
+  - max_repetition: 1.01
+    name: entertainment 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0015/*.npy
+    target_ratio: 0.0027510636052757585
+  - max_repetition: 1.01
+    name: entertainment 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0016/*.npy
+    target_ratio: 0.00658384422694151
+  - max_repetition: 1.1944455183002667
+    name: entertainment 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0017/*.npy
+    target_ratio: 0.014043370517061364
+  - max_repetition: 2.209715699827242
+    name: entertainment 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0018/*.npy
+    target_ratio: 0.02778667039909446
+  - max_repetition: 3.7674137058614083
+    name: entertainment 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/entertainment/vigintile_0020/*.npy
+    target_ratio: 0.04353749231014073
+  - max_repetition: 1.01
+    name: fashion_and_beauty 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0012/*.npy
+    target_ratio: 3.597782705039948e-08
+  - max_repetition: 1.01
+    name: fashion_and_beauty 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0013/*.npy
+    target_ratio: 3.3640199555981594e-07
+  - max_repetition: 1.01
+    name: fashion_and_beauty 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0014/*.npy
+    target_ratio: 1.2542070953228235e-06
+  - max_repetition: 1.01
+    name: fashion_and_beauty 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0015/*.npy
+    target_ratio: 3.5695059866368707e-06
+  - max_repetition: 1.01
+    name: fashion_and_beauty 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0016/*.npy
+    target_ratio: 9.230883591864231e-06
+  - max_repetition: 1.01
+    name: fashion_and_beauty 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0017/*.npy
+    target_ratio: 2.254208381337236e-05
+  - max_repetition: 1.01
+    name: fashion_and_beauty 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0018/*.npy
+    target_ratio: 3.9341511972738226e-05
+  - max_repetition: 1.01
+    name: fashion_and_beauty 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/fashion_and_beauty/vigintile_0020/*.npy
+    target_ratio: 5.102609112997185e-05
+  - max_repetition: 1.01
+    name: finance_and_business 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0011/*.npy
+    target_ratio: 1.3137854988695046e-05
+  - max_repetition: 1.01
+    name: finance_and_business 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0012/*.npy
+    target_ratio: 0.00011763771574083751
+  - max_repetition: 1.01
+    name: finance_and_business 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0013/*.npy
+    target_ratio: 0.0004353464501036251
+  - max_repetition: 1.01
+    name: finance_and_business 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0014/*.npy
+    target_ratio: 0.001089821202420901
+  - max_repetition: 1.01
+    name: finance_and_business 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0015/*.npy
+    target_ratio: 0.002348067569584012
+  - max_repetition: 1.01
+    name: finance_and_business 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0016/*.npy
+    target_ratio: 0.004436307948263254
+  - max_repetition: 1.01
+    name: finance_and_business 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0017/*.npy
+    target_ratio: 0.007379320049101231
+  - max_repetition: 1.01
+    name: finance_and_business 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0018/*.npy
+    target_ratio: 0.011026359478308875
+  - max_repetition: 1.252080074778279
+    name: finance_and_business 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/finance_and_business/vigintile_0020/*.npy
+    target_ratio: 0.013824272862297822
+  - max_repetition: 1.01
+    name: food_and_dining 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0011/*.npy
+    target_ratio: 3.5838370287652354e-06
+  - max_repetition: 1.01
+    name: food_and_dining 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0012/*.npy
+    target_ratio: 3.2115981152459266e-05
+  - max_repetition: 1.01
+    name: food_and_dining 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0013/*.npy
+    target_ratio: 0.0001184081733904921
+  - max_repetition: 1.01
+    name: food_and_dining 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0014/*.npy
+    target_ratio: 0.0003186859583095562
+  - max_repetition: 1.01
+    name: food_and_dining 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0015/*.npy
+    target_ratio: 0.000735808061185103
+  - max_repetition: 1.01
+    name: food_and_dining 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0016/*.npy
+    target_ratio: 0.0014874213159397878
+  - max_repetition: 1.01
+    name: food_and_dining 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0017/*.npy
+    target_ratio: 0.0026682281434146082
+  - max_repetition: 1.01
+    name: food_and_dining 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0018/*.npy
+    target_ratio: 0.0039719275267632165
+  - max_repetition: 1.372380004216447
+    name: food_and_dining 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/food_and_dining/vigintile_0020/*.npy
+    target_ratio: 0.004749980110785754
+  - max_repetition: 1.01
+    name: games 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0012/*.npy
+    target_ratio: 2.864798026559898e-05
+  - max_repetition: 1.01
+    name: games 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0013/*.npy
+    target_ratio: 0.0002584848971132181
+  - max_repetition: 1.01
+    name: games 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0014/*.npy
+    target_ratio: 0.0009208238177230462
+  - max_repetition: 1.01
+    name: games 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0015/*.npy
+    target_ratio: 0.0023510834199165563
+  - max_repetition: 1.01
+    name: games 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0016/*.npy
+    target_ratio: 0.005101417436278801
+  - max_repetition: 1.7439030321727211
+    name: games 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0017/*.npy
+    target_ratio: 0.010306602577655656
+  - max_repetition: 3.129139980352946
+    name: games 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0018/*.npy
+    target_ratio: 0.020276968737578543
+  - max_repetition: 5.186907836042473
+    name: games 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/games/vigintile_0020/*.npy
+    target_ratio: 0.02966881812833145
+  - max_repetition: 1.01
+    name: health 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0011/*.npy
+    target_ratio: 2.3657603103819443e-05
+  - max_repetition: 1.01
+    name: health 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0012/*.npy
+    target_ratio: 0.00021423280487448614
+  - max_repetition: 1.01
+    name: health 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0013/*.npy
+    target_ratio: 0.0007875682591886768
+  - max_repetition: 1.01
+    name: health 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0014/*.npy
+    target_ratio: 0.002110333733224329
+  - max_repetition: 1.01
+    name: health 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0015/*.npy
+    target_ratio: 0.004667210296818173
+  - max_repetition: 1.01
+    name: health 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0016/*.npy
+    target_ratio: 0.009467237886538794
+  - max_repetition: 1.5004107621238925
+    name: health 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0017/*.npy
+    target_ratio: 0.01778975186223188
+  - max_repetition: 2.5237606670196566
+    name: health 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0018/*.npy
+    target_ratio: 0.0303172971496067
+  - max_repetition: 3.8047898611085187
+    name: health 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/health/vigintile_0020/*.npy
+    target_ratio: 0.03404454379211678
+  - max_repetition: 1.01
+    name: history_and_geography 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0013/*.npy
+    target_ratio: 1.2809205543024237e-05
+  - max_repetition: 1.01
+    name: history_and_geography 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0014/*.npy
+    target_ratio: 0.00013065152394461222
+  - max_repetition: 1.01
+    name: history_and_geography 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0015/*.npy
+    target_ratio: 0.0005380790893480364
+  - max_repetition: 1.01
+    name: history_and_geography 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0016/*.npy
+    target_ratio: 0.0016409975106157263
+  - max_repetition: 1.0313093683432373
+    name: history_and_geography 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0017/*.npy
+    target_ratio: 0.00440786052963845
+  - max_repetition: 2.166821795357747
+    name: history_and_geography 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0018/*.npy
+    target_ratio: 0.009602175237090872
+  - max_repetition: 3.6970263613259755
+    name: history_and_geography 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/history_and_geography/vigintile_0020/*.npy
+    target_ratio: 0.010765983368113647
+  - max_repetition: 1.01
+    name: home_and_hobbies 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0012/*.npy
+    target_ratio: 2.7150385808861134e-06
+  - max_repetition: 1.01
+    name: home_and_hobbies 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0013/*.npy
+    target_ratio: 2.52827412412647e-05
+  - max_repetition: 1.01
+    name: home_and_hobbies 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0014/*.npy
+    target_ratio: 9.590129689419233e-05
+  - max_repetition: 1.01
+    name: home_and_hobbies 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0015/*.npy
+    target_ratio: 0.00027131656961854793
+  - max_repetition: 1.01
+    name: home_and_hobbies 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0016/*.npy
+    target_ratio: 0.000687782140565059
+  - max_repetition: 1.01
+    name: home_and_hobbies 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0017/*.npy
+    target_ratio: 0.0015688948438763487
+  - max_repetition: 1.01
+    name: home_and_hobbies 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0018/*.npy
+    target_ratio: 0.0028274335112611847
+  - max_repetition: 1.01
+    name: home_and_hobbies 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/home_and_hobbies/vigintile_0020/*.npy
+    target_ratio: 0.003747141745613961
+  - max_repetition: 1.01
+    name: industrial 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0011/*.npy
+    target_ratio: 4.983705764883863e-06
+  - max_repetition: 1.01
+    name: industrial 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0012/*.npy
+    target_ratio: 4.140898425651759e-05
+  - max_repetition: 1.01
+    name: industrial 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0013/*.npy
+    target_ratio: 0.0001391835159622087
+  - max_repetition: 1.01
+    name: industrial 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0014/*.npy
+    target_ratio: 0.00035159324544869856
+  - max_repetition: 1.01
+    name: industrial 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0015/*.npy
+    target_ratio: 0.0007525781977701899
+  - max_repetition: 1.01
+    name: industrial 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0016/*.npy
+    target_ratio: 0.0014976068336779776
+  - max_repetition: 1.2743480232437387
+    name: industrial 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0017/*.npy
+    target_ratio: 0.0027372712520609102
+  - max_repetition: 2.0805057633121624
+    name: industrial 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0018/*.npy
+    target_ratio: 0.004405985329416752
+  - max_repetition: 3.1385440795902073
+    name: industrial 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/industrial/vigintile_0020/*.npy
+    target_ratio: 0.005815157301898861
+  - max_repetition: 1.01
+    name: literature 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0013/*.npy
+    target_ratio: 2.0919902438676498e-05
+  - max_repetition: 1.01
+    name: literature 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0014/*.npy
+    target_ratio: 0.00021020265387677046
+  - max_repetition: 1.01
+    name: literature 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0015/*.npy
+    target_ratio: 0.0008786830948856095
+  - max_repetition: 1.01
+    name: literature 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0016/*.npy
+    target_ratio: 0.0027219746030589472
+  - max_repetition: 1.01
+    name: literature 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0017/*.npy
+    target_ratio: 0.008152479396760214
+  - max_repetition: 2.3296886678764794
+    name: literature 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0018/*.npy
+    target_ratio: 0.023063184495847065
+  - max_repetition: 4.5293186087636785
+    name: literature 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/literature/vigintile_0020/*.npy
+    target_ratio: 0.033203848598339185
+  - max_repetition: 1.01
+    name: politics 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0011/*.npy
+    target_ratio: 5.370792239378535e-06
+  - max_repetition: 1.01
+    name: politics 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0012/*.npy
+    target_ratio: 4.857551928965783e-05
+  - max_repetition: 1.01
+    name: politics 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0013/*.npy
+    target_ratio: 0.00017451389179310676
+  - max_repetition: 1.01
+    name: politics 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0014/*.npy
+    target_ratio: 0.0004637972889058127
+  - max_repetition: 1.01
+    name: politics 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0015/*.npy
+    target_ratio: 0.0010349061492067365
+  - max_repetition: 1.01
+    name: politics 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0016/*.npy
+    target_ratio: 0.0020436888815624664
+  - max_repetition: 1.01
+    name: politics 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0017/*.npy
+    target_ratio: 0.003808864537630673
+  - max_repetition: 1.01
+    name: politics 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0018/*.npy
+    target_ratio: 0.006346572845792463
+  - max_repetition: 1.01
+    name: politics 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/politics/vigintile_0020/*.npy
+    target_ratio: 0.007777372908961574
+  - max_repetition: 1.01
+    name: religion 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0013/*.npy
+    target_ratio: 1.1453434811339466e-05
+  - max_repetition: 1.01
+    name: religion 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0014/*.npy
+    target_ratio: 0.00011440647472093559
+  - max_repetition: 1.01
+    name: religion 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0015/*.npy
+    target_ratio: 0.00045245886030289705
+  - max_repetition: 1.01
+    name: religion 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0016/*.npy
+    target_ratio: 0.001289725550976335
+  - max_repetition: 1.01
+    name: religion 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0017/*.npy
+    target_ratio: 0.003140678716577483
+  - max_repetition: 1.01
+    name: religion 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0018/*.npy
+    target_ratio: 0.006690693838247937
+  - max_repetition: 1.651994094259686
+    name: religion 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/religion/vigintile_0020/*.npy
+    target_ratio: 0.008065786510730612
+  - max_repetition: 1.01
+    name: science_math_and_technology 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0012/*.npy
+    target_ratio: 0.0011196772418882537
+  - max_repetition: 1.01
+    name: science_math_and_technology 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0013/*.npy
+    target_ratio: 0.004560859122318833
+  - max_repetition: 1.4045988537529246
+    name: science_math_and_technology 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0014/*.npy
+    target_ratio: 0.009853281765246342
+  - max_repetition: 2.2348077446797334
+    name: science_math_and_technology 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0015/*.npy
+    target_ratio: 0.017678195796601803
+  - max_repetition: 3.245715915754532
+    name: science_math_and_technology 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0016/*.npy
+    target_ratio: 0.029061994184660832
+  - max_repetition: 4.467541401483107
+    name: science_math_and_technology 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0017/*.npy
+    target_ratio: 0.045076715831179434
+  - max_repetition: 5.836578166417136
+    name: science_math_and_technology 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0018/*.npy
+    target_ratio: 0.05815935779193748
+  - max_repetition: 7.0100009967852515
+    name: science_math_and_technology 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/science_math_and_technology/vigintile_0020/*.npy
+    target_ratio: 0.044744026648923324
+  - max_repetition: 1.01
+    name: social_life 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0012/*.npy
+    target_ratio: 1.5541075387768164e-06
+  - max_repetition: 1.01
+    name: social_life 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0013/*.npy
+    target_ratio: 1.3896860975378655e-05
+  - max_repetition: 1.01
+    name: social_life 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0014/*.npy
+    target_ratio: 5.1744407759671654e-05
+  - max_repetition: 1.01
+    name: social_life 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0015/*.npy
+    target_ratio: 0.00014230214811293288
+  - max_repetition: 1.01
+    name: social_life 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0016/*.npy
+    target_ratio: 0.00034880002238887805
+  - max_repetition: 1.01
+    name: social_life 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0017/*.npy
+    target_ratio: 0.0007582749860184322
+  - max_repetition: 1.01
+    name: social_life 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0018/*.npy
+    target_ratio: 0.0014148769097325686
+  - max_repetition: 1.01
+    name: social_life 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/social_life/vigintile_0020/*.npy
+    target_ratio: 0.0019148321170413276
+  - max_repetition: 1.01
+    name: software 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0011/*.npy
+    target_ratio: 1.2406479157221622e-05
+  - max_repetition: 1.01
+    name: software 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0012/*.npy
+    target_ratio: 0.00011218628292496365
+  - max_repetition: 1.01
+    name: software 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0013/*.npy
+    target_ratio: 0.0004077951144056353
+  - max_repetition: 1.01
+    name: software 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0014/*.npy
+    target_ratio: 0.0011411753740386723
+  - max_repetition: 1.01
+    name: software 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0015/*.npy
+    target_ratio: 0.002539408131443358
+  - max_repetition: 1.3262125557148703
+    name: software 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0016/*.npy
+    target_ratio: 0.00498517622519426
+  - max_repetition: 2.3085593559060626
+    name: software 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0017/*.npy
+    target_ratio: 0.008747919999632795
+  - max_repetition: 3.7492377419835234
+    name: software 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0018/*.npy
+    target_ratio: 0.013754426865403197
+  - max_repetition: 5.507203706255236
+    name: software 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software/vigintile_0020/*.npy
+    target_ratio: 0.015638492657167873
+  - max_repetition: 1.3364418564004996
+    name: software_development 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0012/*.npy
+    target_ratio: 0.003112610806156664
+  - max_repetition: 2.579421662035841
+    name: software_development 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0013/*.npy
+    target_ratio: 0.006704598273502695
+  - max_repetition: 3.4896866024268487
+    name: software_development 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0014/*.npy
+    target_ratio: 0.00979009861380615
+  - max_repetition: 4.289502751574609
+    name: software_development 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0015/*.npy
+    target_ratio: 0.013043730757654484
+  - max_repetition: 5.03778496144588
+    name: software_development 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0016/*.npy
+    target_ratio: 0.016556204673117136
+  - max_repetition: 5.758485234878727
+    name: software_development 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0017/*.npy
+    target_ratio: 0.02036466923114693
+  - max_repetition: 6.446195599031204
+    name: software_development 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0018/*.npy
+    target_ratio: 0.023158460451721312
+  - max_repetition: 7.0100009955162665
+    name: software_development 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/software_development/vigintile_0020/*.npy
+    target_ratio: 0.018691051498358795
+  - max_repetition: 1.01
+    name: sports_and_fitness 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0011/*.npy
+    target_ratio: 4.077852549821321e-06
+  - max_repetition: 1.01
+    name: sports_and_fitness 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0012/*.npy
+    target_ratio: 3.6267392460594225e-05
+  - max_repetition: 1.01
+    name: sports_and_fitness 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0013/*.npy
+    target_ratio: 0.00012586987449901546
+  - max_repetition: 1.01
+    name: sports_and_fitness 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0014/*.npy
+    target_ratio: 0.0003198216853605351
+  - max_repetition: 1.01
+    name: sports_and_fitness 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0015/*.npy
+    target_ratio: 0.0006905098297002687
+  - max_repetition: 1.01
+    name: sports_and_fitness 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0016/*.npy
+    target_ratio: 0.0013299505625055995
+  - max_repetition: 1.01
+    name: sports_and_fitness 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0017/*.npy
+    target_ratio: 0.0023334781487416825
+  - max_repetition: 1.01
+    name: sports_and_fitness 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0018/*.npy
+    target_ratio: 0.0036895673618011714
+  - max_repetition: 1.01
+    name: sports_and_fitness 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/sports_and_fitness/vigintile_0020/*.npy
+    target_ratio: 0.004542597893937761
+  - max_repetition: 1.01
+    name: transportation 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0011/*.npy
+    target_ratio: 2.487587804836681e-06
+  - max_repetition: 1.01
+    name: transportation 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0012/*.npy
+    target_ratio: 2.143138359166134e-05
+  - max_repetition: 1.01
+    name: transportation 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0013/*.npy
+    target_ratio: 7.488182904531793e-05
+  - max_repetition: 1.01
+    name: transportation 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0014/*.npy
+    target_ratio: 0.0001913593521032479
+  - max_repetition: 1.01
+    name: transportation 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0015/*.npy
+    target_ratio: 0.0004287191982190346
+  - max_repetition: 1.01
+    name: transportation 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0016/*.npy
+    target_ratio: 0.0008775761640652288
+  - max_repetition: 1.01
+    name: transportation 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0017/*.npy
+    target_ratio: 0.001648545069152186
+  - max_repetition: 1.01
+    name: transportation 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0018/*.npy
+    target_ratio: 0.0028189782081571124
+  - max_repetition: 1.1837310097096378
+    name: transportation 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/transportation/vigintile_0020/*.npy
+    target_ratio: 0.003734630652709513
+  - max_repetition: 1.01
+    name: travel_and_tourism 10
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0010/*.npy
+    target_ratio: 3.3280864744457635e-07
+  - max_repetition: 1.01
+    name: travel_and_tourism 11
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0011/*.npy
+    target_ratio: 2.8434042128130256e-06
+  - max_repetition: 1.01
+    name: travel_and_tourism 12
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0012/*.npy
+    target_ratio: 9.904682483205577e-06
+  - max_repetition: 1.01
+    name: travel_and_tourism 13
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0013/*.npy
+    target_ratio: 2.4976186252356273e-05
+  - max_repetition: 1.01
+    name: travel_and_tourism 14
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0014/*.npy
+    target_ratio: 5.3874498225268163e-05
+  - max_repetition: 1.01
+    name: travel_and_tourism 15
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0015/*.npy
+    target_ratio: 0.00011144077427752593
+  - max_repetition: 1.01
+    name: travel_and_tourism 16
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0016/*.npy
+    target_ratio: 0.00021110309046212136
+  - max_repetition: 1.01
+    name: travel_and_tourism 17
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0017/*.npy
+    target_ratio: 0.0003918216274879409
+  - max_repetition: 1.01
+    name: travel_and_tourism 18
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0018/*.npy
+    target_ratio: 0.000638286699767656
+  - max_repetition: 1.01
+    name: travel_and_tourism 20
+    paths:
+    - s3://ai2-llm/preprocessed/cc_all_dressed/all_dressed_v3/dclm_plus2_vigilantes/allenai/dolma2-tokenizer/travel_and_tourism/vigintile_0020/*.npy
+    target_ratio: 0.0007527863993222929
+description: 'Quality upsampling: our method with pool size 4.51T'
+downstream_evaluators:
+- olmo2_dev_1b
+global_batch_size: 2097152
+gpus: 8
+lm_evaluator: true
+max_tokens: 127939584000
+model: olmo2_1B_v2
+name: upsampling-ours-pool-4.51T
+nodes: 2
+preemptible: true
+priority: high
+rank_microbatch_size: 32768
+seed: 1337
+sequence_length: 4096
+tokenizer: dolma2
+weka: false
+workspace: ai2/oe-data
