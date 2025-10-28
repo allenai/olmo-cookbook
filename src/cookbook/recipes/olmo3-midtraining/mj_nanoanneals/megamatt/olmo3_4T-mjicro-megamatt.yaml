@@ -1,7 +1,7 @@
 name: "mjicroanneal-megamatt"
 description: "OLMo3_4T mjicroanneal with 3.88B tokens of megamatt"
 budget: "ai2/oe-base"
-workspace: "ai2/oe-data"
+workspace: "ai2/olmo-3-microanneals"
 nodes: 1
 gpus: 8
 preemptible: false
