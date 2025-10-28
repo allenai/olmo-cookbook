@@ -27,10 +27,10 @@ BEAKER_DEFAULT_WORKSPACE = "ai2/oe-data"
 BEAKER_DEFAULT_BUDGET = "ai2/oe-base"
 BEAKER_DEFAULT_PRIORITY = "normal"
 
-BEAKER_PY_MIN_VERSION = "1.36.4"
-BEAKER_PY_MAX_VERSION = "2"
-BEAKER_GANTRY_MIN_VERSION = "1.17.1"
-BEAKER_GANTRY_MAX_VERSION = "2"
+BEAKER_PY_MIN_VERSION = "2.5.0"
+BEAKER_PY_MAX_VERSION = "3"
+BEAKER_GANTRY_MIN_VERSION = "3.2.0"
+BEAKER_GANTRY_MAX_VERSION = "4"
 
 OLMO_TYPES = ["olmoe", "olmo2", "olmo-core", "olmo-core-v2"]
 
@@ -453,10 +453,7 @@ RULER_SUITES = {
         "ruler_cwe__4096::std",
         "ruler_fwe__4096::std",
     ],
-    "ruler_qa__4096::suite": [
-        "ruler_qa_1__4096::std",
-        "ruler_qa_2__4096::std"
-    ],
+    "ruler_qa__4096::suite": ["ruler_qa_1__4096::std", "ruler_qa_2__4096::std"],
     "ruler_niah__8192::suite": [
         "ruler_niah_s_1__8192::std",
         "ruler_niah_s_2__8192::std",
@@ -474,10 +471,7 @@ RULER_SUITES = {
         "ruler_cwe__8192::std",
         "ruler_fwe__8192::std",
     ],
-    "ruler_qa__8192::suite": [
-        "ruler_qa_1__8192::std",
-        "ruler_qa_2__8192::std"
-    ],
+    "ruler_qa__8192::suite": ["ruler_qa_1__8192::std", "ruler_qa_2__8192::std"],
     "ruler_niah__16384::suite": [
         "ruler_niah_s_1__16384::std",
         "ruler_niah_s_2__16384::std",
@@ -495,10 +489,7 @@ RULER_SUITES = {
         "ruler_cwe__16384::std",
         "ruler_fwe__16384::std",
     ],
-    "ruler_qa__16384::suite": [
-        "ruler_qa_1__16384::std",
-        "ruler_qa_2__16384::std"
-    ],
+    "ruler_qa__16384::suite": ["ruler_qa_1__16384::std", "ruler_qa_2__16384::std"],
     "ruler_niah__32768::suite": [
         "ruler_niah_s_1__32768::std",
         "ruler_niah_s_2__32768::std",
@@ -516,10 +507,7 @@ RULER_SUITES = {
         "ruler_cwe__32768::std",
         "ruler_fwe__32768::std",
     ],
-    "ruler_qa__32768::suite": [
-        "ruler_qa_1__32768::std",
-        "ruler_qa_2__32768::std"
-    ],
+    "ruler_qa__32768::suite": ["ruler_qa_1__32768::std", "ruler_qa_2__32768::std"],
     "ruler_niah__65536::suite": [
         "ruler_niah_s_1__65536::std",
         "ruler_niah_s_2__65536::std",
@@ -537,10 +525,7 @@ RULER_SUITES = {
         "ruler_cwe__65536::std",
         "ruler_fwe__65536::std",
     ],
-    "ruler_qa__65536::suite": [
-        "ruler_qa_1__65536::std",
-        "ruler_qa_2__65536::std"
-    ],
+    "ruler_qa__65536::suite": ["ruler_qa_1__65536::std", "ruler_qa_2__65536::std"],
     "ruler_niah__131072::suite": [
         "ruler_niah_s_1__131072::std",
         "ruler_niah_s_2__131072::std",
@@ -558,10 +543,7 @@ RULER_SUITES = {
         "ruler_cwe__131072::std",
         "ruler_fwe__131072::std",
     ],
-    "ruler_qa__131072::suite": [
-        "ruler_qa_1__131072::std",
-        "ruler_qa_2__131072::std"
-    ],
+    "ruler_qa__131072::suite": ["ruler_qa_1__131072::std", "ruler_qa_2__131072::std"],
 }
 
 ALL_CORE_TASKS = [

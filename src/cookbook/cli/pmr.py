@@ -772,6 +772,7 @@ class InstanceInfo:
         instance_type: str,
         tags: dict[str, str],
         region: str,
+        zone: str | None = None,
         ami_id: str | None = None,
         wait_for_completion: bool = True,
         key_name: str | None = None,
@@ -787,6 +788,7 @@ class InstanceInfo:
             instance_type: The EC2 instance type (e.g., 't2.micro')
             tags: Dictionary of tags to apply to the instance
             region: AWS region where to launch the instance
+            zone: AWS availability zone where to launch the instance
             ami_id: AMI ID to use (defaults to Amazon Linux 2 in the specified region)
             wait_for_completion: Whether to wait for the instance to be running
             key_name: Name of the key pair to use for SSH access to the instance
@@ -826,6 +828,9 @@ class InstanceInfo:
             "MaxCount": 1,
             "TagSpecifications": tag_specifications,
         }
+
+        if zone:
+            launch_params["Placement"] = {"AvailabilityZone": zone}
 
         # Add key pair if provided
         if key_name:
@@ -885,7 +890,6 @@ class Session:
         user: str = "ec2-user",
         client: Union["EC2Client", None] = None,
     ):
-
         self.private_key_path = private_key_path
         self.user = user
         self.instance = InstanceInfo.describe_instance(instance_id=instance_id, region=region, client=client)
@@ -1008,7 +1012,6 @@ class Session:
         terminate: bool = True,
         timeout: int | None = None,
     ) -> SessionContent:
-
         if self.instance.state != InstanceStatus.RUNNING:
             raise ValueError(f"Instance {self.instance.instance_id} is not running")
 
@@ -1270,6 +1273,12 @@ def common_cli_options(f: T) -> T:
     default=None,
     help="IOPS for the root volume",
 )
+@click.option(
+    "--zone",
+    type=str,
+    default=None,
+    help="Availability zone to use for the instances",
+)
 def create_instances(
     name: str,
     instance_type: str,
@@ -1282,6 +1291,7 @@ def create_instances(
     storage_type: str | None,
     storage_size: int | None,
     storage_iops: int | None,
+    zone: str | None,
     **kwargs,
 ):
     """
@@ -1299,6 +1309,7 @@ def create_instances(
         storage_type: Type of EBS storage (e.g., 'gp2', 'gp3'). If None, uses AWS default
         storage_size: Size of root volume in GB. If None, uses AWS default
         storage_iops: IOPS for the root volume. If None, uses AWS default
+        zone: Availability zone to use for the instances; if None, uses AWS default
         **kwargs: Additional keyword arguments
 
     Returns:
@@ -1361,6 +1372,7 @@ def create_instances(
             storage_type=storage_type,
             storage_size=storage_size,
             storage_iops=storage_iops,
+            zone=zone,
         )
         logger.info(f"Created instance {instance.instance_id} with name {instance.name}")
         instances.append(instance)
