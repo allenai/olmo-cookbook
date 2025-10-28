@@ -90,6 +90,9 @@ class BaseNamedTasksGroup:
         for task in self.tasks:
             if isinstance(task, BaseNamedTasksGroup):
                 expanded_tasks.extend(task.expanded_tasks)
+            elif isinstance(task, str) and NamedTasksGroupRegistry.exists(task):
+                # Allow referencing other named groups by their registry name
+                expanded_tasks.extend(NamedTasksGroupRegistry.get(task).expanded_tasks)
             else:
                 expanded_tasks.append(task)
         return expanded_tasks
@@ -415,6 +418,13 @@ class AgiEvalEnglishMidtrainGroup(BaseAverageNamedTasksGroup):
     tasks = [f"agi_eval_{task}::olmo3:midtrain" for task in constants.AGI_EVAL_ENGLISH_TASKS]
 
 
+@NamedTasksGroupRegistry.register("agi_eval_english:0shot_cot::hamish_zs_reasoning")
+class AgiEvalEnglishHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [
+        f"agi_eval_{task}:0shot_cot::hamish_zs_reasoning" for task in constants.AGI_EVAL_ENGLISH_TASKS
+    ]
+
+
 @NamedTasksGroupRegistry.register("starcoder")
 class StarcoderGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.STARCODER_CODEX_TASKS]
@@ -473,6 +483,11 @@ class BBHOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("bbh:cot::olmo3:midtrain")
 class BBHMidtrainThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"bbh_{category}:cot::olmo3:midtrain" for category in constants.BBH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::hamish_zs_reasoning")
+class BBHHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::hamish_zs_reasoning" for category in constants.BBH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
@@ -899,4 +914,32 @@ class Olmo3DevMidtrainV2MainGroup(BaseNamedTasksWithNoAverageGroup):
         "popqa::olmo3:midtrain",
         AgiEvalEnglishMidtrainGroup(),
         MMLUMidtrainGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:adapt")
+class Olmo3AdaptGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        # Knowledge
+        "mmlu:cot::olmo3:adapt",
+        "popqa::olmo3:adapt",
+        "simpleqa::olmo3:adapt",
+        # Reasoning
+        "bbh:cot::olmo3:adapt",
+        "gpqa::olmo3:adapt",
+        "zebralogic::olmo3:adapt",
+        "agi_eval_english::olmo3:adapt",
+        # Math
+        "minerva_math::olmo3:adapt",
+        "gsm8k::olmo3:adapt",
+        "omega::olmo3:adapt",
+        "aime:2024::olmo3:adapt",
+        "aime:2025::olmo3:adapt",
+        # Coding
+        "codex_humanevalplus::olmo3:adapt",
+        "mbppplus::olmo3:adapt",
+        "livecodebench_codegeneration::olmo3:adapt",
+        # Chat / IF
+        "alpaca_eval_v3::olmo3:adapt",
+        "ifeval::olmo3:adapt",
     ]

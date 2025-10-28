@@ -29,6 +29,8 @@ dependencies = [
     "packaging>=24.2",
     "tqdm>=4.67.1",
     "huggingface-hub[hf-transfer]>=0.34,<0.35",
+    "beaker-py>=2.5.1",
+    "beaker-gantry>=3.3.0",
 ]
 
 [project.optional-dependencies]
