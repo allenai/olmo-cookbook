@@ -1,5 +1,6 @@
 name: lightgbm-125-seed-0
-description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=125 samples using lightgbm fit
+description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=125 samples using
+  lightgbm fit
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4

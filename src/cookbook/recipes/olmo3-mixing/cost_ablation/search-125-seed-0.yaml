@@ -1,5 +1,6 @@
 name: search-125-seed-0
-description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=125 samples using search
+description: 5xC 1B DCLM proposed mix (rep=4) with d=24 domains, n=125 samples using
+  search
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
@@ -30,5 +31,5 @@ dataset:
   - name: software_development
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software_development/dolma2-tokenizer/*.npy
-    target_ratio: 0.70
+    target_ratio: 0.7000000000000001
     repetition_factor: 4
