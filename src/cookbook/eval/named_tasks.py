@@ -653,7 +653,7 @@ class Olmo3Dev1bQaBpbV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "lambada:bpb",
         "medmcqa:bpb::none",
         "medqa_en:bpb::none",
-        "sciriff_yesno:bpb::olmes",
+        # "sciriff_yesno:bpb::olmes",
     ]
 
 
@@ -685,7 +685,7 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
         "lambada",
         "medmcqa:rc::none",
         "medqa_en:rc::none",
-        "sciriff_yesno:rc::olmes",
+        # "sciriff_yesno:rc::olmes",
     ]
 
 
@@ -717,7 +717,7 @@ class Olmo3Dev1bQaRcV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "lambada",
         "medmcqa:rc::none",
         "medqa_en:rc::none",
-        "sciriff_yesno:rc::olmes",
+        # "sciriff_yesno:rc::olmes",
     ]
 
 
@@ -898,6 +898,25 @@ class Olmo3Dev1bMainGroup(BaseNamedTasksWithNoAverageGroup):
         Olmo3Dev1bMathBpbGroup(),
         Olmo3Dev1bCodeBpbGroup(),
         Olmo3Dev1bQaRcGroup(),
+        ARCRCFullGroup(),
+        "hellaswag:rc::olmes:full",
+        BasicRCGroup(),
+        MtMbppV2fixGroup(),
+        MMLURCGroup(),
+        MMLUBpbGroup(),
+        "codex_humaneval:3shot:bpb::none",
+        "mbpp:3shot:bpb::none",
+        MinervaBpbGroup()
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:main:v2")
+class Olmo3Dev1bMainV2Group(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        Olmo3Dev1bMathBpbGroup(),
+        Olmo3Dev1bCodeBpbGroup(),
+        Olmo3Dev1bQaBpbV2Group(),
+        Olmo3Dev1bQaRcV2Group(),
         ARCRCFullGroup(),
         "hellaswag:rc::olmes:full",
         BasicRCGroup(),
