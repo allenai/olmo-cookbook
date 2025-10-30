@@ -4,9 +4,6 @@ import re
 from typing import Optional
 
 import click
-from rich.console import Console
-from rich.table import Table
-
 from cookbook.cli.utils import (
     get_aws_access_key_id,
     get_aws_secret_access_key,
@@ -35,6 +32,8 @@ from cookbook.eval.results import (
     make_results_from_dashboard,
     print_missing_tasks,
 )
+from rich.console import Console
+from rich.table import Table
 
 logger = logging.getLogger(__name__)
 
@@ -709,13 +708,16 @@ def get_results(
         skip_on_fail=skip_on_fail,
     )
 
+    with open("mj_reval_FULL.json", "w") as f:
+        f.write(dashboard_table.to_json())
+
+    # print("DBTABLE", dashboard_table.to_json())
     # we subselect the right tasks and models, plus expand named tasks
     results = make_results_from_dashboard(
         dashboard_table=dashboard_table,
         tasks=tasks,
         models=models,
     )
-
     # we find missing tasks in the results
     missing_tasks = find_missing_tasks(results=results)
 

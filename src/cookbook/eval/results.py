@@ -1,15 +1,12 @@
-from datetime import datetime
 import logging
 import re
 import sys
+from datetime import datetime
 from typing import NamedTuple
 
 from cookbook.eval.datalake import FindExperiments, MetricsAll
 from cookbook.eval.miniframe import MiniFrame
-from cookbook.eval.named_tasks import (
-    BaseNamedTasksGroup,
-    NamedTasksGroupRegistry,
-)
+from cookbook.eval.named_tasks import BaseNamedTasksGroup, NamedTasksGroupRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +76,6 @@ def make_dashboard_table(
             unique_metrics[key] = metric
     metrics: list[MetricsAll] = list(unique_metrics.values())
 
-
     for metric in metrics:
         if metric.is_aggregate:
             # we skip aggregate tasks; we will aggregate them ourselves...
@@ -91,17 +87,17 @@ def make_dashboard_table(
         # @davidh: Hotfix for minerva math. The primary metric is set incorrectly in oe-eval but we
         # want to make 100% sure we're looking at the right metric, because a lot of midtraining eval
         # has already been ran. Fix here: https://github.com/allenai/oe-eval-internal/pull/571
-        if 'minerva_math' in metric.alias and 'hamish_zs_reasoning' in metric.alias:
-            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+        if "minerva_math" in metric.alias and "hamish_zs_reasoning" in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics["exact_match_flex"]
 
         # @davidh: Hotfix for Alpaca Eval tasks. The alpaca eval metric multiplies its score by 100. No PR
         # in oe-eval to avoid messing with adapt's backend.
-        if 'alpaca' in metric.alias:
+        if "alpaca" in metric.alias:
             metric.metrics.primary_score /= 100
 
         # @davidh: Hotfix for styled math. Fix here: https://github.com/allenai/oe-eval-internal/pull/592
-        if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
-            metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
+        if "styled_math500" in metric.alias and "tulu" in metric.alias:
+            metric.metrics.primary_score = metric.metrics.extra_metrics["exact_match_flex"]
 
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
@@ -131,7 +127,7 @@ class ExpandedTasks(NamedTuple):
     all_column_tasks: list[str | re.Pattern]
 
     @classmethod
-    def from_tasks(cls, tasks: list[str]) -> 'ExpandedTasks':
+    def from_tasks(cls, tasks: list[str]) -> "ExpandedTasks":
         # compile tasks names into regex patterns (if possible)
         compiled_tasks = [re.compile(task) if re.escape(task) != task else task for task in tasks]
 
@@ -157,7 +153,7 @@ class ExpandedModels(NamedTuple):
     single_models: list[str | re.Pattern]
 
     @classmethod
-    def from_models(cls, models: list[str]) -> 'ExpandedModels':
+    def from_models(cls, models: list[str]) -> "ExpandedModels":
         # we filtered tasks, but the user might want to display only some models
         rows_filter_models: list[str | re.Pattern] = []
         if len(models) > 0:
@@ -168,9 +164,7 @@ class ExpandedModels(NamedTuple):
 
 
 def make_results_from_dashboard(
-    dashboard_table: MiniFrame,
-    tasks: list[str],
-    models: list[str] | None = None
+    dashboard_table: MiniFrame, tasks: list[str], models: list[str] | None = None
 ) -> MiniFrame:
     """
     Filter the results table based on the tasks and models provided.
@@ -209,7 +203,7 @@ def make_results_from_dashboard(
 
 
 def find_missing_tasks(results: MiniFrame) -> dict[str, list[str]]:
-    """ Looks for columns that are set to None across all models (rows) in the results"""
+    """Looks for columns that are set to None across all models (rows) in the results"""
 
     missing_tasks: dict[str, list[str]] = {}
     for model_row in results.rows:
@@ -238,7 +232,6 @@ def print_missing_tasks(
     tasks: list[str],
     models: list[str] | None = None,
 ) -> None:
-
     expanded_tasks = ExpandedTasks.from_tasks(tasks)
     expanded_models = ExpandedModels.from_models(models or [])
 
@@ -255,8 +248,7 @@ def print_missing_tasks(
             task
             for task in missing_task
             if any(
-                t.search(task) if isinstance(t, re.Pattern) else t == task
-                for t in expanded_tasks.all_column_tasks
+                t.search(task) if isinstance(t, re.Pattern) else t == task for t in expanded_tasks.all_column_tasks
             )
         }
         if not model_missing_tasks:
