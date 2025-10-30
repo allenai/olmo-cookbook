@@ -284,6 +284,11 @@ class ARCMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.ARC_TASKS]
 
 
+@NamedTasksGroupRegistry.register("arc:bpb::full")
+class ARCBPBFullGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:bpb::olmes:full" for category in constants.ARC_TASKS]
+
+
 @NamedTasksGroupRegistry.register("arc:rc::full")
 class ARCRCFullGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:rc::olmes:full" for category in constants.ARC_TASKS]
@@ -302,6 +307,11 @@ class ARCRCXlargeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("arc:mc::xlarge")
 class ARCMCXlargeGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::xlarge" for category in constants.ARC_TASKS]
+
+
+@NamedTasksGroupRegistry.register("basic:bpb")
+class BasicBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:bpb::olmes" for task in constants.BASIC_SKILLS]
 
 
 @NamedTasksGroupRegistry.register("basic:rc")
@@ -359,6 +369,11 @@ class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("minerva_math::olmo3:midtrain")
 class MinervaMidtrainReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmo3:midtrain" for subtask in constants.ALL_MINERVA_TASKS]
+
+
+@NamedTasksGroupRegistry.register("deepmind_math::olmo3:heldout")
+class DeepmindMathHeldoutGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"deepmind_math_{cat}::olmo3:heldout" for cat in constants.DEEPMIND_MATH_CATEGORIES]
 
 
 @NamedTasksGroupRegistry.register("math")
@@ -463,6 +478,11 @@ class BBHOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("bbh:cot::olmo3:midtrain")
 class BBHMidtrainThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"bbh_{category}:cot::olmo3:midtrain" for category in constants.BBH_TASKS]
+
+
+@NamedTasksGroupRegistry.register("bbh:cot::olmo3:heldout")
+class BBHHeldoutGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"bbh_{category}:cot::olmo3:heldout" for category in constants.BBH_TASKS]
 
 
 @NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
@@ -574,6 +594,69 @@ class Olmo3Dev1bCodeBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:bpb")
+class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCBPBFullGroup(),
+        MMLUBpbGroup(),
+        "csqa:bpb::olmes:full",
+        "hellaswag:bpb::olmes:full",
+        "winogrande:bpb::olmes:full",
+        "socialiqa:bpb::olmes:full",
+        "piqa:bpb::olmes:full",
+
+        # Gen OLMES
+        "coqa:bpb::gen2mc",
+        "drop:bpb::gen2mc",
+        "jeopardy:bpb::gen2mc",
+        "naturalqs:bpb::gen2mc",
+        "squad:bpb::gen2mc",
+
+        # New OLMo 3
+        "sciq:bpb::olmo3",
+        "qasper_yesno:bpb::olmes",
+        BasicBpbGroup(),
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:bpb::none",
+        "medqa_en:bpb::none",
+        "sciriff_yesno:bpb::olmes",
+    ]
+
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:bpb:v2")
+class Olmo3Dev1bQaBpbV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCBPBFullGroup(),
+        MMLUBpbGroup(),
+        "csqa:bpb::olmes:full",
+        "hellaswag:bpb::olmes:full",
+        "winogrande:bpb::olmes:full",
+        "socialiqa:bpb::olmes:full",
+        "piqa:bpb::olmes:full",
+
+        # Gen OLMES
+        "coqa:bpb::gen2mc:xlarge",
+        "drop:bpb::gen2mc:xlarge",
+        "jeopardy:bpb::gen2mc:xlarge",
+        "naturalqs:bpb::gen2mc:xlarge",
+        "squad:bpb::gen2mc:xlarge",
+
+        # New OLMo 3
+        "sciq:bpb::olmo3",
+        "qasper_yesno:bpb::olmes",
+        BasicBpbGroup(),
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:bpb::none",
+        "medqa_en:bpb::none",
+        "sciriff_yesno:bpb::olmes",
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:rc")
 class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -606,43 +689,49 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:rc:v2")
+class Olmo3Dev1bQaRcV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Core OLMES
+        ARCRCFullGroup(),
+        MMLURCGroup(),
+        "csqa:rc::olmes:full",
+        "hellaswag:rc::olmes:full",
+        "winogrande:rc::olmes:full",
+        "socialiqa:rc::olmes:full",
+        "piqa:rc::olmes:full",
+
+        # Gen OLMES
+        "coqa:rc::gen2mc:xlarge",
+        "drop:rc::gen2mc:xlarge",
+        "jeopardy:rc::gen2mc:xlarge",
+        "naturalqs:rc::gen2mc:xlarge",
+        "squad:rc::gen2mc:xlarge",
+
+        # New OLMo 3
+        "sciq:rc::olmo3",
+        "qasper_yesno:rc::olmes",
+        BasicRCGroup(),
+        "lab_bench_dbqa",
+        "lab_bench_protocolqa",
+        "lambada",
+        "medmcqa:rc::none",
+        "medqa_en:rc::none",
+        "sciriff_yesno:rc::olmes",
+    ]
+
+
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:bpb")
 class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Core OLMES
-        "arc:bpb::full$",
-        "mmlu:bpb$",
-        "csqa:bpb::olmes:full",
-        "hellaswag:bpb::olmes:full",
-        "winogrande:bpb::olmes:full",
-        "socialiqa:bpb::olmes:full",
-        "piqa:bpb::olmes:full",
-
-        # Gen OLMES
-        "coqa:bpb::gen2mc",
-        "drop:bpb::gen2mc",
-        "jeopardy:bpb::gen2mc",
-        "naturalqs:bpb::gen2mc",
-        "squad:bpb::gen2mc",
+        # QA
+        Olmo3Dev1bQaBpbGroup(),
 
         # Math
         MinervaBpbGroup(),
 
         # Code
         Olmo3Dev1bCodeBpbGroup(),
-
-        # New OLMo 3
-        "sciq:bpb::olmo3",
-        "qasper_yesno:bpb::olmes",
-        "basic_skills:bpb::olmes",
-        "lab_bench_dbqa:bpb",
-        "lab_bench_protocolqa:bpb",
-        "lambada:bpb",
-        "medmcqa:bpb::none",
-        "medqa_en:bpb::none",
-        "sciriff_yesno:bpb::olmes",
-        "ultrachat_masked_ppl",
-        "wildchat_masked_ppl",
     ]
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
@@ -730,6 +819,23 @@ class Olmo3Dev7bMcqaNonSTEMGroup(BaseAverageOfAveragesNamedTasksGroup):
         "jeopardy:mc::gen2mc",
         "naturalqs:mc::gen2mc",
         "squad:mc::gen2mc",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:mcqa:non_stem:v2")
+class Olmo3Dev7bMcqaNonSTEMV2Group(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        MMLUHumanitiesMCGroup(),
+        MMLUSocialSciencesMCGroup(),
+        MMLUOtherMCGroup(),
+        "csqa:mc::xlarge",
+        "piqa:mc::xlarge",
+        "socialiqa:mc::xlarge",
+        "coqa:mc::gen2mc:xlarge",
+        "drop:mc::gen2mc:xlarge",
+        "jeopardy:mc::gen2mc:xlarge",
+        "naturalqs:mc::gen2mc:xlarge",
+        "squad:mc::gen2mc:xlarge",
     ]
 
 
@@ -883,4 +989,39 @@ class Olmo3DevMidtrainV2MainGroup(BaseNamedTasksWithNoAverageGroup):
         "popqa::olmo3:midtrain",
         AgiEvalEnglishMidtrainGroup(),
         MMLUMidtrainGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:base_heldout")
+class Olmo3BaseHeldoutGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        BBHHeldoutGroup(),
+        MMLUProMCGroup(),
+        DeepmindMathHeldoutGroup(),
+        "lbpp::olmo3",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:paper")
+class Olmo3PaperGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        # olmo3:base_easy
+        Olmo3Dev1bMathBpbGroup(),
+        Olmo3Dev1bCodeBpbGroup(),
+        Olmo3Dev1bQaBpbV2Group(),
+        Olmo3Dev1bQaRcV2Group(),
+
+        # olmo3:base
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMV2Group(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV2Group(),
+        Olmo3Dev7bCodeGenV2Group(),
+        Olmo3Dev7bCodeFimGroup(),
+
+        # olmo3:base_chat
+        Olmo3DevMidtrainV2MainGroup(),
+
+        # olmo3:heldout
+        Olmo3BaseHeldoutGroup(),
     ]
