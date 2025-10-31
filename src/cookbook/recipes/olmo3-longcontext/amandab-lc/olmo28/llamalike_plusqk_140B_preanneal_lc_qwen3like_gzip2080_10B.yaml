@@ -2,10 +2,10 @@ name: &name "llamalike_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-p
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/augusta-google-1
+cluster: ai2/jupiter
 preemptible: true
 priority: high
-nodes: 8
+nodes: 4
 gpus: 8
 seed: 4123
 
