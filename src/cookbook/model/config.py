@@ -222,7 +222,6 @@ class WrappedTransformerConfig:
             **kwargs,
             
         )
-        config.block.attention.use_head_qk_norm = True
         config.block.attention.use_flash = True
         return config
 
