@@ -49,7 +49,10 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@a32a01fa116d2648529bb6150061016abf67d085", 
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@7a28bcaa671316376dcda7b8b12add248911c115", 
+    # 7a28bcaa671316376dcda7b8b12add248911c115 <- augusta fix
+    # a32a01fa116d2648529bb6150061016abf67d085 <- baselines commit (everything from this summer)
+
     #601d3367ee9b0817ff71324a3052945851229afa <- olmo-core HEAD
     #7afdc3ed67f00b090aae11b5101ef147160274cc <- olmo-cookbook HEAD
     #a32a01fa116d2648529bb6150061016abf67d085 <- + scheduler fix
