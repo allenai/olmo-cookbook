@@ -2,7 +2,7 @@ name: &name "llamalike_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-p
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
-cluster: ai2/jupiter
+cluster: ai2/augusta
 preemptible: true
 priority: high
 nodes: 4
@@ -26,7 +26,7 @@ metrics_config:
 
 generate_doc_lengths: true  # enable intra-document masking
 load_path: gs://ai2-llm/checkpoints/amandab/LlamaClone-plus-qknorm-reordered-norm-fixed-reload/step34000
-load_state: false
+load_state: false 
 model: "llama3_8B_plus_qk_reorder_norm"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
