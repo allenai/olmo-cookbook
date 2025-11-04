@@ -13,7 +13,8 @@ from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
     NumpyDatasetConfig,
-    NumpyDatasetType,
+    NumpyFSLDatasetConfig,
+    NumpyPaddedFSLDatasetConfig,
     TokenizerConfig,
 )
 from olmo_core.nn.attention import SlidingWindowAttentionConfig
@@ -404,9 +405,8 @@ class TransformerConfigBuilder:
 
         if self.lm_evaluator:
             callbacks["lm_evaluator"] = LMEvaluatorCallbackConfig(
-                eval_dataset=NumpyDatasetConfig.from_data_mix(
+                eval_dataset=NumpyPaddedFSLDatasetConfig.from_data_mix(
                     DataMix.v3_small_ppl_validation,
-                    name=NumpyDatasetType.padded_fsl,
                     mix_base_dir=self.root_dir,
                     sequence_length=self.sequence_length,
                     tokenizer=self.tokenizer,
@@ -450,10 +450,9 @@ class TransformerConfigBuilder:
             for source in self.sources:
                 source_paths.extend(source.paths)
 
-        dataset_config = NumpyDatasetConfig(
+        dataset_config = NumpyFSLDatasetConfig(
             paths=source_paths,
             source_mixture_config=mixture_config,
-            name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             max_target_sequence_length=self.max_target_sequence_length,
             tokenizer=self.tokenizer,
