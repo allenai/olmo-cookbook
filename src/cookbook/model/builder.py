@@ -426,7 +426,7 @@ class TransformerConfigBuilder:
 
         return callbacks
 
-    def build_dataset_config(self, loader_processes: int = 8) -> NumpyDatasetConfig:
+    def build_dataset_config(self, global_batch_size: int, loader_processes: int = 8) -> NumpyDatasetConfig:
         is_fractional = any(source.ratio is not None and source.ratio != 1 for source in self.sources)
 
         mixture_config = None
@@ -440,7 +440,7 @@ class TransformerConfigBuilder:
             mixture_config = MixtureBuilder(
                 sources=self.sources,
                 max_tokens=self.max_tokens,
-                sequence_length=self.sequence_length,
+                global_batch_size=global_batch_size,
                 seed=self.seed,
                 processes=loader_processes,
                 dtype=self.dataset_dtype,
@@ -615,7 +615,7 @@ class TransformerConfigBuilder:
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
         rank_microbatch_size = self.get_rank_microbatch_size()
-        dataset_config = self.build_dataset_config()
+        dataset_config = self.build_dataset_config(global_batch_size=global_batch_size)
         optim_config = self.get_optimizer_config()
 
         data_loader_config = NumpyDataLoaderConfig(
