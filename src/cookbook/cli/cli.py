@@ -8,7 +8,7 @@ import click
 import yaml
 from beaker import Beaker
 from beaker.exceptions import BeakerSecretNotFound
-from beaker.services.job import JobClient
+from beaker._job import JobClient
 from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
