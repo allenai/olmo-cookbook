@@ -1,0 +1,175 @@
+name: 1b-5xC-dclm-stackedu-128-flat-seed-1
+description: 1B 5xC DCLM+StackEdu proposed mix (rep=4, 6T) from flat swarm of size 128 (0faecf052e5e896d) seed 1
+budget: ai2/oe-base
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: high
+cluster: ai2/augusta-google-1
+weka: false
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+dataset:
+  sources:
+  - name: dclm:adult_content
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/adult_content/dolma2-tokenizer/*.npy
+    target_ratio: 0.0009337413349854701
+  - name: dclm:art_and_design
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/art_and_design/dolma2-tokenizer/*.npy
+    target_ratio: 0.0005884063102217878
+  - name: dclm:crime_and_law
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/crime_and_law/dolma2-tokenizer/*.npy
+    target_ratio: 0.009946299697988832
+  - name: dclm:education_and_jobs
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/education_and_jobs/dolma2-tokenizer/*.npy
+    target_ratio: 0.04355996122781186
+  - name: dclm:electronics_and_hardware
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/electronics_and_hardware/dolma2-tokenizer/*.npy
+    target_ratio: 0.015556321725242177
+  - name: dclm:entertainment
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/entertainment/dolma2-tokenizer/*.npy
+    target_ratio: 0.010250561621241423
+  - name: dclm:fashion_and_beauty
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/fashion_and_beauty/dolma2-tokenizer/*.npy
+    target_ratio: 0.006375216493489202
+  - name: dclm:finance_and_business
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/finance_and_business/dolma2-tokenizer/*.npy
+    target_ratio: 0.10284179786894843
+  - name: dclm:food_and_dining
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/food_and_dining/dolma2-tokenizer/*.npy
+    target_ratio: 0.0109551876396553
+  - name: dclm:games
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/games/dolma2-tokenizer/*.npy
+    target_ratio: 0.013958068596601871
+  - name: dclm:health
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/health/dolma2-tokenizer/*.npy
+    target_ratio: 0.0681490935521514
+  - name: dclm:history_and_geography
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/history_and_geography/dolma2-tokenizer/*.npy
+    target_ratio: 0.008048535909722761
+  - name: dclm:home_and_hobbies
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/home_and_hobbies/dolma2-tokenizer/*.npy
+    target_ratio: 0.01165820998785428
+  - name: dclm:industrial
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/industrial/dolma2-tokenizer/*.npy
+    target_ratio: 0.0018838254336841207
+  - name: dclm:literature
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/literature/dolma2-tokenizer/*.npy
+    target_ratio: 0.03651212758758327
+  - name: dclm:politics
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/politics/dolma2-tokenizer/*.npy
+    target_ratio: 0.12470137336028775
+  - name: dclm:religion
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/religion/dolma2-tokenizer/*.npy
+    target_ratio: 0.01608973472779025
+  - name: dclm:science_math_and_technology
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/science_math_and_technology/dolma2-tokenizer/*.npy
+    target_ratio: 0.27096755708064035
+  - name: dclm:social_life
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/social_life/dolma2-tokenizer/*.npy
+    target_ratio: 0.017529873413932577
+  - name: dclm:software
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software/dolma2-tokenizer/*.npy
+    target_ratio: 0.007649975776372825
+  - name: dclm:software_development
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software_development/dolma2-tokenizer/*.npy
+    target_ratio: 0.14819113477939258
+  - name: dclm:sports_and_fitness
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/sports_and_fitness/dolma2-tokenizer/*.npy
+    target_ratio: 0.0016954583907060395
+  - name: dclm:transportation
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/transportation/dolma2-tokenizer/*.npy
+    target_ratio: 0.004556284253688941
+  - name: dclm:travel_and_tourism
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/travel_and_tourism/dolma2-tokenizer/*.npy
+    target_ratio: 0.00014178223574136942
+  - name: stack-edu:C
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/C/**/*.npy
+    target_ratio: 0.0010503353526831148
+  - name: stack-edu:CSharp
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/CSharp/**/*.npy
+    target_ratio: 0.003566009469497742
+  - name: stack-edu:Cpp
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Cpp/**/*.npy
+    target_ratio: 0.006939297171363855
+  - name: stack-edu:Go
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Go/**/*.npy
+    target_ratio: 0.00034985563036376145
+  - name: stack-edu:Java
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Java/**/*.npy
+    target_ratio: 0.017597411759116048
+  - name: stack-edu:JavaScript
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/JavaScript/**/*.npy
+    target_ratio: 0.005117339780417246
+  - name: stack-edu:Markdown
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Markdown/**/*.npy
+    target_ratio: 0.012924967681360207
+  - name: stack-edu:PHP
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/PHP/**/*.npy
+    target_ratio: 0.0035816731242758982
+  - name: stack-edu:Python
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Python/**/*.npy
+    target_ratio: 0.011345413228128251
+  - name: stack-edu:Ruby
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Ruby/**/*.npy
+    target_ratio: 0.0003939754616097854
+  - name: stack-edu:Rust
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Rust/**/*.npy
+    target_ratio: 0.0006904087116619506
+  - name: stack-edu:Shell
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Shell/**/*.npy
+    target_ratio: 0.0010707193147060318
+  - name: stack-edu:SQL
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/SQL/**/*.npy
+    target_ratio: 0.001277114793997797
+  - name: stack-edu:Swift
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/Swift/**/*.npy
+    target_ratio: 0.0004997349377277172
+  - name: stack-edu:TypeScript
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/TypeScript/**/*.npy
+    target_ratio: 0.0008552145773557557

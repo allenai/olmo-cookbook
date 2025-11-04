@@ -181,3 +181,7 @@ cython_debug/
 tmp/
 temp/
 uv.lock
+
+
+# ignore vscode workspace settings
+*.code-workspace
