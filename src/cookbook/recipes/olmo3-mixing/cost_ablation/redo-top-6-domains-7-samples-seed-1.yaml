@@ -16,7 +16,6 @@ rank_microbatch_size: 32768
 global_batch_size: 2097152
 load_path: gs://ai2-llm/checkpoints/mayeec/dclm-5xC-1b-cost-ablation-top-6-domains-7-samples-seed-1-ea846a7d/step52000
 load_state: true
-load_optim_state: true 
 dataset:
   sources:
   - name: entertainment

@@ -99,7 +99,6 @@ class ExperimentConfig(BaseModel, extra="ignore"):
     model: ModelConfigIdentifier
     load_path: Optional[str] = None
     load_state: bool = True
-    load_optim_state: bool = False
     annealing: Optional[AnnealConfig] = None
     nccl_debug: bool = False
     activation_checkpointing: bool = False
