@@ -49,7 +49,7 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@36636ac6ca3c98a48343b9c535a3c74c4d1465ea",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@3bbf6707e9d94523cf6bbad93217b6c74e8d87b7",
     "beaker-py>=1.37,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
