@@ -1,0 +1,3 @@
+name,gsm8k::olmo3:n8:v2,gsm-symb:n8:v2,minerva:n4:v2,olmo3:dev:7b:math:v2
+anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-8730626c_step47684-hf,80.10,57.61,42.14,59.95
+anneal-round5-100B-olmo25_7b-anneal-6T-non-decon-fixed-ed30fcae_step47684-hf,78.49,52.07,44.09,58.22

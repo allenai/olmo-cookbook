@@ -1,0 +1,3 @@
+name,mmlu_humanities:mc,mmlu_social_sciences:mc,mmlu_other:mc,csqa:mc::xlarge,piqa:mc::xlarge,socialiqa:mc::xlarge,coqa:mc::gen2mc,drop:mc::gen2mc,jeopardy:mc::gen2mc,naturalqs:mc::gen2mc,squad:mc::gen2mc,olmo3:dev:7b:mcqa:non_stem
+anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-8730626c_step47684-hf,69.62,74.54,66.19,75.60,79.70,80.60,93.33,66.31,87.46,69.28,97.35,78.18
+anneal-round5-100B-olmo25_7b-anneal-6T-non-decon-fixed-ed30fcae_step47684-hf,68.47,75.09,66.82,76.68,81.47,80.26,93.76,63.92,86.41,68.93,97.30,78.10

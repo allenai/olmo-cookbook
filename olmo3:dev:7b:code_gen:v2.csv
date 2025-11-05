@@ -1,0 +1,3 @@
+name,bigcodebench:3shot::olmo3:v2,codex_humaneval:3shot::olmo3:n32:v2,deepseek_leetcode::olmo3:n32:v2,ds1000:3shot::olmo3:v2,mbpp:3shot::olmo3:n32:v2,multipl-e-humaneval:n32:v2,multipl-e-mbpp:n32:v2,olmo3:dev:7b:code_gen:v2
+anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-8730626c_step47684-hf,36.54,49.43,0.00,20.38,48.93,28.59,39.56,31.92
+anneal-round5-100B-olmo25_7b-anneal-6T-non-decon-fixed-ed30fcae_step47684-hf,35.79,50.46,0.56,19.50,49.18,29.54,37.70,31.82

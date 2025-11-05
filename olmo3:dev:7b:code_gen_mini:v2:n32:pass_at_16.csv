@@ -1,0 +1,3 @@
+name,deepseek_leetcode::olmo3:n32:v2:pass_at_16,codex_humaneval:3shot::olmo3:n32:v2:pass_at_16,mbpp:3shot::olmo3:n32:v2:pass_at_16,multipl-e-humaneval:n32:v2:pass_at_16,multipl-e-mbpp:n32:v2:pass_at_16,olmo3:dev:7b:code_gen_mini:v2:n32:pass_at_16
+anneal-round5-100B-olmo25_7b-anneal-6T-non-decon-fixed-ed30fcae_step47684-hf,3.24,72.35,60.67,55.22,61.33,50.56
+anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-8730626c_step47684-hf,0.00,68.81,59.67,53.90,61.61,48.80

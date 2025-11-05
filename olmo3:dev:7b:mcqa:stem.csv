@@ -1,0 +1,3 @@
+name,arc:mc::xlarge,mmlu_stem:mc,medmcqa:mc::none,medqa_en:mc::none,sciq:mc::xlarge,olmo3:dev:7b:mcqa:stem
+anneal-round5-100B-olmo25_7b-anneal-6T-decon-sparkle-motion-8730626c_step47684-hf,89.66,60.33,49.75,42.89,93.21,67.17
+anneal-round5-100B-olmo25_7b-anneal-6T-non-decon-fixed-ed30fcae_step47684-hf,89.32,60.61,49.61,42.18,92.82,66.91
