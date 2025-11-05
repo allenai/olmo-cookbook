@@ -980,7 +980,7 @@ class Olmo3Dev7bV2MainGroup(BaseNamedTasksWithNoAverageGroup):
 
 # Differences: No CruxEval or MultiPL-E or FIM, uses 1 candidate for math/code instead of 4
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v2:fast")
-class Olmo3Dev7bV2MainGroup(BaseNamedTasksWithNoAverageGroup):
+class Olmo3Dev7bV2MainFastGroup(BaseNamedTasksWithNoAverageGroup):
     tasks = [
         Olmo3Dev7bMcqaSTEMGroup(),
         Olmo3Dev7bMcqaNonSTEMGroup(),
