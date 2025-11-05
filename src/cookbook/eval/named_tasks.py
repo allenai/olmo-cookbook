@@ -737,7 +737,6 @@ class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
 class Olmo3Dev7bMathV2Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Math
         "gsm8k::olmo3:n8:v2",
         GsmSymbN8V2Group(),
         MinervaN4V2Group(),
@@ -754,6 +753,19 @@ class Olmo3Dev7bCodeGenV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "mbpp:3shot::olmo3:n32:v2",
         MultiPlEHEN32V2Group(),
         MultiPlEMBPPN32V2Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v2:fast")
+class Olmo3Dev7bCodeGenV2FastGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "bigcodebench:3shot::olmo3:v2",
+        "codex_humaneval:3shot::olmo3:v2",
+        # "deepseek_leetcode::olmo3:v2",
+        "ds1000:3shot::olmo3:v2",
+        "mbpp:3shot::olmo3:v2",
+        # MultiPlEHEN32V2Group(),
+        # MultiPlEMBPPN32V2Group(),
     ]
 
 
@@ -943,6 +955,34 @@ class Olmo3Dev7bV2MainGroup(BaseNamedTasksWithNoAverageGroup):
         MultiPlEHEN32V2Group(),
         MultiPlEMBPPN32V2Group(),
         CruxEvalGroup(),
+    ]
+
+
+# Differences: No CruxEval, MultiPL-E, FIM, Deepseek LeetCode
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v2:fast")
+class Olmo3Dev7bV2MainFastGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV2Group(),
+        Olmo3Dev7bCodeGenV2FastGroup(),
+        # Olmo3Dev7bCodeFimGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmo3:n8:v2",
+        GsmSymbN8V2Group(),
+        # GsmSymbN8V2PassAt4Group(),
+        MinervaN4V2Group(),
+        # "minerva_math_500::olmo3:n32:v2",
+        # "minerva_math_500::olmo3:n32:v2:pass_at_16",
+        "codex_humaneval:3shot::olmo3:n32:v2",
+        "mbpp:3shot::olmo3:n32:v2",
+        # MultiPlEHEN32V2Group(),
+        # MultiPlEMBPPN32V2Group(),
+        # CruxEvalGroup(),
     ]
 
 
