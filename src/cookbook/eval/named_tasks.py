@@ -760,10 +760,10 @@ class Olmo3Dev7bCodeGenV2Group(BaseAverageOfAveragesNamedTasksGroup):
 class Olmo3Dev7bCodeGenV2FastGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         "bigcodebench:3shot::olmo3:v2",
-        "codex_humaneval:3shot::olmo3:v2",
+        "codex_humaneval:3shot::olmo3:n32:v2",
         # "deepseek_leetcode::olmo3:v2",
         "ds1000:3shot::olmo3:v2",
-        "mbpp:3shot::olmo3:v2",
+        "mbpp:3shot::olmo3:n32:v2",
         # MultiPlEHEN32V2Group(),
         # MultiPlEMBPPN32V2Group(),
     ]
