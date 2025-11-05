@@ -38,8 +38,7 @@ dev = [
     "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py>=2,<3",
-    "beaker-gantry>=3,<4",
+    "beaker-py>=1.37,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -51,8 +50,7 @@ checkpoints = [
 ]
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@53168250104596d9afaf2a1972a915e160b95617",
-    "beaker-py>=2,<3",
-    "beaker-gantry>=3,<4",
+    "beaker-py>=1.37,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]
