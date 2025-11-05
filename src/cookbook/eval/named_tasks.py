@@ -361,6 +361,11 @@ class MinervaN4V2Group(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::olmes:n4:v2" for subtask in constants.ALL_MINERVA_TASKS]
 
 
+@NamedTasksGroupRegistry.register("minerva:v2")
+class MinervaV2Group(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::olmes:v2" for subtask in constants.ALL_MINERVA_TASKS]
+
+
 @NamedTasksGroupRegistry.register("minerva::hamish_zs_reasoning")
 class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
@@ -393,6 +398,11 @@ class GsmSymbGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("gsm-symb:n8:v2")
 class GsmSymbN8V2Group(BaseAverageNamedTasksGroup):
     tasks = [f'{task}:n8:v2' for task in constants.ALL_GSM_SYMB_TASKS]
+
+
+@NamedTasksGroupRegistry.register("gsm-symb:v2")
+class GsmSymbV2Group(BaseAverageNamedTasksGroup):
+    tasks = [f'{task}:v2' for task in constants.ALL_GSM_SYMB_TASKS]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb:n8:v2:pass_at_4")
@@ -737,10 +747,19 @@ class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
 class Olmo3Dev7bMathV2Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        # Math
         "gsm8k::olmo3:n8:v2",
         GsmSymbN8V2Group(),
         MinervaN4V2Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2:fast")
+class Olmo3Dev7bMathV2FastGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        # Math
+        "gsm8k::olmo3:v2",
+        GsmSymbV2Group(),
+        MinervaV2Group(),
     ]
 
 
@@ -754,6 +773,19 @@ class Olmo3Dev7bCodeGenV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "mbpp:3shot::olmo3:n32:v2",
         MultiPlEHEN32V2Group(),
         MultiPlEMBPPN32V2Group(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:code_gen:v2:fast")
+class Olmo3Dev7bCodeGenV2FastGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "bigcodebench:3shot::olmo3:v2",
+        "codex_humaneval:3shot::olmo3:v2",
+        "deepseek_leetcode::olmo3:v2",
+        "ds1000:3shot::olmo3:v2",
+        "mbpp:3shot::olmo3:v2",
+        # MultiPlEHEN32V2Group(),
+        # MultiPlEMBPPN32V2Group(),
     ]
 
 
@@ -943,6 +975,29 @@ class Olmo3Dev7bV2MainGroup(BaseNamedTasksWithNoAverageGroup):
         MultiPlEHEN32V2Group(),
         MultiPlEMBPPN32V2Group(),
         CruxEvalGroup(),
+    ]
+
+
+# Differences: No CruxEval or MultiPL-E or FIM, uses 1 candidate for math/code instead of 4
+@NamedTasksGroupRegistry.register("olmo3:dev:7b:main:v2:fast")
+class Olmo3Dev7bV2MainGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        Olmo3Dev7bMcqaSTEMGroup(),
+        Olmo3Dev7bMcqaNonSTEMGroup(),
+        Olmo3Dev7bGenGroup(),
+        Olmo3Dev7bMathV2FastGroup(),
+        Olmo3Dev7bCodeGenV2FastGroup(),
+        ARCMCXlargeGroup(),
+        MMLUMCGroup(),
+        GenXlargeGroup(),
+        BasicRCGroup(),
+        "gsm8k::olmo3:v2",
+        GsmSymbV2Group(),
+        MinervaV2Group(),
+        "codex_humaneval:3shot::olmo3:v2",
+        "mbpp:3shot::olmo3:v2",
+        # MultiPlEHEV2Group(),
+        # MultiPlEMBPPV2Group(),
     ]
 
 
