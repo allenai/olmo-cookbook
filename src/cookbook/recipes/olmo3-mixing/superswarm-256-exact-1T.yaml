@@ -1,4 +1,4 @@
-name: 1b-5xC-superswarm-256-1T
+name: 1b-5xC-superswarm-256-exact-1T
 description: 1B 5xC superswarm proposed mix (rep=4 @ 1T) from flat swarm, 256 runs exact (8a9064196039c095)
 budget: ai2/oe-base
 workspace: ai2/dolma2
