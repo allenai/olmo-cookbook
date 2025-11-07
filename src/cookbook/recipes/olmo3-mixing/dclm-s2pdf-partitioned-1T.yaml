@@ -1,5 +1,6 @@
 name: 1b-5xC-dclm-s2pdf-partitioned-1T
-description: 1B 5xC DCLM+S2PDF mix (fa602271/7ce6bdd38559d457) with S2PDF being partitioned (rep=4 @ 1T)
+description: 1B 5xC DCLM+S2PDF mix (fa602271/7ce6bdd38559d457) with S2PDF being partitioned
+  (rep=4 @ 1T)
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
@@ -126,10 +127,18 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/education_jobs/*.npy
     target_ratio: 0.0006927811373877439
+  - name: s2pdf:entertainment
+    paths:
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/entertainment/*.npy
+    target_ratio: 3.798143867380128e-05
   - name: s2pdf:finance_business
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/finance_business/*.npy
     target_ratio: 0.0002177837076792867
+  - name: s2pdf:food_dining
+    paths:
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/food_dining/*.npy
+    target_ratio: 0.0006371369577710559
   - name: s2pdf:games
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/games/*.npy
