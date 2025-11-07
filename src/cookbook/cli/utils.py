@@ -116,8 +116,9 @@ def get_aws_access_key_id() -> Optional[str]:
     if "AWS_ACCESS_KEY_ID" in os.environ:
         return os.environ["AWS_ACCESS_KEY_ID"]
 
-    if os.path.exists("~/.aws/credentials"):
-        with open("~/.aws/credentials", "r") as f:
+    credentials_path = os.path.expanduser("~/.aws/credentials")
+    if os.path.exists(credentials_path):
+        with open(credentials_path, "r") as f:
             for line in f:
                 if line.startswith("aws_access_key_id"):
                     return line.split("=")[1].strip()
@@ -140,8 +141,9 @@ def get_aws_secret_access_key() -> Optional[str]:
     if "AWS_SECRET_ACCESS_KEY" in os.environ:
         return os.environ["AWS_SECRET_ACCESS_KEY"]
 
-    if os.path.exists("~/.aws/credentials"):
-        with open("~/.aws/credentials", "r") as f:
+    credentials_path = os.path.expanduser("~/.aws/credentials")
+    if os.path.exists(credentials_path):
+        with open(credentials_path, "r") as f:
             for line in f:
                 if line.startswith("aws_secret_access_key"):
                     return line.split("=")[1].strip()
@@ -294,7 +296,7 @@ def add_secret_to_beaker_workspace(
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.user_name}_{secret_name}"
+    full_secret_name = f"{get_beaker_user()}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         write_secret = False
@@ -370,7 +372,7 @@ def check_if_secret_exists_in_beaker_workspace(
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.user_name}_{secret_name}"
+    full_secret_name = f"{get_beaker_user()}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         return True
@@ -422,6 +424,8 @@ def make_eval_run_name(
     name_suffix: str | None = None,
 ) -> str:
     path_no_scheme = (p := urlparse(checkpoint_path)).netloc + p.path
+    # Strip trailing slashes to ensure os.path.basename works correctly
+    path_no_scheme = path_no_scheme.rstrip("/")
 
     step_suffix = None
     if re.search(r"/step\d+[^/]*/?$", checkpoint_path):
