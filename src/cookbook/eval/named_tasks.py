@@ -555,20 +555,34 @@ for helmet_length in (int(2**i) for i in range(13, 18)):
     NamedTasksGroupRegistry.register(f"helmet:{helmet_length // 2 ** 10}k")(make_helmet_group(helmet_length))
 
 
+# this function programmatically makes ruler tasks
 def make_ruler_group(ruler_length: int) -> Type[BaseAverageNamedTasksGroup]:
     class RULERGroup(BaseAverageNamedTasksGroup):
         tasks = [
             task
             for group_name, tasks in constants.RULER_SUITES.items()
             for task in tasks
+            # we don't wanna add the average task, just the individual tasks
             if group_name.endswith(f"__{ruler_length}::suite") and not group_name.startswith("ruler_all")
         ]
 
     return RULERGroup
 
 
+# we make task group, register them, and then add it to this map
+_RULER_GROUPS_BY_LENGTH: dict[int, Type[BaseAverageNamedTasksGroup]] = {}
+
 for ruler_length in (int(2**i) for i in range(12, 18)):
-    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2 ** 10}k")(make_ruler_group(ruler_length))
+    _ruler_group = make_ruler_group(ruler_length)
+    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2 ** 10}k")(_ruler_group)
+    _RULER_GROUPS_BY_LENGTH[ruler_length] = _ruler_group
+
+
+# for olmo 3, we use 4k to 64k ruler tasks, so we make that a average of averages task group
+@NamedTasksGroupRegistry.register("olmo3:ruler:v1")
+class Ruler4kTo64kOlmo3SuiteGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [_RULER_GROUPS_BY_LENGTH[int(2 ** i)]() for i in range(12, 17)]
+
 
 @NamedTasksGroupRegistry.register("minerva:bpb")
 class MinervaBpbGroup(BaseAverageNamedTasksGroup):
