@@ -2,7 +2,7 @@ name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cw
 description: *name
 budget: ai2/oe-base
 workspace: ai2/olmo-3-microanneals
-cluster: ai2/augusta-google-1
+cluster: ai2/titan
 preemptible: true
 priority: urgent
 nodes: 1
