@@ -2,7 +2,7 @@ name: &name "olmo25_7b_lc_64k_6T_M100B_50B_BAILEY_RERUN"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/olmo-3-microanneals
-cluster: ai2/augusta-google-1
+cluster: ai2/triton
 preemptible: true
 priority: urgent
 nodes: 1
@@ -39,4 +39,4 @@ dataset:
   - name: All files
     target_ratio: 1.0
     paths:
-    -  gs://ai2-llm/preprocessed/tylerr/lc-reshard-final/v0.6/allenai/dolma2-tokenizer/*.npy
+    -  s3://ai2-llm/preprocessed/tylerr/lc-reshard-final/v0.6/allenai/dolma2-tokenizer/*.npy
