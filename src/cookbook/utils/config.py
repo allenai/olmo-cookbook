@@ -196,10 +196,10 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
 
     if not dry_run:
         dataset = config.dataset.build()
-        dataset.prepare() # to save global ind
         model = config.model.build(init_device="meta")
         train_module = config.train_module.build(model)
         data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
+        data_loader.reshuffle(1) # to save global ind
         trainer = config.trainer.build(train_module, data_loader)
 
         # If we have a load path and there is no checkpoint in the save folder, load the checkpoint from the load path.
