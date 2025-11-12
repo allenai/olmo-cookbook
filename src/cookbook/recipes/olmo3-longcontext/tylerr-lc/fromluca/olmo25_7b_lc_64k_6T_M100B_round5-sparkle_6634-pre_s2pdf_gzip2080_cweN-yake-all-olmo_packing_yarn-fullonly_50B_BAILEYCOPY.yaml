@@ -2,7 +2,7 @@ name: &name "olmo25_7b_lc_64k_6T_M100B_50B_BAILEY_RERUN"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/olmo-3-microanneals
-cluster: ai2/titan
+cluster: ai2/augusta-google-1
 preemptible: true
 priority: urgent
 nodes: 1
