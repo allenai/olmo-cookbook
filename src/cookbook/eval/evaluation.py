@@ -170,6 +170,9 @@ def evaluate_checkpoint(
         **({"gpu_memory_utilization": str(vllm_memory_utilization)} if model_backend == "vllm" else {}),
         **(model_args or {}),
     }
+    # Ensure tokenizer loads from the same HF revision when provided
+    if revision:
+        model_args.setdefault("tokenizer_revision", revision)
     model_args_str = ",".join(f"{k}={v}" for k, v in model_args.items())
 
     # set model info
