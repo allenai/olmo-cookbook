@@ -2,7 +2,7 @@ name: pstar-code-rep5
 description: p* baseline on code-heavy (rep=5)
 budget: ai2/oe-base
 workspace: ai2/oe-data
-nodes: 2
+nodes: 8
 gpus: 8
 preemptible: true
 max_tokens: 127939584000
