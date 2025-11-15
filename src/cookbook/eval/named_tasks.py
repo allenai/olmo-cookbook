@@ -667,7 +667,7 @@ class Olmo3Dev1bQaBpbV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "lambada:bpb",
         "medmcqa:bpb::none",
         "medqa_en:bpb::none",
-        # "sciriff_yesno:bpb::olmes",
+        "sciriff_yesno:bpb::olmes",
     ]
 
 
