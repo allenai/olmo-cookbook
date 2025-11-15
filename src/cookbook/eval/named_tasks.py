@@ -699,7 +699,7 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
         "lambada",
         "medmcqa:rc::none",
         "medqa_en:rc::none",
-        # "sciriff_yesno:rc::olmes",
+        "sciriff_yesno:rc::olmes",
     ]
 
 
@@ -731,7 +731,7 @@ class Olmo3Dev1bQaRcV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "lambada",
         "medmcqa:rc::none",
         "medqa_en:rc::none",
-        # "sciriff_yesno:rc::olmes",
+        "sciriff_yesno:rc::olmes",
     ]
 
 
