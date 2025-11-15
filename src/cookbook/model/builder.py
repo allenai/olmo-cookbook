@@ -13,7 +13,6 @@ from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
     NumpyDatasetConfig,
-    NumpyDatasetType,
     NumpyPackedFSLDatasetConfig,
     NumpyPaddedFSLDatasetConfig,
     TokenizerConfig,
