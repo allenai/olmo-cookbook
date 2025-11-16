@@ -1,11 +1,11 @@
-name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_100B"
+name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_100B-v2"
 description: *name
 budget: ai2/oe-base
 workspace: ai2/long-contexts
 cluster: ai2/augusta-google-1
 preemptible: true
 priority: high
-nodes: 4
+nodes: 8
 gpus: 8
 seed: 4123
 gc_interval: 200
