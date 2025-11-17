@@ -103,6 +103,13 @@ def make_dashboard_table(
         if 'styled_math500' in metric.alias and 'tulu' in metric.alias:
             metric.metrics.primary_score = metric.metrics.extra_metrics['exact_match_flex']
 
+        # @soldni: hot fix for wildchat/ultrachat masked ppl. The task has no alias in oe-eval,
+        # so hash gets added at the end  the name. We strip if the hash matches the known one.
+        if metric.alias in {'wildchat_masked_ppl-67b0e9', 'ultrachat_masked_ppl-831470'}:
+            metric_alias, _ = metric.alias.rsplit('-', 1)
+            metric.task_config.setdefault("metadata", {}).setdefault("alias", metric_alias)
+            assert metric.alias in {'wildchat_masked_ppl', 'ultrachat_masked_ppl'}
+
         # add primary score
         metrics_table.add(col=metric.alias, row=metric.model_name, val=metric.metrics.primary_score)
 
