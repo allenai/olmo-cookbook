@@ -1,4 +1,4 @@
-name: "suffix-train-olmo2-5xC-30m-dense-dolma2-100B-baseline 256 seq len"
+name: "suffix-train-olmo2-5xC-30m-dense-dolma2-100B-baseline-256-seq-len"
 description: "suffix train baseline 30M @ 5xC scale on dolma2 100B with 256 sequence length"
 budget: "ai2/oe-base"
 workspace: "ai2/dolma2"
