@@ -14,11 +14,11 @@ model: "olmo_30m"
 tokenizer: "dolma2"
 weka: false
 priority: normal
-cluster: ai2/augusta-google-1
+cluster: ai2/jupiter
 dataset:
   sources:
     - name: dolma2-100b
       target_ratio: 1.0
       paths:
-        - gs://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
+        - s3://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
   
