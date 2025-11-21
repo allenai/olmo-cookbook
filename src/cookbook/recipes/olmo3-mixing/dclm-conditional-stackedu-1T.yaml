@@ -1,5 +1,5 @@
 name: 1b-5xC-dclm-conditional-stackedu-rep-4-1T
-description: 1B 5xC DCLM+StackEdu proposed mix (rep=4 @ 1T) from conditional swarm (72ad252afb579504)
+description: 1B 5xC DCLM+StackEdu proposed mix (rep=4 @ 1T) from conditional swarm (1a77563a4e8b5f40)
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
