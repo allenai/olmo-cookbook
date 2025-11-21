@@ -14,7 +14,7 @@ model: "olmo_30m"
 tokenizer: "dolma2"
 weka: false
 priority: normal
-cluster: ai2/jupiter
+cluster: aus80
 dataset:
   sources:
     - name: dolma2-100b
