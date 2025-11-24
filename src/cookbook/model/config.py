@@ -260,6 +260,16 @@ class WrappedTransformerConfig:
         return config
     
     @classmethod
+    def olmo25_7b_noswa(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 no swa
+        """
+        config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+
+        config.block.attention.use_flash = True
+        return config   
+    
+    @classmethod
     def olmo25_headnorm_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         OLMo2.8 test run
@@ -274,6 +284,44 @@ class WrappedTransformerConfig:
         config.block.attention.use_head_qk_norm = True
         return config
     
+    @classmethod
+    def olmo25_preorder_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 preorder test run
+        """
+        config = TransformerConfig.olmo2_7B(
+            vocab_size=tokenizer.padded_vocab_size(),
+            block_name=TransformerBlockType.default,
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        
+        return config
+    
+    @classmethod
+    def olmo25_preorder_7b_noqk(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 preorder test run
+        """
+        config = TransformerConfig.olmo2_7B(
+            vocab_size=tokenizer.padded_vocab_size(),
+            block_name=TransformerBlockType.default,
+            qk_norm=False,
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        
+        return config
+    
+
 
     @classmethod
     def olmo25_gqa_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
