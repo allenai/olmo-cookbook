@@ -203,6 +203,32 @@ class WrappedTransformerConfig:
         config.block.attention.use_flash = True
         return config
  
+
+    @classmethod
+    def llama3_8B_swa(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        """
+        An 8B Llama3-like model config.
+        """
+        config = getattr(TransformerConfig, "llama_like")(
+            d_model=4096,
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_layers=kwargs.pop("n_layers", 32),
+            n_heads=kwargs.pop("n_heads", 32),
+            n_kv_heads=kwargs.pop("n_kv_heads", 8),
+            rope_theta=kwargs.pop("rope_theta", 500_000),
+            hidden_size_multiplier=1.3,
+            hidden_size_multiple_of=1024,
+            **kwargs,
+            
+        )
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
+ 
     @classmethod
     def llama3_8B_plus_qk_reorder_norm(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
         """
