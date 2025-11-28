@@ -1,4 +1,4 @@
-name: &name "llamalike_swa_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "llamalike_swa_reinit_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -25,7 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/amandab/LlamaClone-swa/step34000
+load_path: gs://ai2-llm/checkpoints/amandab/LlamaClone-swa-fixed-init/step34000
 load_state: false
 model: "llama3_8B_swa"
 tokenizer: "dolma2"
