@@ -55,6 +55,7 @@ all = [
     "beaker-gantry",
     "GitPython>=3.0,<4.0",
     "wandb",
+    "torchao==0.11.0",
 ]
 
 [project.scripts]
