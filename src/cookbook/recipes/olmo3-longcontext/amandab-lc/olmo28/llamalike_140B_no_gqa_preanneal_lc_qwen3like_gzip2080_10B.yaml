@@ -27,7 +27,7 @@ metrics_config:
 generate_doc_lengths: true  # enable intra-document masking
 load_path: gs://ai2-llm/checkpoints/amandab/LlamaClone-8B-nogqa/step34000
 load_state: false
-model: "llama3_8B_no_gqa"
+model: "llama3_8B_nogqa"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
