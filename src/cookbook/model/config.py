@@ -272,6 +272,63 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def llama3_8B_nogqa(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        """
+        An 8B Llama3-like model config.
+        """
+        config = getattr(TransformerConfig, "llama_like")(
+            d_model=4096,
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_layers=kwargs.pop("n_layers", 32),
+            n_heads=kwargs.pop("n_heads", 32),
+            n_kv_heads=kwargs.pop("n_kv_heads", 32),
+            rope_theta=kwargs.pop("rope_theta", 500_000),
+            hidden_size_multiplier=1.125,
+            hidden_size_multiple_of=1024,
+            **kwargs,
+        )
+        config.block.attention.use_flash = True
+        return config
+
+    @classmethod
+    def llama3_8B_gqa_4(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        """
+        An 8B Llama3-like model config.
+        """
+        config = getattr(TransformerConfig, "llama_like")(
+            d_model=4096,
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_layers=kwargs.pop("n_layers", 32),
+            n_heads=kwargs.pop("n_heads", 32),
+            n_kv_heads=kwargs.pop("n_kv_heads", 4),
+            rope_theta=kwargs.pop("rope_theta", 500_000),
+            hidden_size_multiplier=1.3125,
+            hidden_size_multiple_of=1024,
+            **kwargs,
+        )
+        config.block.attention.use_flash = True
+        return config
+    
+    @classmethod
+    def llama3_8B_gqa_16(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        """
+        An 8B Llama3-like model config.
+        """
+        config = getattr(TransformerConfig, "llama_like")(
+            d_model=4096,
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_layers=kwargs.pop("n_layers", 32),
+            n_heads=kwargs.pop("n_heads", 32),
+            n_kv_heads=kwargs.pop("n_kv_heads", 16),
+            rope_theta=kwargs.pop("rope_theta", 500_000),
+            hidden_size_multiplier=1.21875,
+            hidden_size_multiple_of=1024,
+            **kwargs,
+        )
+        config.block.attention.use_flash = True
+        return config
+    
+    @classmethod
     def olmo25_7b(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         """
         OLMo2.5 retrofit

@@ -25,7 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/amandab/LlamaClone-8B/step34000
+load_path: gs://ai2-llm/checkpoints/amandab/LlamaClone-8B-gqa-4/step34000
 load_state: false
 model: "llama3_8B_gqa_4"
 tokenizer: "dolma2"
