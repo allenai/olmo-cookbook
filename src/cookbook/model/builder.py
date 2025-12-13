@@ -13,7 +13,7 @@ from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
     NumpyDatasetConfig,
-    NumpyDatasetType,
+    NumpyDatasetDType,
     TokenizerConfig,
 )
 from olmo_core.data.types import NumpyDatasetDType
@@ -48,6 +48,7 @@ from olmo_core.train.train_module import (
     TransformerActivationCheckpointingConfig,
     TransformerActivationCheckpointingMode,
 )
+from olmo_core.data.numpy_dataset import NumpyFSLDatasetConfig
 
 from cookbook.aliases import (
     AnnealConfig,
@@ -429,6 +430,7 @@ class TransformerConfigBuilder:
             mixture_config = MixtureBuilder(
                 sources=self.sources,
                 max_tokens=self.max_tokens,
+                global_batch_size=self.global_batch_size,
                 sequence_length=self.sequence_length,
                 seed=self.seed,
                 processes=loader_processes,
@@ -439,10 +441,10 @@ class TransformerConfigBuilder:
             for source in self.sources:
                 source_paths.extend(source.paths)
 
-        dataset_config = NumpyDatasetConfig(
+        dataset_config = NumpyFSLDatasetConfig(
             paths=source_paths,
             source_mixture_config=mixture_config,
-            name=NumpyDatasetType.fsl,
+            # name=NumpyDatasetDType.uint32,
             sequence_length=self.sequence_length,
             max_target_sequence_length=self.max_target_sequence_length,
             tokenizer=self.tokenizer,
@@ -540,7 +542,13 @@ class TransformerConfigBuilder:
 
         try:
             # Try olmo_core v2 config format first
-            base_lr: int = config["optim"]["lr"]
+            # Check if 'optim' is inside 'train_module'
+            if "optim" in config.get("train_module", {}):
+                base_lr: int = config["train_module"]["optim"]["lr"]
+            else:
+                # Fallback to checking root if not in train_module
+                base_lr: int = config["optim"]["lr"]
+                
             scheduler_config = config["train_module"]["scheduler"]
         except KeyError as e:
             # Now try olmo_core v1 config format

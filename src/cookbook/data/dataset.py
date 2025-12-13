@@ -8,6 +8,7 @@ import s3fs
 from olmo_core.data.source_mixture import (
     SourceMixtureConfig,
     SourceMixtureDatasetConfig,
+    SourceMixtureList,
 )
 from olmo_core.data.types import NumpyDatasetDType
 
@@ -19,6 +20,7 @@ from cookbook.utils.data import expand_globs
 class MixtureBuilder:
     sources: List[SourceInstance]
     max_tokens: int
+    global_batch_size: int
     sequence_length: int
     seed: int
     dtype: NumpyDatasetDType
@@ -62,11 +64,23 @@ class MixtureBuilder:
                 )
             )
 
+        source_list = SourceMixtureList(sources=source_configs)
+
         return SourceMixtureDatasetConfig(
-            source_configs=source_configs,
-            max_tokens=self.max_tokens,
-            sequence_length=self.sequence_length,
+            source_list=source_list,           # <--- Fix: Renamed from source_configs
+            requested_tokens=self.max_tokens,  # <--- Fix: Renamed from max_tokens
+            global_batch_size=self.global_batch_size, # <--- Fix: Added required arg
             seed=self.seed,
-            dtype=self.dtype,
             processes=self.processes,
+            # sequence_length and dtype removed: these belong in the .build() method call, not here
         )
+
+        # return SourceMixtureDatasetConfig(
+        #     source_configs=source_configs,
+        #     max_tokens=self.max_tokens,
+        #     sequence_length=self.sequence_length,
+        #     seed=self.seed,
+        #     dtype=self.dtype,
+        #     processes=self.processes,
+        # )
+
