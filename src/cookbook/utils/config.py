@@ -114,7 +114,7 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
 
     _REMOTE_FS_CACHE = dict(
         s3=s3fs.S3FileSystem(),
-        weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
+        # weka=s3fs.S3FileSystem(client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"),
         gs=gcsfs.GCSFileSystem(),
     )
 
@@ -240,7 +240,13 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             preemptible=group.config.preemptible,
             beaker_image="petew/olmo-core-tch270cu128",
             priority=group.config.priority,
-            env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
+            env_vars=[
+                BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN"),
+                BeakerEnvVar(name="AWS_CONFIG_FILE", value="/root/.aws/config"),
+                BeakerEnvVar(name="AWS_SHARED_CREDENTIALS_FILE", value="/root/.aws/credentials"),
+                BeakerEnvVar(name="AWS_PROFILE", value="S3"),
+                BeakerEnvVar(name="AWS_DEFAULT_REGION", value="us-east-1"),
+            ],
             env_secrets=[
                 BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
                 BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
@@ -259,9 +265,13 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 "pip install -e '.[all]'",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
-                "mkdir -p ~/.aws",
-                "printenv AWS_CONFIG > ~/.aws/config",
-                "printenv AWS_CREDENTIALS > ~/.aws/credentials",
+                # "mkdir -p ~/.aws",
+                # "printenv AWS_CONFIG > ~/.aws/config",
+                # "printenv AWS_CREDENTIALS > ~/.aws/credentials",
+                "mkdir -p /root/.aws",
+                "printenv AWS_CONFIG > /root/.aws/config",
+                "printenv AWS_CREDENTIALS > /root/.aws/credentials",
+                "chmod 600 /root/.aws/config /root/.aws/credentials",
             ],
         )
         for experiment in group.instances
