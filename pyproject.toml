@@ -51,7 +51,6 @@ checkpoints = [
 ]
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/olmo-core.git@anejs/linear-rnns",
-    "flash-linear-attention",
     "beaker-py",
     "beaker-gantry",
     "GitPython>=3.0,<4.0",
