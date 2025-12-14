@@ -60,7 +60,7 @@ model_overrides:
 
   # 3. FLA (GatedDeltaNet) Configuration
   - block.fla.name="GatedDeltaNet"
-  - block.fla.dtype="bfloat16"
+  # - block.fla.dtype="bfloat16"
   # head_dim = 0.75 * (3840 / 30) = 0.75 * 128 = 96
   - block.fla.fla_layer_kwargs.head_dim=96
   - block.fla.fla_layer_kwargs.use_gate=true
