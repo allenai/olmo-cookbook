@@ -38,8 +38,7 @@ dev = [
     "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py",
-    "beaker-gantry",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -52,8 +51,7 @@ checkpoints = [
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/olmo-core.git@anejs/linear-rnns",
     "flash-linear-attention",
-    "beaker-py",
-    "beaker-gantry",
+    "beaker-py>=1,<2",
     "GitPython>=3.0,<4.0",
     "wandb",
 ]
