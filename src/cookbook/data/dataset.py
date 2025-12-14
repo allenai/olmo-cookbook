@@ -26,8 +26,8 @@ def _make_weka_fs() -> s3fs.S3FileSystem:
     endpoint = os.environ["WEKA_ENDPOINT_URL"]
 
     # Prefer explicit env creds (best for beaker / torchrun)
-    key = os.getenv("WEKA_ACCESS_KEY_ID") or os.getenv("AWS_ACCESS_KEY_ID")
-    secret = os.getenv("WEKA_SECRET_ACCESS_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY")
+    key = os.getenv("AWS_ACCESS_KEY_ID")
+    secret = os.getenv("AWS_SECRET_ACCESS_KEY")
     token = os.getenv("WEKA_SESSION_TOKEN") or os.getenv("AWS_SESSION_TOKEN")
 
     client_kwargs = {
@@ -58,22 +58,22 @@ class MixtureBuilder:
     dtype: NumpyDatasetDType
     processes: int = 1
 
-    cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
-        default_factory=lambda: dict(
-            s3=s3fs.S3FileSystem(),
-            weka=_make_weka_fs(),
-            gs=gcsfs.GCSFileSystem(),
-        )
-    )
     # cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
     #     default_factory=lambda: dict(
     #         s3=s3fs.S3FileSystem(),
-    #         weka=s3fs.S3FileSystem(
-    #             client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
-    #         ),
+    #         weka=_make_weka_fs(),
     #         gs=gcsfs.GCSFileSystem(),
     #     )
     # )
+    cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
+        default_factory=lambda: dict(
+            s3=s3fs.S3FileSystem(),
+            # weka=s3fs.S3FileSystem(
+            #     client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
+            # ),
+            gs=gcsfs.GCSFileSystem(),
+        )
+    )
 
     def build(self) -> SourceMixtureDatasetConfig:
         source_configs: List[SourceMixtureConfig] = []
