@@ -17,6 +17,12 @@ from cookbook.utils.data import expand_globs
 
 
 def _make_weka_fs() -> s3fs.S3FileSystem:
+
+    print("WEKA_ENDPOINT_URL set:", "WEKA_ENDPOINT_URL" in os.environ)
+    print("WEKA_ACCESS_KEY_ID set:", "WEKA_ACCESS_KEY_ID" in os.environ)
+    print("AWS_ACCESS_KEY_ID set:", "AWS_ACCESS_KEY_ID" in os.environ)
+    print("HOME:", os.environ.get("HOME"))
+
     endpoint = os.environ["WEKA_ENDPOINT_URL"]
 
     # Prefer explicit env creds (best for beaker / torchrun)
