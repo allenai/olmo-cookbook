@@ -16,6 +16,32 @@ from cookbook.aliases import SourceInstance
 from cookbook.utils.data import expand_globs
 
 
+def _make_weka_fs() -> s3fs.S3FileSystem:
+    endpoint = os.environ["WEKA_ENDPOINT_URL"]
+
+    # Prefer explicit env creds (best for beaker / torchrun)
+    key = os.getenv("WEKA_ACCESS_KEY_ID") or os.getenv("AWS_ACCESS_KEY_ID")
+    secret = os.getenv("WEKA_SECRET_ACCESS_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY")
+    token = os.getenv("WEKA_SESSION_TOKEN") or os.getenv("AWS_SESSION_TOKEN")
+
+    client_kwargs = {
+        "endpoint_url": endpoint,
+        # botocore often wants a region even for S3-compatible endpoints
+        "region_name": os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION") or "us-east-1",
+    }
+
+    if key and secret:
+        return s3fs.S3FileSystem(
+            key=key,
+            secret=secret,
+            token=token,
+            client_kwargs=client_kwargs,
+        )
+
+    # Fallback: use a profile (keeps local behavior)
+    profile = os.getenv("WEKA_AWS_PROFILE", "WEKA")
+    return s3fs.S3FileSystem(client_kwargs=client_kwargs, profile=profile)
+
 @dataclass
 class MixtureBuilder:
     sources: List[SourceInstance]
@@ -25,15 +51,23 @@ class MixtureBuilder:
     seed: int
     dtype: NumpyDatasetDType
     processes: int = 1
+
     cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
         default_factory=lambda: dict(
             s3=s3fs.S3FileSystem(),
-            weka=s3fs.S3FileSystem(
-                client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
-            ),
+            weka=_make_weka_fs(),
             gs=gcsfs.GCSFileSystem(),
         )
     )
+    # cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
+    #     default_factory=lambda: dict(
+    #         s3=s3fs.S3FileSystem(),
+    #         weka=s3fs.S3FileSystem(
+    #             client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
+    #         ),
+    #         gs=gcsfs.GCSFileSystem(),
+    #     )
+    # )
 
     def build(self) -> SourceMixtureDatasetConfig:
         source_configs: List[SourceMixtureConfig] = []
