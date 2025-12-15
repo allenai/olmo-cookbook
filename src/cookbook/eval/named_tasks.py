@@ -247,6 +247,11 @@ class MMLUHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:cot::hamish_zs_reasoning" for category in constants.MMLU_CATEGORIES]
 
 
+@NamedTasksGroupRegistry.register("mmlu:cot::hamish_zs_reasoning_deepseek")
+class MMLUHamishZSReasoningDeepSeekGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:cot::hamish_zs_reasoning_deepseek" for category in constants.MMLU_CATEGORIES]
+
+
 @NamedTasksGroupRegistry.register("mmlu:cot::olmo3:thinker")
 class MMLUOLMo3ThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:cot::olmo3:thinker" for category in constants.MMLU_CATEGORIES]
@@ -332,6 +337,12 @@ class MMLUProMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::none" for category in constants.MMLU_PRO_CATEGORIES]
 
 
+@NamedTasksGroupRegistry.register("mmlu_pro:0shot_cot::tulu3")
+class MMLUProZeroShotCoTTulu3Group(BaseAverageNamedTasksGroup):
+    # Aggregate the per-category 0-shot CoT (tulu3) metrics as exposed by oe-eval
+    tasks = [f"{category}:0shot_cot::tulu3" for category in constants.MMLU_PRO_CATEGORIES]
+
+
 @NamedTasksGroupRegistry.register("gen")
 class GenGroup(BaseAverageNamedTasksGroup):
     tasks = [task for task in constants.ALL_GEN_TASKS]
@@ -367,6 +378,11 @@ class MinervaN4V2Group(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("minerva::hamish_zs_reasoning")
 class MinervaHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{subtask}::hamish_zs_reasoning" for subtask in constants.ALL_MINERVA_TASKS]
+
+
+@NamedTasksGroupRegistry.register("minerva_math::hamish_zs_reasoning_deepseek")
+class MinervaHamishZSReasoningDeepSeekGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{subtask}::hamish_zs_reasoning_deepseek" for subtask in constants.ALL_MINERVA_TASKS]
 
 
 @NamedTasksGroupRegistry.register("minerva_math::olmo3:midtrain")
@@ -493,6 +509,11 @@ class BBHHamishZSReasoningGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("ifeval_mt::tulu-thinker")
 class IFEvalMTThinkerGroup(BaseAverageNamedTasksGroup):
     tasks = [f"ifeval_mt_{task_type}::tulu-thinker" for task_type in constants.IFEVAL_MT_TASKS]
+
+
+@NamedTasksGroupRegistry.register("ifbench::tulu")
+class IFBenchMTGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"ifbench_mt_{task_type}::tulu" for task_type in constants.IFBENCH_MT_TASKS]
 
 
 @NamedTasksGroupRegistry.register("multiturn_alpacaeval::tulu")

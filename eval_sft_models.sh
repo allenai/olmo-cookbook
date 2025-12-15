@@ -2,31 +2,28 @@
 set -euo pipefail
 
 paths_and_revs=(
-    "Qwen/Qwen3-4B,"
-    "yapeichang/grpo_qwen3-4b-inst_v1_binary_LC_sym_r2,step_1000"
-    # "yapeichang/grpo_qwen3-4b-inst_v1_binary_LC_sym_r2,step_2500"
-    "Qwen/Qwen3-8B,"
-    "yapeichang/grpo_qwen3-8b-inst_v1_binary_LC_sym_r2,step_1000"
-    # "yapeichang/grpo_qwen3-8b-inst_v1_binary_LC_sym_r2,step_2500"
-    "allenai/Olmo-3-7B-Think,"
-    "yapeichang/grpo_olmo3-7b-think_v1_binary_LC_sym_r2,step_1000"
-    # "yapeichang/grpo_olmo3-7b-think_v1_binary_LC_sym_r2,step_2500"
+    "yapeichang/sft_olmo3-1025-7b_mix_0-100,"
+    "yapeichang/sft_olmo3-1025-7b_mix_5-95,"
+    "yapeichang/sft_olmo3-1025-7b_mix_10-90,"
+    # "yapeichang/sft_qwen3-8b-base_mix_0-100,"
+    # "yapeichang/sft_qwen3-8b-base_mix_5-95,"
+    # "yapeichang/sft_qwen3-8b-inst_v1_simple_with_mix"
 )
 
 all_tasks=(
     # "gpqa:0shot_cot::qwen3-instruct"
     # "zebralogic::hamish_zs_reasoning_deepseek"
-    # "minerva_math::hamish_zs_reasoning_deepseek"
+    # # "minerva_math::hamish_zs_reasoning_deepseek"
     # "gsm8k::zs_cot_latex_deepseek"
     # "codex_humanevalplus:0-shot-chat::tulu-thinker_deepseek"
     # "mbppplus:0-shot-chat::tulu-thinker_deepseek"
-    # "livecodebench_codegeneration::tulu-thinker_deepseek_no_think_tags"
+    # # "livecodebench_codegeneration::tulu-thinker_deepseek_no_think_tags"
     # "alpaca_eval_v3::hamish_zs_reasoning_deepseek"
-    # "aime:zs_cot_r1::pass_at_32_2024_deepseek"
+    # # "aime:zs_cot_r1::pass_at_32_2024_deepseek"
     # "aime:zs_cot_r1::pass_at_32_2025_deepseek"
     # "omega_500:0-shot-chat_deepseek"
     # "mmlu_pro:0shot_cot::tulu3"
-    # "mmlu:cot::hamish_zs_reasoning_deepseek"
+    # # "mmlu:cot::hamish_zs_reasoning_deepseek"
     "ifbench::tulu"
 )
 
@@ -47,8 +44,8 @@ for entry in "${paths_and_revs[@]}"; do
       --partition-size 8 \
       --model-backend vllm \
       --no-compute-gold-bpb \
-      --model-args "process_output=r1_style,trust_remote_code=true,max_length=${max_tokens},dtype=bfloat16" \
-      --task-args 'chat_overrides={"generation_kwargs":{"stop_sequences":["Problem:","Answer:","Question:","</s>","<|eot_id|>"]}}' \
+      --model-args "trust_remote_code=true,max_length=${max_tokens},dtype=bfloat16" \
+      --task-args 'chat_overrides={"generation_kwargs":{"stop_sequences":["Problem:","Question:","<|im_end|>"]}}' \
       --gantry-args env-secret="OPENAI_API_KEY=yapeic_OPENAI_API_KEY" \
       --fim-tokens l2c \
       --vllm-use-v1-spec \
@@ -58,3 +55,5 @@ for entry in "${paths_and_revs[@]}"; do
       --workspace ai2/oe-data
   done
 done
+
+# --task-args 'chat_overrides={"generation_kwargs":{"stop_sequences":["Problem:","Answer:","Question:","<|im_start|>","<|im_end|>"]}}' \

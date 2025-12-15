@@ -297,7 +297,7 @@ def add_secret_to_beaker_workspace(
     try:
         client.secret.get(full_secret_name)
         write_secret = False
-    except beaker.exceptions.SecretNotFound:
+    except beaker.exceptions.BeakerSecretNotFound:
         write_secret = True
 
     if write_secret or overwrite:
@@ -343,7 +343,7 @@ def check_if_secret_exists_in_beaker_workspace(
     try:
         client.secret.get(full_secret_name)
         return True
-    except beaker.exceptions.SecretNotFound:
+    except beaker.exceptions.BeakerSecretNotFound:
         return False
 
 

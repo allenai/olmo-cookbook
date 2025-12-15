@@ -1,0 +1,19 @@
+olmo-cookbook-eval results \
+  --format csv --dashboard yapeic/train_r2 --sort-by name \
+  --tasks gpqa:0shot_cot::qwen3-instruct \
+  --tasks zebralogic::hamish_zs_reasoning_deepseek \
+  --tasks minerva_math::hamish_zs_reasoning_deepseek \
+  --tasks gsm8k::zs_cot_latex_deepseek \
+  --tasks aime:zs_cot_r1::pass_at_32_2024_deepseek \
+  --tasks aime:zs_cot_r1::pass_at_32_2025_deepseek \
+  --tasks omega_500:0-shot-chat_deepseek \
+  --tasks codex_humanevalplus:0-shot-chat::tulu-thinker_deepseek \
+  --tasks mbppplus:0-shot-chat::tulu-thinker_deepseek \
+  --tasks livecodebench_codegeneration::tulu-thinker_deepseek_no_think_tags \
+  --tasks alpaca_eval_v3::hamish_zs_reasoning_deepseek \
+  --tasks mmlu_pro:0shot_cot::tulu3 \
+  --models "sft_olmo3-1025-7b_mix_0-100" \
+  --models "sft_olmo3-1025-7b_mix_5-95" \
+  --models "sft_olmo3-1025-7b_mix_10-90" \
+  --models "sft_qwen3-8b-base_mix_0-100" \
+  --models "sft_qwen3-8b-base_mix_5-95"
