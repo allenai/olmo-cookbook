@@ -169,7 +169,22 @@ Use the `--dry-run` flag to print the command without launching the job; to view
 
 At the moment, we pin OLMo-core to commit [`2f66fd9`](https://github.com/allenai/OLMo-core/tree/2f66fd95c17c9779be9930f8fb80803293c2dc30), but you can override this by setting the `--olmo-core-commit-hash` flag.
 
+## Run model Merging
 
+Example of merging models:
+
+```bash
+olmo-cookbook-merge merge \     
+    "/oe-training-default/amanr/ckpts/467000-100B/step531000-hf" \
+    "/oe-training-default/amanr/ckpts/467000-100B/step532000-hf" \
+    --output-dir /oe-training-default/amanr/merged_checkpoint_dir/ \
+    --methods ema \
+    --alpha 0.2 \
+    --use-beaker \
+    --beaker-cluster aus80g \
+    --beaker-allow-dirty
+```
+> You can merge any number of checkpoints, just add their paths to the command.
 ## EC2 CLI
 
 The EC2 CLI is a tool for managing EC2 instances. We will describe its use by example.

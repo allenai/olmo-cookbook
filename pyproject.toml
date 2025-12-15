@@ -61,6 +61,7 @@ all = [
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
 olmo-cookbook-core = "cookbook.cli:core.cli"
+olmo-cookbook-merge = "cookbook.cli:merge.cli"
 poormanray = "cookbook.cli:pmr.cli"
 
 
