@@ -466,10 +466,24 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
         if commit_branch:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
+            # Fix fetch refspec - shallow clone restricts it to main only
+            subprocess.run(
+                shlex.split("git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*"), check=True
+            )
             subprocess.run(
                 shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True
             )
-            subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
+            # Check if we're already on the target branch (e.g., main after shallow clone)
+            result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True
+            )
+            current_branch = result.stdout.strip()
+            if current_branch == commit_branch:
+                # Already on the right branch, just ensure tracking is set up
+                subprocess.run(shlex.split(f"git branch -u origin/{commit_branch}"), check=True)
+            else:
+                # Need to checkout a different branch
+                subprocess.run(shlex.split(f"git checkout --track origin/{commit_branch}"), check=True)
 
         if commit_hash:
             # Change directory to the cloned repo
