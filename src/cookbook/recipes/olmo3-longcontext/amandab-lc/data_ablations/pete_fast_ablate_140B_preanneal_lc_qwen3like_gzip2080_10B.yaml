@@ -1,15 +1,15 @@
-name: &name "olmo25_halfcontext_fixed_init_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "pete_fast_ablation_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/augusta-google-1
 preemptible: true
-priority: low
-nodes: 4
+priority: urgent
+nodes: 16
 gpus: 8
 seed: 4123
 
-gc_interval:   200
+gc_interval: 200
 
 # annealing:
 #   enabled: true
@@ -25,9 +25,9 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/amandab/OLMo2.5-half-context-fixed-init/step34000
+load_path: gs://ai2-llm/checkpoints/PeteFastDataAblationModel/step34000
 load_state: false
-model: "olmo25_7b"
+model: "pete_data_ablation"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
@@ -43,7 +43,7 @@ eval_interval: 500
 # downstream_evaluators:
 #   - olmo2_dev_1b
 model_overrides:
-  - block.attention.rope.theta=8000000
+  - block.attention.rope.theta=160000
 
 
 dataset:

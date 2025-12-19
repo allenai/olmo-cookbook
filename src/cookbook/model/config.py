@@ -268,8 +268,36 @@ class WrappedTransformerConfig:
             qk_norm=True,
             **kwargs,
         )
-        config.block.attention.use_flash = True
         return config
+
+
+    @classmethod
+    def pete_data_ablation(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        """
+        An 7B Llama3-like data ablation model config.
+        """
+        config = getattr(TransformerConfig, "llama_like")(
+            d_model=4096,
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_layers=kwargs.pop("n_layers", 32),
+            n_heads=kwargs.pop("n_heads", 32),
+            rope_theta=kwargs.pop("rope_theta", 10_000),
+            n_kv_heads=kwargs.pop("n_kv_heads", 8),
+            hidden_size_multiplier=1.3,
+            hidden_size_multiple_of=1024,
+            qk_norm=False,
+            **kwargs,
+        )
+        config.block.attention.use_flash = True
+
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        return config
+
+
 
     @classmethod
     def llama3_8B_nogqa(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
