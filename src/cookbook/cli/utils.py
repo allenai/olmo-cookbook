@@ -116,8 +116,9 @@ def get_aws_access_key_id() -> Optional[str]:
     if "AWS_ACCESS_KEY_ID" in os.environ:
         return os.environ["AWS_ACCESS_KEY_ID"]
 
-    if os.path.exists("~/.aws/credentials"):
-        with open("~/.aws/credentials", "r") as f:
+    credentials_path = os.path.expanduser("~/.aws/credentials")
+    if os.path.exists(credentials_path):
+        with open(credentials_path, "r") as f:
             for line in f:
                 if line.startswith("aws_access_key_id"):
                     return line.split("=")[1].strip()
@@ -140,8 +141,9 @@ def get_aws_secret_access_key() -> Optional[str]:
     if "AWS_SECRET_ACCESS_KEY" in os.environ:
         return os.environ["AWS_SECRET_ACCESS_KEY"]
 
-    if os.path.exists("~/.aws/credentials"):
-        with open("~/.aws/credentials", "r") as f:
+    credentials_path = os.path.expanduser("~/.aws/credentials")
+    if os.path.exists(credentials_path):
+        with open(credentials_path, "r") as f:
             for line in f:
                 if line.startswith("aws_secret_access_key"):
                     return line.split("=")[1].strip()
@@ -183,7 +185,7 @@ def install_oe_eval(
     env: Optional[PythonEnv] = None,
     no_dependencies: bool = True,
     is_editable: bool = False,
-) -> str:
+) -> str | None:
     env = env or PythonEnv.null()
 
     print("Installing beaker and gantry clients...")
@@ -192,7 +194,7 @@ def install_oe_eval(
     # Get current installation location, if exists
     result = subprocess.run([env.pip, "show", "oe-eval"], capture_output=True, text=True)
 
-    oe_eval_dir = None
+    oe_eval_dir: Optional[str] = None
     for line in result.stdout.splitlines():
         if line.startswith("Editable project location:"):
             oe_eval_dir = line.split(":", 1)[1].strip()
@@ -289,15 +291,16 @@ def add_secret_to_beaker_workspace(
 ) -> str:
     try:
         import beaker  # pyright: ignore
+        BeakerSecretNotFoundException = get_secret_not_found_exception()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.user_name}_{secret_name}"
+    full_secret_name = f"{get_beaker_user()}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         write_secret = False
-    except beaker.exceptions.BeakerSecretNotFound:
+    except BeakerSecretNotFoundException:
         write_secret = True
 
     if write_secret or overwrite:
@@ -307,25 +310,54 @@ def add_secret_to_beaker_workspace(
 
 
 @run_func_in_venv
+def get_beaker_version() -> Version:
+    try:
+        from beaker.version import VERSION
+    except ImportError:
+        raise ImportError("beaker-py must be installed to use this function")
+
+    return Version(VERSION)
+
+
+def get_secret_not_found_exception() -> type[Exception]:
+    beaker_version = get_beaker_version()
+    if beaker_version.major > 1:
+        from beaker.exceptions import BeakerSecretNotFound
+        return BeakerSecretNotFound
+    else:
+        from beaker.exceptions import SecretNotFound # pyright: ignore
+        return SecretNotFound
+
+
+@run_func_in_venv
 def get_beaker_token() -> str:
     try:
         import beaker  # pyright: ignore
+        beaker_version = get_beaker_version()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env()
-    return client.account.config.user_token
+
+    if beaker_version.major > 1:
+        return client.config.user_token
+    else:
+        return client.account.config.user_token # pyright: ignore
 
 
 @run_func_in_venv
 def get_beaker_user() -> str:
     try:
         import beaker  # pyright: ignore
+        beaker_version = get_beaker_version()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env()
-    return client.user_name
+    if beaker_version.major > 1:
+        return client.user_name
+    else:
+        return client.account.name  # pyright: ignore
 
 
 @run_func_in_venv
@@ -334,16 +366,17 @@ def check_if_secret_exists_in_beaker_workspace(
     workspace: str,
 ) -> bool:
     try:
-        import beaker  # pyright: ignore
+        import beaker
+        BeakerSecretNotFoundException = get_secret_not_found_exception()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.user_name}_{secret_name}"
+    full_secret_name = f"{get_beaker_user()}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         return True
-    except beaker.exceptions.BeakerSecretNotFound:
+    except BeakerSecretNotFoundException:
         return False
 
 
@@ -391,6 +424,8 @@ def make_eval_run_name(
     name_suffix: str | None = None,
 ) -> str:
     path_no_scheme = (p := urlparse(checkpoint_path)).netloc + p.path
+    # Strip trailing slashes to ensure os.path.basename works correctly
+    path_no_scheme = path_no_scheme.rstrip("/")
 
     step_suffix = None
     if re.search(r"/step\d+[^/]*/?$", checkpoint_path):
