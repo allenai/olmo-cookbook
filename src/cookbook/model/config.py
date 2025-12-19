@@ -282,7 +282,6 @@ class WrappedTransformerConfig:
             n_layers=kwargs.pop("n_layers", 32),
             n_heads=kwargs.pop("n_heads", 32),
             rope_theta=kwargs.pop("rope_theta", 10_000),
-            hidden_size_multiplier=1.3,
             hidden_size_multiple_of=1024,
             qk_norm=False,
             **kwargs,
