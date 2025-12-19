@@ -274,7 +274,7 @@ class WrappedTransformerConfig:
     @classmethod
     def pete_data_ablation(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
         """
-        An 7B Llama3-like data ablation model config.
+        An 7B Llama2-like data ablation model config.
         """
         config = getattr(TransformerConfig, "llama_like")(
             d_model=4096,
@@ -282,7 +282,6 @@ class WrappedTransformerConfig:
             n_layers=kwargs.pop("n_layers", 32),
             n_heads=kwargs.pop("n_heads", 32),
             rope_theta=kwargs.pop("rope_theta", 10_000),
-            n_kv_heads=kwargs.pop("n_kv_heads", 8),
             hidden_size_multiplier=1.3,
             hidden_size_multiple_of=1024,
             qk_norm=False,
