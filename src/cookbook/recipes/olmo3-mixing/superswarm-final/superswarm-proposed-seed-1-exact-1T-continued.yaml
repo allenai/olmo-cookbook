@@ -11,7 +11,7 @@ seed: 1337
 model: olmo2_1B_v2
 tokenizer: dolma2
 priority: high
-cluster: h100
+cluster: ai2/jupiter
 rank_microbatch_size: 32768
 global_batch_size: 2097152
 load_path: weka://oe-training-default/ai2-llm/checkpoints/mayeec/1b-5xC-superswarm-proposed-seed-1-exact-1T-052b8d5e/step36000
