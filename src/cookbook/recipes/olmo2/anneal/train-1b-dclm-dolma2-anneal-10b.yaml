@@ -18,7 +18,8 @@ cluster: ai2/jupiter-cirrascale-2
 rank_microbatch_size: 32768
 scheduler_type: linear
 warmup_steps: 0
-annealing: true
+annealing:
+  enabled: true
 model_overrides:
   - block.feed_forward.hidden_size=5632
 load_path: weka://oe-training-default/ai2-llm/checkpoints/ai2-tylerm/olmo-cookbook-1b-5xC-love2code-no-prose-hlr-00203459/step53971/
