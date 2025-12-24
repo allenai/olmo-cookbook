@@ -1,5 +1,5 @@
-name: 1b-5xC-dclm-rep-4
-description: 1B 5xC DCLM-only proposed mix (rep=4) (e3dad906846f76a6). note that this is for the 6T setting (where dclm token counts is 5T x natural)
+name: 1b-5xC-dclm-lightgbm
+description: 1B 5xC DCLM-only proposed mix using lightgbm regression (rep=4 @ for 1b 5xC) (62e7dc06/contribution_1_vary_regression_models/60d09b737fd54691)
 budget: ai2/oe-base
 workspace: ai2/dolma2
 nodes: 4
@@ -10,9 +10,9 @@ sequence_length: 4096
 seed: 1337
 model: olmo2_1B_v2
 tokenizer: dolma2
-priority: normal
-cluster: ai2/augusta-google-1
-weka: false
+priority: high
+cluster: ai2/jupiter
+weka: true
 rank_microbatch_size: 32768
 global_batch_size: 2097152
 dataset:
@@ -20,96 +20,96 @@ dataset:
   - name: adult_content
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/adult_content/dolma2-tokenizer/*.npy
-    target_ratio: 0.00031078271576024513
+    target_ratio: 0.01297821957213534
   - name: art_and_design
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/art_and_design/dolma2-tokenizer/*.npy
-    target_ratio: 0.0030486236393227075
+    target_ratio: 0.018887383407709058
   - name: crime_and_law
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/crime_and_law/dolma2-tokenizer/*.npy
-    target_ratio: 0.0023245280928405666
+    target_ratio: 0.04226443581468962
   - name: education_and_jobs
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/education_and_jobs/dolma2-tokenizer/*.npy
-    target_ratio: 0.07680766825307761
+    target_ratio: 0.04186238498573072
   - name: electronics_and_hardware
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/electronics_and_hardware/dolma2-tokenizer/*.npy
-    target_ratio: 0.03718301106995158
+    target_ratio: 0.026589053167954468
   - name: entertainment
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/entertainment/dolma2-tokenizer/*.npy
-    target_ratio: 0.056757977608327036
+    target_ratio: 0.10999675595306396
   - name: fashion_and_beauty
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/fashion_and_beauty/dolma2-tokenizer/*.npy
-    target_ratio: 0.00021411030492645295
+    target_ratio: 0.009275515209390083
   - name: finance_and_business
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/finance_and_business/dolma2-tokenizer/*.npy
-    target_ratio: 0.015655842404046962
+    target_ratio: 0.041153191727273115
   - name: food_and_dining
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/food_and_dining/dolma2-tokenizer/*.npy
-    target_ratio: 0.025636099298406115
+    target_ratio: 0.02529993870017468
   - name: games
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/games/dolma2-tokenizer/*.npy
-    target_ratio: 0.07196750083363199
+    target_ratio: 0.057676267244115335
   - name: health
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/health/dolma2-tokenizer/*.npy
-    target_ratio: 0.11195256767698032
+    target_ratio: 0.07626494386486324
   - name: history_and_geography
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/history_and_geography/dolma2-tokenizer/*.npy
-    target_ratio: 0.004387738958133697
+    target_ratio: 0.029206245518723434
   - name: home_and_hobbies
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/home_and_hobbies/dolma2-tokenizer/*.npy
-    target_ratio: 0.007951152247479998
+    target_ratio: 0.039698599371450156
   - name: industrial
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/industrial/dolma2-tokenizer/*.npy
-    target_ratio: 0.0004056214725569976
+    target_ratio: 0.010841305491227438
   - name: literature
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/literature/dolma2-tokenizer/*.npy
-    target_ratio: 0.06284874994326432
+    target_ratio: 0.03539083426380478
   - name: politics
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/politics/dolma2-tokenizer/*.npy
-    target_ratio: 0.010209843087993584
+    target_ratio: 0.03140890928568717
   - name: religion
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/religion/dolma2-tokenizer/*.npy
-    target_ratio: 0.009300081424136157
+    target_ratio: 0.046527086405518565
   - name: science_math_and_technology
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/science_math_and_technology/dolma2-tokenizer/*.npy
-    target_ratio: 0.28196262048313714
+    target_ratio: 0.1281769566716619
   - name: social_life
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/social_life/dolma2-tokenizer/*.npy
-    target_ratio: 0.003823838415765748
+    target_ratio: 0.04975665040071378
   - name: software
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software/dolma2-tokenizer/*.npy
-    target_ratio: 0.062131059103990374
+    target_ratio: 0.02647896567255507
   - name: software_development
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/software_development/dolma2-tokenizer/*.npy
-    target_ratio: 0.148639051781585
+    target_ratio: 0.054538993751990325
   - name: sports_and_fitness
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/sports_and_fitness/dolma2-tokenizer/*.npy
-    target_ratio: 0.003433693323450114
+    target_ratio: 0.03951439286732274
   - name: transportation
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/transportation/dolma2-tokenizer/*.npy
-    target_ratio: 0.001567377365481294
+    target_ratio: 0.029061979563271455
   - name: travel_and_tourism
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/travel_and_tourism/dolma2-tokenizer/*.npy
-    target_ratio: 0.001480460495753967
+    target_ratio: 0.017150991088973663
