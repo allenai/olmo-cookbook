@@ -22,11 +22,6 @@ dataset:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/adult_content/dolma2-tokenizer/*.npy
     repetition_factor: 4
     target_ratio: 2.158928525156243e-05
-  - name: art_and_design
-    paths:
-    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/art_and_design/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
-    repetition_factor: 4
   - name: crime_and_law
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/crime_and_law/dolma2-tokenizer/*.npy
@@ -56,11 +51,6 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/finance_and_business/dolma2-tokenizer/*.npy
     target_ratio: 0.04437240221516288
-    repetition_factor: 4
-  - name: food_and_dining
-    paths:
-    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/food_and_dining/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
     repetition_factor: 4
   - name: games
     paths:
@@ -131,9 +121,4 @@ dataset:
     paths:
     - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/transportation/dolma2-tokenizer/*.npy
     target_ratio: 0.0021028769091858213
-    repetition_factor: 4
-  - name: travel_and_tourism
-    paths:
-    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/travel_and_tourism/dolma2-tokenizer/*.npy
-    target_ratio: 0.0
     repetition_factor: 4
