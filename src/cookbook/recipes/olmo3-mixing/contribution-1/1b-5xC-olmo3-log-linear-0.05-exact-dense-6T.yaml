@@ -1,7 +1,7 @@
 name: 1b-5xC-olmo3-log-linear-0.05-exact-dense-6T
 description: 1B 5xC Olmo3-only proposed mix using log linear regression (rep=4 @ for 6T, drop metrics), exact computation with kl-reg=0.05 from dense swarm (78dcbdb7/bc42ded73fbac9ae)
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/mixing-evals
 nodes: 4
 gpus: 8
 preemptible: true
