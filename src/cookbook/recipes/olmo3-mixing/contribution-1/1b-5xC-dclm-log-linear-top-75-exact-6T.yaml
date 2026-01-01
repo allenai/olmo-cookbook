@@ -1,7 +1,7 @@
 name: 1b-5xC-dclm-log-linear-top-75-exact-6T
 description: 1B 5xC DCLM-only proposed mix using log linear regression (rep=4 @ for 6T, drop metrics), exact computation with kl-reg=0.05 on top 75 (8b7b857ca13ca6b0)
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/mixing-evals
 nodes: 4
 gpus: 8
 preemptible: true
