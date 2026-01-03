@@ -1,7 +1,7 @@
 name: 1b-5xC-olmo3-bimix-1T
 description: 1B 5xC Olmo3-only proposed mix using BiMix regression (rep=4 @ for 1T, drop metrics), simulation from dense swarm (fb0754d0c75d975b)
 budget: ai2/oe-base
-workspace: ai2/dolma2
+workspace: ai2/mixing-evals
 nodes: 4
 gpus: 8
 preemptible: true
