@@ -268,7 +268,6 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
     if not dry_run:
         dataset = config.dataset.build()
         model = config.model.build(init_device="meta")
-        logger.info(f"Number of parameters: {model.num_params}. Number of non-embedding parameters: {model.num_non_embedding_params}")
         train_module = config.train_module.build(model)
         data_loader = config.data_loader.build(dataset, dp_process_group=train_module.dp_process_group)
         trainer = config.trainer.build(train_module, data_loader)
@@ -290,6 +289,11 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             f"Estimated training steps: {math.ceil(base_config.max_tokens / config.data_loader.global_batch_size):,}"
         )
     logger.info(config)
+
+
+    model = config.model.build(init_device="meta")
+    logger.info(f"Number of parameters: {model.num_params}. Number of non-embedding parameters: {model.num_non_embedding_params}")
+
 
     return trainer
 
