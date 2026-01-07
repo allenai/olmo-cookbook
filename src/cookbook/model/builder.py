@@ -13,7 +13,8 @@ from olmo_core.data import (
     DataMix,
     NumpyDataLoaderConfig,
     NumpyDatasetConfig,
-    NumpyDatasetType,
+    NumpyFSLDatasetConfig,
+    NumpyPaddedFSLDatasetConfig,
     TokenizerConfig,
 )
 from olmo_core.nn.attention import SlidingWindowAttentionConfig
@@ -280,13 +281,19 @@ class TransformerConfigBuilder:
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
             self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            # NOTE: work_dir must be a local path, not a url
+            self.work_dir = f"/tmp/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
-        if any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka:
+        elif (
+            any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka
+        ):
             self.root_dir = "/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")
             self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
+            self.work_dir = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
-        self.dataset_cache = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
+        else:
+            self.work_dir = f"{self.root_dir}/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
     def get_tokenizer_config(self, tokenizer) -> TokenizerConfig:
         try:
@@ -369,8 +376,7 @@ class TransformerConfigBuilder:
                     # it is ignored for wandb metrics, only entity is used
                     # (it is used for comet metrics)
                     logger.warning(
-                        "metrics_config.workspace is ignored for WandB metrics. "
-                        "Use metrics_config.entity instead."
+                        "metrics_config.workspace is ignored for WandB metrics. Use metrics_config.entity instead."
                     )
 
                 callbacks[MetricBackend.wandb.value] = WandBCallback(
@@ -386,8 +392,7 @@ class TransformerConfigBuilder:
                     # show warning if entity is set to non-default value;
                     # it is not used for comet metrics (only workspace is used)
                     logger.warning(
-                        "metrics_config.entity is ignored for Comet metrics. "
-                        "Use metrics_config.workspace instead."
+                        "metrics_config.entity is ignored for Comet metrics. Use metrics_config.workspace instead."
                     )
 
                 callbacks[MetricBackend.comet.value] = CometCallback(
@@ -400,13 +405,12 @@ class TransformerConfigBuilder:
 
         if self.lm_evaluator:
             callbacks["lm_evaluator"] = LMEvaluatorCallbackConfig(
-                eval_dataset=NumpyDatasetConfig.from_data_mix(
+                eval_dataset=NumpyPaddedFSLDatasetConfig.from_data_mix(
                     DataMix.v3_small_ppl_validation,
-                    name=NumpyDatasetType.padded_fsl,
                     mix_base_dir=self.root_dir,
                     sequence_length=self.sequence_length,
                     tokenizer=self.tokenizer,
-                    work_dir=self.dataset_cache,
+                    work_dir=self.work_dir,
                 ),
                 eval_interval=self.eval_interval,
             )
@@ -422,7 +426,7 @@ class TransformerConfigBuilder:
 
         return callbacks
 
-    def build_dataset_config(self, loader_processes: int = 8) -> NumpyDatasetConfig:
+    def build_dataset_config(self, global_batch_size: int, loader_processes: int = 8) -> NumpyDatasetConfig:
         is_fractional = any(source.ratio is not None and source.ratio != 1 for source in self.sources)
 
         mixture_config = None
@@ -436,7 +440,7 @@ class TransformerConfigBuilder:
             mixture_config = MixtureBuilder(
                 sources=self.sources,
                 max_tokens=self.max_tokens,
-                sequence_length=self.sequence_length,
+                global_batch_size=global_batch_size,
                 seed=self.seed,
                 processes=loader_processes,
                 dtype=self.dataset_dtype,
@@ -446,15 +450,14 @@ class TransformerConfigBuilder:
             for source in self.sources:
                 source_paths.extend(source.paths)
 
-        dataset_config = NumpyDatasetConfig(
+        dataset_config = NumpyFSLDatasetConfig(
             paths=source_paths,
             source_mixture_config=mixture_config,
-            name=NumpyDatasetType.fsl,
             sequence_length=self.sequence_length,
             max_target_sequence_length=self.max_target_sequence_length,
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
-            work_dir=self.dataset_cache,
+            work_dir=self.work_dir,
         )
 
         return dataset_config
@@ -468,9 +471,7 @@ class TransformerConfigBuilder:
             SchedulerType.LINEAR: lambda: LinearWithWarmup(
                 warmup_steps=self.get_warmup_steps(), alpha_f=0.0 if self.annealing is not None else 0.1
             ),
-            SchedulerType.WSD: lambda: WSD(
-                warmup_steps=self.get_warmup_steps(),
-            ),
+            SchedulerType.WSD: lambda: WSD(warmup=self.get_warmup_steps()),
         }
 
         return scheduler_map[self.scheduler_type]()
@@ -614,12 +615,12 @@ class TransformerConfigBuilder:
     def build(self) -> ModelTrainConfig:
         global_batch_size = self.get_global_batch_size()
         rank_microbatch_size = self.get_rank_microbatch_size()
-        dataset_config = self.build_dataset_config()
+        dataset_config = self.build_dataset_config(global_batch_size=global_batch_size)
         optim_config = self.get_optimizer_config()
 
         data_loader_config = NumpyDataLoaderConfig(
             global_batch_size=global_batch_size,
-            work_dir=self.dataset_cache,
+            work_dir=self.work_dir,
             seed=self.seed,
             num_workers=12,
         )
@@ -651,7 +652,7 @@ class TransformerConfigBuilder:
             load_path=load_path,
             load_strategy=load_strategy,
             save_folder=self.checkpoint_dir,
-            work_dir=self.dataset_cache,
+            work_dir=self.work_dir,
             save_overwrite=True,
             metrics_collect_interval=10,
             cancel_check_interval=self.cancel_check_interval,

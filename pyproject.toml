@@ -28,20 +28,19 @@ dependencies = [
     "tabulate",
     "packaging>=24.2",
     "tqdm>=4.67.1",
+    "huggingface-hub[hf-transfer]>=0.34,<0.35",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff",
-    "mypy>=1.0,<1.4",
-    "ruff",
-    "mypy>=1.0,<1.4",
+    "ruff>=0.12.8",
     "boto3-stubs[essential,ec2,s3,ssm]",
     "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py>=1,<2",
+    "beaker-py>=1.37.0,<2.0",
     "GitPython>=3.0,<4.0",
+    "google-cloud-compute"
 ]
 wandb = [
     "wandb",
@@ -51,16 +50,18 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@tylerr/olmo3-scripts-swafix-foreachopt",
-    "beaker-py>=1,<2",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@4b04c98f897814c6d13f58794d39e46f447c8c33", #c779ca546cc3194e73e7491aaefcdffbed042c65",
+    "beaker-py>=1.37.0,<2.0",
     "GitPython>=3.0,<4.0",
     "wandb",
+    "google-cloud-compute",
 ]
 
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
 olmo-cookbook-core = "cookbook.cli:core.cli"
+olmo-cookbook-swarm = "cookbook.cli:swarm.cli"
 poormanray = "cookbook.cli:pmr.cli"
 
 

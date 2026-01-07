@@ -2,7 +2,7 @@ import logging
 import math
 import os
 from pathlib import Path
-from typing import List, Tuple, Union, cast
+from typing import List, Tuple, Union, cast, Optional
 from urllib.parse import urlparse
 
 import gcsfs
@@ -85,12 +85,68 @@ def mk_experiment_group(
     )
 
 
+def mk_swarm_source_instances(
+    sources: list[SourceConfig], mix_map: dict[str, tuple[float, float]]
+) -> list[SourceInstance]:
+    instances = []
+
+    for source in sources:
+        if source.topics:
+            for topic in source.topics:
+                full_name = f"{source.name}:{topic.name}"
+                if full_name not in mix_map or mix_map[full_name][0] == 0:
+                    continue
+                instances.append(
+                    SourceInstance(
+                        name=full_name,
+                        paths=topic.paths,
+                        ratio=mix_map[full_name][0],
+                        repetition_factor=mix_map[full_name][1],
+                    )
+                )
+        else:
+            if source.name not in mix_map or mix_map[source.name][0] == 0:
+                continue
+            instances.append(
+                SourceInstance(
+                    name=source.name,
+                    paths=source.paths,
+                    ratio=mix_map[source.name][0],
+                    repetition_factor=mix_map[source.name][1],
+                )
+            )
+
+    return instances
+
+def mk_swarm_experiments(
+    config: ExperimentConfig, mixes: list[dict[str, tuple[float, float]]], group_id: str
+) -> list[ExperimentInstance]:
+    """Generate source instances from a config."""
+    return [
+        ExperimentInstance(
+            name=f"{config.name}-{group_id}-{idx:02}",
+            sources=mk_swarm_source_instances(config.dataset.sources, mix),
+        )
+        for idx, mix in enumerate(mixes)
+    ]
+
+def mk_swarm_experiment_group(
+    config: ExperimentConfig, mixes: list[dict[str, tuple[float, float]]], group_id: str
+) -> ExperimentGroup:
+    """Build an experiment group from an experiment config."""
+
+    return ExperimentGroup(
+        config=config,
+        group_id=group_id,
+        instances=mk_swarm_experiments(config, mixes, group_id),
+    )
+
 def mk_instance_cmd(
-    instance: ExperimentInstance, config: ExperimentConfig, group_id: str, beaker_user: str
+    instance: ExperimentInstance, config: ExperimentConfig, group_id: str, beaker_user: str, swarm: bool
 ) -> List[str]:
     """Build a command for launching an experiment instance."""
 
-    return [
+    cmd = [
         "src/cookbook/train.py",
         "train",
         "-n",
@@ -102,6 +158,18 @@ def mk_instance_cmd(
         "-C",
         str(config.path),
     ]
+
+    if swarm:
+        sources = []
+        for source in instance.sources:
+            paths = [f'"{path}"' for path in source.paths]
+            source_str = (
+                f'-s ("{source.name}",[{",".join(paths)}],{source.ratio},{source.repetition_factor})'
+            )
+            sources.append(source_str)
+        cmd.extend(sources)
+
+    return cmd
 
 
 _REMOTE_FS_CACHE: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] | None = None
@@ -121,7 +189,7 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
-def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
+def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False, source: List[Tuple[str, List[str], str, str]] = []):
     """
     Launch a training run with the given parameters.
     """
@@ -142,13 +210,22 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "s3://"))
 
     else:
-        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
-
         if base_config.load_path:
             # When we have a weka path remotely on beaker we need to treat it like a local path since the bucket is mounted
             base_config.load_path = normalize_path(base_config.load_path.replace("weka://", "/weka/"))
 
-    source_instances = mk_source_instances(source_paths, None)
+    if len(source) > 0:
+        source_instances: List[SourceInstance] = []
+        for item in source:
+            name, paths, ratio, repetition = item
+            source_instances.append(
+                SourceInstance(
+                    name=name, paths=paths, ratio=float(ratio), repetition_factor=float(repetition)
+                )
+            )
+    else:
+        source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
+        source_instances = mk_source_instances(source_paths, None)
     dp_world_size = base_config.nodes * base_config.gpus
 
     config = TransformerConfigBuilder(
@@ -200,7 +277,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
             logger.info(
                 f"Loading checkpoint from {base_config.load_path} and load_trainer_state: {base_config.load_state}"
             )
-            trainer.load_checkpoint(base_config.load_path, load_trainer_state=base_config.load_state)
+            trainer.load_checkpoint(base_config.load_path, load_trainer_state=base_config.load_state, load_optim_state=base_config.load_optim_state)
 
         cast(WandBCallback, trainer.callbacks["wandb"]).config = config_dict
         cast(ConfigSaverCallback, trainer.callbacks["config_saver"]).config = config_dict
@@ -213,29 +290,73 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         )
     logger.info(config)
 
+
+    model = config.model.build(init_device="meta")
+    logger.info(f"Number of parameters: {model.num_params}. Number of non-embedding parameters: {model.num_non_embedding_params}")
+
+
     return trainer
 
 
-def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLaunchConfig]:
+def mk_launch_configs(group: ExperimentGroup, beaker_user: str, swarm: bool=False) -> list[BeakerLaunchConfig]:
     """Build a beaker launch config from an experiment group."""
 
     weka_buckets: List[BeakerWekaBucket] = []
     if group.config.weka:
         weka_buckets.append(BeakerWekaBucket("oe-training-default", "/weka/oe-training-default"))
 
+    setup_steps = [
+        'git clone "$REPO_URL"',
+        "conda shell.bash activate base",
+        "cd olmo-cookbook",
+        'git checkout "$GIT_REF"',
+        "git submodule update --init --recursive",
+        "pip install -e '.[all]'",
+        "pip freeze",
+        # Move AWS credentials from env to relevant files
+        "mkdir -p ~/.aws",
+        "printenv AWS_CONFIG > ~/.aws/config",
+        "printenv AWS_CREDENTIALS > ~/.aws/credentials",
+    ]
+
+    if group.config.gpus == 1:
+        setup_steps += [
+            # Single-process values
+            "export WORLD_SIZE=1 RANK=0 LOCAL_RANK=0",
+            "export MASTER_ADDR=127.0.0.1",
+
+            # Pick a free port for the training PG (env:// consumers)
+            "export MASTER_PORT=$(python - <<'PY'\n"
+            "import socket, contextlib\n"
+            "with contextlib.closing(socket.socket()) as s:\n"
+            "    s.bind(('', 0)); print(s.getsockname()[1])\n"
+            "PY)",
+
+            # Also set the *distributed default* port that some launchers default to (incl. torchrun RDZV when not specified)
+            "export TORCH_DISTRIBUTED_DEFAULT_PORT=$(python - <<'PY'\n"
+            "import socket, contextlib\n"
+            "with contextlib.closing(socket.socket()) as s:\n"
+            "    s.bind(('', 0)); print(s.getsockname()[1])\n"
+            "PY)",
+
+            # Keep the job on GPU 0 even if the box has more (unrelated to ports, but fine)
+            "export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}",
+        ]
+
+
     return [
         BeakerLaunchConfig(
             name=f"{experiment.name}",
             description=group.config.description,
             task_name=experiment.name,
-            cmd=mk_instance_cmd(experiment, group.config, group.group_id, beaker_user),
+            cmd=mk_instance_cmd(experiment, group.config, group.group_id, beaker_user, swarm),
             clusters=[group.config.cluster],
             num_nodes=group.config.nodes,
             num_gpus=group.config.gpus,
             shared_filesystem=group.config.weka,
             allow_dirty=True,
             weka_buckets=weka_buckets,
-            budget=group.config.budget or "ai2/oe-data",
+            budget=group.config.budget or "ai2/oe-base",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
             beaker_image="petew/olmo-core-tch270cu128",
@@ -251,19 +372,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
             retries=3,
-            setup_steps=[
-                'git clone "$REPO_URL"',
-                "conda shell.bash activate base",
-                "cd olmo-cookbook",
-                'git checkout "$GIT_REF"',
-                "git submodule update --init --recursive",
-                "pip install -e '.[all]'",
-                "pip freeze",
-                # Move AWS credentials from env to relevant files
-                "mkdir -p ~/.aws",
-                "printenv AWS_CONFIG > ~/.aws/config",
-                "printenv AWS_CREDENTIALS > ~/.aws/credentials",
-            ],
+            setup_steps=setup_steps
         )
         for experiment in group.instances
     ]

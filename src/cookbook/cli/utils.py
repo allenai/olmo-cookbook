@@ -18,6 +18,8 @@ from cookbook.constants import (
     AI2_OLMO_CORE_GIT_URL,
     AI2_OLMO_GIT_URL,
     BEAKER_GANTRY_MAX_VERSION,
+    BEAKER_GANTRY_MIN_VERSION,
+    BEAKER_PY_MIN_VERSION,
     BEAKER_PY_MAX_VERSION,
     OE_EVAL_GIT_URL,
     TRANSFORMERS_GIT_URL,
@@ -150,7 +152,9 @@ def get_aws_secret_access_key() -> Optional[str]:
 def install_beaker_py(
     env: Optional[PythonEnv] = None,
     beaker_py_max_version: Optional[str] = BEAKER_PY_MAX_VERSION,
+    beaker_py_min_version: Optional[str] = BEAKER_PY_MIN_VERSION,
     beaker_gantry_max_version: Optional[str] = BEAKER_GANTRY_MAX_VERSION,
+    beaker_gantry_min_version: Optional[str] = BEAKER_GANTRY_MIN_VERSION,
 ) -> None:
     env = env or PythonEnv.null()
 
@@ -158,6 +162,8 @@ def install_beaker_py(
         return check_beaker_dependencies(
             env=env,
             beaker_py_max_version=beaker_py_max_version,
+            beaker_py_min_version=beaker_py_min_version,
+            beaker_gantry_min_version=beaker_gantry_min_version,
             beaker_gantry_max_version=beaker_gantry_max_version,
         )
     except Exception:
@@ -184,11 +190,7 @@ def install_oe_eval(
     install_beaker_py(env)
 
     # Get current installation location, if exists
-    result = subprocess.run(
-        [env.pip, "show", "oe-eval"],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run([env.pip, "show", "oe-eval"], capture_output=True, text=True)
 
     oe_eval_dir = None
     for line in result.stdout.splitlines():
@@ -198,22 +200,14 @@ def install_oe_eval(
 
     if bool(oe_eval_dir and os.path.exists(oe_eval_dir)):
         # Get local commit hash
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=oe_eval_dir,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=oe_eval_dir, capture_output=True, text=True)
         installed_commit = result.stdout.strip()
 
         if commit_hash is None:
             # Check if commit matches remote hash (branch or HEAD)
             branch = commit_branch or "HEAD"
             result = subprocess.run(
-                ["git", "ls-remote", "origin", branch],
-                cwd=oe_eval_dir,
-                capture_output=True,
-                text=True
+                ["git", "ls-remote", "origin", branch], cwd=oe_eval_dir, capture_output=True, text=True
             )
             if result.returncode != 0 or not result.stdout:
                 return None
@@ -268,7 +262,6 @@ def run_func_in_venv(fn):
             f.write(f"out = {fn.__name__}(*{args}, **{kwargs})\n")
             f.write("print(repr(out), end='')\n")
             f.flush()
-
             result = subprocess.run(
                 shlex.split(f"{env.python} {f.name}"),
                 capture_output=True,
@@ -300,7 +293,7 @@ def add_secret_to_beaker_workspace(
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.account.name}_{secret_name}"
+    full_secret_name = f"{client.user_name}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         write_secret = False
@@ -332,7 +325,7 @@ def get_beaker_user() -> str:
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env()
-    return client.account.name
+    return client.user_name
 
 
 @run_func_in_venv
@@ -346,7 +339,7 @@ def check_if_secret_exists_in_beaker_workspace(
         raise ImportError("beaker-py must be installed to use this function")
 
     client = beaker.Beaker.from_env(default_workspace=workspace)
-    full_secret_name = f"{client.account.name}_{secret_name}"
+    full_secret_name = f"{client.user_name}_{secret_name}"
     try:
         client.secret.get(full_secret_name)
         return True
@@ -438,7 +431,9 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
         if commit_branch:
             # Change directory to the cloned repo
             os.chdir(tmp_dir)
-            subprocess.run(shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True)
+            subprocess.run(
+                shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True
+            )
             subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
 
         if commit_hash:
@@ -568,6 +563,9 @@ def install_transformers(
     print("Installing accelerate to fully support Huggingface model conversion...")
     subprocess.run(shlex.split(f"{env.pip} install 'accelerate>=0.26.0'"), check=True, env=env.path())
 
+    print("Installing torchao to fully support Huggingface model conversion...")
+    subprocess.run(shlex.split(f"{env.pip} install 'torchao==0.11.0'"), check=True, env=env.path())
+
     return transformers_dir
 
 
@@ -596,7 +594,9 @@ def remove_conflicting_packages(env: Optional[PythonEnv] = None):
 
 def check_beaker_dependencies(
     env: Optional[PythonEnv] = None,
+    beaker_py_min_version: Optional[str] = BEAKER_PY_MIN_VERSION,
     beaker_py_max_version: Optional[str] = BEAKER_PY_MAX_VERSION,
+    beaker_gantry_min_version: Optional[str] = BEAKER_GANTRY_MIN_VERSION,
     beaker_gantry_max_version: Optional[str] = BEAKER_GANTRY_MAX_VERSION,
 ):
     env = env or PythonEnv.null()
@@ -607,8 +607,11 @@ def check_beaker_dependencies(
         iter([r for r in output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     beaker_py_version = Version(beaker_py_version_string.split(":")[1].strip())
-    if beaker_py_max_version is not None and beaker_py_version > Version(beaker_py_max_version):
-        raise RuntimeError(f"beaker-py version {beaker_py_version} not supported; use {beaker_py_max_version}")
+
+    if beaker_py_max_version is not None and beaker_py_version >= Version(beaker_py_max_version):
+        raise RuntimeError(f"beaker-py version v{beaker_py_version} not supported; use <{beaker_py_max_version}")
+    if beaker_py_min_version is not None and beaker_py_version < Version(beaker_py_min_version):
+        raise RuntimeError(f"beaker-py version v{beaker_py_version} not supported; use >={beaker_py_min_version}")
 
     gantry_output = subprocess.run(
         shlex.split(f"{env.pip} show beaker-gantry"), capture_output=True, env=env.path()
@@ -619,10 +622,10 @@ def check_beaker_dependencies(
         iter([r for r in gantry_output.stdout.decode("utf-8").split("\n") if "Version:" in r])
     )
     gantry_version = Version(gantry_version_string.split(":")[1].strip())
-    if beaker_gantry_max_version is not None and gantry_version > Version(beaker_gantry_max_version):
-        raise RuntimeError(
-            f"beaker-gantry version {gantry_version} not supported; use {beaker_gantry_max_version}"
-        )
+    if beaker_gantry_max_version is not None and gantry_version >= Version(beaker_gantry_max_version):
+        raise RuntimeError(f"beaker-gantry v{gantry_version} not supported; use <{beaker_gantry_max_version}")
+    if beaker_gantry_min_version is not None and gantry_version < Version(beaker_gantry_min_version):
+        raise RuntimeError(f"beaker-gantry v{gantry_version} not supported; use >={beaker_gantry_min_version}")
 
 
 def find_repository_root(current: Union[str, Path] = __file__) -> Path:

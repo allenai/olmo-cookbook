@@ -20,7 +20,6 @@ from cookbook.cli.utils import (
     remove_conflicting_packages,
 )
 from cookbook.constants import (
-    BEAKER_KNOWN_CLUSTERS,
     DEFAULT_OLMO2_TOKENIZER,
     DEFAULT_OLMO_CORE_TOKENIZER,
     DEFAULT_OLMOE_TOKENIZER,
@@ -34,6 +33,7 @@ from cookbook.constants import (
     OLMOE_UNSHARD_SCRIPT,
     TRANSFORMERS_COMMIT_HASH,
 )
+from cookbook.utils.clusters import get_matching_clusters
 
 
 def convert_olmo_core_v2(
@@ -48,12 +48,12 @@ def convert_olmo_core_v2(
     transformers_git_url: Optional[str] = None,
     transformers_commit_hash: str = TRANSFORMERS_COMMIT_HASH,
     skip_validation: bool = False,
+    fix_generation_config: bool = True,
     dtype: Optional[str] = None,
     env: Optional[PythonEnv] = None,
 ):
     env = env or PythonEnv.null()
 
-    current_directory = os.getcwd()
     directories_to_clean_up = []
 
     if max_sequence_length is None:
@@ -150,11 +150,64 @@ def convert_olmo_core_v2(
             config = json.load(f)
 
         if config.get("torch_dtype", "") == "float32":
-            print(f"Changing type of model to bfloat16...")
+            print("Changing type of model to bfloat16...")
             config["torch_dtype"] = "bfloat16"
 
             with open(config_file, "w") as f:
                 json.dump(config, f)
+
+            print(f"Updated model type from float32 to bfloat16 in {config_file}.")
+
+        if fix_generation_config:
+            # fix generation config
+            generation_config_file = os.path.join(huggingface_output_dir, "generation_config.json")
+            tokenization_config_file = os.path.join(huggingface_output_dir, "tokenizer_config.json")
+            tokenizer_file = os.path.join(huggingface_output_dir, "tokenizer.json")
+
+            generation_config = {}
+            if os.path.exists(generation_config_file):
+                with open(generation_config_file, "r") as f:
+                    generation_config = json.load(f)
+
+            # @soldni: this is to stop type checking from complaining
+            assert isinstance(generation_config, dict), "generation_config.json should be a dictionary"
+
+            if "eos_token_id" in generation_config and "pad_token_id" not in generation_config:
+                print("EOS and PAD tokens already set in generation config, nothing to do.")
+                return
+
+            if not os.path.exists(tokenization_config_file):
+                raise FileNotFoundError("tokenization_config.json not found; cannot fix generation config.")
+
+            with open(tokenization_config_file, "r") as f:
+                tokenization_config = json.load(f)
+
+            if not os.path.exists(tokenizer_file):
+                raise FileNotFoundError("tokenizer.json not found; cannot fix generation config.")
+
+            with open(tokenizer_file, "r") as f:
+                tokenizer = json.load(f)
+
+            # TODO: bos too?
+            for token_name in ("eos_token", "pad_token"):
+                token_id_name = f"{token_name}_id"
+                if token_id_name in generation_config:
+                    print(f"Checking EOS token ID in generation config: {generation_config['eos_token_id']}")
+                    continue
+
+                if (token_value := tokenization_config.get(token_name)) is None:
+                    continue
+
+                token_id_value = tokenizer.get("model", {}).get("vocab", {}).get(token_value, None)
+                if token_id_value is None:
+                    raise ValueError(f"Could not find {token_id_name} for {token_value} in {tokenizer_file}.")
+                print(f"Setting {token_id_name} to {token_id_value} in generation config.")
+                generation_config[token_id_name] = token_id_value
+
+            with open(generation_config_file, "w") as f:
+                json.dump(generation_config, f, indent=2)
+
+            print(f"Updated generation config in {generation_config_file}.")
 
     finally:
         for directory in directories_to_clean_up:
@@ -427,6 +480,7 @@ def run_checkpoint_conversion(
     max_sequence_length: Optional[int] = None,
     skip_validation: bool = False,
     dtype: Optional[str] = None,
+    experimental_with_flash_attn: bool = False,
 ):
     env = (
         PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -469,11 +523,16 @@ def run_checkpoint_conversion(
             if secret_name:
                 gantry_flags.append(f"--env-secret HF_TOKEN={secret_name}")
 
-        for cluster in BEAKER_KNOWN_CLUSTERS.get(beaker_cluster, [beaker_cluster]):
+        for cluster in set(get_matching_clusters(beaker_cluster)):
             gantry_flags.append(f"--cluster {cluster}")
+
+        install_flash_attention = ""
+        if experimental_with_flash_attn and olmo_type == "olmo-core-v2":
+            install_flash_attention = "pip install --no-build-isolation-package flash-attn &&"
 
         remote_command = [
             "pip install uv && uv pip install . --system &&",
+            install_flash_attention,
             "olmo-cookbook-eval convert",
             f"{input_dir}",
             f"--olmo-type {olmo_type}",
