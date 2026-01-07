@@ -300,6 +300,45 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str, swarm: bool=Fals
     if group.config.weka:
         weka_buckets.append(BeakerWekaBucket("oe-training-default", "/weka/oe-training-default"))
 
+    setup_steps = [
+        'git clone "$REPO_URL"',
+        "conda shell.bash activate base",
+        "cd olmo-cookbook",
+        'git checkout "$GIT_REF"',
+        "git submodule update --init --recursive",
+        "pip install -e '.[all]'",
+        "pip freeze",
+        # Move AWS credentials from env to relevant files
+        "mkdir -p ~/.aws",
+        "printenv AWS_CONFIG > ~/.aws/config",
+        "printenv AWS_CREDENTIALS > ~/.aws/credentials",
+    ]
+
+    if group.config.gpus == 1:
+        setup_steps += [
+            # Single-process values
+            "export WORLD_SIZE=1 RANK=0 LOCAL_RANK=0",
+            "export MASTER_ADDR=127.0.0.1",
+
+            # Pick a free port for the training PG (env:// consumers)
+            "export MASTER_PORT=$(python - <<'PY'\n"
+            "import socket, contextlib\n"
+            "with contextlib.closing(socket.socket()) as s:\n"
+            "    s.bind(('', 0)); print(s.getsockname()[1])\n"
+            "PY)",
+
+            # Also set the *distributed default* port that some launchers default to (incl. torchrun RDZV when not specified)
+            "export TORCH_DISTRIBUTED_DEFAULT_PORT=$(python - <<'PY'\n"
+            "import socket, contextlib\n"
+            "with contextlib.closing(socket.socket()) as s:\n"
+            "    s.bind(('', 0)); print(s.getsockname()[1])\n"
+            "PY)",
+
+            # Keep the job on GPU 0 even if the box has more (unrelated to ports, but fine)
+            "export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}",
+        ]
+
+
     return [
         BeakerLaunchConfig(
             name=f"{experiment.name}",
@@ -328,19 +367,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str, swarm: bool=Fals
                 BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
             ],
             retries=3,
-            setup_steps=[
-                'git clone "$REPO_URL"',
-                "conda shell.bash activate base",
-                "cd olmo-cookbook",
-                'git checkout "$GIT_REF"',
-                "git submodule update --init --recursive",
-                "pip install -e '.[all]'",
-                "pip freeze",
-                # Move AWS credentials from env to relevant files
-                "mkdir -p ~/.aws",
-                "printenv AWS_CONFIG > ~/.aws/config",
-                "printenv AWS_CREDENTIALS > ~/.aws/credentials",
-            ],
+            setup_steps=setup_steps
         )
         for experiment in group.instances
     ]
