@@ -1,0 +1,54 @@
+name: 1b-5xC-olmo3-search-6T-fixed
+description: 1B 5xC Olmo3-only proposed mix using search (rep=4 @ for 6T, drop metrics), from dense fixed swarm (a60a0224d70c91af)
+budget: ai2/oe-base
+workspace: ai2/dolma2
+nodes: 4
+gpus: 8
+preemptible: true
+max_tokens: 127939584000
+sequence_length: 4096
+seed: 1337
+model: olmo2_1B_v2
+tokenizer: dolma2
+priority: high
+cluster: ai2/jupiter
+weka: true
+rank_microbatch_size: 32768
+global_batch_size: 2097152
+dataset:
+  sources:
+  - name: arxiv
+    paths:
+    - s3://ai2-llm/preprocessed/proof-pile-2/v0_decontaminated/arxiv/train/allenai/dolma2-tokenizer/*.npy
+    repetition_factor: 4
+    target_ratio: 0.011101110111011102
+  - name: dclm
+    paths:
+    - s3://ai2-llm/preprocessed/dclm/baseline_topic_classified_sample/*/dolma2-tokenizer/*.npy
+    repetition_factor: 4
+    target_ratio: 0.5806580658065806
+  - name: finemath-3plus
+    paths:
+    - s3://ai2-llm/preprocessed/finemath/finemath-3plus/allenai/dolma2-tokenizer/*.npy
+    repetition_factor: 4
+    target_ratio: 0.008800880088008802
+  - name: pes2o
+    paths:
+    - s3://ai2-llm/preprocessed/pes2o/allenai/dolma2-tokenizer/*.npy
+    repetition_factor: 4
+    target_ratio: 0.0019001900190019005
+  - name: stack-edu
+    paths:
+    - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
+    repetition_factor: 4
+    target_ratio: 0.07270727072707271
+  - name: wikipedia
+    paths:
+    - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy
+    repetition_factor: 4
+    target_ratio: 0.0015001500150015005
+  - name: s2pdfv1
+    paths:
+    - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/**/*.npy
+    repetition_factor: 4
+    target_ratio: 0.3233323332333234
