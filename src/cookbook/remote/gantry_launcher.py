@@ -57,6 +57,7 @@ class GantryLauncher:
     ) -> subprocess.CompletedProcess:
 
         extra_flags = extra_flags or {}
+        breakpoint()
 
         gantry_command = [
             "gantry run",
