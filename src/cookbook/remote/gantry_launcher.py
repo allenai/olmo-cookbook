@@ -72,7 +72,8 @@ class GantryLauncher:
             ("--dry-run" if self.dry_run else ""),
             " ".join(self._flags),
             " ".join(f"--{k} {v}" for k, v in extra_flags.items()),
-            f"-- /bin/bash -c 'pip install uv && uv pip install . --system && {command}'",
+            # f"-- /bin/bash -c 'pip install uv && uv pip install . --system && {command}'",
+            f"-- /bin/bash -c 'source /stage/.venv/bin/activate && {command}'",
         ]
         gantry_command_str = " ".join(gantry_command)
 
