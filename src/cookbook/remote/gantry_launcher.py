@@ -73,7 +73,7 @@ class GantryLauncher:
             " ".join(self._flags),
             " ".join(f"--{k} {v}" for k, v in extra_flags.items()),
             # f"-- /bin/bash -c 'pip install uv && uv pip install . --system && {command}'",
-            f"-- /bin/bash -c 'source /stage/.venv/bin/activate && {command}'",
+            f"-- /bin/bash -c 'export PATH=/stage/.venv/bin:$PATH && {command}'",
         ]
         gantry_command_str = " ".join(gantry_command)
 
