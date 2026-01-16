@@ -42,11 +42,6 @@ dataset:
     - s3://ai2-llm/preprocessed/stack-edu/allenai/dolma2-tokenizer/**/*.npy
     repetition_factor: 4
     target_ratio: 0.20098196511530836
-  - name: wikipedia
-    paths:
-    - s3://ai2-llm/preprocessed/structured-wikipedia/concat_with_links/allenai/dolma2-tokenizer/*.npy
-    repetition_factor: 4
-    target_ratio: 0.0
   - name: s2pdfv1
     paths:
     - s3://ai2-llm/preprocessed/s2pdf_dedupe_minhash_v1_with_no_pii_basic_quality_datadelve/**/*.npy
