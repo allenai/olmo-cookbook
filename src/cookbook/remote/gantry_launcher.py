@@ -63,6 +63,7 @@ class GantryLauncher:
             f"--description '{description}'",
             ("--allow-dirty" if self.allow_dirty else ""),
             "--no-python",
+            "--uv-venv /stage/.venv",
             f"--workspace {self.workspace}",
             f"--priority {self.priority}",
             f"--gpus {self.gpus}",
@@ -73,7 +74,7 @@ class GantryLauncher:
             " ".join(self._flags),
             " ".join(f"--{k} {v}" for k, v in extra_flags.items()),
             # f"-- /bin/bash -c 'pip install uv && uv pip install . --system && {command}'",
-            f"-- /bin/bash -c 'export PATH=/stage/.venv/bin:$PATH && {command}'",
+            f"-- /bin/bash -c '{command}'",
         ]
         gantry_command_str = " ".join(gantry_command)
 
