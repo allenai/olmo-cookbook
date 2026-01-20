@@ -1,10 +1,9 @@
-from functools import cached_property
 import re
+from functools import cached_property
 from typing import Callable, ClassVar, Type, TypeVar, Union
 
 from cookbook import constants
 from cookbook.eval.miniframe import MiniFrame
-
 
 T = TypeVar("T", bound=Type["BaseNamedTasksGroup"])
 
@@ -25,7 +24,6 @@ class NamedTasksGroupRegistry:
 
     @classmethod
     def register(cls, task_name: str) -> Callable[[T], T]:
-
         # instantiate the singleton instance here; it won't get instantiated
         # twice cuz it's a singleton, after all.
         instance = cls()
@@ -109,6 +107,7 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
     """
     Base class for named tasks groups that are supposed to be averaged.
     """
+
     def combine(self, results: MiniFrame) -> MiniFrame:
         # filter results by task names; if we have no results at all, we create a new table.
         filtered = results.keep_cols(*self.expanded_tasks) or MiniFrame(title=results.title)
@@ -124,7 +123,7 @@ class BaseAverageNamedTasksGroup(BaseNamedTasksGroup):
         # otherwise, the average is the sum of the scores divided by the number of scores.
         for row in filtered.rows:
             average: float | None = (
-                (sum(row.values) / len(row.values))         # pyright: ignore
+                (sum(row.values) / len(row.values))  # pyright: ignore
                 if all(s is not None for s in row.values) and len(row.values) > 0
                 else None
             )
@@ -189,6 +188,7 @@ class BaseNamedTasksWithNoAverageGroup(BaseAverageOfAveragesNamedTasksGroup):
     For example, "olmo3:dev:7b:main" is not a average,
     but contains "olmo3:dev:7b:mcqa" and "mmlu:mc" are task averages.
     """
+
     def combine(self, results: MiniFrame) -> MiniFrame:
         # Compute all the task averages;
         out_table = super().combine(results)
@@ -378,11 +378,7 @@ class DeepmindMathHeldoutGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("math")
 class MathGroup(BaseAverageOfAveragesNamedTasksGroup):
-    tasks = [
-        "gsm8k::olmo1",
-        "gsm8k::olmes",
-        MinervaGroup()
-    ]
+    tasks = ["gsm8k::olmo1", "gsm8k::olmes", MinervaGroup()]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb")
@@ -392,12 +388,12 @@ class GsmSymbGroup(BaseAverageNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("gsm-symb:n8:v2")
 class GsmSymbN8V2Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}:n8:v2' for task in constants.ALL_GSM_SYMB_TASKS]
+    tasks = [f"{task}:n8:v2" for task in constants.ALL_GSM_SYMB_TASKS]
 
 
 @NamedTasksGroupRegistry.register("gsm-symb:n8:v2:pass_at_4")
 class GsmSymbN8V2PassAt4Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}:n8:v2:pass_at_4' for task in constants.ALL_GSM_SYMB_TASKS]
+    tasks = [f"{task}:n8:v2:pass_at_4" for task in constants.ALL_GSM_SYMB_TASKS]
 
 
 @NamedTasksGroupRegistry.register("code")
@@ -437,27 +433,27 @@ class CodeNoBcbGroup(BaseNamedTasksGroup):
 
 @NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:v2")
 class MultiPlEHEN32V2Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}:n32:v2' for task in constants.MULTIPL_E_HE_TASKS]
+    tasks = [f"{task}:n32:v2" for task in constants.MULTIPL_E_HE_TASKS]
 
 
 @NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:v2")
 class MultiPlEMBPPN32V2Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}:n32:v2' for task in constants.MULTIPL_E_MBPP_TASKS]
+    tasks = [f"{task}:n32:v2" for task in constants.MULTIPL_E_MBPP_TASKS]
 
 
 @NamedTasksGroupRegistry.register("multipl-e-humaneval:n32:v2:pass_at_16")
 class MultiPlEHEN32V2PassAt16Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}:n32:v2:pass_at_16' for task in constants.MULTIPL_E_HE_TASKS]
+    tasks = [f"{task}:n32:v2:pass_at_16" for task in constants.MULTIPL_E_HE_TASKS]
 
 
 @NamedTasksGroupRegistry.register("multipl-e-mbpp:n32:v2:pass_at_16")
 class MultiPlEMBPPN32V2PassAt16Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}:n32:v2:pass_at_16' for task in constants.MULTIPL_E_MBPP_TASKS]
+    tasks = [f"{task}:n32:v2:pass_at_16" for task in constants.MULTIPL_E_MBPP_TASKS]
 
 
 @NamedTasksGroupRegistry.register("fim::olmo3")
 class FimOLMo3Group(BaseAverageNamedTasksGroup):
-    tasks = [f'{task}::olmo3' for task in constants.FIM_TASKS]
+    tasks = [f"{task}::olmo3" for task in constants.FIM_TASKS]
 
 
 @NamedTasksGroupRegistry.register("crux-eval")
@@ -552,7 +548,7 @@ def make_helmet_group(helmet_length: int) -> Type[BaseAverageNamedTasksGroup]:
 
 
 for helmet_length in (int(2**i) for i in range(13, 18)):
-    NamedTasksGroupRegistry.register(f"helmet:{helmet_length // 2 ** 10}k")(make_helmet_group(helmet_length))
+    NamedTasksGroupRegistry.register(f"helmet:{helmet_length // 2**10}k")(make_helmet_group(helmet_length))
 
 
 # this function programmatically makes ruler tasks
@@ -574,14 +570,14 @@ _RULER_GROUPS_BY_LENGTH: dict[int, Type[BaseAverageNamedTasksGroup]] = {}
 
 for ruler_length in (int(2**i) for i in range(12, 18)):
     _ruler_group = make_ruler_group(ruler_length)
-    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2 ** 10}k")(_ruler_group)
+    NamedTasksGroupRegistry.register(f"ruler:{ruler_length // 2**10}k")(_ruler_group)
     _RULER_GROUPS_BY_LENGTH[ruler_length] = _ruler_group
 
 
 # for olmo 3, we use 4k to 64k ruler tasks, so we make that a average of averages task group
 @NamedTasksGroupRegistry.register("olmo3:ruler:v1")
 class Ruler4kTo64kOlmo3SuiteGroup(BaseNamedTasksWithNoAverageGroup):
-    tasks = [_RULER_GROUPS_BY_LENGTH[int(2 ** i)]() for i in range(12, 17)]
+    tasks = [_RULER_GROUPS_BY_LENGTH[int(2**i)]() for i in range(12, 17)]
 
 
 @NamedTasksGroupRegistry.register("minerva:bpb")
@@ -619,14 +615,12 @@ class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
         "winogrande:bpb::olmes:full",
         "socialiqa:bpb::olmes:full",
         "piqa:bpb::olmes:full",
-
         # Gen OLMES
         "coqa:bpb::gen2mc",
         "drop:bpb::gen2mc",
         "jeopardy:bpb::gen2mc",
         "naturalqs:bpb::gen2mc",
         "squad:bpb::gen2mc",
-
         # New OLMo 3
         "sciq:bpb::olmo3",
         "qasper_yesno:bpb::olmes",
@@ -639,6 +633,7 @@ class Olmo3Dev1bQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
         "sciriff_yesno:bpb::olmes",
     ]
 
+
 @NamedTasksGroupRegistry.register("olmo3:dev:1b:qa:bpb:v2")
 class Olmo3Dev1bQaBpbV2Group(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
@@ -650,14 +645,12 @@ class Olmo3Dev1bQaBpbV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "winogrande:bpb::olmes:full",
         "socialiqa:bpb::olmes:full",
         "piqa:bpb::olmes:full",
-
         # Gen OLMES
         "coqa:bpb::gen2mc:xlarge",
         "drop:bpb::gen2mc:xlarge",
         "jeopardy:bpb::gen2mc:xlarge",
         "naturalqs:bpb::gen2mc:xlarge",
         "squad:bpb::gen2mc:xlarge",
-
         # New OLMo 3
         "sciq:bpb::olmo3",
         "qasper_yesno:bpb::olmes",
@@ -682,14 +675,12 @@ class Olmo3Dev1bQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
         "winogrande:rc::olmes:full",
         "socialiqa:rc::olmes:full",
         "piqa:rc::olmes:full",
-
         # Gen OLMES
         "coqa:rc::gen2mc",
         "drop:rc::gen2mc",
         "jeopardy:rc::gen2mc",
         "naturalqs:rc::gen2mc",
         "squad:rc::gen2mc",
-
         # New OLMo 3
         "sciq:rc::olmo3",
         "qasper_yesno:rc::olmes",
@@ -714,14 +705,12 @@ class Olmo3Dev1bQaRcV2Group(BaseAverageOfAveragesNamedTasksGroup):
         "winogrande:rc::olmes:full",
         "socialiqa:rc::olmes:full",
         "piqa:rc::olmes:full",
-
         # Gen OLMES
         "coqa:rc::gen2mc:xlarge",
         "drop:rc::gen2mc:xlarge",
         "jeopardy:rc::gen2mc:xlarge",
         "naturalqs:rc::gen2mc:xlarge",
         "squad:rc::gen2mc:xlarge",
-
         # New OLMo 3
         "sciq:rc::olmo3",
         "qasper_yesno:rc::olmes",
@@ -740,13 +729,12 @@ class Olmo3Dev1bBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         # QA
         Olmo3Dev1bQaBpbGroup(),
-
         # Math
         MinervaBpbGroup(),
-
         # Code
         Olmo3Dev1bCodeBpbGroup(),
     ]
+
 
 @NamedTasksGroupRegistry.register("olmo3:dev:7b:math:v2")
 class Olmo3Dev7bMathV2Group(BaseAverageOfAveragesNamedTasksGroup):
@@ -865,6 +853,82 @@ class Olmo3Dev7bMcqaNonSTEMV2Group(BaseAverageOfAveragesNamedTasksGroup):
     ]
 
 
+@NamedTasksGroupRegistry.register("olmo3:base_easy:math_bpb")
+class Olmo3BaseEasyMathBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "minerva_math_algebra:bpb::olmes",
+        "minerva_math_counting_and_probability:bpb::olmes",
+        "minerva_math_geometry:bpb::olmes",
+        "minerva_math_intermediate_algebra:bpb::olmes",
+        "minerva_math_number_theory:bpb::olmes",
+        "minerva_math_prealgebra:bpb::olmes",
+        "minerva_math_precalculus:bpb::olmes",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:base_easy:code_bpb")
+class Olmo3BaseEasyCodeBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        "codex_humaneval:3shot:bpb::none",
+        "mbpp:3shot:bpb::none",
+        MtMbppV2fixGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:base_easy:qa_rc")
+class Olmo3BaseEasyQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        ARCRCFullGroup(),
+        MMLURCGroup(),
+        "csqa:rc::olmes:full",
+        "hellaswag:rc::olmes:full",
+        "winogrande:rc::olmes:full",
+        "socialiqa:rc::olmes:full",
+        "piqa:rc::olmes:full",
+        "coqa:rc::gen2mc:xlarge",
+        "drop:rc::gen2mc:xlarge",
+        "jeopardy:rc::gen2mc:xlarge",
+        "naturalqs:rc::gen2mc:xlarge",
+        "squad:rc::gen2mc:xlarge",
+        "sciq:rc::olmo3",
+        "qasper_yesno:rc::olmes",
+        BasicRCGroup(),
+        "lab_bench_dbqa",
+        "lab_bench_protocolqa",
+        "lambada",
+        "medmcqa:rc::none",
+        "medqa_en:rc::none",
+        "sciriff_yesno:rc::olmes",
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:base_easy:qa_bpb")
+class Olmo3BaseEasyQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
+    tasks = [
+        ARCBPBFullGroup(),
+        MMLUBpbGroup(),
+        "csqa:rc:bpb::olmes:full",
+        "hellaswag:rc:bpb::olmes:full",
+        "winogrande:rc:bpb::olmes:full",
+        "socialiqa:rc:bpb::olmes:full",
+        "piqa:rc:bpb::olmes:full",
+        "coqa:rc:bpb::gen2mc:xlarge",
+        "drop:rc:bpb::gen2mc:xlarge",
+        "jeopardy:rc:bpb::gen2mc:xlarge",
+        "naturalqs:rc:bpb::gen2mc:xlarge",
+        "squad:rc:bpb::gen2mc:xlarge",
+        "sciq:rc:bpb::olmo3",
+        "qasper_yesno:rc:bpb::olmes",
+        BasicBpbGroup(),
+        "lab_bench_dbqa:bpb",
+        "lab_bench_protocolqa:bpb",
+        "lambada:bpb",
+        "medmcqa:rc:bpb::none",
+        "medqa_en:rc:bpb::none",
+        "sciriff_yesno:rc:bpb::olmes",
+    ]
+
+
 # # # # # # # # # # # # # # # DISPLAY TASK GROUPS # # # # # # # # # # # # # # # # #
 #  These are just shortcuts to display many metrics at once. no need to average.  #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -887,7 +951,7 @@ class Olmo2PaperGroup(BaseNamedTasksWithNoAverageGroup):
         MMLURCGroup(),
         CoreMCGroup(),
         MMLUProMCGroup(),
-        "triviaqa::olmes"
+        "triviaqa::olmes",
     ]
 
 
@@ -932,7 +996,7 @@ class Olmo3Dev1bMainGroup(BaseNamedTasksWithNoAverageGroup):
         MMLUBpbGroup(),
         "codex_humaneval:3shot:bpb::none",
         "mbpp:3shot:bpb::none",
-        MinervaBpbGroup()
+        MinervaBpbGroup(),
     ]
 
 
@@ -1064,7 +1128,6 @@ class Olmo3PaperGroup(BaseNamedTasksWithNoAverageGroup):
         Olmo3Dev1bCodeBpbGroup(),
         Olmo3Dev1bQaBpbV2Group(),
         Olmo3Dev1bQaRcV2Group(),
-
         # olmo3:base
         Olmo3Dev7bMcqaSTEMGroup(),
         Olmo3Dev7bMcqaNonSTEMV2Group(),
@@ -1072,10 +1135,18 @@ class Olmo3PaperGroup(BaseNamedTasksWithNoAverageGroup):
         Olmo3Dev7bMathV2Group(),
         Olmo3Dev7bCodeGenV2Group(),
         Olmo3Dev7bCodeFimGroup(),
-
         # olmo3:base_chat
         Olmo3DevMidtrainV2MainGroup(),
-
         # olmo3:heldout
         Olmo3BaseHeldoutGroup(),
+    ]
+
+
+@NamedTasksGroupRegistry.register("olmo3:base_easy")
+class Olmo3BaseEasyGroup(BaseNamedTasksWithNoAverageGroup):
+    tasks = [
+        Olmo3BaseEasyMathBpbGroup(),
+        Olmo3BaseEasyCodeBpbGroup(),
+        Olmo3BaseEasyQaBpbGroup(),
+        Olmo3BaseEasyQaRcGroup(),
     ]
