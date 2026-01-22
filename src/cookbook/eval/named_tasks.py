@@ -214,6 +214,11 @@ class MMLUBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:bpb::olmes" for category in constants.MMLU_CATEGORIES]
 
 
+@NamedTasksGroupRegistry.register("mmlu:rc:bpb")
+class MMLURcBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:rc:bpb::olmes" for category in constants.MMLU_CATEGORIES]
+
+
 @NamedTasksGroupRegistry.register("mmlu:mc")
 class MMLUMCGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:mc::olmes" for category in constants.MMLU_CATEGORIES]
@@ -289,6 +294,11 @@ class ARCBPBFullGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:bpb::olmes:full" for category in constants.ARC_TASKS]
 
 
+@NamedTasksGroupRegistry.register("arc:rc:bpb::full")
+class ARCRcBpbFullGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{category}:rc:bpb::olmes:full" for category in constants.ARC_TASKS]
+
+
 @NamedTasksGroupRegistry.register("arc:rc::full")
 class ARCRCFullGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{category}:rc::olmes:full" for category in constants.ARC_TASKS]
@@ -312,6 +322,11 @@ class ARCMCXlargeGroup(BaseAverageNamedTasksGroup):
 @NamedTasksGroupRegistry.register("basic:bpb")
 class BasicBpbGroup(BaseAverageNamedTasksGroup):
     tasks = [f"{task}:bpb::olmes" for task in constants.BASIC_SKILLS]
+
+
+@NamedTasksGroupRegistry.register("basic:rc:bpb")
+class BasicRcBpbGroup(BaseAverageNamedTasksGroup):
+    tasks = [f"{task}:rc:bpb::olmes" for task in constants.BASIC_SKILLS]
 
 
 @NamedTasksGroupRegistry.register("basic:rc")
@@ -905,8 +920,8 @@ class Olmo3BaseEasyQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
 @NamedTasksGroupRegistry.register("olmo3:base_easy:qa_bpb")
 class Olmo3BaseEasyQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
-        ARCBPBFullGroup(),
-        MMLUBpbGroup(),
+        ARCRcBpbFullGroup(),
+        MMLURcBpbGroup(),
         "csqa:rc:bpb::olmes:full",
         "hellaswag:rc:bpb::olmes:full",
         "winogrande:rc:bpb::olmes:full",
@@ -919,7 +934,7 @@ class Olmo3BaseEasyQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
         "squad:rc:bpb::gen2mc:xlarge",
         "sciq:rc:bpb::olmo3",
         "qasper_yesno:rc:bpb::olmes",
-        BasicBpbGroup(),
+        BasicRcBpbGroup(),
         "lab_bench_dbqa:bpb",
         "lab_bench_protocolqa:bpb",
         "lambada:bpb",
