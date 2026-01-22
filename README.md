@@ -135,6 +135,25 @@ You can also provide a list of `--models` regular expressions to filter the mode
 
 You can use `--format json` to see full results when model names are long.
 
+## How to Run Pairwise Analysis of Models
+
+### Install dependencies
+```shell
+pip install ".[analysis]"
+```
+
+### Download and preprocess results
+```shell
+olmo-cookbook-analysis download --dashboard "debug-bos-fix"
+```
+
+### Run pairwise analysis
+```shell
+olmo-cookbook-analysis run --dashboard "debug-bos-fix"
+```
+
+### View pairwise analysis results
+Plots are written to `/tmp/cookbook/analysis/peteish32/plots` and can be viewed with your preferred PDF viewer.
 
 
 ## Running OLMo-core script
