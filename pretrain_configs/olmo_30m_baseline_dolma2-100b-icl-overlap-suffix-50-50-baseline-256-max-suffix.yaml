@@ -1,0 +1,25 @@
+name: "suffix-train-olmo2-5xC-30m-dense-dolma2-100B-icl-overlap-suffix-50-50-baseline-256-max-suffix"
+description: "suffix train 30M @ 5xC scale on dolma2 100B icl overlap suffix 50/50 baseline with max suffix length 256"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 1
+preemptible: true
+max_tokens: 2_910_233_600
+sequence_length: 2048
+global_batch_size: 131072
+seed: 1337
+learning_rate: 0.007276622186288963
+model: "olmo_30m"
+tokenizer: "dolma2"
+weka: false
+priority: low
+cluster: ai2/titan
+dataset:
+  sources:
+    - name: dolma2-100b-icl-overlap-suffix-dolma2-100b-50-50
+      target_ratio: 1.0
+      paths:
+        - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-suffix-icl-overlap-max-suffix-256/allenai/dolma2-tokenizer/*.npy
+        - s3://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
+  
