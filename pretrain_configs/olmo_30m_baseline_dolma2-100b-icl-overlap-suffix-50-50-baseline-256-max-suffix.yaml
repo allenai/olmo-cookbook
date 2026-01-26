@@ -14,7 +14,7 @@ model: "olmo_30m"
 tokenizer: "dolma2"
 weka: false
 priority: high
-cluster: aus80g
+cluster: ai2/jupiter
 dataset:
   chunk_based_mixture: true
   sources:
