@@ -13,13 +13,16 @@ learning_rate: 0.007276622186288963
 model: "olmo_30m"
 tokenizer: "dolma2"
 weka: false
-priority: low
+priority: high
 cluster: ai2/titan
 dataset:
   sources:
-    - name: dolma2-100b-icl-overlap-suffix-dolma2-100b-50-50
-      target_ratio: 1.0
+    - name: dolma2-100b-icl-overlap-suffix-dolma2-100b
+      target_ratio: 0.5
       paths:
         - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-suffix-icl-overlap-max-suffix-256/allenai/dolma2-tokenizer/*.npy
+    - name: dolma2-100b-baseline
+      target_ratio: 0.5
+      paths:
         - s3://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
   
