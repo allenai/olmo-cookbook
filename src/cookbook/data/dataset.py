@@ -24,14 +24,21 @@ class MixtureBuilder:
     dtype: NumpyDatasetDType
     processes: int = 1
     cached_fs: dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]] = field(
-        default_factory=lambda: dict(
-            s3=s3fs.S3FileSystem(),
-            weka=s3fs.S3FileSystem(
-                client_kwargs={"endpoint_url": os.environ["WEKA_ENDPOINT_URL"]}, profile="WEKA"
-            ),
-            gs=gcsfs.GCSFileSystem(),
-        )
+        default_factory=lambda: dict(s3=s3fs.S3FileSystem())  # Only init S3 eagerly
     )
+
+    def _get_fs(self, scheme: str) -> Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]:
+        """Get filesystem for scheme, initializing lazily if needed."""
+        if scheme not in self.cached_fs:
+            if scheme == "weka":
+                # profile="WEKA" reads endpoint_url from AWS config [profile WEKA]
+                self.cached_fs[scheme] = s3fs.S3FileSystem(profile="WEKA")
+            elif scheme == "gs":
+                self.cached_fs[scheme] = gcsfs.GCSFileSystem()
+            else:
+                # Fall back to S3 for unknown schemes
+                return self.cached_fs["s3"]
+        return self.cached_fs[scheme]
 
     def build(self) -> SourceMixtureDatasetConfig:
         source_configs: List[SourceMixtureConfig] = []
@@ -48,7 +55,7 @@ class MixtureBuilder:
 
             scheme = schemes.pop()
 
-            expanded = paths + expand_globs(self.cached_fs.get(scheme, self.cached_fs["s3"]), globs)
+            expanded = paths + expand_globs(self._get_fs(scheme), globs)
 
             if len(expanded) == 0:
                 raise ValueError(f"No paths found for source {source.name}")
