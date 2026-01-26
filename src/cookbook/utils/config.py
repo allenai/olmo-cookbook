@@ -257,7 +257,8 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install -e '.[all]'",
-                "pip install --upgrade 'beaker-py>=2.5.0'",
+                "pip uninstall -y beaker beaker-py || true",
+                "pip install 'beaker-py>=1.36.0,<2.0'",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
