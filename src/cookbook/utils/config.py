@@ -238,7 +238,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             budget=group.config.budget or "ai2/oe-base",
             workspace=group.config.workspace,
             preemptible=group.config.preemptible,
-            beaker_image="petew/olmo-core-tch270cu128-2025-05-16",
+            beaker_image="petew/olmo-core-tch270cu128",
             priority=group.config.priority,
             env_vars=[BeakerEnvVar(name="NCCL_DEBUG", value="INFO" if group.config.nccl_debug else "WARN")],
             env_secrets=[
@@ -257,6 +257,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
                 'git checkout "$GIT_REF"',
                 "git submodule update --init --recursive",
                 "pip install -e '.[all]'",
+                "pip install --upgrade 'beaker-py>=2.5.0'",
                 "pip freeze",
                 # Move AWS credentials from env to relevant files
                 "mkdir -p ~/.aws",
