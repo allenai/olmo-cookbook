@@ -21,7 +21,7 @@ dataset:
     - name: rnd-cat-baseline-suffix-dolma2-100b-2048
       target_ratio: 0.5
       paths:
-        - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-suffix-rnd-cat-max-suffix-256/allenai/dolma2-tokenizer/*.npy
+        - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-suffix-rnd-cat-max-suffix-2048/allenai/dolma2-tokenizer/*.npy
     - name: dolma2-100b-baseline
       target_ratio: 0.5
       paths:
