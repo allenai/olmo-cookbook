@@ -40,6 +40,7 @@ class DatasetConfig(BaseModel):
     dtype: NumpyDatasetDType = NumpyDatasetDType.uint32
     processes: int = 16
     seed: int = 42
+    chunk_based_mixture: bool = False
 
 
 class MetricBackend(Enum):

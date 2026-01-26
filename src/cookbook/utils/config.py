@@ -182,6 +182,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         model_overrides=base_config.model_overrides,
         activation_checkpointing=base_config.activation_checkpointing,
         load_path_fs=load_path_fs,
+        chunk_based_mixture=base_config.dataset.chunk_based_mixture,
     ).build()
 
     seed_all(config.init_seed)

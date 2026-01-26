@@ -194,6 +194,7 @@ class TransformerConfigBuilder:
     activation_checkpointing: bool
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
+    chunk_based_mixture: bool = False
 
     def __init__(
         self,
@@ -228,6 +229,7 @@ class TransformerConfigBuilder:
         seed: int = 42,
         warmup_steps: Optional[int] = None,
         profile: bool = False,
+        chunk_based_mixture: bool = False,
     ):
         self.run_name = run_name
         self.sources = sources
@@ -265,6 +267,7 @@ class TransformerConfigBuilder:
         self.checkpoint_dir = f"{self.data_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
         self.eval_interval = eval_interval
         self.cluster = cluster
+        self.chunk_based_mixture = chunk_based_mixture
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
@@ -448,6 +451,7 @@ class TransformerConfigBuilder:
             tokenizer=self.tokenizer,
             mix_base_dir=self.root_dir,
             work_dir=self.work_dir,
+            chunk_based_mixture=self.chunk_based_mixture,
         )
 
         return dataset_config
