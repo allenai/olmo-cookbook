@@ -13,7 +13,7 @@ learning_rate: 0.007276622186288963
 model: "olmo_30m"
 tokenizer: "dolma2"
 weka: false
-priority: high
+priority: low
 cluster: ai2/titan
 dataset:
     dataset_type: shuffled_fsl
