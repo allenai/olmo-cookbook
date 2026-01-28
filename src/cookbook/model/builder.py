@@ -195,6 +195,11 @@ class TransformerConfigBuilder:
     annealing: Optional[AnnealConfig] = None
     profile: bool = False
     chunk_based_mixture: bool = False
+    # Shuffled FSL dataset options
+    dataset_type: str = "fsl"
+    max_window_size: Optional[int] = None
+    separator_token_id: Optional[int] = None
+    shuffle_seed: Optional[int] = None
 
     def __init__(
         self,
@@ -230,6 +235,10 @@ class TransformerConfigBuilder:
         warmup_steps: Optional[int] = None,
         profile: bool = False,
         chunk_based_mixture: bool = False,
+        dataset_type: str = "fsl",
+        max_window_size: Optional[int] = None,
+        separator_token_id: Optional[int] = None,
+        shuffle_seed: Optional[int] = None,
     ):
         self.run_name = run_name
         self.sources = sources
@@ -268,6 +277,10 @@ class TransformerConfigBuilder:
         self.eval_interval = eval_interval
         self.cluster = cluster
         self.chunk_based_mixture = chunk_based_mixture
+        self.dataset_type = dataset_type
+        self.max_window_size = max_window_size
+        self.separator_token_id = separator_token_id
+        self.shuffle_seed = shuffle_seed
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
@@ -442,17 +455,39 @@ class TransformerConfigBuilder:
             for source in self.sources:
                 source_paths.extend(source.paths)
 
-        dataset_config = NumpyDatasetConfig(
-            paths=source_paths,
-            source_mixture_config=mixture_config,
-            name=NumpyDatasetType.fsl,
-            sequence_length=self.sequence_length,
-            max_target_sequence_length=self.max_target_sequence_length,
-            tokenizer=self.tokenizer,
-            mix_base_dir=self.root_dir,
-            work_dir=self.work_dir,
-            chunk_based_mixture=self.chunk_based_mixture,
-        )
+        # Handle shuffled_fsl dataset type
+        if self.dataset_type == "shuffled_fsl":
+            if self.max_window_size is None:
+                raise ValueError("'max_window_size' is required for shuffled_fsl dataset type")
+            if self.separator_token_id is None:
+                raise ValueError("'separator_token_id' is required for shuffled_fsl dataset type")
+            if self.shuffle_seed is None:
+                raise ValueError("'shuffle_seed' is required for shuffled_fsl dataset type")
+            if mixture_config is not None:
+                raise ValueError("shuffled_fsl dataset type does not support source mixtures")
+
+            dataset_config = NumpyDatasetConfig(
+                paths=source_paths,
+                name=NumpyDatasetType.shuffled_fsl,
+                sequence_length=self.sequence_length,
+                max_window_size=self.max_window_size,
+                separator_token_id=self.separator_token_id,
+                shuffle_seed=self.shuffle_seed,
+                tokenizer=self.tokenizer,
+                work_dir=self.work_dir,
+            )
+        else:
+            dataset_config = NumpyDatasetConfig(
+                paths=source_paths,
+                source_mixture_config=mixture_config,
+                name=NumpyDatasetType.fsl,
+                sequence_length=self.sequence_length,
+                max_target_sequence_length=self.max_target_sequence_length,
+                tokenizer=self.tokenizer,
+                mix_base_dir=self.root_dir,
+                work_dir=self.work_dir,
+                chunk_based_mixture=self.chunk_based_mixture,
+            )
 
         return dataset_config
 

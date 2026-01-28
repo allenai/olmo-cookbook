@@ -35,12 +35,23 @@ class SourceInstance(BaseModel):
     repetition_factor: float = 1.0
 
 
+class DatasetType(str, Enum):
+    """Dataset type for training."""
+    fsl = "fsl"
+    shuffled_fsl = "shuffled_fsl"
+
+
 class DatasetConfig(BaseModel):
     sources: list[SourceConfig]
     dtype: NumpyDatasetDType = NumpyDatasetDType.uint32
     processes: int = 16
     seed: int = 42
     chunk_based_mixture: bool = False
+    # Shuffled FSL dataset options
+    dataset_type: DatasetType = DatasetType.fsl
+    max_window_size: Optional[int] = None
+    separator_token_id: Optional[int] = None
+    shuffle_seed: Optional[int] = None
 
 
 class MetricBackend(Enum):

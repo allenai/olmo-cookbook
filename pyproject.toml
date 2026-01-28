@@ -50,7 +50,7 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@overlap-pretrain",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@suffled-fsl",
     "beaker-py",
     "beaker-gantry",
     "GitPython>=3.0,<4.0",
