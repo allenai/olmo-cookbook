@@ -12,7 +12,7 @@ seed: 1337
 learning_rate: 0.007276622186288963
 model: "olmo_30m"
 tokenizer: "dolma2"
-weka: true
+weka: false
 priority: high
 cluster: ai2/titan
 dataset:
@@ -24,4 +24,4 @@ dataset:
         - name: dolma2-100b-baseline
           target_ratio: 1.0
           paths:
-            - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
+            - s3://ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
