@@ -1,7 +1,7 @@
 name: 1b-5xC-superswarm-65-seed-2-exact-1T-strong-prior
 description: 1B 5xC superswarm proposed mix (rep=4 @ 1T) from flat swarm, 65 runs exact seed 2 with finalized constraints and strong prior (ec86081c3d9dda9a)
 budget: ai2/oe-base
-workspace: ai2/mixing-evals
+workspace: ai2/dolma2
 nodes: 4
 gpus: 8
 preemptible: true
