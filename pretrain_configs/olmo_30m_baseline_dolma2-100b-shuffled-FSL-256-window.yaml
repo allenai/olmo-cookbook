@@ -24,4 +24,4 @@ dataset:
         - name: dolma2-100b-baseline
           target_ratio: 1.0
           paths:
-            - /weka/oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
+            - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
