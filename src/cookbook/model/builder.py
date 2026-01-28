@@ -200,6 +200,7 @@ class TransformerConfigBuilder:
     max_window_size: Optional[int] = None
     separator_token_id: Optional[int] = None
     shuffle_seed: Optional[int] = None
+    truncate_from: str = "start"
 
     def __init__(
         self,
@@ -239,6 +240,7 @@ class TransformerConfigBuilder:
         max_window_size: Optional[int] = None,
         separator_token_id: Optional[int] = None,
         shuffle_seed: Optional[int] = None,
+        truncate_from: str = "start",
     ):
         self.run_name = run_name
         self.sources = sources
@@ -281,6 +283,7 @@ class TransformerConfigBuilder:
         self.max_window_size = max_window_size
         self.separator_token_id = separator_token_id
         self.shuffle_seed = shuffle_seed
+        self.truncate_from = truncate_from
 
         if any(substring in cluster for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
@@ -466,6 +469,8 @@ class TransformerConfigBuilder:
             if mixture_config is not None:
                 raise ValueError("shuffled_fsl dataset type does not support source mixtures")
 
+            from olmo_core.data.types import TruncateFrom as OlmoTruncateFrom
+
             dataset_config = NumpyDatasetConfig(
                 paths=source_paths,
                 name=NumpyDatasetType.shuffled_fsl,
@@ -473,6 +478,7 @@ class TransformerConfigBuilder:
                 max_window_size=self.max_window_size,
                 separator_token_id=self.separator_token_id,
                 shuffle_seed=self.shuffle_seed,
+                truncate_from=OlmoTruncateFrom(self.truncate_from),
                 tokenizer=self.tokenizer,
                 work_dir=self.work_dir,
             )

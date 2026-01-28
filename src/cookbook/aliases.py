@@ -41,6 +41,12 @@ class DatasetType(str, Enum):
     shuffled_fsl = "shuffled_fsl"
 
 
+class TruncateFrom(str, Enum):
+    """Which end of documents to keep when truncating."""
+    start = "start"
+    end = "end"
+
+
 class DatasetConfig(BaseModel):
     sources: list[SourceConfig]
     dtype: NumpyDatasetDType = NumpyDatasetDType.uint32
@@ -52,6 +58,7 @@ class DatasetConfig(BaseModel):
     max_window_size: Optional[int] = None
     separator_token_id: Optional[int] = None
     shuffle_seed: Optional[int] = None
+    truncate_from: TruncateFrom = TruncateFrom.start
 
 
 class MetricBackend(Enum):

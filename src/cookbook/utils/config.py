@@ -187,6 +187,7 @@ def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_u
         max_window_size=base_config.dataset.max_window_size,
         separator_token_id=base_config.dataset.separator_token_id,
         shuffle_seed=base_config.dataset.shuffle_seed,
+        truncate_from=base_config.dataset.truncate_from.value,
     ).build()
 
     seed_all(config.init_seed)

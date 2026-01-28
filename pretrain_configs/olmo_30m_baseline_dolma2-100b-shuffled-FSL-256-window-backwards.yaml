@@ -1,0 +1,28 @@
+name: "suffix-train-olmo2-5xC-30m-dense-dolma2-100b-shuffled-FSL-256-window-backwards"
+description: "suffix train 30M @ 5xC scale on dolma2 100B with shuffled FSL 256 window (keep suffix)"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 1
+preemptible: true
+max_tokens: 2_910_233_600
+sequence_length: 2048
+global_batch_size: 131072
+seed: 1337
+learning_rate: 0.007276622186288963
+model: "olmo_30m"
+tokenizer: "dolma2"
+weka: true
+priority: low
+cluster: ai2/titan
+dataset:
+    dataset_type: shuffled_fsl
+    max_window_size: 256
+    separator_token_id: 100274  # EOS token for dolma2 tokenizer
+    shuffle_seed: 1337
+    truncate_from: end  # Keep the last 256 tokens (suffix) instead of first 256
+    sources:
+        - name: dolma2-100b-baseline
+          target_ratio: 1.0
+          paths:
+            - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1-100b/allenai/dolma2-tokenizer/*/*.npy
