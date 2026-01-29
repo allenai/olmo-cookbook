@@ -2,13 +2,18 @@ import concurrent.futures
 import logging
 import os
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import click
 import yaml
 from beaker import Beaker
 from beaker.exceptions import SecretNotFound
 from beaker.services.job import JobClient
+from olmo_core.launch.beaker import (
+    BeakerEnvSecret,
+    BeakerLaunchConfig,
+    BeakerWekaBucket,
+)
 from olmo_core.utils import generate_uuid, prepare_cli_environment
 from tqdm import tqdm
 from yaspin import yaspin
@@ -375,6 +380,134 @@ def prepare_user_workspace(
             if user not in secret_name:
                 beaker.secret.write(secret_name, "[blank]", workspace=target_workspace)
                 print(f"Writing blank value for {secret_name}")
+
+
+@cli.command("sample-data")
+@click.option(
+    "-c",
+    "--config",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to the experiment configuration file.",
+)
+@click.option(
+    "-n",
+    "--num-samples",
+    type=int,
+    default=10,
+    help="Number of instances to sample.",
+)
+@click.option(
+    "-s",
+    "--start-idx",
+    type=int,
+    default=0,
+    help="Starting instance index to sample from.",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Print the Beaker experiment spec without launching.",
+)
+def sample_data(config: Path, num_samples: int, start_idx: int, dry_run: bool):
+    """Launch a remote job to sample training data from a dataset.
+    
+    This command launches a CPU-only Beaker job that samples training instances
+    from the configured dataset, decodes them, and outputs both the decoded text
+    and document metadata to /results/samples.jsonl.
+    """
+    with open(config, "r") as f:
+        data = yaml.safe_load(f)
+
+    experiment_config = ExperimentConfig(**data, path=config)
+    
+    beaker_user = (Beaker.from_env().account.whoami().name).upper()  # pyright: ignore
+    job_name = f"sample-data-{experiment_config.name}-{generate_uuid()[:8]}"
+    
+    logger.info(f"Launching sample-data job '{job_name}' as user '{beaker_user}'")
+    logger.info(f"Config: {config}")
+    logger.info(f"Sampling {num_samples} instances starting from index {start_idx}")
+    
+    # Build weka bucket mounts if needed
+    weka_buckets: List[BeakerWekaBucket] = []
+    if experiment_config.weka:
+        weka_buckets.append(BeakerWekaBucket("oe-training-default", "/weka/oe-training-default"))
+    
+    # Build the command to run sample_data.py
+    cmd = [
+        "src/cookbook/sample_data.py",
+        "sample",
+        "-C", str(config),
+        "-n", str(num_samples),
+        "-s", str(start_idx),
+        "-o", "/results/samples.jsonl",
+    ]
+    
+    launch_config = BeakerLaunchConfig(
+        name=job_name,
+        description=f"Sample data from {experiment_config.name}",
+        task_name=job_name,
+        cmd=cmd,
+        clusters=[experiment_config.cluster],
+        num_nodes=1,
+        num_gpus=0,  # CPU-only job
+        shared_filesystem=experiment_config.weka,
+        allow_dirty=True,
+        weka_buckets=weka_buckets,
+        budget=experiment_config.budget or "ai2/oe-base",
+        workspace=experiment_config.workspace,
+        preemptible=True,
+        beaker_image="petew/olmo-core-tch270cu128",
+        priority=experiment_config.priority,
+        env_secrets=[
+            BeakerEnvSecret(name="BEAKER_TOKEN", secret=f"{beaker_user}_BEAKER_TOKEN"),
+            BeakerEnvSecret(name="WANDB_API_KEY", secret=f"{beaker_user}_WANDB_API_KEY"),
+            BeakerEnvSecret(name="AWS_CONFIG", secret=f"{beaker_user}_AWS_CONFIG"),
+            BeakerEnvSecret(name="AWS_CREDENTIALS", secret=f"{beaker_user}_AWS_CREDENTIALS"),
+            BeakerEnvSecret(name="R2_ENDPOINT_URL", secret="R2_ENDPOINT_URL"),
+            BeakerEnvSecret(name="WEKA_ENDPOINT_URL", secret="WEKA_ENDPOINT_URL"),
+            BeakerEnvSecret(name="GOOGLE_CLOUD_PROJECT", secret="GOOGLE_CLOUD_PROJECT"),
+        ],
+        setup_steps=[
+            'git clone "$REPO_URL"',
+            "conda shell.bash activate base",
+            "cd olmo-cookbook",
+            'git checkout "$GIT_REF"',
+            "git submodule update --init --recursive",
+            "pip install -e '.[all]'",
+            "pip uninstall -y beaker beaker-py || true",
+            "pip install 'beaker-py>=1.36.0,<2.0'",
+            "pip freeze",
+            # Move AWS credentials from env to relevant files
+            "mkdir -p ~/.aws",
+            "printenv AWS_CONFIG > ~/.aws/config",
+            "printenv AWS_CREDENTIALS > ~/.aws/credentials",
+        ],
+    )
+    
+    if dry_run:
+        logger.info("Dry run mode enabled. Printing experiment spec...")
+        spec = launch_config.build_experiment_spec(torchrun=False)
+        logger.info(spec)
+        return
+    
+    if not click.confirm("Proceed with launching the sample-data job?", default=False):
+        logger.info("Launch cancelled!")
+        return
+    
+    with yaspin(text="Launching sample-data job...", color="yellow") as spinner:
+        try:
+            # Launch without torchrun since this is a single-process CPU job
+            experiment = launch_config.launch(torchrun=False)
+            spinner.ok("✔")
+            logger.info(f"Sample-data job launched successfully!")
+            logger.info(f"Experiment: {experiment.id}")
+            logger.info(f"View at: https://beaker.org/ex/{experiment.id}")
+        except Exception as e:
+            spinner.fail("✗")
+            logger.error(f"Failed to launch sample-data job: {e}")
+            raise
 
 
 cli.command()(evaluate_model)

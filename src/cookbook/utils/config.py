@@ -121,6 +121,80 @@ def remote_fs_cache() -> dict[str, Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]
     return _REMOTE_FS_CACHE
 
 
+def build_dataset_only(config_path: Path):
+    """
+    Build only the dataset from an experiment config (no model/trainer).
+    
+    This is useful for sampling/inspecting training data without needing a GPU
+    or building the full training infrastructure.
+    
+    Args:
+        config_path: Path to the experiment configuration file.
+        
+    Returns:
+        Tuple of (dataset, tokenizer_identifier) where:
+        - dataset: The built NumpyDataset instance
+        - tokenizer_identifier: The HuggingFace tokenizer identifier string
+    """
+    from cookbook.model.config import Tokenizers
+    
+    base_config = config_from_path(config_path)
+    
+    # Normalize source paths for remote execution (expand globs, convert weka:// to /weka/)
+    source_paths = normalize_source_paths(base_config.dataset.sources, expand=True)
+    source_instances = mk_source_instances(source_paths, None)
+    
+    # Get tokenizer config to extract identifier
+    tokenizer_config = Tokenizers[base_config.tokenizer].value
+    tokenizer_identifier = tokenizer_config.identifier
+    
+    # Build dataset config using TransformerConfigBuilder's build_dataset_config method
+    # We need minimal builder setup just for dataset
+    builder = TransformerConfigBuilder(
+        beaker_user="sample-data",
+        cluster=base_config.cluster,
+        downstream_evaluators=[],
+        dtype=base_config.dataset.dtype,
+        eval_interval=1,
+        group_id="sample",
+        lm_evaluator=False,
+        max_dp_world_size=1,
+        max_target_sequence_length=base_config.max_target_sequence_length,
+        max_tokens=base_config.max_tokens,
+        model_identifier=base_config.model,
+        run_name="sample-data",
+        save_interval=1,
+        seed=base_config.seed,
+        sequence_length=base_config.sequence_length,
+        sources=source_instances,
+        tokenizer=base_config.tokenizer,
+        metrics_config=None,
+        weka=base_config.weka,
+        rank_microbatch_size=None,
+        global_batch_size=None,
+        load_path=None,
+        warmup_steps=None,
+        learning_rate=None,
+        scheduler_type=base_config.scheduler_type,
+        annealing=None,
+        hard_stop=None,
+        model_overrides=None,
+        activation_checkpointing=False,
+        load_path_fs=None,
+        chunk_based_mixture=base_config.dataset.chunk_based_mixture,
+        dataset_type=base_config.dataset.dataset_type.value,
+        max_window_size=base_config.dataset.max_window_size,
+        separator_token_id=base_config.dataset.separator_token_id,
+        shuffle_seed=base_config.dataset.shuffle_seed,
+        truncate_from=base_config.dataset.truncate_from.value,
+    )
+    
+    dataset_config = builder.build_dataset_config()
+    dataset = dataset_config.build()
+    
+    return dataset, tokenizer_identifier
+
+
 def build_train_config(config_path: Path, run_name: str, group_id: str, beaker_user: str, dry_run: bool = False):
     """
     Launch a training run with the given parameters.
