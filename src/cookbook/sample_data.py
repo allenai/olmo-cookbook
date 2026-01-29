@@ -4,16 +4,20 @@ Sample training data from a shuffled FSL dataset.
 This script is designed to run remotely on Beaker (without GPU) to sample
 training instances from a shuffled FSL dataset, decode them using the
 HuggingFace tokenizer, and output both the decoded text and document metadata.
+
+This version instruments the actual data pipeline rather than mimicking it,
+ensuring the document metadata exactly matches what the training sees.
 """
 
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import click
 import numpy as np
 import torch
+from olmo_core.data.numpy_dataset import NumpyShuffledFSLDataset
 from olmo_core.data.utils import load_array_slice_into_tensor
 from transformers import AutoTokenizer
 
@@ -22,66 +26,101 @@ from cookbook.utils.config import build_dataset_only
 logger = logging.getLogger(__name__)
 
 
-def get_documents_for_instance(
-    dataset,
-    instance_idx: int,
-) -> List[Dict[str, Any]]:
+class InstrumentedShuffledFSLDataset:
     """
-    Get document metadata for a given instance index.
+    A wrapper around NumpyShuffledFSLDataset that captures document metadata
+    during sampling by instrumenting the actual __getitem__ logic.
     
-    Returns a list of document info dicts containing:
-    - shuffled_idx: position in shuffled order
-    - orig_idx: original document index
-    - file_idx: source file index
-    - file_path: path to source file
-    - doc_start: start position in file
-    - orig_len: original document length
-    - proc_len: processed length (after truncation)
-    - local_start: start offset within document for this instance
-    - local_end: end offset within document for this instance
+    This ensures we get exactly the same document information that the
+    training pipeline sees, avoiding any discrepancies from reimplementing
+    the sampling logic.
     """
-    # Ensure index is loaded
-    dataset._load_or_build_index()
     
-    assert dataset._cumsum is not None
-    assert dataset._permutation is not None
-    assert dataset._doc_metadata is not None
+    def __init__(self, dataset: NumpyShuffledFSLDataset):
+        self.dataset = dataset
+        self._last_documents: List[Dict[str, Any]] = []
     
-    sequence_length = dataset.sequence_length
-    start_token = instance_idx * sequence_length
-    end_token = start_token + sequence_length
+    def __len__(self) -> int:
+        return len(self.dataset)
     
-    # Binary search to find documents spanning this token range
-    first_doc = int(np.searchsorted(dataset._cumsum, start_token, side="right")) - 1
-    last_doc = int(np.searchsorted(dataset._cumsum, end_token, side="left"))
+    @property
+    def sequence_length(self) -> int:
+        return self.dataset.sequence_length
     
-    # Clamp to valid range
-    first_doc = max(0, first_doc)
-    last_doc = min(last_doc, len(dataset._permutation) - 1)
-    
-    documents = []
-    for shuffled_idx in range(first_doc, last_doc + 1):
-        orig_idx = int(dataset._permutation[shuffled_idx])
-        file_idx, doc_start, orig_len, proc_len = dataset._doc_metadata[orig_idx]
+    def get_instance_with_metadata(self, index: int) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+        """
+        Get an instance along with metadata about the documents that compose it.
         
-        # Calculate which portion of this document is in this instance
-        doc_start_in_stream = int(dataset._cumsum[shuffled_idx])
-        local_start = max(0, start_token - doc_start_in_stream)
-        local_end = min(int(proc_len), end_token - doc_start_in_stream)
+        This reimplements __getitem__ but captures document info as it goes,
+        using the exact same logic as the original to ensure consistency.
         
-        documents.append({
-            "shuffled_idx": shuffled_idx,
-            "orig_idx": orig_idx,
-            "file_idx": int(file_idx),
-            "file_path": str(dataset.paths[int(file_idx)]),
-            "doc_start": int(doc_start),
-            "orig_len": int(orig_len),
-            "proc_len": int(proc_len),
-            "local_start": local_start,
-            "local_end": local_end,
-        })
-    
-    return documents
+        Returns:
+            Tuple of (instance_dict, documents_list) where:
+            - instance_dict: {"input_ids": tensor} same as original __getitem__
+            - documents_list: list of document metadata dicts
+        """
+        dataset = self.dataset
+        
+        index = int(index)
+        pos_index = index if index >= 0 else len(dataset) + index
+        
+        if pos_index < 0 or pos_index >= len(dataset):
+            raise IndexError(f"{index} is out of bounds for dataset of size {len(dataset)}")
+        
+        # Ensure index is loaded
+        dataset._load_or_build_index()
+        assert dataset._cumsum is not None
+        assert dataset._permutation is not None
+        assert dataset._doc_metadata is not None
+        
+        start_token = pos_index * dataset.sequence_length
+        end_token = start_token + dataset.sequence_length
+        
+        # Binary search: find the documents that span this token range
+        first_doc = int(np.searchsorted(dataset._cumsum, start_token, side="right")) - 1
+        last_doc = int(np.searchsorted(dataset._cumsum, end_token, side="left"))
+        
+        # Clamp to valid range
+        first_doc = max(0, first_doc)
+        last_doc = min(last_doc, len(dataset._permutation) - 1)
+        
+        tokens_list: List[torch.Tensor] = []
+        documents: List[Dict[str, Any]] = []
+        
+        for shuffled_idx in range(first_doc, last_doc + 1):
+            orig_idx = int(dataset._permutation[shuffled_idx])
+            file_idx, doc_start, orig_len, proc_len = dataset._doc_metadata[orig_idx]
+            
+            # Read and process this document (same as original)
+            doc_tokens = dataset._read_document(int(file_idx), int(doc_start), int(orig_len), int(proc_len))
+            
+            # Calculate which portion of this document we need
+            doc_start_in_stream = int(dataset._cumsum[shuffled_idx])
+            local_start = max(0, start_token - doc_start_in_stream)
+            local_end = min(int(proc_len), end_token - doc_start_in_stream)
+            
+            # This is the key check from the original code - only include docs
+            # that actually contribute tokens to this instance
+            if local_start < local_end:
+                tokens_list.append(doc_tokens[local_start:local_end])
+                
+                # Capture document metadata for this contributing document
+                documents.append({
+                    "shuffled_idx": shuffled_idx,
+                    "orig_idx": orig_idx,
+                    "file_idx": int(file_idx),
+                    "file_path": str(dataset.paths[int(file_idx)]),
+                    "doc_start": int(doc_start),
+                    "orig_len": int(orig_len),
+                    "proc_len": int(proc_len),
+                    "local_start": local_start,
+                    "local_end": local_end,
+                    "tokens_contributed": local_end - local_start,
+                })
+        
+        input_ids = torch.cat(tokens_list) if tokens_list else torch.tensor([], dtype=torch.long)
+        
+        return {"input_ids": input_ids}, documents
 
 
 def read_full_document(
@@ -96,7 +135,7 @@ def read_full_document(
 
 
 def sample_and_decode_instance(
-    dataset,
+    instrumented_dataset: InstrumentedShuffledFSLDataset,
     tokenizer,
     instance_idx: int,
 ) -> Dict[str, Any]:
@@ -109,21 +148,18 @@ def sample_and_decode_instance(
     - token_ids: list of token IDs
     - documents: list of document info with full text
     """
-    # Get the instance tokens
-    instance = dataset[instance_idx]
+    # Get the instance tokens AND document metadata in one call
+    instance, doc_infos = instrumented_dataset.get_instance_with_metadata(instance_idx)
     input_ids = instance["input_ids"]
     
     # Detokenize the whole instance
     detokenized_instance = tokenizer.decode(input_ids.tolist())
     
-    # Get document metadata
-    doc_infos = get_documents_for_instance(dataset, instance_idx)
-    
     # Read and decode full documents
     documents = []
     for doc_info in doc_infos:
         full_doc_tokens = read_full_document(
-            dataset,
+            instrumented_dataset.dataset,
             doc_info["file_idx"],
             doc_info["doc_start"],
             doc_info["orig_len"],
@@ -154,13 +190,14 @@ def log_instance(sample: Dict[str, Any]) -> None:
     logger.info(sample["detokenized_instance"])
     logger.info("-" * 40)
     
-    logger.info(f"\n--- Document IDs in this instance ({len(sample['documents'])} documents) ---")
+    logger.info(f"\n--- Documents in this instance ({len(sample['documents'])} documents) ---")
     
     for i, doc in enumerate(sample["documents"]):
         logger.info(f"\n[DOC {i}] shuffled_idx={doc['shuffled_idx']}, orig_idx={doc['orig_idx']}, "
                    f"file_idx={doc['file_idx']}, orig_len={doc['orig_len']}, proc_len={doc['proc_len']}")
         logger.info(f"  File: {doc['file_path']}")
-        logger.info(f"  Portion used in instance: tokens [{doc['local_start']}:{doc['local_end']}]")
+        logger.info(f"  Portion in instance: tokens [{doc['local_start']}:{doc['local_end']}] "
+                   f"({doc['tokens_contributed']} tokens)")
         logger.info(f"\nFull document text ({doc['orig_len']} tokens):")
         logger.info("-" * 40)
         logger.info(doc["full_text"])
@@ -223,8 +260,11 @@ def sample(
     # Build dataset and get tokenizer info
     dataset, tokenizer_identifier = build_dataset_only(Path(config_path))
     
-    logger.info(f"Dataset built with {len(dataset)} instances")
-    logger.info(f"Sequence length: {dataset.sequence_length}")
+    # Wrap with instrumentation
+    instrumented_dataset = InstrumentedShuffledFSLDataset(dataset)
+    
+    logger.info(f"Dataset built with {len(instrumented_dataset)} instances")
+    logger.info(f"Sequence length: {instrumented_dataset.sequence_length}")
     logger.info(f"Loading tokenizer: {tokenizer_identifier}")
     
     # Load the HuggingFace tokenizer for decoding
@@ -235,13 +275,13 @@ def sample(
     for i in range(num_samples):
         instance_idx = start_idx + i
         
-        if instance_idx >= len(dataset):
-            logger.warning(f"Instance index {instance_idx} exceeds dataset size {len(dataset)}, stopping.")
+        if instance_idx >= len(instrumented_dataset):
+            logger.warning(f"Instance index {instance_idx} exceeds dataset size {len(instrumented_dataset)}, stopping.")
             break
         
         logger.info(f"Sampling instance {instance_idx} ({i + 1}/{num_samples})...")
         
-        sample_data = sample_and_decode_instance(dataset, tokenizer, instance_idx)
+        sample_data = sample_and_decode_instance(instrumented_dataset, tokenizer, instance_idx)
         samples.append(sample_data)
         
         # Log to console
