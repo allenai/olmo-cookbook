@@ -21,7 +21,7 @@ dataset:
     - name: dolma2-full-icl-overlap-suffix-256
       target_ratio: 0.5
       paths:
-        - s3://ai2-llm/suffix-arrays/preprocessed/dolma2-0625-v01/icl-overlap-max-suffix-256/allenai/dolma2-tokenizer/*.npy
+        - weka://oe-training-default/ai2-llm/suffix-arrays/preprocessed/dolma2-0625-v01/icl-overlap-max-suffix-256/allenai/dolma2-tokenizer/*.npy
     - name: dolma2-100b-baseline
       target_ratio: 0.5
       paths:
