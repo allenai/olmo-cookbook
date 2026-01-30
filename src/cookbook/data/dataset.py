@@ -31,8 +31,10 @@ class MixtureBuilder:
         """Get filesystem for scheme, initializing lazily if needed."""
         if scheme not in self.cached_fs:
             if scheme == "weka":
-                # profile="WEKA" reads endpoint_url from AWS config [profile WEKA]
-                self.cached_fs[scheme] = s3fs.S3FileSystem(profile="WEKA")
+                self.cached_fs[scheme] = s3fs.S3FileSystem(
+                    profile="WEKA",
+                    client_kwargs={"endpoint_url": os.environ.get("WEKA_ENDPOINT_URL")}
+                )
             elif scheme == "gs":
                 self.cached_fs[scheme] = gcsfs.GCSFileSystem()
             else:
