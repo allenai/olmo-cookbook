@@ -332,6 +332,16 @@ def convert_checkpoint(
     ),
 )
 @click.option(
+    "--exclude-tasks",
+    type=str,
+    multiple=True,
+    default=[],
+    help=(
+        "Exclude tasks matching these patterns. Can be specified multiple times. "
+        "Tasks containing any of these patterns will be excluded from evaluation."
+    ),
+)
+@click.option(
     "-p",
     "--partition-size",
     type=int,
@@ -520,6 +530,7 @@ def evaluate_model(
     dashboard: str,
     model_backend: str,
     tasks: list[str],
+    exclude_tasks: list[str],
     partition_size: int,
     remote_output_prefix: str,
     extra_args: str,
@@ -590,13 +601,26 @@ def evaluate_model(
         # to match this model name, and finally find all missing tasks in results.
         dashboard_table = make_dashboard_table(dashboard=dashboard)
         results = make_results_from_dashboard(dashboard_table=dashboard_table, tasks=tasks, models=[model_name])
-        missing_tasks = find_missing_tasks(results=results)
+        missing_tasks = find_missing_tasks(results=results, dashboard_table=dashboard_table)
 
         # Override our tasks with the missing set
         if missing_tasks and model_name in missing_tasks:
             tasks = missing_tasks[model_name]
         else:
             print(f"Found no missing tasks for {model_name}")
+            return
+
+    # Apply task exclusions if specified
+    if exclude_tasks:
+        tasks_before = len(tasks) if isinstance(tasks, list) else len(list(tasks))
+        tasks = [task for task in tasks if not any(pattern in str(task) for pattern in exclude_tasks)]
+        tasks_after = len(tasks)
+
+        if tasks_before > tasks_after:
+            print(f"Excluded {tasks_before - tasks_after} tasks matching patterns: {', '.join(exclude_tasks)}")
+
+        if not tasks:
+            print("No tasks remaining after exclusions!")
             return
 
     evaluate_checkpoint(
@@ -717,7 +741,7 @@ def get_results(
     )
 
     # we find missing tasks in the results
-    missing_tasks = find_missing_tasks(results=results)
+    missing_tasks = find_missing_tasks(results=results, dashboard_table=dashboard_table)
 
     # we gotta let the user know if there are any missing tasks
     print_missing_tasks(missing_tasks=missing_tasks, models=models, tasks=tasks)

@@ -168,8 +168,20 @@ class ExpandedModels(NamedTuple):
         # we filtered tasks, but the user might want to display only some models
         rows_filter_models: list[str | re.Pattern] = []
         if len(models) > 0:
-            # okay we filter models too! do the same regex trick as above
-            rows_filter_models.extend(re.compile(m) if re.escape(m) != m else m for m in models)
+            # Try to compile as regex only if it's clearly intended as a pattern (contains regex special chars)
+            # BUT for exact model names (like from backfill), keep as string for exact matching
+            # Check if the string looks like a regex pattern vs. a model name with special chars like '+'
+            for m in models:
+                # If it contains common model name patterns (step numbers with +), treat as literal string
+                if '+' in m and 'step' in m:
+                    # This looks like a model name with averaged steps, not a regex pattern
+                    rows_filter_models.append(m)
+                elif re.escape(m) != m:
+                    # Contains regex special chars and doesn't look like a model name, compile as regex
+                    rows_filter_models.append(re.compile(m))
+                else:
+                    # No special chars, keep as string for exact match
+                    rows_filter_models.append(m)
 
         return cls(single_models=rows_filter_models)
 
@@ -215,7 +227,7 @@ def make_results_from_dashboard(
     return results
 
 
-def find_missing_tasks(results: MiniFrame) -> dict[str, list[str]]:
+def find_missing_tasks(results: MiniFrame, dashboard_table: MiniFrame | None = None) -> dict[str, list[str]]:
     """ Looks for columns that are set to None across all models (rows) in the results"""
 
     missing_tasks: dict[str, list[str]] = {}
@@ -229,7 +241,37 @@ def find_missing_tasks(results: MiniFrame) -> dict[str, list[str]]:
             all_tasks_set = set()
             try:
                 # this is a task group! the get function will return a class that has an expanded_tasks attribute
-                all_tasks_set.update(NamedTasksGroupRegistry.get(metric_column_name).expanded_tasks)
+                task_group = NamedTasksGroupRegistry.get(metric_column_name)
+
+                # If we have access to the full dashboard table, check which individual tasks
+                # in this group are actually missing instead of blindly expanding the entire group
+                if dashboard_table is not None:
+                    # Find the row for this model in the dashboard
+                    dashboard_row = None
+                    for row in dashboard_table.rows:
+                        if row.name == model_row.name:
+                            dashboard_row = row
+                            break
+
+                    if dashboard_row is not None:
+                        # Check which individual tasks in the group are actually None
+                        dashboard_cols = list(dashboard_row.columns)
+                        dashboard_vals = list(dashboard_row.values)
+                        for task in task_group.expanded_tasks:
+                            task_str = str(task)  # Handle regex patterns
+                            if task_str in dashboard_cols:
+                                idx = dashboard_cols.index(task_str)
+                                if dashboard_vals[idx] is None:
+                                    all_tasks_set.add(task)
+                            else:
+                                # Task not in dashboard at all, so it's missing
+                                all_tasks_set.add(task)
+                    else:
+                        # Model not found in dashboard, expand entire group
+                        all_tasks_set.update(task_group.expanded_tasks)
+                else:
+                    # No dashboard table provided, fall back to expanding entire group
+                    all_tasks_set.update(task_group.expanded_tasks)
             except ValueError:
                 # actually not a task group, just a task name. append as is.
                 all_tasks_set.add(metric_column_name)
