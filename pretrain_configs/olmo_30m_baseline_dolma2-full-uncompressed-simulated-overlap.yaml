@@ -14,7 +14,7 @@ model: "olmo_30m"
 tokenizer: "dolma2"
 weka: true
 priority: high
-cluster: ai2/jupiter
+cluster: ai2/ceres
 dataset:
   sources:
     - name: dolma2-full-uncompressed-simulated-overlap
