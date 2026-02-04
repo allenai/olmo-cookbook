@@ -17,15 +17,14 @@ priority: low
 cluster: ai2/titan
 dataset:
   chunk_based_mixture: true
-    sources:
-      - name: dolma2-full-icl-overlap-suffix-2048-eos-fix
+  sources:
+    - name: dolma2-full-icl-overlap-suffix-2048-eos-fix
       target_ratio: 0.5
       paths:
         - weka://oe-training-default/ai2-llm/suffix-arrays/preprocessed/dolma2-0625-v01/icl-overlap-max-suffix-2048-eos-fix/allenai/dolma2-tokenizer/*.npy
     - name: dolma2-100b-baseline
       target_ratio: 0.5
-      paths:
-        paths:
+      paths:  
         - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2-fixed/**/*.npy
         - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/arxiv/**/*.npy
         - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/finemath-3plus/**/*.npy
