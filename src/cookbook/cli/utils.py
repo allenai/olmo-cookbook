@@ -172,8 +172,9 @@ def install_beaker_py(
         cmd = [
             env.pip,
             "install",
-            f"beaker-py<={beaker_py_max_version}",
-            f"beaker-gantry<={beaker_gantry_max_version}",
+            "--upgrade",
+            f"beaker-py>={beaker_py_min_version},<={beaker_py_max_version}",
+            f"beaker-gantry>={beaker_gantry_min_version},<={beaker_gantry_max_version}",
         ]
 
         subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
@@ -452,24 +453,17 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
 
         print(f"Cloning repository from {git_url} to {tmp_dir}...")
 
-        # Base clone command with minimal history
-        cmd = shlex.split(f"git clone --depth 1 {git_url}")
-
-        if commit_hash:
-            cmd.append("--no-checkout")
-
-        cmd.append(tmp_dir)
-
-        # Execute clone
-        subprocess.run(cmd, check=True)
-
         if commit_branch:
-            # Change directory to the cloned repo
-            os.chdir(tmp_dir)
-            subprocess.run(
-                shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True
-            )
-            subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
+            # For specific branches, do a full clone of just that branch (gantry needs proper tracking)
+            cmd = shlex.split(f"git clone --branch {commit_branch} --single-branch {git_url} {tmp_dir}")
+            subprocess.run(cmd, check=True)
+        else:
+            # For default branch or commit hash, use shallow clone for speed
+            cmd = shlex.split(f"git clone --depth 1 {git_url}")
+            if commit_hash:
+                cmd.append("--no-checkout")
+            cmd.append(tmp_dir)
+            subprocess.run(cmd, check=True)
 
         if commit_hash:
             # Change directory to the cloned repo
