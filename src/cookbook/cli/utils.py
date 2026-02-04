@@ -173,7 +173,7 @@ def install_beaker_py(
             env.pip,
             "install",
             f"beaker-py<={beaker_py_max_version}",
-            f"beaker-gantry<={beaker_gantry_max_version}",
+            "beaker-gantry==1.17.1",
         ]
 
         subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
@@ -470,6 +470,9 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
                 shlex.split(f"git fetch origin {commit_branch}:refs/remotes/origin/{commit_branch}"), check=True
             )
             subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
+            # Manually configure tracking (works with shallow clones where --set-upstream-to fails)
+            subprocess.run(["git", "config", f"branch.{commit_branch}.remote", "origin"], check=True)
+            subprocess.run(["git", "config", f"branch.{commit_branch}.merge", f"refs/heads/{commit_branch}"], check=True)
 
         if commit_hash:
             # Change directory to the cloned repo
