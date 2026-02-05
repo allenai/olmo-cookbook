@@ -181,8 +181,15 @@ sudo mount /dev/md0 /mnt/raid0
 sudo chown -R $USER /mnt/raid0
 # Download and set up all packages we need
 sudo yum install gcc cmake openssl-devel gcc-c++ htop wget tmux screen -y
-wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
-tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+# install s5cmd (architecture-aware)
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ]; then
+    S5CMD_ARCH="Linux-arm64"
+else
+    S5CMD_ARCH="Linux-64bit"
+fi
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_${S5CMD_ARCH}.tar.gz
+tar -xvzf s5cmd_2.2.2_${S5CMD_ARCH}.tar.gz
 sudo mv s5cmd /usr/local/bin
 sudo yum install git -y
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh
@@ -221,9 +228,15 @@ sudo "${{PKG_MANAGER}}" install gcc g++ cmake openssl-devel -y
 # install github cli
 curl -sS https://webi.sh/gh | sh
 
-# install s5cmd
-wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
-tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+# install s5cmd (architecture-aware)
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ]; then
+    S5CMD_ARCH="Linux-arm64"
+else
+    S5CMD_ARCH="Linux-64bit"
+fi
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_${{S5CMD_ARCH}}.tar.gz
+tar -xvzf s5cmd_2.2.2_${{S5CMD_ARCH}}.tar.gz
 sudo mv s5cmd /usr/local/bin/
 
 # install uv via pip
@@ -306,9 +319,15 @@ sudo "${{PKG_MANAGER}}" install git tmux htop -y
 # install gcc, g++, cmake, openssl-devel
 sudo "${{PKG_MANAGER}}" install gcc g++ cmake openssl-devel -y
 
-# install s5cmd
-wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz
-tar -xvzf s5cmd_2.2.2_Linux-64bit.tar.gz
+# install s5cmd (architecture-aware)
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ]; then
+    S5CMD_ARCH="Linux-arm64"
+else
+    S5CMD_ARCH="Linux-64bit"
+fi
+wget https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_${{S5CMD_ARCH}}.tar.gz
+tar -xvzf s5cmd_2.2.2_${{S5CMD_ARCH}}.tar.gz
 sudo mv s5cmd /usr/local/bin/
 
 # install rust
@@ -750,7 +769,7 @@ class InstanceInfo:
         """
         Get the latest AMI ID for a given instance type and region
         """
-        is_arm = instance_type.startswith(("a1", "c6g", "c7g", "m6g", "m7g", "r6g", "r7g", "t4g", "im4gn", "g5g"))
+        is_arm = instance_type.startswith(("a1", "c6g", "c7g", "m6g", "m7g", "r6g", "r7g", "t4g", "im4gn", "g5g", "i8g"))
 
         # Select appropriate AMI based on architecture
         if is_arm:
