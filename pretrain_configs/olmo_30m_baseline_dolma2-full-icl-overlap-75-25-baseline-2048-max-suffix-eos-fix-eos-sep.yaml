@@ -13,8 +13,8 @@ learning_rate: 0.007276622186288963
 model: "olmo_30m"
 tokenizer: "dolma2"
 weka: true
-priority: high
-cluster: ai2/ceres
+priority: low
+cluster: ai2/titan
 dataset:
   chunk_based_mixture: true
   sources:
