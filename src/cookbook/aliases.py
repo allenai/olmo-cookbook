@@ -129,6 +129,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     eval_interval: int = 200
     save_interval: int = 1000
     warmup_steps: Optional[int] = None
+    timeout: Optional[str] = None
     path: Path
 
     @field_validator("model", mode="before")

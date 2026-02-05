@@ -14,7 +14,8 @@ model: "olmo_30m"
 tokenizer: "dolma2"
 weka: true
 priority: high
-cluster: ai2/saturn
+cluster: ai2/jupiter
+timeout: "1h"
 dataset:
   sources:
     - name: dolma2-full-icl-overlap-suffix-2048-eos-fix
