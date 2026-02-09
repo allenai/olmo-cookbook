@@ -154,9 +154,7 @@ class ModelConfigIdentifier:
             # Validate against registry
             if value not in cls._registry:
                 valid_values = ", ".join(cls._registry.keys())
-                raise ValueError(
-                    f"'{value}' is not a valid model identifier. " f"Available models: {valid_values}"
-                )
+                raise ValueError(f"'{value}' is not a valid model identifier. Available models: {valid_values}")
 
             return cls(value)
 

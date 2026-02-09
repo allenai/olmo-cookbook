@@ -291,6 +291,7 @@ def add_secret_to_beaker_workspace(
 ) -> str:
     try:
         import beaker  # pyright: ignore
+
         BeakerSecretNotFoundException = get_secret_not_found_exception()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
@@ -323,9 +324,11 @@ def get_secret_not_found_exception() -> type[Exception]:
     beaker_version = get_beaker_version()
     if beaker_version.major > 1:
         from beaker.exceptions import BeakerSecretNotFound
+
         return BeakerSecretNotFound
     else:
-        from beaker.exceptions import SecretNotFound # pyright: ignore
+        from beaker.exceptions import SecretNotFound  # pyright: ignore
+
         return SecretNotFound
 
 
@@ -333,6 +336,7 @@ def get_secret_not_found_exception() -> type[Exception]:
 def get_beaker_token() -> str:
     try:
         import beaker  # pyright: ignore
+
         beaker_version = get_beaker_version()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
@@ -342,13 +346,14 @@ def get_beaker_token() -> str:
     if beaker_version.major > 1:
         return client.config.user_token
     else:
-        return client.account.config.user_token # pyright: ignore
+        return client.account.config.user_token  # pyright: ignore
 
 
 @run_func_in_venv
 def get_beaker_user() -> str:
     try:
         import beaker  # pyright: ignore
+
         beaker_version = get_beaker_version()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")
@@ -367,6 +372,7 @@ def check_if_secret_exists_in_beaker_workspace(
 ) -> bool:
     try:
         import beaker
+
         BeakerSecretNotFoundException = get_secret_not_found_exception()
     except ImportError:
         raise ImportError("beaker-py must be installed to use this function")

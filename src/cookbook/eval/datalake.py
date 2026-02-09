@@ -159,7 +159,6 @@ class FindExperiments(BaseDatalakeItem):
 
     @classmethod
     def run(cls, dashboard: str | None = None, model_name: str | None = None, limit: int = 10_000) -> list[Self]:
-
         # make sure at least one of dashboard or model_name is provided
         assert dashboard or model_name, "Either dashboard or model_name must be provided"
         response = requests.get(
@@ -199,12 +198,12 @@ class Metrics:
     @property
     def bpb(self) -> float | None:
         return self.bits_per_byte_corr or self.logits_per_byte_corr
-    
+
     @property
     def pass_at_4(self) -> float | None:
         if "pass_at_4" in self.extra_metrics:
             return self.extra_metrics["pass_at_4"]
-    
+
     @property
     def pass_at_16(self) -> float | None:
         if "pass_at_16" in self.extra_metrics:
@@ -262,9 +261,8 @@ class MetricsAll(BaseDatalakeItem):
     @property
     def model_name(self) -> str | None:
         model_name = self.model_config.get("model", None)
-        if 'revision' in self.model_config and \
-            self.model_config['revision'] is not None:
-            model_name = model_name + ':' + self.model_config['revision']
+        if "revision" in self.model_config and self.model_config["revision"] is not None:
+            model_name = model_name + ":" + self.model_config["revision"]
         return model_name
 
     @property
@@ -304,7 +302,7 @@ class BaseDashboardTransformRequest(BaseDatalakeItem):
     def num_workers(cls, num_workers: int | None = None) -> int | None:
         logger.warning(
             "\033[1;33mlimiting num_workers to 1 (asked: %s) for dashboard requests\033[0m",
-            num_workers or "unlimited"
+            num_workers or "unlimited",
         )
         return 1
 
@@ -329,25 +327,19 @@ class BaseDashboardTransformRequest(BaseDatalakeItem):
         return cls(**(response.json() or {}))
 
 
-
 @dataclass
 class RemoveFromDashboard(BaseDashboardTransformRequest):
     """Remove an experiment from a dashboard."""
 
     @classmethod
     def run(
-        cls,
-        model_name: str,
-        dashboard: str,
-        fuzzy: bool = False,
-        num_workers: int | None = None
+        cls, model_name: str, dashboard: str, fuzzy: bool = False, num_workers: int | None = None
     ) -> List[Self]:
         runs = FindExperiments.run(model_name=model_name, dashboard=dashboard)
         cache = get_datalake_cache()
 
         fns = []
         for run in runs:
-
             # if the experiment is in the cache, we remove it since we changed its tags
             cache.delete(experiment_id=run.experiment_id)
 

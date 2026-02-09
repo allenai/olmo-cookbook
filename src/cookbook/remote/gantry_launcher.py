@@ -55,7 +55,6 @@ class GantryLauncher:
         description: str,
         extra_flags: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
-
         extra_flags = extra_flags or {}
 
         gantry_command = [
