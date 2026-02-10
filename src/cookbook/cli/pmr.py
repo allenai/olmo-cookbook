@@ -322,7 +322,9 @@ cd decon
 cargo build --release
 pip install -r python/requirements.txt
 
-make evals-s3
+cd
+mkdir eval-reference
+s5cmd cp s3://decon-evals/reference/* ./eval-reference/
 """.strip()
 
 
