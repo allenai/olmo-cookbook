@@ -432,7 +432,7 @@ def convert_checkpoint(
 )
 @click.option(
     "--vllm-memory-utilization",
-    default=0.8,
+    default=0.85,
     type=click.FloatRange(0.0, 1.0),
     help="Memory utilization for vLLM models, as a fraction of total GPU memory (between 0 and 1)",
 )
@@ -503,6 +503,18 @@ def convert_checkpoint(
     default=None,
     help="Number of shots to use for evaluation; by default, the number of shots is part of task def in oe-eval",
 )
+@click.option(
+    "--only-generate-commands",
+    is_flag=True,
+    default=False,
+    help="Only generate the corresponding commands for `oe-eval-internal`",
+)
+@click.option(
+    "--run-local",
+    is_flag=True,
+    default=False,
+    help="Prepare commands for a local run",
+)
 def evaluate_model(
     oe_eval_branch: str,
     oe_eval_commit: str,
@@ -543,6 +555,8 @@ def evaluate_model(
     backfill: bool,
     name_suffix: str,
     num_shots: int | None,
+    only_generate_commands: bool,
+    run_local: bool,
 ):
     """Evaluate a checkpoint using the oe-eval toolkit.
     This command will launch a job on Beaker to evaluate the checkpoint using the specified parameters.
@@ -638,6 +652,8 @@ def evaluate_model(
         use_backend_in_run_name=use_backend_in_run_name,
         name_suffix=name_suffix,
         num_shots=num_shots,
+        only_generate_commands=only_generate_commands,
+        run_local=run_local
     )
 
 

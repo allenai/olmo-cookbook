@@ -63,6 +63,8 @@ def evaluate_checkpoint(
     name_suffix: str,
     num_shots: int | None,
     use_hf_token: bool,
+    only_generate_commands: bool,
+    run_local: bool,
 ):
     # Create virtual environment
     env = PythonEnv.create(name=python_venv_name, force=python_venv_force)
@@ -146,17 +148,19 @@ def evaluate_checkpoint(
     beaker_clusters = ",".join(set(get_matching_clusters(cluster)).difference(clusters_to_exclude))
 
     # set the beaker flags
-    flags.append(f"--beaker-workspace '{workspace}'")
-    flags.append(f"--beaker-budget '{budget}'")
-    flags.append(f"--beaker-priority {priority}")
-    flags.append(f"--cluster '{beaker_clusters}'")
+    if not run_local:
+        flags.append(f"--beaker-workspace '{workspace}'")
+        flags.append(f"--beaker-budget '{budget}'")
+        flags.append(f"--beaker-priority {priority}")
+        flags.append(f"--cluster '{beaker_clusters}'")
 
     # set resources
     flags.append(f"--gpus {num_gpus}")
 
     # datalake parameters (mostly have to push there + tags)
-    flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
-    flags.append("--push-datalake")
+    if not run_local:
+        flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
+        flags.append("--push-datalake")
 
     # override number of shots; by default, the number of shots is part of task definition in oe-eval
     # changing number of shots will result in a new run name, similar to how we do it for BOS token.
@@ -170,6 +174,8 @@ def evaluate_checkpoint(
         **({"gpu_memory_utilization": str(vllm_memory_utilization)} if model_backend == "vllm" else {}),
         **(model_args or {}),
     }
+    # always set to True or False, don't leave it None, or vLLM will error out
+    model_args["trust_remote_code"] = model_args.get("trust_remote_code", "true" if model_backend == "vllm" else "false")
     model_args_str = ",".join(f"{k}={v}" for k, v in model_args.items())
 
     # set model info
@@ -310,31 +316,38 @@ def evaluate_checkpoint(
             if dry_run:
                 local_flags.append("--dry-run")
 
-            # set beaker image
-            if beaker_image:
-                local_flags.append(f"--beaker-image {beaker_image}")
 
             # set revision
             if revision:
                 local_flags.append(f"--revision {revision}")
 
-            # set gantry
-            if use_gantry:
-                local_flags.append("--use-gantry")
 
-            if beaker_retries > 0:
-                local_flags.append(f"--beaker-retries {beaker_retries}")
+            env_str = ''
+            if run_local:
+                env_str = env_str + f'VLLM_USE_V1={1 if use_vllm_v1_spec else 0} '
+                local_flags.append("--run-local")
+                local_flags.append(f"--output-dir /workspace/results/{dashboard}/{submitted_jobs_cnt}")
+            else:
+                # set beaker image
+                if beaker_image:
+                    local_flags.append(f"--beaker-image {beaker_image}")
+                # set gantry
+                if use_gantry:
+                    local_flags.append("--use-gantry")
 
-            # user might want to disable vllm v1 spec because its causing eval failures
-            # we also set gantry to use --yes to skip all confirmations
-            gantry_args_dict = {
-                "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
-                "yes": True,
-                **({"ref": oe_eval_commit} if oe_eval_commit else {}),
-                **gantry_args_dict,
-            }
-            # finally append gantry args
-            local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
+                if beaker_retries > 0:
+                    local_flags.append(f"--beaker-retries {beaker_retries}")
+
+                # user might want to disable vllm v1 spec because its causing eval failures
+                # we also set gantry to use --yes to skip all confirmations
+                gantry_args_dict = {
+                    "env": f"VLLM_USE_V1={1 if use_vllm_v1_spec else 0}",
+                    "yes": True,
+                    **({"ref": oe_eval_commit} if oe_eval_commit else {}),
+                    **gantry_args_dict,
+                }
+                # finally append gantry args
+                local_flags.append(f"--gantry-args '{json.dumps(gantry_args_dict)}'")
 
             if model_backend == "vllm" and task_group == "mc" and vllm_for_mc:
                 local_flags.append("--vllm-for-mc")
@@ -367,13 +380,23 @@ def evaluate_checkpoint(
                 local_flags.append(f"--task-args '{json.dumps(partition_task_args)}'")
 
             # run oe-eval
-            cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
-            print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
 
-            output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
-            print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
-            if output.returncode != 0:
-                raise RuntimeError(f"Error running command: {cmd}")
+            if not only_generate_commands:
+                cmd = f"{env.python} {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
+                print(f"\n\nCommand:\n{cmd}\nFrom:\n{oe_eval_dir}\n\n")
+                output = subprocess.run(shlex.split(cmd), cwd=oe_eval_dir, env=env.path(), capture_output=True)
+                print(f"{output.stdout.decode()}\n{output.stderr.decode()}\n")
+                if output.returncode != 0:
+                    raise RuntimeError(f"Error running command: {cmd}")
+            else:
+                if run_local:
+                    cmd = env_str + f"python {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
+                else:
+                    cmd = f"python {OE_EVAL_LAUNCH_COMMAND} {' '.join(local_flags)}"
+                print(f"{cmd}")
             submitted_jobs_cnt += 1
 
-    print(f"Launched {submitted_jobs_cnt:,} eval jobs on {beaker_clusters} for {run_name}.")
+    if not only_generate_commands:
+        print(f"Launched {submitted_jobs_cnt:,} eval jobs on {beaker_clusters} for {run_name}.")
+    else:
+        pass # don't print, just output the commands
