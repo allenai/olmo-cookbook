@@ -27,6 +27,7 @@ from cookbook.utils.config import (
     mk_experiment_group,
     mk_launch_configs,
 )
+from cookbook.utils.clusters import get_matching_clusters
 from cookbook.utils.data import get_token_counts_and_ratios
 
 logger = logging.getLogger(__name__)
@@ -449,7 +450,7 @@ def sample_data(config: Path, num_samples: int, start_idx: int, dry_run: bool):
         description=f"Sample data from {experiment_config.name}",
         task_name=job_name,
         cmd=cmd,
-        clusters=[experiment_config.cluster],
+        clusters=list(set(get_matching_clusters(experiment_config.cluster))),
         num_nodes=1,
         num_gpus=0,  # CPU-only job
         shared_filesystem=experiment_config.weka,

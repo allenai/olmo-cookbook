@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import gcsfs
+from cookbook.utils.clusters import get_matching_clusters
 import olmo_core.train.train_module as train_module
 import s3fs
 import torch
@@ -285,14 +286,16 @@ class TransformerConfigBuilder:
         self.shuffle_seed = shuffle_seed
         self.truncate_from = truncate_from
 
-        if any(substring in cluster for substring in ["augusta"]):
+        resolved_clusters = get_matching_clusters(cluster)
+
+        if any(substring in c for c in resolved_clusters for substring in ["augusta"]):
             self.root_dir = "gs://ai2-llm"
             self.checkpoint_dir = f"{self.root_dir}/checkpoints/{self.beaker_user.lower()}/{self.run_name}"
             # NOTE: work_dir must be a local path, not a url
             self.work_dir = f"/tmp/{self.beaker_user.lower()}/{self.run_name}/dataset-cache"
 
         elif (
-            any(substring in cluster for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka
+            any(substring in c for c in resolved_clusters for substring in ["jupiter", "saturn", "ceres", "neptune", "titan"]) and weka
         ):
             self.root_dir = "/weka/oe-training-default/ai2-llm"
             logger.info(f"Using Weka bucket as root dir: {self.root_dir}")

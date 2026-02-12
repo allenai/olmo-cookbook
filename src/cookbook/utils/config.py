@@ -26,6 +26,7 @@ from cookbook.aliases import (
     SourceInstance,
 )
 from cookbook.model.builder import TransformerConfigBuilder
+from cookbook.utils.clusters import get_matching_clusters
 from cookbook.utils.data import normalize_source_paths
 
 logger = logging.getLogger(__name__)
@@ -309,7 +310,7 @@ def mk_launch_configs(group: ExperimentGroup, beaker_user: str) -> list[BeakerLa
             description=group.config.description,
             task_name=experiment.name,
             cmd=mk_instance_cmd(experiment, group.config, group.group_id, beaker_user),
-            clusters=[group.config.cluster],
+            clusters=list(set(get_matching_clusters(group.config.cluster))),
             num_nodes=group.config.nodes,
             num_gpus=group.config.gpus,
             shared_filesystem=group.config.weka,
