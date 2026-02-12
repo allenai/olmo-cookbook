@@ -1,0 +1,34 @@
+name: "suffix-train-olmo2-5xC-30m-dense-dolma2-100b-icl-overlap-50-50-baseline-2048-max-suffix-eos-fix-eos-sep"
+description: "suffix train 30M @ 5xC scale on dolma2 100B dataset icl overlap 50/50 baseline with max suffix length 2048 eos fix eos sep"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 1
+preemptible: true
+max_tokens: 2_910_233_600
+sequence_length: 2048
+global_batch_size: 131072
+seed: 1337
+learning_rate: 0.007276622186288963
+model: "olmo_30m"
+tokenizer: "dolma2"
+weka: true
+priority: low
+cluster: ai2/titan
+dataset:
+  chunk_based_mixture: true
+  sources:
+    - name: dolma2-100b-icl-overlap-suffix-2048-eos-fix-eos-sep
+      target_ratio: 0.5
+      paths:
+        - weka://oe-training-default/ai2-llm/suffix-arrays/preprocessed/dolma2-0625-samples/100b-icl-overlap-2048-eos-fix-eos-sep/allenai/dolma2-tokenizer/*.npy
+    - name: dolma2-100b-baseline
+      target_ratio: 0.5
+      paths:  
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2-fixed/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/arxiv/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/finemath-3plus/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/s2pdf_redacted/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/stack-edu/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/wikipedia/**/*.npy
+  
