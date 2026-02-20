@@ -921,7 +921,7 @@ class Olmo3BaseEasyQaRcGroup(BaseAverageOfAveragesNamedTasksGroup):
 class Olmo3BaseEasyQaBpbGroup(BaseAverageOfAveragesNamedTasksGroup):
     tasks = [
         ARCRcBpbFullGroup(),
-        MMLURcBpbGroup(),
+        MMLUBpbGroup(),
         "csqa:rc:bpb::olmes:full",
         "hellaswag:rc:bpb::olmes:full",
         "winogrande:rc:bpb::olmes:full",
