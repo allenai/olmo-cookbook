@@ -198,6 +198,31 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def olmo25_7b_drope(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b(tokenizer)
+        config.block.attention.rope = None
+        return config
+
+    @classmethod
+    def olmo25_7b_drope_fullonly(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b(tokenizer)
+        config.block.attention.rope = None
+
+        def no_rope(block: TransformerBlockConfig) -> TransformerBlockConfig:
+            block.attention.rope = None
+            return block
+
+        swa_config = config.block.attention.sliding_window
+        if swa_config is not None:
+            # Only drop rope on global layers
+            config.block_overrides = {
+                i: no_rope(config.block.copy())
+                for i in range(config.n_layers)
+                if not swa_config.should_use_swa(i, config.n_layers)
+            }
+        return config
+
+    @classmethod
     def olmo25_7b_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
         config = cls.olmo25_7b(tokenizer)
         config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
