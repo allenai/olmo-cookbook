@@ -1,7 +1,7 @@
 name: &name "olmo25_7b_lc_64k_6T_M100B_round5-sparkle_6634-pre_s2pdf_gzip2080_cweN-yake-all-olmo_packing_yarn-fullonly_100B-v2"
 description: *name
 budget: ai2/oe-base
-workspace: ai2/linear-rnns
+workspace: ai2/oe-t-ladder
 cluster: ai2/jupiter
 preemptible: true
 priority: urgent
