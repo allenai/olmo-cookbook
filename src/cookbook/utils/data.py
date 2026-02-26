@@ -105,7 +105,7 @@ def get_token_counts_and_ratios(
     total_tokens = sum(token_counts.values())
 
     if total_tokens == 0:
-        raise Exception(f"Error processing config, no tokens found!")
+        raise Exception("Error processing config, no tokens found!")
 
     relative_sizes = {path: count / total_tokens for path, count in token_counts.items()}
 
@@ -264,7 +264,7 @@ def get_filesystem_for_scheme(scheme: str):
         except Exception as e:
             raise OLMoEnvironmentError(
                 f"Failed to create GCS filesystem: {str(e)}. Ensure GOOGLE_APPLICATION_CREDENTIALS_JSON and GOOGLE_CLOUD_PROJECT are set correctly."
-            )
+            ) from e
 
     elif scheme in ("r2", "http", "https"):
         raise NotImplementedError(f"'{scheme}' scheme is not currently supported")
