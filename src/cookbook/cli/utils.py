@@ -160,23 +160,14 @@ def install_beaker_py(
 ) -> None:
     env = env or PythonEnv.null()
 
-    try:
-        return check_beaker_dependencies(
-            env=env,
-            beaker_py_max_version=beaker_py_max_version,
-            beaker_py_min_version=beaker_py_min_version,
-            beaker_gantry_min_version=beaker_gantry_min_version,
-            beaker_gantry_max_version=beaker_gantry_max_version,
-        )
-    except Exception:
-        cmd = [
-            env.pip,
-            "install",
-            f"beaker-py<={beaker_py_max_version}",
-            f"beaker-gantry<={beaker_gantry_max_version}",
-        ]
-
-        subprocess.run(shlex.split(" ".join(cmd)), check=True, env=env.path())
+    # Always install beaker-gantry from main to get latest features
+    cmd = [
+        env.pip,
+        "install",
+        f"beaker-py<={beaker_py_max_version}",
+        "beaker-gantry @ git+https://github.com/allenai/beaker-gantry@main",
+    ]
+    subprocess.run(cmd, check=True, env=env.path())
 
 
 def install_oe_eval(
@@ -190,6 +181,14 @@ def install_oe_eval(
 
     print("Installing beaker and gantry clients...")
     install_beaker_py(env)
+
+    # Log installed gantry version
+    gantry_info = subprocess.run([env.pip, "show", "beaker-gantry"], capture_output=True, text=True)
+    if gantry_info.returncode == 0:
+        for line in gantry_info.stdout.splitlines():
+            if line.startswith("Version:"):
+                print(f"Using beaker-gantry version: {line.split(':', 1)[1].strip()}")
+                break
 
     # Get current installation location, if exists
     result = subprocess.run([env.pip, "show", "oe-eval"], capture_output=True, text=True)

@@ -39,7 +39,7 @@ dev = [
 ]
 beaker = [
     "beaker-py",
-    "beaker-gantry",
+    "beaker-gantry @ git+https://github.com/allenai/beaker-gantry@main",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -52,7 +52,7 @@ checkpoints = [
 all = [
     "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@tyler/migrate-gdn-hybrid-configs",
     "beaker-py",
-    "beaker-gantry",
+    "beaker-gantry @ git+https://github.com/allenai/beaker-gantry@main",
     "GitPython>=3.0,<4.0",
     "wandb",
     "torchao==0.11.0",
