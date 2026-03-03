@@ -37,7 +37,7 @@ dev = [
     "google-api-python-client-stubs",
 ]
 beaker = [
-    "beaker-py>=1.17.1,<2",
+    "beaker-py>=2.5.4,<3",
     "GitPython>=3.0,<4.0",
 ]
 wandb = [
@@ -50,7 +50,7 @@ checkpoints = [
 all = [
     # "ai2-olmo-core[all] @ git+https://github.com/allenai/OLMo-core.git@tyler/lc-localadj-gloofix-ropescaling-yarn-cpstride",
     "ai2-olmo-core[all] @ git+https://github.com/allenai/OLMo-core.git@tyler/migrate-gdn-hybrid-configs",
-    "beaker-py>=1.17.1,<2",
+    "beaker-py>=2.5.4,<3",
     "GitPython>=3.0,<4.0",
     "wandb",
     "pyarrow>=19,<20",

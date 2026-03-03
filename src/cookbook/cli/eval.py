@@ -386,9 +386,9 @@ def convert_checkpoint(
 @click.option(
     "-v",
     "--model-backend",
-    type=click.Choice(["hf", "vllm"]),
+    type=click.Choice(["hf", "vllm", "olmo_core"]),
     default="vllm",
-    help="Model backend (hf for Hugging Face, vllm for vLLM)",
+    help="Model backend (hf for Hugging Face, vllm for vLLM, olmo_core for OLMo Core)",
 )
 @click.option("-g", "--use-gantry", is_flag=True, help="Submit jobs with gantry directly.")
 @click.option("--beaker-retries", type=int, default=0, help="Number of retries for failed evals")
