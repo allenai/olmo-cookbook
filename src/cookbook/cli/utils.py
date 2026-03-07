@@ -472,10 +472,10 @@ def clone_repository(git_url: str, commit_hash: Optional[str] = None, commit_bra
             subprocess.run(shlex.split(f"git checkout -b {commit_branch} origin/{commit_branch}"), check=True)
 
         if commit_hash:
-            # Change directory to the cloned repo
             os.chdir(tmp_dir)
             subprocess.run(shlex.split(f"git fetch origin '{commit_hash}'"), check=True)
-            subprocess.run(shlex.split(f"git checkout '{commit_hash}'"), check=True)
+            # Create a local branch to avoid detached HEAD, which breaks gantry's active_branch check
+            subprocess.run(shlex.split(f"git checkout -b pinned-{commit_hash[:12]} '{commit_hash}'"), check=True)
 
         return tmp_dir
 
