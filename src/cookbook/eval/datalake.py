@@ -289,7 +289,8 @@ class MetricsAll(BaseDatalakeItem):
 
             result = cache.set(response.json(), experiment_id=experiment_id)
 
-        result = [cls(**metric) for metric in (result.value or [])]
+        known_fields = {f.name for f in dataclass_fields(cls)}
+        result = [cls(**{k: v for k, v in metric.items() if k in known_fields}) for metric in (result.value or [])]
 
         return result
 
