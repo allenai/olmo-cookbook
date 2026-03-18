@@ -200,18 +200,43 @@ class MiniFrame:
 
         console.print(table)
 
-    def show_transposed(self):
+    def show_transposed(self, highlight_best: bool = True, lower_is_better: bool = False):
         """Show table transposed: tasks as rows, models as columns."""
         console = Console()
         table = Table(title=self.title, min_width=len(self.title) + 4)
 
         row_names = [row.name for row in self.rows]
+        show_delta = len(row_names) == 2
         table.add_column("")  # task name column
         for name in row_names:
             table.add_column(name, justify="center")
+        if show_delta:
+            table.add_column("Δ", justify="center")
 
         for col in self.columns:
-            values = [f"{self._data[col].get(r) * 100:.2f}" if self._data[col].get(r) is not None else "-" for r in row_names]
+            raw_vals = [self._data[col].get(r) for r in row_names]
+            numeric_vals = [v for v in raw_vals if v is not None]
+            best_val = (min(numeric_vals) if lower_is_better else max(numeric_vals)) if numeric_vals else None
+
+            values = []
+            for v in raw_vals:
+                if v is None:
+                    values.append("-")
+                elif highlight_best and best_val is not None and v == best_val:
+                    values.append(f"[bold blue]{v * 100:.2f}[/bold blue]")
+                else:
+                    values.append(f"{v * 100:.2f}")
+
+            if show_delta and raw_vals[0] is not None and raw_vals[1] is not None:
+                delta = (raw_vals[0] - raw_vals[1]) * 100
+                # positive delta is good if higher is better, bad if lower is better
+                is_good = (delta < 0) if lower_is_better else (delta > 0)
+                color = "green" if is_good else "red"
+                sign = "+" if delta > 0 else ""
+                values.append(f"[{color}]{sign}{delta:.2f}[/{color}]")
+            elif show_delta:
+                values.append("-")
+
             table.add_row(col, *values)
 
         console.print(table)

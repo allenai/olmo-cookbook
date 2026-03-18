@@ -651,6 +651,14 @@ def evaluate_model(
     help="Set specific models to show. Can be specified multiple times.",
 )
 @click.option(
+    "-x",
+    "--exclude-models",
+    type=str,
+    multiple=True,
+    default=None,
+    help="Exclude models matching these patterns. Can be specified multiple times.",
+)
+@click.option(
     "-t",
     "--tasks",
     type=str,
@@ -687,6 +695,12 @@ def evaluate_model(
     help="Transpose the table (tasks as rows, models as columns)",
 )
 @click.option(
+    "-L",
+    "--lower-is-better",
+    is_flag=True,
+    help="Highlight lowest value as best (for BPB metrics). Default is higher is better.",
+)
+@click.option(
     "-F",
     "--force",
     is_flag=True,
@@ -700,12 +714,14 @@ def evaluate_model(
 def get_results(
     dashboard: str,
     models: list[str],
+    exclude_models: list[str],
     tasks: list[str],
     format: str,
     sort_by: str,
     sort_column_name: str,
     sort_descending: bool,
     transpose: bool,
+    lower_is_better: bool,
     force: bool,
     skip_on_fail: bool,
 ) -> None:
@@ -722,6 +738,11 @@ def get_results(
         tasks=tasks,
         models=models,
     )
+
+    # exclude models matching any of the exclude patterns
+    if exclude_models:
+        import re
+        results = results.drop_rows(*[re.compile(p) for p in exclude_models])
 
     # we find missing tasks in the results
     missing_tasks = find_missing_tasks(results=results)
@@ -746,7 +767,7 @@ def get_results(
         print(results.to_json())
     elif format == "table":
         if transpose:
-            results.show_transposed()
+            results.show_transposed(lower_is_better=lower_is_better)
         else:
             results.show()
     elif format == "csv":
