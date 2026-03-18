@@ -200,6 +200,22 @@ class MiniFrame:
 
         console.print(table)
 
+    def show_transposed(self):
+        """Show table transposed: tasks as rows, models as columns."""
+        console = Console()
+        table = Table(title=self.title, min_width=len(self.title) + 4)
+
+        row_names = [row.name for row in self.rows]
+        table.add_column("")  # task name column
+        for name in row_names:
+            table.add_column(name, justify="center")
+
+        for col in self.columns:
+            values = [f"{self._data[col].get(r) * 100:.2f}" if self._data[col].get(r) is not None else "-" for r in row_names]
+            table.add_row(col, *values)
+
+        console.print(table)
+
     def to_json(self) -> str:
         return json.dumps(self._data, sort_keys=True)
 

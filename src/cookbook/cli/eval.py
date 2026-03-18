@@ -681,6 +681,12 @@ def evaluate_model(
 @click.option("-A/--ascending", "sort_descending", flag_value=False, default=False, help="Sort ascending")
 @click.option("-D/--descending", "sort_descending", flag_value=True, default=False, help="Sort descending")
 @click.option(
+    "-T",
+    "--transpose",
+    is_flag=True,
+    help="Transpose the table (tasks as rows, models as columns)",
+)
+@click.option(
     "-F",
     "--force",
     is_flag=True,
@@ -699,6 +705,7 @@ def get_results(
     sort_by: str,
     sort_column_name: str,
     sort_descending: bool,
+    transpose: bool,
     force: bool,
     skip_on_fail: bool,
 ) -> None:
@@ -738,7 +745,10 @@ def get_results(
     if format == "json":
         print(results.to_json())
     elif format == "table":
-        results.show()
+        if transpose:
+            results.show_transposed()
+        else:
+            results.show()
     elif format == "csv":
         print(results.to_csv())
     else:
