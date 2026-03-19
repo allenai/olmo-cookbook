@@ -61,7 +61,26 @@ olmo-cookbook-eval evaluate "$CHECKPOINT" \
     --workspace "$WORKSPACE"
 ```
 
-Notes: 
+#### Using the OLMo-core backend
+
+You can also evaluate unconverted OLMo-core checkpoints directly using the `olmo_core` backend. This skips the HuggingFace conversion step — point the checkpoint path at the raw OLMo-core checkpoint:
+
+```bash
+CHECKPOINT="/oe-training-default/ai2-llm/checkpoints/username/olmo-core-run/step10000"
+
+olmo-cookbook-eval evaluate "$CHECKPOINT" \
+    --tasks "olmo3:dev:1b:main" \
+    --priority "$PRIORITY" \
+    --cluster "$CLUSTER" \
+    --num-gpus "$NUM_GPUS" \
+    --model-backend olmo_core \
+    --model-args "$MODEL_ARGS" \
+    --partition-size "$PARTITION" \
+    --dashboard "$DASHBOARD"  \
+    --workspace "$WORKSPACE"
+```
+
+Notes:
 * Task names are collected here: https://github.com/allenai/olmo-cookbook/blob/main/src/cookbook/eval/named_tasks.py
 
 *How long does it take?*
