@@ -122,6 +122,21 @@ olmo-cookbook-eval evaluate \
   --dashboard peteish32
 ```
 
+#### Using the OLMo-core backend
+
+The `olmo_core` backend lets you evaluate OLMo-core checkpoints directly, without converting to HuggingFace format first. Point the checkpoint path at the raw OLMo-core checkpoint directory:
+
+```shell
+olmo-cookbook-eval evaluate \
+  "/oe-training-default/ai2-llm/checkpoints/username/olmo-core-run/step10000" \
+  --tasks core:mc --tasks mmlu:mc \
+  --priority high \
+  --cluster aus80g \
+  --num-gpus 1 \
+  --model-backend olmo_core \
+  --dashboard my-dashboard
+```
+
 ### Get results
 
 ```shell
