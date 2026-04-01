@@ -45,6 +45,14 @@ beaker = [
 wandb = [
     "wandb",
 ]
+analysis = [
+    "statsmodels",
+    "matplotlib",
+    "scipy",
+    "pandas",
+    "tqdm",
+    "smallpond"
+]
 checkpoints = [
     "google-cloud-storage",
     "boto3"
@@ -60,9 +68,9 @@ all = [
 [project.scripts]
 olmo-cookbook = "cookbook.cli:cli.cli"
 olmo-cookbook-eval = "cookbook.cli:eval.cli"
+olmo-cookbook-analysis = "cookbook.cli:analysis.cli"
 olmo-cookbook-core = "cookbook.cli:core.cli"
 poormanray = "cookbook.cli:pmr.cli"
-
 
 [tool.black]
 line-length = 115
