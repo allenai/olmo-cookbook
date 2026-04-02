@@ -1,0 +1,39 @@
+name: "suffix-train-370M-1xc-icl-overlap-50-50"
+description: "suffix train ICL overlap 50/50 mix 370M @ 1xC on dolma2 — with in-loop evals"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 8
+preemptible: true
+max_tokens: 7425490944
+sequence_length: 2048
+global_batch_size: 786432
+rank_microbatch_size: 32768
+seed: 1337
+learning_rate: 0.0031141923166338303
+warmup_steps: 944
+model: "olmo2_370M"
+tokenizer: "dolma2"
+weka: true
+priority: high
+cluster: ai2/jupiter
+lm_evaluator: true
+downstream_evaluators:
+  - olmo2_dev_1b
+eval_interval: 900
+dataset:
+  chunk_based_mixture: true
+  sources:
+    - name: dolma2-full-icl-overlap-suffix-2048-eos-fix-500B
+      target_ratio: 0.5
+      paths:
+        - weka://oe-training-default/ai2-llm/suffix-arrays/preprocessed/dolma2-0625-v01/icl-overlap-max-suffix-2048-eos-fix-500B-sample/allenai/dolma2-tokenizer/*.npy
+    - name: dolma2-100b-baseline
+      target_ratio: 0.5
+      paths:
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2-fixed/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/arxiv/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/finemath-3plus/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/s2pdf_redacted/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/stack-edu/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/wikipedia/**/*.npy

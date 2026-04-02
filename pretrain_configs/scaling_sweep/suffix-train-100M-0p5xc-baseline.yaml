@@ -1,0 +1,33 @@
+name: "suffix-train-100M-0p5xc-baseline"
+description: "suffix train baseline 100M @ 0.5xC on dolma2 — with in-loop evals"
+budget: "ai2/oe-base"
+workspace: "ai2/dolma2"
+nodes: 1
+gpus: 2
+preemptible: true
+max_tokens: 1017446400
+sequence_length: 2048
+global_batch_size: 327680
+seed: 1337
+learning_rate: 0.004794531662304535
+warmup_steps: 310
+model: "olmo2_100M"
+tokenizer: "dolma2"
+weka: true
+priority: high
+cluster: ai2/jupiter
+lm_evaluator: true
+downstream_evaluators:
+  - olmo2_dev_1b
+eval_interval: 300
+dataset:
+  sources:
+    - name: dolma2-full
+      target_ratio: 1.0
+      paths:
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/all-dressed-snazzy2-fixed/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/arxiv/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/finemath-3plus/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/s2pdf_redacted/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/stack-edu/**/*.npy
+        - weka://oe-training-default/ai2-llm/preprocessed/dolma2-0625/v0.1/allenai/dolma2-tokenizer/wikipedia/**/*.npy
