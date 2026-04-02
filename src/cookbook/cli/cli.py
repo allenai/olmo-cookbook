@@ -7,7 +7,10 @@ from typing import List, Optional
 import click
 import yaml
 from beaker import Beaker
-from beaker.exceptions import SecretNotFound
+try:
+    from beaker.exceptions import SecretNotFound
+except ImportError:
+    from beaker.exceptions import BeakerSecretNotFound as SecretNotFound
 from beaker.services.job import JobClient
 from olmo_core.launch.beaker import (
     BeakerEnvSecret,
