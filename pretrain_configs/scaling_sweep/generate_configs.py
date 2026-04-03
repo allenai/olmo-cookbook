@@ -16,9 +16,9 @@ OUTDIR = Path(__file__).parent
 
 # Non-embedding params (from TransformerConfig.num_non_embedding_params with dolma2 tokenizer)
 MODELS = {
-    "olmo2_100M": {"non_emb": 101_736_960, "gpus": 2},
     "olmo2_190M": {"non_emb": 190_354_176, "gpus": 4},
     "olmo2_370M": {"non_emb": 371_262_464, "gpus": 8},
+    "olmo2_600M": {"non_emb": 462_466_368, "gpus": 8},
 }
 
 BUDGETS = {"0.5xC": 0.5, "1xC": 1.0, "2xC": 2.0}
