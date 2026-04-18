@@ -1,4 +1,4 @@
-name: &name "olmo29_25init_redone-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "olmo25_gqa_4K_swa_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
@@ -11,8 +11,8 @@ seed: 4123
 
 gc_interval: 200
 
-annealing:
-  enabled: true
+# annealing:
+#   enabled: true
 
 # because the learning rate went to zero during midtraining, we need to warmup to a higher learning rate
 # (from end of pretraining)
@@ -25,9 +25,9 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/amandab/OLMo2.9-2.5ish-v2/step34000
+load_path: gs://ai2-llm/checkpoints/amandab/Olmo2.5-gqa-4K-train/step34000
 load_state: false
-model: "olmo3_7B_swafix"
+model: ""
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304
