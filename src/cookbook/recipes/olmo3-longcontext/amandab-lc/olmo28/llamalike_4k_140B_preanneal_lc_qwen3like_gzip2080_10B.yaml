@@ -26,7 +26,7 @@ metrics_config:
 
 generate_doc_lengths: true  # enable intra-document masking
 weka: true
-load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/LlamaClone-8B-4K/step34000
+load_path: weka://oe-training-default/oe-training-default/ai2-llm/checkpoints/amandab/LlamaClone-8B-4K/step34000
 load_state: false
 model: "llama3_8B"
 tokenizer: "dolma2"
