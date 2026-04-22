@@ -202,7 +202,28 @@ class WrappedTransformerConfig:
         )
         config.block.attention.use_flash = True
         return config
-    
+
+    @classmethod
+    def qwen3_layerwise_8B(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        """
+        An 8B Llama3-like model config.
+        """
+        config = getattr(TransformerConfig, "llama_like")(
+            d_model=4096,
+            vocab_size=tokenizer.padded_vocab_size(),
+            n_layers=kwargs.pop("n_layers", 36),
+            n_heads=kwargs.pop("n_heads", 32),
+            n_kv_heads=kwargs.pop("n_kv_heads", 8),
+            qk_norm=kwargs.pop("qk_norm", True),
+            rope_theta=kwargs.pop("rope_theta", 500_000),
+            hidden_size_multiplier=1.125,
+            hidden_size_multiple_of=1024,
+            **kwargs,
+        )
+
+        config.block.attention.use_flash = True
+        return config
+        
     @classmethod
     def qwen3_8B(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
         """
@@ -223,6 +244,7 @@ class WrappedTransformerConfig:
         )
 
         config.block.attention.use_flash = True
+        config.block.attention.use_head_qk_norm = True
         return config
  
 
@@ -409,6 +431,24 @@ class WrappedTransformerConfig:
         OLMo2.5 retrofit
         """
         config = TransformerConfig.olmo2_7B(vocab_size=tokenizer.padded_vocab_size())
+        config.block.attention.sliding_window = SlidingWindowAttentionConfig(
+            force_full_attention_on_first_layer=False,
+            force_full_attention_on_last_layer=True,
+            pattern=[4096, 4096, 4096, -1],
+        )
+        config.block.attention.use_flash = True
+        return config
+    
+    @classmethod
+    def olmo25_7b_gqa_swa(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        """
+        OLMo2.5 retrofit
+        """
+        config = TransformerConfig.olmo2_7B(
+            n_kv_heads=8,
+            hidden_size_multiplier=1.2,
+            hidden_size_multiple_of=1024,
+            vocab_size=tokenizer.padded_vocab_size())
         config.block.attention.sliding_window = SlidingWindowAttentionConfig(
             force_full_attention_on_first_layer=False,
             force_full_attention_on_last_layer=True,

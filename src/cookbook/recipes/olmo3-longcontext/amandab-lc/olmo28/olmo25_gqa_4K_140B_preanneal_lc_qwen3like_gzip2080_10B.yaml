@@ -5,7 +5,7 @@ workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
 priority: urgent
-nodes: 8
+nodes: 2
 gpus: 8
 seed: 4123
 
@@ -25,9 +25,10 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: gs://ai2-llm/checkpoints/amandab/Olmo2.5-gqa-4K-train/step34000
+weka: true
+load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/Olmo2.5-gqa-4K-train/step34000
 load_state: false
-model: ""
+model: "olmo25_7b_gqa_swa"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304

@@ -1,11 +1,11 @@
-name: &name "qwenlike_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
+name: &name "qwenlike_layerwise_140B_lc_64k-midtrain_round3_qwenlike_s2pdf_gzip2080_10B-preanneal"
 description: *name
 budget: "ai2/oe-base"
 workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
 priority: urgent
-nodes: 8
+nodes: 2
 gpus: 8
 seed: 4123
 
@@ -30,7 +30,7 @@ generate_doc_lengths: true  # enable intra-document masking
 weka: true
 load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/Qwenlike-8B/step34000
 load_state: false 
-model: "qwen3_8B"
+model: "qwen3_layerwise_8B"
 tokenizer: "dolma2"
 max_tokens: 10_000_000_000  # 10B tokens TODO: update if needed
 global_batch_size: 4_194_304

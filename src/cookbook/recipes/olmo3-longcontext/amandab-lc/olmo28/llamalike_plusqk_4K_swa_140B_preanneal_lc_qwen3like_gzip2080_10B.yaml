@@ -5,7 +5,7 @@ workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
 priority: urgent
-nodes: 8
+nodes: 2
 gpus: 8
 seed: 4123
 
@@ -25,6 +25,7 @@ metrics_config:
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
+weka: true
 load_path: weka://ai2-llm/checkpoints/amandab/LlamaClone-qknorm-postnorm-4K/step34000
 load_state: false 
 model: "llama3_8B_plus_qk_reorder_norm_swa"
