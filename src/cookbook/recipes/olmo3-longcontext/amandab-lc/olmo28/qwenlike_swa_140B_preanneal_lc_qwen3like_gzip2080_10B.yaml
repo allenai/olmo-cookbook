@@ -5,8 +5,8 @@ workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
 priority: urgent
-nodes: 1
-gpus: 1
+nodes: 8
+gpus: 8
 seed: 4123
 
 gc_interval: 200
@@ -19,13 +19,16 @@ gc_interval: 200
 warmup_steps: 200
 learning_rate: 0.00029952
 
+nccl_debug: true
+
 metrics_config:
   backend: wandb
   project: "olmo3-7b-long-context"
   entity: "ai2-llm"
 
 generate_doc_lengths: true  # enable intra-document masking
-load_path: weka://ai2-llm/checkpoints/amandab/Qwenlike-8B/step34000
+weka: true
+load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/Qwenlike-8B/step34000
 load_state: false 
 model: "qwen3_8B"
 tokenizer: "dolma2"
