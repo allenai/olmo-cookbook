@@ -5,7 +5,7 @@ workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
 priority: urgent
-nodes: 2
+nodes: 8
 gpus: 8
 seed: 4123
 
