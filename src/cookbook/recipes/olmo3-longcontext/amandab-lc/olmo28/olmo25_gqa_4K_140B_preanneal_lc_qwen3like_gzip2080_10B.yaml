@@ -26,7 +26,7 @@ metrics_config:
 
 generate_doc_lengths: true  # enable intra-document masking
 weka: true
-load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/Olmo2.5-gqa-4K-train/step34000
+load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/Olmo2.5-gqa-4K/step34000
 load_state: false
 model: "olmo25_7b_gqa_swa"
 tokenizer: "dolma2"
