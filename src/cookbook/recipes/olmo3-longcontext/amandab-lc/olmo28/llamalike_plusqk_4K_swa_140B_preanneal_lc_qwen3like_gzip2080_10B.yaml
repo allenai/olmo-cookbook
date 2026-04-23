@@ -11,6 +11,7 @@ seed: 4123
 
 gc_interval: 200
 
+nccl_debug: true
 # annealing:
 #   enabled: true
 
