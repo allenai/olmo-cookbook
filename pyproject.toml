@@ -13,6 +13,7 @@ authors = [
 requires-python = ">=3.10,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
+    "torchao==0.11",
     "boto3",
     "click",
     "requests",
