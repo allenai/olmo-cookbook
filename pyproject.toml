@@ -13,7 +13,9 @@ authors = [
 requires-python = ">=3.10,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
+    "torch>=2.7,<2.8",
     "torchao==0.11",
+    "flash_attn",
     "boto3",
     "click",
     "requests",
@@ -51,7 +53,7 @@ checkpoints = [
     "boto3"
 ]
 all = [
-    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@7afdc3ed67f00b090aae11b5101ef147160274cc", #c779ca546cc3194e73e7491aaefcdffbed042c65",
+    "ai2-olmo-core @ git+https://github.com/allenai/OLMo-core.git@741eae164b8d80e98d3521d91216ef63da61fa5b", #6afdc3ed67f00b090aae11b5101ef147160274cc", #c779ca546cc3194e73e7491aaefcdffbed042c65",
     "beaker-py",
     "beaker-gantry",
     "GitPython>=3.0,<4.0",
@@ -141,6 +143,12 @@ python_classes = [
   "Test*",
   "*Test",
 ]
+[tool.uv.extra-build-dependencies]
+# Will require these extra packages when building flash-attn.
+# It's important that the torch version matches the one used by this package.
+# Consider using == in both your dependencies and here for an exact match on the torch version.
+flash-attn = ["setuptools>=80.9.0", "torch>=2.6,<2.7"]
+
 log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 log_level = "DEBUG"
 log_cli = false
