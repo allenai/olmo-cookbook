@@ -96,7 +96,7 @@ def convert_olmo_core_v2(
                 # do not copy directories
                 continue
             if file.startswith("."):
-                # do not copy hidden files
+        # do not copy hidden files
                 continue
             shutil.copy(src, os.path.join(huggingface_output_dir, file))
         print(f"Copied tokenizer files to {huggingface_output_dir}.")
@@ -129,6 +129,12 @@ def convert_olmo_core_v2(
             (f"--dtype {dtype}" if dtype else ""),
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
+
+        import sys
+        print("installing flash attn...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.3.14/flash_attn-2.8.2+cu128torch2.7-cp312-cp312-linux_x86_64.whl"])
+        print("trying import again....")
+        import flash_attn
 
         try:
             subprocess.run(
@@ -553,7 +559,7 @@ def run_checkpoint_conversion(
             (f"--dtype {dtype}" if dtype else ""),
         ]
         remote_command_str = " ".join(remote_command)
-
+        print(remote_command_str)
         gantry_command = [
             "gantry run",
             f"--description 'Converting OLMo checkpoint at {input_dir}'",
