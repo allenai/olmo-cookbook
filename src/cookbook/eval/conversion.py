@@ -114,6 +114,21 @@ def convert_olmo_core_v2(
                 config = json.load(json_file)
                 yaml.dump(config, yaml_file)
 
+        # Patch the conversion script: when flash attention is unavailable, the upstream script disables
+        # use_flash, which then violates the constraint that window_size requires use_flash=True.
+        # The correct fix is to disable validation instead, so use_flash stays True and the model
+        # architecture is preserved. The actual flash attention kernel is only needed for forward passes
+        # (validation), not for loading and reshaping weights.
+        convert_script_path = os.path.join(olmo_code_dir, OLMO_CORE_UNSHARD_CONVERT_SCRIPT)
+        with open(convert_script_path, "r") as f:
+            script_content = f.read()
+        patched = script_content.replace(
+            'attention["use_flash"] = False',
+            "validate = False  # keep use_flash=True so window_size constraint is satisfied",
+        )
+        with open(convert_script_path, "w") as f:
+            f.write(patched)
+
         print("Converting OLMo core V2 weights to Huggingface format...")
         os.makedirs(huggingface_output_dir, exist_ok=True)
         cmd = [
