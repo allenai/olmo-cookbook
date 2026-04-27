@@ -1,5 +1,5 @@
 TRANSFORMERS_GIT_URL = "https://github.com/abertsch72/transformers"
-TRANSFORMERS_COMMIT_HASH = "c39cda322350df588ad7e471e3b123a0b13fd2fb"  # abertsch72/convert_olmpool
+TRANSFORMERS_COMMIT_HASH = "b26fb82432b6c552ad26edba54917701044b58e7"  # abertsch72/convert_olmpool
 
 OLMOE_CONVERSION_SCRIPT = "src/transformers/models/olmoe/convert_olmoe_weights_to_hf.py"
 OLMO2_CONVERSION_SCRIPT = "src/transformers/models/olmo2/convert_olmo2_weights_to_hf.py"
