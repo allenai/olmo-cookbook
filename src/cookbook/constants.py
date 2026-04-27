@@ -1,5 +1,5 @@
 TRANSFORMERS_GIT_URL = "https://github.com/abertsch72/transformers"
-TRANSFORMERS_COMMIT_HASH = "7f2562e0a8546337de2cff41ea0bc3fd083a1576"  # abertsch72/convert_olmpool
+TRANSFORMERS_COMMIT_HASH = "c39cda322350df588ad7e471e3b123a0b13fd2fb"  # abertsch72/convert_olmpool
 
 OLMOE_CONVERSION_SCRIPT = "src/transformers/models/olmoe/convert_olmoe_weights_to_hf.py"
 OLMO2_CONVERSION_SCRIPT = "src/transformers/models/olmo2/convert_olmo2_weights_to_hf.py"
@@ -14,7 +14,7 @@ OLMO2_COMMIT_HASH = "69362b95c66655191d513e9c1420d54aa8477d92"
 OLMO2_UNSHARD_SCRIPT = "scripts/unshard.py"
 
 OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
-OLMO_CORE_V2_COMMIT_HASH = "d52bdf08c7d3106da9e17760b19e2b10f1ab6f23"  # amandab/convert_olmpool
+OLMO_CORE_V2_COMMIT_HASH = "2287ee9d43cf2a91e5a8025940d3cd486a118ead"  # amandab/convert_olmpool
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
 OLMO_CORE_CONVERT_DTYPES = ["float32", "bfloat16", "float16"]
 OLMO_CORE_CONVERT_FROM_HF_SCRIPT = "src/examples/huggingface/convert_checkpoint_from_hf.py"
