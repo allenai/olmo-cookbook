@@ -85,7 +85,11 @@ class PythonEnv:
 
     @classmethod
     def null(cls) -> "PythonEnv":
-        return cls(name=None, python="python", pip="pip")
+        import sys
+
+        python = sys.executable
+        pip = str(Path(python).parent / "pip")
+        return cls(name=None, python=python, pip=pip)
 
 
 def get_huggingface_token() -> Optional[str]:
@@ -517,6 +521,9 @@ def install_olmo_core(commit_hash: Optional[str], env: Optional[PythonEnv] = Non
     # Removing previous installation
     print("Removing previous installation of ai2-olmo-core...")
     subprocess.run(shlex.split(f"{env.pip} uninstall -y ai2-olmo-core"), cwd=olmo_dir, env=env.path())
+
+    # Upgrade pip to avoid resolver bugs (e.g. AssertionError in get_topological_weights)
+    subprocess.run(shlex.split(f"{env.pip} install --upgrade pip"), check=True, cwd=olmo_dir, env=env.path())
 
     # Install the package
     print(f"Installing OLMo dependencies from {olmo_dir}...")
