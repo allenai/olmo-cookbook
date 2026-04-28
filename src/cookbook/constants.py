@@ -14,7 +14,7 @@ OLMO2_COMMIT_HASH = "69362b95c66655191d513e9c1420d54aa8477d92"
 OLMO2_UNSHARD_SCRIPT = "scripts/unshard.py"
 
 OLMO_CORE_COMMIT_HASH = "9bad23d9a78e62101699a585a8fde3d69dba5616"
-OLMO_CORE_V2_COMMIT_HASH = "202b5449ab8e83facf09f58578aede40cdd99115b"  # amandab/convert_olmpool
+OLMO_CORE_V2_COMMIT_HASH = "02b5449ab8e83facf09f58578aede40cdd99115b"  # amandab/convert_olmpool
 OLMO_CORE_UNSHARD_CONVERT_SCRIPT = "src/examples/huggingface/convert_checkpoint_to_hf.py"
 OLMO_CORE_CONVERT_DTYPES = ["float32", "bfloat16", "float16"]
 OLMO_CORE_CONVERT_FROM_HF_SCRIPT = "src/examples/huggingface/convert_checkpoint_from_hf.py"
