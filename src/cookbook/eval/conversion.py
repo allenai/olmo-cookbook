@@ -145,11 +145,11 @@ def convert_olmo_core_v2(
         ]
         print(f"Running command: {' '.join(cmd)} from commit hash: {olmo_core_v2_commit_hash}")
 
-        import sys
-        print("installing flash attn...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.3.14/flash_attn-2.8.2+cu128torch2.7-cp312-cp312-linux_x86_64.whl"])
-        print("trying import again....")
-        import flash_attn
+        #import sys
+        #print("installing flash attn...")
+        #subprocess.check_call([sys.executable, "-m", "pip", "install", "https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.3.14/flash_attn-2.8.2+cu128torch2.7-cp312-cp312-linux_x86_64.whl"])
+        #print("trying import again....")
+        #import flash_attn
 
         try:
             subprocess.run(
