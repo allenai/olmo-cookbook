@@ -1,6 +1,6 @@
 name: &name "olmo25_yarn_lc_64k_5B_stage2"
 description: *name
-budget: "ai2/oe-base"
+budget: "ai2/oe-other"
 workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
@@ -25,7 +25,7 @@ generate_doc_lengths: true  # enable intra-document masking
 weka: true
 load_path: PLACEHOLDER_OLMO25_STAGE1_CHECKPOINT  # fill in stage 1 output checkpoint path
 load_state: false
-model: "olmo25_7b_gqa_swa_yarn"
+model: ""
 tokenizer: "dolma2"
 max_tokens: 5_000_000_000  # 5B tokens, stage 2 of 2
 global_batch_size: 4_194_304

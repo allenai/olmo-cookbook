@@ -1,6 +1,6 @@
 name: &name "qwenlike_yarn_lc_32k_5B_stage1"
 description: *name
-budget: "ai2/oe-base"
+budget: "ai2/oe-other"
 workspace: "ai2/long-contexts"
 cluster: ai2/jupiter
 preemptible: true
