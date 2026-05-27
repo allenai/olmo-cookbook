@@ -759,6 +759,38 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
+    def llama3_8B_yarn(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        config = cls.llama3_8B(tokenizer, **kwargs)
+        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
+            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
+        )
+        return config
+
+    @classmethod
+    def llama3_8B_gqa_16_yarn(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        config = cls.llama3_8B_gqa_16(tokenizer, **kwargs)
+        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
+            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
+        )
+        return config
+
+    @classmethod
+    def qwen3_layerwise_8B_yarn(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        config = cls.qwen3_layerwise_8B(tokenizer, **kwargs)
+        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
+            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
+        )
+        return config
+
+    @classmethod
+    def olmo25_7b_gqa_swa_yarn(cls, tokenizer: TokenizerConfig) -> TransformerConfig:
+        config = cls.olmo25_7b_gqa_swa(tokenizer)
+        config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
+            factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
+        )
+        return config
+
+    @classmethod
     def from_model_identifier(
         cls,
         model_identifier: ModelConfigIdentifier,

@@ -116,6 +116,7 @@ class ExperimentConfig(BaseModel, extra="forbid"):
     eval_interval: int = 200
     save_interval: int = 1000
     warmup_steps: Optional[int] = None
+    scheduler_alpha_f: Optional[float] = None  # terminal LR as fraction of initial LR (default 0.0 for linear)
     path: Path
 
     @field_validator("model", mode="before")

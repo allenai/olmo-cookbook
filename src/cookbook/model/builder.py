@@ -206,6 +206,7 @@ class TransformerConfigBuilder:
     global_batch_size: Optional[int]
     rank_microbatch_size: Optional[int]
     warmup_steps: Optional[int]
+    scheduler_alpha_f: Optional[float]
     load_path_fs: Optional[Union[s3fs.S3FileSystem, gcsfs.GCSFileSystem]]
     activation_checkpointing: bool
     dp_shard_degree: Optional[int]
@@ -253,6 +254,7 @@ class TransformerConfigBuilder:
         max_target_sequence_length: int = 8192,
         seed: int = 42,
         warmup_steps: Optional[int] = None,
+        scheduler_alpha_f: Optional[float] = None,
         profile: bool = False,
     ):
         self.run_name = run_name
@@ -288,6 +290,7 @@ class TransformerConfigBuilder:
         self.rank_microbatch_size = rank_microbatch_size
         self.downstream_evaluators = downstream_evaluators
         self.warmup_steps = warmup_steps
+        self.scheduler_alpha_f = scheduler_alpha_f
         self.load_path = load_path
         self.hard_stop = hard_stop
         self.annealing = annealing
@@ -493,7 +496,10 @@ class TransformerConfigBuilder:
             SchedulerType.COS_LINEAR: lambda: CosWithWarmupAndLinearDecay(
                 warmup_steps=self.get_warmup_steps(),
             ),
-            SchedulerType.LINEAR: lambda: LinearWithWarmup(warmup_steps=self.get_warmup_steps(), alpha_f=0.0),
+            SchedulerType.LINEAR: lambda: LinearWithWarmup(
+                warmup_steps=self.get_warmup_steps(),
+                alpha_f=self.scheduler_alpha_f if self.scheduler_alpha_f is not None else 0.0,
+            ),
             SchedulerType.WSD: lambda: WSD(
                 warmup_steps=self.get_warmup_steps(),
             ),
