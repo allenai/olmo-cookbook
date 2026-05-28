@@ -775,8 +775,8 @@ class WrappedTransformerConfig:
         return config
 
     @classmethod
-    def qwen3_layerwise_8B_yarn(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
-        config = cls.qwen3_layerwise_8B(tokenizer, **kwargs)
+    def qwen3_8B_yarn(cls, tokenizer: TokenizerConfig, **kwargs) -> TransformerConfig:
+        config = cls.qwen3_8B(tokenizer, **kwargs)
         config.block.attention.rope.scaling = YaRNRoPEScalingConfig(
             factor=8, beta_fast=32, beta_slow=1, old_context_len=8192
         )

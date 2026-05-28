@@ -25,7 +25,7 @@ generate_doc_lengths: true  # enable intra-document masking
 weka: true
 load_path: PLACEHOLDER_OLMO25_STAGE1_CHECKPOINT  # fill in stage 1 output checkpoint path
 load_state: false
-model: ""
+model: "olmo25_7b_yarn"
 tokenizer: "dolma2"
 max_tokens: 5_000_000_000  # 5B tokens, stage 2 of 2
 global_batch_size: 4_194_304
