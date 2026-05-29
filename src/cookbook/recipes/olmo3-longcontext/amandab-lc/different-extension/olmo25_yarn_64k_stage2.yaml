@@ -23,7 +23,7 @@ metrics_config:
 
 generate_doc_lengths: true  # enable intra-document masking
 weka: true
-load_path: PLACEHOLDER_OLMO25_STAGE1_CHECKPOINT  # fill in stage 1 output checkpoint path
+load_path: weka://oe-training-default/ai2-llm/checkpoints/amandab/olmo25_yarn_lc_32k_5B_stage1v2-1c93cac6/step1193
 load_state: false
 model: "olmo25_7b_yarn"
 tokenizer: "dolma2"
