@@ -154,9 +154,13 @@ def evaluate_checkpoint(
     # set resources
     flags.append(f"--gpus {num_gpus}")
 
-    # datalake parameters (mostly have to push there + tags)
-    flags.append(f"--datalake-tags 'dashboard={dashboard},checkpoint={run_name}'")
-    flags.append("--push-datalake")
+    # The oe-eval-datalake.allen.ai service has been decommissioned (its endpoints now just 404
+    # to the generic allenai.org "not found" page), so pushing there always fails and takes the
+    # whole job down with it even though the actual eval results were already written out fine.
+    # Explicitly opt out with --no-datalake rather than relying on oe-eval's own auto-push logic
+    # (push_internal_datalake() in oe-eval defaults GIT_BRANCH_NAME to "main" when the env var is
+    # unset, which forces a push attempt on Beaker regardless of --push-datalake).
+    flags.append("--no-datalake")
 
     # override number of shots; by default, the number of shots is part of task definition in oe-eval
     # changing number of shots will result in a new run name, similar to how we do it for BOS token.
